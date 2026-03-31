@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/schemas/android/tools"
+    xmlns:tools2="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -24,18 +25,30 @@
         android:id="@+id/layout_user_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="40dp"
         android:gravity="center"
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/btn_close">
+        app:layout_constraintTop_toBottomOf="@id/btn_close"
+        tools2:layout_editor_absoluteX="-16dp">
 
-        <ImageView
+        <androidx.cardview.widget.CardView
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="#E0E0E0"
-            android:src="@android:drawable/sym_def_app_icon" />
+            app:cardCornerRadius="30dp"
+            app:cardElevation="0dp">
+
+            <ImageView
+                android:id="@+id/iv_avatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#E0E0E0"
+                android:scaleType="centerCrop"
+                android:src="@android:drawable/sym_def_app_icon" />
+
+        </androidx.cardview.widget.CardView>
 
         <TextView
+            android:id="@+id/tv_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -45,6 +58,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tv_phone_number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -53,6 +67,7 @@
             android:textSize="16sp" />
 
         <TextView
+            android:id="@+id/tv_instruction"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -65,25 +80,73 @@
         android:id="@+id/layout_dots"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="8dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/layout_user_info">
 
-        <TextView android:id="@+id/dot_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp" android:text="○" android:textColor="#BDBDBD" android:textSize="30sp" />
-        <TextView android:id="@+id/dot_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp" android:text="○" android:textColor="#BDBDBD" android:textSize="30sp" />
-        <TextView android:id="@+id/dot_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp" android:text="○" android:textColor="#BDBDBD" android:textSize="30sp" />
-        <TextView android:id="@+id/dot_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp" android:text="○" android:textColor="#BDBDBD" android:textSize="30sp" />
-        <TextView android:id="@+id/dot_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp" android:text="○" android:textColor="#BDBDBD" android:textSize="30sp" />
-        <TextView android:id="@+id/dot_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp" android:text="○" android:textColor="#BDBDBD" android:textSize="30sp" />
+        <TextView
+            android:id="@+id/tv_dot_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:text="○"
+            android:textColor="#BDBDBD"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/tv_dot_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:text="○"
+            android:textColor="#BDBDBD"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/tv_dot_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:text="○"
+            android:textColor="#BDBDBD"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/tv_dot_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:text="○"
+            android:textColor="#BDBDBD"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/tv_dot_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:text="○"
+            android:textColor="#BDBDBD"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/dot_6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:text="○"
+            android:textColor="#BDBDBD"
+            android:textSize="30sp" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/tv_error_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:text="Mã Pin không đúng. Vui lòng thử lại."
         android:textColor="#E53935"
         android:textSize="15sp"
@@ -96,10 +159,11 @@
         android:id="@+id/btn_forgot_pass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:text="Quên mật khẩu?"
         android:textColor="#0052CC"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_error_message" />
 
@@ -111,6 +175,7 @@
         android:text="Đây không phải tài khoản của tôi"
         android:textColor="#0052CC"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.454"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_forgot_pass" />
 

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/btn_close_sheet"
+        android:layout_width="19dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:text="X" />
+
+    <ImageView
+        android:id="@+id/iv_bell_logo"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:srcCompat="@drawable/ic_zalo_bell" />
+
+    <TextView
+        android:id="@+id/tv_sheet_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Lấy lại mật khẩu ZaloPay"
+        android:textAllCaps="false"
+        android:textColor="#000000"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tv_sheet_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Đăng nhập với Zalo để bắt đầu"
+        android:textColor="#757575" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_login_zalo"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="#0A42A5"
+        android:text="Đăng nhập với Zalo"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        app:cornerRadius="18dp" />
+
+    <TextView
+        android:id="@+id/tv_sheet_link_sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Bạn không thể đăng nhập Zalo?"
+        android:textColor="#0052CC"
+        android:textSize="13sp" />
+</LinearLayout>

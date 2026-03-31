@@ -32,7 +32,7 @@ public class PasscodeActivity extends AppCompatActivity {
 
     // Ánh xạ giao diện
     private void initViews() {
-        int[] dotIds = {R.id.dot_1, R.id.dot_2, R.id.dot_3, R.id.dot_4, R.id.dot_5, R.id.dot_6};
+        int[] dotIds = {R.id.tv_dot_1, R.id.tv_dot_2, R.id.tv_dot_3, R.id.tv_dot_4, R.id.tv_dot_5, R.id.dot_6};
         for (int i = 0; i < MAX_LENGTH; i++) {
             dots[i] = findViewById(dotIds[i]);
         }
@@ -50,6 +50,30 @@ public class PasscodeActivity extends AppCompatActivity {
         }
 
         findViewById(R.id.btn_delete).setOnClickListener(v -> onDeleteClick());
+
+        //Tìm text quên mật khẩu
+        TextView btnForgotPass = findViewById(R.id.btn_forgot_pass);
+        btnForgotPass.setOnClickListener(v -> {
+            com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog =
+                    new com.google.android.material.bottomsheet.BottomSheetDialog(PasscodeActivity.this);
+            View bottomSheetView = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_forgot, null);
+            bottomSheetDialog.setContentView(bottomSheetView);
+
+            TextView btnCloseX = bottomSheetView.findViewById(R.id.btn_close_sheet);
+            btnCloseX.setOnClickListener(v1 -> {
+                bottomSheetDialog.dismiss();
+            });
+
+            bottomSheetDialog.show();
+        });
+
+        //Tìm text Đây không phải tài khoản của tôi
+        TextView btnNotMyAccount = findViewById(R.id.btn_not_my_account);
+        btnNotMyAccount.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(PasscodeActivity.this, ContactSupportActivity.class);
+
+            startActivity(intent);
+        });
     }
 
     private void onNumberClick(String number) {
