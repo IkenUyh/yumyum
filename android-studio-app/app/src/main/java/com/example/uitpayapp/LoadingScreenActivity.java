@@ -20,5 +20,11 @@ public class LoadingScreenActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            android.content.Intent intent = new android.content.Intent(LoadingScreenActivity.this, SignInActivity.class);
+            startActivity(intent);
+            finish();
+        }, 2000);
     }
 }
