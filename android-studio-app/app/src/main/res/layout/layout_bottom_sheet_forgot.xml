@@ -18,6 +18,8 @@
         android:id="@+id/iv_bell_logo"
         android:layout_width="100dp"
         android:layout_height="100dp"
+        android:background="@null"
+        android:scaleType="fitCenter"
         app:srcCompat="@drawable/ic_zalo_bell" />
 
     <TextView
