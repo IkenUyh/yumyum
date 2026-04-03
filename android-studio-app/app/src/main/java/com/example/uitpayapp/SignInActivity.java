@@ -62,6 +62,9 @@ public class SignInActivity extends AppCompatActivity {
             new Handler().postDelayed(() -> {
                 loading.setVisibility(View.GONE);
                 handler.removeCallbacks(runnable);
+
+                android.content.Intent intent = new android.content.Intent(SignInActivity.this, PasscodeActivity.class);
+                startActivity(intent);
             }, 2000);
         });
         List <Integer> imageList = List.of(
