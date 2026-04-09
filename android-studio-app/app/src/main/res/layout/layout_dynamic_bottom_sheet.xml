@@ -25,7 +25,7 @@
             android:layout_alignParentEnd="true"
             app:tint="#000000"/>
     </RelativeLayout>
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/sheet_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
