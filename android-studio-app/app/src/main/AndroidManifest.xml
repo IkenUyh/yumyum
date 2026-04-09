@@ -10,7 +10,7 @@
         android:theme="@style/Theme.Androidstudioapp">
 
         <activity
-            android:name=".LoadingScreenActivity"
+            android:name=".ProfileActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

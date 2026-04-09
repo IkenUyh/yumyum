@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#f1f5ff">
+        <TextView
+            android:id="@+id/pagetilte"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tài khoản"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:padding="15dp"
+            android:textColor="#FFFFFF"
+            android:background="#0034c8"/>
+        <ScrollView
+            android:layout_below="@id/pagetilte"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:id="@+id/userinfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="140dp"
+                    android:orientation="horizontal"
+                    android:padding="15dp"
+                    android:background="@drawable/bg_userinfo_gradient">
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        app:cardCornerRadius="35dp"
+                        app:cardElevation="0dp"
+                        android:layout_marginRight="12dp">
+                        <ImageView
+                            android:layout_width="70dp"
+                            android:layout_height="70dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/ic_dog_kid" />
+                    </androidx.cardview.widget.CardView>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="3dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Nguyễn Văn A"
+                                android:textColor="#FFFFFF"
+                                android:textStyle="bold"
+                                android:textSize="18sp"/>
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="0dp"
+                                android:layout_weight="1"/>
+                            <ImageView
+                                android:layout_width="23dp"
+                                android:layout_height="23dp"
+                                android:src="@drawable/ic_edit_pencil"
+                                android:scaleType="centerCrop"/>
+
+                        </LinearLayout>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:text="19001010"
+                            android:layout_marginBottom="3dp"/>
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:cardCornerRadius="16dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#1b743c"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:text="Đã xác thực"
+                                android:paddingLeft="5dp"
+                                android:paddingRight="5sp"
+                                android:background="#e6faef"/>
+                        </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+                </LinearLayout>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/userinfo"
+                    android:layout_marginTop="-15dp"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    android:backgroundTint="#f1f5ff">
+                    <LinearLayout
+                        android:id="@+id/main_menu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp"
+                        android:layout_marginTop="60dp">
+                        <TextView android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="#000000"
+                            android:text="Ưu đãi"/>
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="2dp"
+                            app:cardUseCompatPadding="true">
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+                                <include android:id="@+id/my_gift_item"
+                                    layout="@layout/menuitem_profile_screen"/>
+                                <include android:id="@+id/my_coin_item"
+                                    layout="@layout/menuitem_profile_screen"/>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+
+                        <LinearLayout android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+                            <TextView android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="#000000"
+                                android:text="Quản lý tài chính"/>
+                            <View android:layout_width="0dp"
+                                android:layout_height="0dp"
+                                android:layout_weight="1"/>
+                            <TextView android:id="@+id/show_more_manage_finance"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="16sp"
+                                android:textStyle="normal"
+                                android:textColor="#1e45c0"
+                                android:text="Xem thêm"/>
+                        </LinearLayout>
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="2dp"
+                            app:cardUseCompatPadding="true">
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:id="@+id/account_card_payment">
+                                    <include android:id="@+id/account_card_payment_item"
+                                        layout="@layout/menuitem_profile_screen"/>
+                                    <RelativeLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginLeft="40dp"
+                                        android:padding="16dp"
+                                        android:gravity="center_vertical">
+                                        <TextView android:layout_alignParentLeft="true"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:textSize="16sp"
+                                            android:text="Số dư hiện có"
+                                            android:textColor="#000000"/>
+                                        <ImageView android:id="@+id/hide_show_amount"
+                                            android:layout_width="18dp"
+                                            android:layout_height="18dp"
+                                            android:scaleType="centerCrop"
+                                            android:src="@drawable/ic_eye"
+                                            android:layout_alignParentEnd="true"/>
+                                    </RelativeLayout>
+                                    <RelativeLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginLeft="40dp"
+                                        android:padding="10dp"
+                                        android:gravity="center_vertical">
+                                        <ImageView
+                                            android:layout_width="24dp"
+                                            android:layout_height="24dp"
+                                            android:scaleType="centerCrop"
+                                            android:src="@drawable/ic_uitpay_demo"/>
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:textSize="16sp"
+                                            android:textColor="#000000"
+                                            android:text="Ví UITpay"
+                                            android:layout_marginLeft="34dp"/>
+                                        <TextView
+                                            android:id="@+id/wallet_balance"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:textColor="#000000"
+                                            android:layout_alignParentEnd="true"
+                                            android:textSize="16sp"
+                                            android:padding="0dp"
+                                            android:text="0đ"
+                                            android:inputType="textPassword"/>
+                                    </RelativeLayout>
+                                    <RelativeLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginLeft="40dp"
+                                        android:padding="10dp"
+                                        android:gravity="center_vertical">
+                                        <ImageView
+                                            android:layout_width="24dp"
+                                            android:layout_height="24dp"
+                                            android:scaleType="centerCrop"
+                                            android:src="@drawable/ic_accmulated_balance"/>
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:textSize="16sp"
+                                            android:textColor="#000000"
+                                            android:text="Số dư sinh lời"
+                                            android:layout_marginLeft="34dp"/>
+                                        <TextView
+                                            android:id="@+id/accmulated_balance"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:textColor="#000000"
+                                            android:layout_alignParentEnd="true"
+                                            android:textSize="16sp"
+                                            android:padding="0dp"
+                                            android:text="0đ"
+                                            android:inputType="textPassword"/>
+                                    </RelativeLayout>
+                                    <View
+                                        android:layout_width="match_parent"
+                                        android:layout_height="1dp"
+                                        android:background="#f0f0f0"
+                                        android:layout_marginLeft="10dp"
+                                        android:layout_marginRight="10dp"/>
+                                </LinearLayout>
+                                <include android:id="@+id/auto_payment_setting_item"
+                                    layout="@layout/menuitem_profile_screen"/>
+                                <include android:id="@+id/reliability_score_item"
+                                    layout="@layout/menuitem_profile_screen"/>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+
+                        <TextView android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="#000000"
+                            android:text="Tiện ích"/>
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="2dp"
+                            app:cardUseCompatPadding="true">
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+                                <include android:id="@+id/my_receipt_item"
+                                    layout="@layout/menuitem_profile_screen"/>
+                                <include android:id="@+id/my_contract_item"
+                                    layout="@layout/menuitem_profile_screen"/>
+                                <include android:id="@+id/my_ticket_item"
+                                    layout="@layout/menuitem_profile_screen"/>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+
+                        <TextView android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="#000000"
+                            android:text="Hỗ trợ và Cài đặt"/>
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="2dp"
+                            app:cardUseCompatPadding="true">
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+                                <include android:id="@+id/contact_support_item"
+                                    layout="@layout/menuitem_profile_screen"/>
+                                <include android:id="@+id/security_center_item"
+                                    layout="@layout/menuitem_profile_screen"/>
+                                <include android:id="@+id/setting_item"
+                                    layout="@layout/menuitem_profile_screen"/>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/logout_card"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="2dp"
+                            app:cardUseCompatPadding="true"
+                            android:layout_marginBottom="10dp">
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:orientation="horizontal"
+                                android:padding="16dp">
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/ic_logout"/>
+                                <TextView
+                                    android:layout_marginLeft="10dp"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="18sp"
+                                    android:textColor="#cf2847"
+                                    android:text="Đăng xuất"/>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="90dp"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/qr_manage_card"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:padding="12dp"
+                            android:gravity="center_horizontal">
+                            <LinearLayout
+                                android:layout_width="110dp"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="14sp"
+                                    android:textColor="#000000"
+                                    android:text="Quản lý mã"
+                                    android:textStyle="bold"/>
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="14sp"
+                                    android:textColor="#000000"
+                                    android:text="Quản lý các mã QR quan trọng"
+                                    android:textStyle="normal"/>
+                            </LinearLayout>
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:src="@drawable/ic_qr_scan"
+                                android:scaleType="centerCrop"/>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:padding="12dp"
+                            android:gravity="center_horizontal">
+                            <LinearLayout
+                                android:layout_width="110dp"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="14sp"
+                                    android:textColor="#000000"
+                                    android:text="UITpay Priority"
+                                    android:textStyle="bold"/>
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="14sp"
+                                    android:textColor="#000000"
+                                    android:text="Thành viên"
+                                    android:textStyle="normal"/>
+                            </LinearLayout>
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:src="@drawable/ic_priority_uitpay"
+                                android:scaleType="centerCrop"/>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+            </RelativeLayout>
+        </ScrollView>
+    </RelativeLayout>
+</FrameLayout>
