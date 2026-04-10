@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -23,12 +24,15 @@ public class SignInActivity extends AppCompatActivity {
 
     private EditText edtPhoneNumber;
     private Button btnLogin;
+    private Handler sliderHandler;
+    private Runnable sliderRunnable;
     FrameLayout loading;
     TextView txtDots;
     Handler handler;
     Runnable runnable;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sign_in_page);
         btnLogin= findViewById(R.id.btnLogin);
@@ -62,6 +66,7 @@ public class SignInActivity extends AppCompatActivity {
             new Handler().postDelayed(() -> {
                 loading.setVisibility(View.GONE);
                 handler.removeCallbacks(runnable);
+                sliderHandler.removeCallbacks(sliderRunnable);
 
                 android.content.Intent intent = new android.content.Intent(SignInActivity.this, PasscodeActivity.class);
                 startActivity(intent);
@@ -75,8 +80,16 @@ public class SignInActivity extends AppCompatActivity {
         //adapter se la trung gian dua anh len viewpaper
         ImageSliderAdapter adapter = new ImageSliderAdapter(imageList);
         viewPager2.setAdapter(adapter);
+        sliderHandler=new Handler(Looper.getMainLooper());
+        sliderRunnable=new Runnable() {
+            @Override
+            public void run() {
+                int currentitem=viewPager2.getCurrentItem();
+                currentitem=(currentitem+1)%imageList.size();
+                viewPager2.setCurrentItem(currentitem,true);
+                sliderHandler.postDelayed(this,3000);
+            }
+        };
+        sliderHandler.post(sliderRunnable);
     }
-
-
-
 }
