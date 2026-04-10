@@ -1,0 +1,93 @@
+package com.example.uitpayapp;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import android.os.Bundle;
+import java.util.ArrayList;
+import java.util.List;
+
+public class HomeActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_home);
+
+        // =========================================================
+        // 1. ÁNH XẠ VIEW VÀ CẤU HÌNH CƠ BẢN
+        // =========================================================
+        RecyclerView rvDichVuPhoBien = findViewById(R.id.rvDichVuPhoBien);
+        RecyclerView rvDeXuat = findViewById(R.id.rvDeXuat);
+
+        // Cho phép các item cuộn tràn ra ngoài phạm vi padding
+        rvDichVuPhoBien.setClipChildren(false);
+        rvDichVuPhoBien.setClipToPadding(false);
+
+        rvDeXuat.setClipChildren(false);
+        rvDeXuat.setClipToPadding(false);
+
+        // =========================================================
+        // 2. THIẾT LẬP DANH SÁCH: DỊCH VỤ PHỔ BIẾN
+        // =========================================================
+        List<ServiceItem> listPhobien = new ArrayList<>();
+        listPhobien.add(new ServiceItem("Điện thoại", R.drawable.ic_phone, "-50%"));
+        listPhobien.add(new ServiceItem("Hóa đơn", R.drawable.ic_receipt, "+QUÀ"));
+        listPhobien.add(new ServiceItem("Sinh lời", R.drawable.ic_table, "Mới"));
+        listPhobien.add(new ServiceItem("Du lịch", R.drawable.ic_suitcase, null));
+        listPhobien.add(new ServiceItem("Vé phim", R.drawable.ic_ticket, null));
+        listPhobien.add(new ServiceItem("Trả vay", R.drawable.ic_percent, null));
+        listPhobien.add(new ServiceItem("Vay tiền", R.drawable.ic_mark, null));
+        listPhobien.add(new ServiceItem("Tất cả", R.drawable.ic_widget, null));
+
+        ServiceAdapter adapterPhobien = new ServiceAdapter(listPhobien, R.layout.item_service);
+        rvDichVuPhoBien.setAdapter(adapterPhobien);
+
+        // =========================================================
+        // 3. THIẾT LẬP DANH SÁCH: ZALOPAY ĐỀ XUẤT (DẠNG ICON)
+        // =========================================================
+        List<ServiceItem> listDeXuat = new ArrayList<>();
+        listDeXuat.add(new ServiceItem("Trò chơi", R.drawable.ic_gamepad, null));
+        listDeXuat.add(new ServiceItem("Chứng khoán", R.drawable.ic_chart, null));
+        listDeXuat.add(new ServiceItem("Mở TK có quà", R.drawable.ic_gift2, null));
+        listDeXuat.add(new ServiceItem("Vietlott", R.drawable.ic_lottery, null));
+        listDeXuat.add(new ServiceItem("Trả phạt", R.drawable.ic_alarm, null));
+
+        ServiceAdapter adapterDeXuat = new ServiceAdapter(listDeXuat, R.layout.item_service_horizontal);
+        rvDeXuat.setAdapter(adapterDeXuat);
+
+        // =========================================================
+        // 4. THIẾT LẬP DANH SÁCH: BANNER ĐỀ XUẤT (DẠNG NGANG)
+        // =========================================================
+        RecyclerView rcvSuggest = findViewById(R.id.rcvSuggest);
+        rcvSuggest.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
+        List<SuggestionModel> listNgang = new ArrayList<>();
+        listNgang.add(new SuggestionModel(SuggestionModel.TYPE_HORIZONTAL, R.drawable.img_usagi,"Phất cờ nhận xu, rinh ngay quà khủng!","Mừng đại lễ 30/04, hàng ngàn quà hấp d..."  ));
+        listNgang.add(new SuggestionModel(SuggestionModel.TYPE_HORIZONTAL,R.drawable.img_usagi,"Mở tài khoản thanh toán VPBank NEO","Cơ hội nhận đến 210.000đ khi mở tài khoản"));
+        listNgang.add(new SuggestionModel(SuggestionModel.TYPE_HORIZONTAL,R.drawable.img_usagi,"Săn vé xem phim cực rẻ","Giảm ngay 50% cho bạn mới sử dụng Zalopay" ));
+        listNgang.add(new SuggestionModel(SuggestionModel.TYPE_HORIZONTAL, R.drawable.img_usagi,"Thanh toán hóa đơn trúng vàng","Cơ hội trúng 1 chỉ vàng SJC mỗi tuần"));
+        listNgang.add(new SuggestionModel(SuggestionModel.TYPE_HORIZONTAL,R.drawable.img_usagi, "Du lịch xả hơi, ưu đãi tới bến","Hoàn tiền 10% khi đặt vé máy bay và khách sạn"));
+
+        SuggestAdapter adapter = new SuggestAdapter(listNgang);
+        rcvSuggest.setAdapter(adapter);
+
+        // =========================================================
+        // 5. THIẾT LẬP DANH SÁCH: ƯU ĐÃI SIÊU HỜI (DẠNG LƯỚI 2 CỘT)
+        // =========================================================
+        RecyclerView rvUuDaiSieuHoi = findViewById(R.id.rvUuDaiSieuHoi);
+        rvUuDaiSieuHoi.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(this, 2));
+
+        List<SuggestionModel> listDoc = new ArrayList<>();
+        listDoc.add(new SuggestionModel(SuggestionModel.TYPE_VERTICAL,R.drawable.img_miku,"Mở tài khoản thanh toán VPBank NEO - Cơ hội n...","" ));
+        listDoc.add(new SuggestionModel(SuggestionModel.TYPE_VERTICAL,R.drawable.img_miku,"Cơ hội nhận đến 130.000đ cùng MSB trên...",""));
+        listDoc.add(new SuggestionModel( SuggestionModel.TYPE_VERTICAL, R.drawable.img_miku,"Vay tiền nhanh, online 100% giải ngân tức thì","" ));
+        listDoc.add(new SuggestionModel(SuggestionModel.TYPE_VERTICAL,R.drawable.img_miku,"Nhận đến 220.000đ khi mở tài khoản Shinhan...",""));
+        listDoc.add(new SuggestionModel(SuggestionModel.TYPE_VERTICAL,R.drawable.img_miku,"Thần Ma Tu Tiên đã ra mắt - Tặng code tân thủ",""));
+        listDoc.add(new SuggestionModel(SuggestionModel.TYPE_VERTICAL, R.drawable.img_miku, "Lễ lớn, không chờ lương - Đi đãaaaa trả sau!",""));
+        listDoc.add(new SuggestionModel(SuggestionModel.TYPE_VERTICAL,R.drawable.img_miku,"Giảm 50% mua vé máy bay Bamboo Airways", ""));
+
+        SuggestAdapter adapterUuDai = new SuggestAdapter(listDoc);
+        rvUuDaiSieuHoi.setAdapter(adapterUuDai);
+    }
+}

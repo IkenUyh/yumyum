@@ -1,5 +1,6 @@
 package com.example.uitpayapp;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -99,17 +100,16 @@ public class PasscodeActivity extends AppCompatActivity {
         tvErrorMessage.setVisibility(View.INVISIBLE);
     }
 
-    // Hiển thị lỗi và auto-reset sau 1.5s
+    // Chuyển sang HomeActivity khi nhập đủ 6 số
     private void handlePasscodeComplete() {
         isChecking = true;
-        tvErrorMessage.setVisibility(View.VISIBLE);
-
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            passcode = "";
-            updateDots();
-            tvErrorMessage.setVisibility(View.INVISIBLE);
-            isChecking = false;
-        }, RESET_DELAY_MS);
+        
+        // Tạo Intent để chuyển sang HomeActivity
+        Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
+        startActivity(intent);
+        
+        // Kết thúc PasscodeActivity để người dùng không quay lại được bằng nút Back
+        finish();
     }
 
     // Cập nhật giao diện 6 dấu chấm
