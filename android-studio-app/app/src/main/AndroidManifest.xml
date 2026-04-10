@@ -8,9 +8,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Androidstudioapp">
-
+        
         <activity
-            android:name=".ProfileActivity"
+            android:name=".TransactionHistoryActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,17 +19,26 @@
         </activity>
 
         <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".LoadingScreenActivity"
+            android:exported="false"/>
+
+        <activity
             android:name=".SignInActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
+            
         <activity
             android:name=".ContactSupportActivity"
             android:exported="false" />
-
+            
         <activity
             android:name=".PasscodeActivity"
             android:exported="false" />
+
     </application>
 
 </manifest>
