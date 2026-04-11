@@ -1,4 +1,4 @@
-package com.example.uitpayapp;
+package com.example.uitpayapp.transaction;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -8,6 +8,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.uitpayapp.R;
 
 import java.text.DecimalFormat;
 import java.util.List;

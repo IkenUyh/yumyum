@@ -1,4 +1,4 @@
-package com.example.uitpayapp;// SuggestAdapter.java
+package com.example.uitpayapp.suggestion;// SuggestAdapter.java
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -6,6 +6,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.uitpayapp.R;
+
 import java.util.List;
 
 public class SuggestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

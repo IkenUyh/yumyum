@@ -1,7 +1,6 @@
-package com.example.uitpayapp;
+package com.example.uitpayapp.transaction;
 
 import android.os.Bundle;
-import android.view.SurfaceControl;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +10,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.uitpayapp.R;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;

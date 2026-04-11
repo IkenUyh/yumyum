@@ -1,4 +1,4 @@
-package com.example.uitpayapp;
+package com.example.uitpayapp.suggestion;
 
 // SuggestionModel.java
 public class SuggestionModel {

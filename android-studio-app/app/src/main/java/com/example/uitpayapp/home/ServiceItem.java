@@ -1,4 +1,4 @@
-package com.example.uitpayapp;
+package com.example.uitpayapp.home;
 
 public class ServiceItem {
     private String name;

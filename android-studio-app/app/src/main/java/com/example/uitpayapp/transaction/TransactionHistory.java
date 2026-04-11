@@ -1,4 +1,4 @@
-package com.example.uitpayapp;
+package com.example.uitpayapp.transaction;
 
 public class TransactionHistory {
     private String id;
