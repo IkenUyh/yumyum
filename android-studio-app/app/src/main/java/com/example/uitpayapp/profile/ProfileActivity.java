@@ -44,6 +44,7 @@ public class ProfileActivity extends AppCompatActivity {
             return insets;
         });
         SetDataMainMenu(mainMenu);
+        setupBottomNavigation();
     }
 
     void SetDataMainMenu(RecyclerView mainMenu) {
@@ -190,5 +191,36 @@ public class ProfileActivity extends AppCompatActivity {
         //TAM THOI DE LISTENER LA NULL, TRONG TUONG LAI LAM TIEP SE PHAN LOAI THEM 1 FUNCTION NUA
         bottomSheetDialog.setContentView(SheetView);
         bottomSheetDialog.show();
+    }
+
+    private void setupBottomNavigation() {
+        android.widget.LinearLayout navHome = findViewById(R.id.navHome);
+        android.widget.LinearLayout navHistory = findViewById(R.id.navHistory);
+        android.widget.LinearLayout navGift = findViewById(R.id.navGift);
+        android.widget.LinearLayout navAccount = findViewById(R.id.navAccount);
+
+        // 1. Luồng bấm về TRANG CHỦ
+        navHome.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.home.HomeActivity.class);
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
+
+        // 2. Luồng bấm qua LỊCH SỬ
+        navHistory.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.transaction.TransactionHistoryActivity.class);
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
+
+        // 3. Luồng bấm qua SĂN QUÀ
+        navGift.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.gift.GiftActivity.class);
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
     }
 }

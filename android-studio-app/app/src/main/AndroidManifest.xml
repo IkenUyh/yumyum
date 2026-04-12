@@ -27,6 +27,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".gift.GiftActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".profile.ProfileActivity"
             android:exported="false" />
 

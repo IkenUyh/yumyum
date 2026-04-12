@@ -94,5 +94,38 @@ public class HomeActivity extends AppCompatActivity {
 
         SuggestAdapter adapterUuDai = new SuggestAdapter(listDoc);
         rvUuDaiSieuHoi.setAdapter(adapterUuDai);
+
+        setupBottomNavigation();
+    }
+
+    private void setupBottomNavigation() {
+        android.widget.LinearLayout navHome = findViewById(R.id.navHome);
+        android.widget.LinearLayout navHistory = findViewById(R.id.navHistory);
+        android.widget.LinearLayout navGift = findViewById(R.id.navGift);
+        android.widget.LinearLayout navAccount = findViewById(R.id.navAccount);
+
+        // 2. Luồng bấm qua LỊCH SỬ
+        navHistory.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.transaction.TransactionHistoryActivity.class);
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); // Kéo màn hình lên chứ đéo đẻ thêm để nhẹ máy
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
+
+        // 3. Luồng bấm qua SĂN QUÀ
+        navGift.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.gift.GiftActivity.class);
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
+
+        // 4. Luồng bấm qua TÀI KHOẢN
+        navAccount.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.profile.ProfileActivity.class);
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
     }
 }
