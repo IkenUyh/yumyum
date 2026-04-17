@@ -1,5 +1,11 @@
 package com.example.uitpayapp.transaction;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 public class TransactionHistory {
     private String id;
     private String title;         // Mô tả thông tin lịch sử giao dịch
@@ -25,15 +31,40 @@ public class TransactionHistory {
         this.mainIconId = mainIconId;
     }
 
-    // Các hàm Getters (Đã bổ sung đầy đủ)
     public String getId() { return id; }
     public String getTitle() { return title; }
     public long getAmount() { return amount; }
-    public long getRemain() { return remain; }    // Đã thêm
+    public long getRemain() { return remain; }
     public String getDate() { return date; }
     public String getCategory() { return category; }
     public String getStatus() { return status; }
-    public String getSource() { return source; }  // Đã thêm
+    public String getSource() { return source; }
     public boolean isIncome() { return isIncome; }
     public int getMainIconId() { return mainIconId; }
+    public int getYear() {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("HH:mm - dd/MM/yyyy", Locale.getDefault());
+            Date d = format.parse(date);
+
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(d);
+
+            return cal.get(Calendar.YEAR);
+        } catch (Exception e) {
+            return -1;
+        }
+        }
+    public int getMonth(){
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("HH:mm - dd/MM/yyyy", Locale.getDefault());
+            Date d = format.parse(date);
+
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(d);
+
+            return cal.get(Calendar.MONTH) + 1;
+        } catch (Exception e) {
+            return -1;
+        }
+    }
 }

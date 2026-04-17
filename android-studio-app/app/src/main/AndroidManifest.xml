@@ -8,45 +8,43 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Androidstudioapp">
+        <activity
+            android:name=".transaction.TransactionHistoryFiltered"
+            android:exported="false">
 
+        </activity>
         <activity
             android:name=".auth.LoadingScreenActivity"
             android:exported="true">
-            <intent-filter>
+           <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".home.HomeActivity"
             android:exported="false" />
-
         <activity
             android:name=".transaction.TransactionHistoryActivity"
-            android:exported="false" />
-
+            android:exported="false">
+        </activity>
         <activity
             android:name=".gift.GiftActivity"
             android:exported="false" />
-
         <activity
             android:name=".profile.ProfileActivity"
             android:exported="false" />
-
         <activity
             android:name=".auth.SignInActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
             android:name=".profile.ContactSupportActivity"
             android:exported="false" />
-
         <activity
             android:name=".auth.PasscodeActivity"
             android:exported="false" />
-
     </application>
 
 </manifest>

@@ -1,6 +1,8 @@
 package com.example.uitpayapp.transaction;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,8 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.uitpayapp.R;
 import com.google.android.material.tabs.TabLayout;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class TransactionHistoryActivity extends AppCompatActivity {
 
@@ -44,16 +51,24 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         allTransactions = new ArrayList<>();
         displayTransactions = new ArrayList<>();
-        adapter = new TransactionHistoryAdapter(displayTransactions);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        List<Object> groupedList = buildGroupedList(displayTransactions);
+        adapter = new TransactionHistoryAdapter(groupedList,true);
         recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         createDummyData();
         setupTabs();
         filterTransactions("Tất cả");
         setupBottomNavigation();
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/yyyy", Locale.getDefault());
+        String current = sdf.format(new Date());
+
+        ImageView ivFilter=findViewById(R.id.ivFilter);
+        ivFilter.setOnClickListener(v->{
+            Intent filterintent=new Intent(TransactionHistoryActivity.this,TransactionHistoryFiltered.class);
+            startActivity(filterintent);
+        });
     }
     private void createDummyData() {
-        // Thứ tự truyền vào: ID, Tiêu đề, Số tiền, Số dư, Thời gian, Category (để lọc Tab), Trạng thái, Nguồn tiền, isIncome (+ hay -)
 
         allTransactions.add(new TransactionHistory("1", R.drawable.ic_giaodich_1,"Rút tiền về thẻ/ tài khoản đã liên kết", 380000, 5000000, "19:28 - 26/10/2024", "Nhận tiền", "Thành công", "Ví UITpay", false));
 
@@ -62,6 +77,11 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         allTransactions.add(new TransactionHistory("3",R.drawable.ic_giaodich_1 ,"Nạp tiền vào tài khoản UITpay", 190000, 5190000, "19:27 - 26/10/2024", "Nạp tiền", "Thành công", "MBBank", true));
 
         allTransactions.add(new TransactionHistory("4", R.drawable.ic_giaodich_1,"Nạp tiền điện thoại Viettel", 50000, 5000000, "10:00 - 25/10/2024", "Điện thoại", "Thành công", "Ví UITpay", false));
+        allTransactions.add(new TransactionHistory("5", R.drawable.ic_giaodich_1,"Nạp tiền điện thoại Viettel", 50000, 5000000, "10:00 - 25/10/2024", "Điện thoại", "Thành công", "Ví UITpay", false));
+        allTransactions.add(new TransactionHistory("6", R.drawable.ic_giaodich_1,"Nạp tiền điện thoại Viettel", 50000, 5000000, "10:00 - 25/09/2024", "Điện thoại", "Thành công", "Ví UITpay", false));
+        allTransactions.add(new TransactionHistory("7", R.drawable.ic_giaodich_1,"Nạp tiền điện thoại Viettel", 50000, 5000000, "10:00 - 25/09/2024", "Điện thoại", "Thành công", "Ví UITpay", false));
+        allTransactions.add(new TransactionHistory("8", R.drawable.ic_giaodich_1,"Nạp tiền điện thoại Viettel", 50000, 5000000, "10:00 - 25/09/2024", "Điện thoại", "Thành công", "Ví UITpay", false));
+
     }
 
     private void setupTabs() {
@@ -76,13 +96,12 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         tabLayout.addTab(tabLayout.newTab().setText("Thanh toán"));
         tabLayout.addTab(tabLayout.newTab().setText("Tài chính"));
 
-        // Bắt sự kiện khi người dùng nhấn vào một Tab bất kỳ
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 if (tab.getText() != null) {
                     String selectedCategory = tab.getText().toString();
-                    filterTransactions(selectedCategory); // Gọi hàm lọc dữ liệu
+                    filterTransactions(selectedCategory);
                 }
             }
 
@@ -95,27 +114,51 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         });
     }
 
-    // Hàm thực hiện chức năng LỌC dữ liệu
     private void filterTransactions(String category) {
-        // 1. Xóa sạch dữ liệu đang hiển thị cũ
         displayTransactions.clear();
-
-        // 2. Lọc dữ liệu mới từ danh sách gốc
-        if (category.equals("Tất cả")) {
-            displayTransactions.addAll(allTransactions); // Lấy hết
+        if (category.trim().equals("Tất cả")) {
+            displayTransactions.addAll(allTransactions);
         } else {
-            // Duyệt qua từng giao dịch, nếu khớp "Category" thì mới cho hiển thị
             for (TransactionHistory transaction : allTransactions) {
-                if (transaction.getCategory().equals(category)) {
+                if (transaction.getCategory().trim().equalsIgnoreCase(category.trim())) {
                     displayTransactions.add(transaction);
                 }
             }
         }
+        List<Object> groupedList = buildGroupedList(displayTransactions);
+        adapter.setData(groupedList);
+    }
 
-        // 3. "Báo cáo" cho Adapter biết dữ liệu đã thay đổi để nó vẽ lại giao diện
-        if (adapter != null) {
-            adapter.notifyDataSetChanged();
+    private List<Object> buildGroupedList(List<TransactionHistory> list) {
+        List<Object> result = new ArrayList<>();
+
+        Map<String, List<TransactionHistory>> map = new LinkedHashMap<>();
+
+        for (TransactionHistory item : list) {
+            String monthYear = item.getDate().substring(item.getDate().length() - 7);
+
+            if (!map.containsKey(monthYear)) {
+                map.put(monthYear, new ArrayList<>());
+            }
+            map.get(monthYear).add(item);
         }
+
+        for (String key : map.keySet()) {
+            List<TransactionHistory> items = map.get(key);
+
+            long income = 0;
+            long expense = 0;
+
+            for (TransactionHistory t : items) {
+                if (t.isIncome()) income += t.getAmount();
+                else expense += t.getAmount();
+            }
+
+            result.add(new HeaderItem(key, income, expense)); // header
+            result.addAll(items); // item
+        }
+
+        return result;
     }
 
     private void setupBottomNavigation() {
