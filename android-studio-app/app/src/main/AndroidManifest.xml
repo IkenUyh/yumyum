@@ -40,6 +40,18 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".home.money_transfer.MoneyTransferActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".home.money_transfer.TransferConfirmationActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".home.money_transfer.TransferSuccessActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".profile.ContactSupportActivity"
             android:exported="false" />
 
