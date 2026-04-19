@@ -2,7 +2,12 @@ package com.example.uitpayapp.transaction;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,9 +31,12 @@ import java.util.Map;
 public class TransactionHistoryActivity extends AppCompatActivity {
 
     private TabLayout tabLayout;
+    private View layoutEmpty;
+    private TextView tvEmpty;
     private RecyclerView recyclerView;
     private TransactionHistoryAdapter adapter;
-
+    private String currentCategory = "Tất cả";
+    private String currentQuery = "";
     // 1. Danh sách gốc (constant)
     private List<TransactionHistory> allTransactions;
     // 2. Danh sách dùng để hiển thị trên màn hình (đưa vào Adapter)
@@ -46,8 +54,8 @@ public class TransactionHistoryActivity extends AppCompatActivity {
 
 
         tabLayout = findViewById(R.id.layoutTabs);
-
-
+        layoutEmpty = findViewById(R.id.layoutEmpty);
+        tvEmpty = findViewById(R.id.tvEmpty);
         recyclerView = findViewById(R.id.recyclerView);
         allTransactions = new ArrayList<>();
         displayTransactions = new ArrayList<>();
@@ -57,7 +65,8 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         createDummyData();
         setupTabs();
-        filterTransactions("Tất cả");
+        //filterTransactions("Tất cả");
+        applyFilter();
         setupBottomNavigation();
         SimpleDateFormat sdf = new SimpleDateFormat("MM/yyyy", Locale.getDefault());
         String current = sdf.format(new Date());
@@ -67,6 +76,34 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             Intent filterintent=new Intent(TransactionHistoryActivity.this,TransactionHistoryFiltered.class);
             startActivity(filterintent);
         });
+        EditText edtSearch = findViewById(R.id.etSearchQuery);
+        ImageView ivClear = findViewById(R.id.ivClear);
+        edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentQuery = s.toString();
+
+                // Hiện hoặc ẩn nút clear
+                if (s.length() > 0) {
+                    ivClear.setVisibility(View.VISIBLE);
+                } else {
+                    ivClear.setVisibility(View.GONE);
+                }
+
+                applyFilter();
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+        ivClear.setOnClickListener(v -> {
+            edtSearch.setText("");
+            currentQuery = "";
+            applyFilter();
+        });
+
     }
     private void createDummyData() {
 
@@ -101,8 +138,8 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 if (tab.getText() != null) {
                     String selectedCategory = tab.getText().toString();
-                    filterTransactions(selectedCategory);
-                }
+                    currentCategory = selectedCategory;
+                    applyFilter();                }
             }
 
             @Override
@@ -114,7 +151,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         });
     }
 
-    private void filterTransactions(String category) {
+  /*  private void filterTransactions(String category) {
         displayTransactions.clear();
         if (category.trim().equals("Tất cả")) {
             displayTransactions.addAll(allTransactions);
@@ -127,6 +164,49 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         }
         List<Object> groupedList = buildGroupedList(displayTransactions);
         adapter.setData(groupedList);
+    }*/
+
+    private void applyFilter() {
+        displayTransactions.clear();
+
+        for (TransactionHistory transaction : allTransactions) {
+
+            // 1. Lọc theo category
+            boolean matchCategory = currentCategory.equals("Tất cả") ||
+                    transaction.getCategory().equalsIgnoreCase(currentCategory);
+
+            // 2. Lọc theo title (search)
+            boolean matchSearch;
+
+            if (currentQuery == null || currentQuery.trim().isEmpty()) {
+                matchSearch = true; // không search → cho qua hết
+            } else {
+                matchSearch = transaction.getTitle()
+                        .toLowerCase()
+                        .contains(currentQuery.toLowerCase());
+            }
+
+            // 3. Nếu match cả 2 thì thêm
+            if (matchCategory && matchSearch) {
+                displayTransactions.add(transaction);
+            }
+        }
+
+        List<Object> groupedList = buildGroupedList(displayTransactions);
+        adapter.setData(groupedList);
+        if (displayTransactions.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            layoutEmpty.setVisibility(View.VISIBLE);
+            if (currentQuery.isEmpty()) {
+                tvEmpty.setText("Bạn chưa có giao dịch nào");
+            } else {
+                tvEmpty.setText("Không tìm thấy giao dịch phù hợp");
+            }
+
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            layoutEmpty.setVisibility(View.GONE);
+        }
     }
 
     private List<Object> buildGroupedList(List<TransactionHistory> list) {

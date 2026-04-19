@@ -54,22 +54,35 @@
                 app:tint="#9E9E9E" />
 
             <EditText
-                android:id="@+id/etSearchMonth"
+                android:id="@+id/etSearchQuery"
                 style="@android:style/Widget.EditText"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="184dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="24dp"
                 android:background="@null"
                 android:hint="Tìm giao dịch"
+                android:inputType="text|textCapSentences"
                 android:textColor="#9E9E9E"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/ivFilter"
-                app:layout_constraintHorizontal_bias="0.338"
+                app:layout_constraintEnd_toEndOf="@+id/ivClear"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
+                app:layout_constraintVertical_bias="1.0" />
+
+
+            <ImageView
+                android:id="@+id/ivClear"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_transactionhistory_close_24px"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/etSearchQuery"
+                app:layout_constraintEnd_toStartOf="@id/ivFilter"
+                app:layout_constraintTop_toTopOf="@id/etSearchQuery"/>
 
             <ImageView
                 android:id="@+id/ivFilter"
@@ -129,10 +142,39 @@
         android:layout_height="0dp"
         android:layout_marginTop="1dp"
         android:background="#FFFFFF"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layoutTabs" />
+
+    <LinearLayout
+        android:id="@+id/layoutEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/recyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/recyclerView">
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:alpha="0.5"
+            android:src="@drawable/img_transactionhistory_notransaction" />
+
+        <TextView
+            android:id="@+id/tvEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Bạn chưa có giao dịch nào"
+            android:textColor="#9E9E9E"
+            android:textSize="16sp" />
+    </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout2"
