@@ -77,7 +77,7 @@
         <activity android:name=".ScanQRCode.QRScanActivity"
             android:exported="false" />
         <activity android:name=".profile.SecurityTransactionActivity"
-
+            android:exported="false"/>
         <activity
             android:name=".profile.ContactSupportActivity"
             android:exported="false" />
