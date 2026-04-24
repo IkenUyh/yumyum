@@ -23,7 +23,8 @@
             android:text="Tiêu đề"
             android:textSize="16sp"
             android:textStyle="normal"
-            android:textColor="#000000"/>
+            android:textColor="#000000"
+            android:maxWidth="250dp"/>
         <TextView
             android:id="@+id/menu_subtitle"
             android:layout_width="wrap_content"

@@ -1,5 +1,6 @@
 package com.example.uitpayapp.auth;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -7,10 +8,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.uitpayapp.home.ImageSliderAdapter;
@@ -33,6 +39,18 @@ public class SignInActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sign_in_page);
+        LinearLayout navBottom = findViewById(R.id.navBottom);
+        ViewCompat.setOnApplyWindowInsetsListener(navBottom, (v, insets) -> {
+            //thanh duoi
+            Insets navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+            //ban phim
+            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+            int safeBottomPadding = Math.max(navInsets.bottom,imeInsets.bottom)+10;
+            if (v != null) {
+                v.setPadding(v.getPaddingLeft(),v.getPaddingTop(),v.getPaddingRight(), safeBottomPadding);
+            }
+            return insets;
+        });
         btnLogin= findViewById(R.id.btnLogin);
         loading = findViewById(R.id.loadingOverlay);
         txtDots = findViewById(R.id.txtDots);
