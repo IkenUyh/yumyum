@@ -95,6 +95,15 @@ public class HomeActivity extends AppCompatActivity {
         SuggestAdapter adapterUuDai = new SuggestAdapter(listDoc);
         rvUuDaiSieuHoi.setAdapter(adapterUuDai);
 
+        // =========================================================
+        // 6. CHUYỂN TRANG: NÚT CHUYỂN TIỀN
+        // =========================================================
+        android.widget.LinearLayout btnChuyenTien = findViewById(R.id.btnChuyenTien);
+        btnChuyenTien.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(HomeActivity.this, com.example.uitpayapp.home.money_transfer.MoneyTransferActivity.class);
+            startActivity(intent);
+        });
+
         setupBottomNavigation();
     }
 
