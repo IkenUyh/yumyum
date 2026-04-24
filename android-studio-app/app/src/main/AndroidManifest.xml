@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.uitpayapp">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -36,8 +43,7 @@
 
         <activity
             android:name=".auth.SignInActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+            android:exported="false" />
 
         <activity
             android:name=".profile.ContactSupportActivity"
@@ -46,7 +52,27 @@
         <activity
             android:name=".auth.PasscodeActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".profile.ReceiptActivity"
+            android:exported="false" />
+        <activity android:name=".profile.InfoApplication"
+            android:exported="false" />
+        <activity android:name=".profile.NotificationSettings"
+            android:exported="false" />
+        <activity android:name=".profile.ProfileWebView"
+            android:exported="false" />
+        <activity android:name=".profile.AccmulatedBalanceActivity"
+            android:exported="false" />
+        <activity android:name=".voucher.VoucherActivity"
+            android:exported="false" />
+        <activity android:name=".profile.AutoPaymentActivity"
+            android:exported="false" />
+        <activity android:name=".profile.SecuritySettingsActivity"
+            android:exported="false" />
+        <activity android:name=".ScanQRCode.QRScanActivity"
+            android:exported="false" />
+        <activity android:name=".profile.SecurityTransactionActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

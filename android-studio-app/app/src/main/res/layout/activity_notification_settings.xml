@@ -5,260 +5,203 @@
     android:layout_height="match_parent"
     android:background="#F1F5FF"
     android:orientation="vertical">
-
-    <!-- Header -->
-    <RelativeLayout
+    <include layout="@layout/layout_top_bar"
+        android:id="@+id/top_bar_notification"/>
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#0034C8"
-        android:padding="15dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cài đặt thông báo"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_centerVertical="true"/>
-
-        <ImageView
-            android:id="@+id/btn_close_settings"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_alignParentEnd="true"
-            android:background="@drawable/bg_keypad_button"
-            android:backgroundTint="#20FFFFFF"
-            android:padding="6dp"
-            android:src="@drawable/ic_less_than"
-            android:rotation="180"
-            app:tint="#FFFFFF"
-            android:clickable="true"
-            android:focusable="true"/>
-    </RelativeLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp">
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <!-- Card 1: Main Toggles -->
-            <androidx.cardview.widget.CardView
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:cardUseCompatPadding="true"
+            android:layout_marginBottom="16dp">
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
+                android:orientation="vertical">
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Âm thông báo"
-                            android:textColor="#000000"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:layout_centerVertical="true"/>
-
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:checked="true"
-                            app:thumbTint="#FFFFFF"
-                            app:trackTint="#0034C8"/>
-                    </RelativeLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#F0F0F0"
-                        android:layout_marginHorizontal="16dp"/>
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Nhận thông báo trên thiết bị"
-                            android:textColor="#000000"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:layout_centerVertical="true"/>
-
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:checked="true"
-                            app:thumbTint="#FFFFFF"
-                            app:trackTint="#0034C8"/>
-                    </RelativeLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Card 2: Categories -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
                     android:padding="16dp">
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Các nội dung sẽ thông báo đến bạn:"
-                        android:textColor="#757575"
-                        android:textSize="14sp"
-                        android:layout_marginBottom="16dp"/>
-
-                    <!-- Category: Giao dịch -->
-                    <RelativeLayout
+                        android:text="Âm thông báo"
+                        android:textColor="#000000"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_centerVertical="true"/>
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:checked="true"
+                        app:thumbTint="#FFFFFF"
+                        app:trackTint="#0034C8"/>
+                </RelativeLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#F0F0F0"
+                    android:layout_marginHorizontal="16dp"/>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nhận thông báo trên thiết bị"
+                        android:textColor="#000000"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_centerVertical="true"/>
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:checked="true"
+                        app:thumbTint="#FFFFFF"
+                        app:trackTint="#0034C8"/>
+                </RelativeLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Các nội dung sẽ thông báo đến bạn:"
+                    android:textColor="#757575"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="16dp"/>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp">
+                    <ImageView
+                        android:id="@+id/ic_trans"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_receipt"
+                        app:tint="#00C853"
+                        android:layout_centerVertical="true"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Giao dịch"
+                        android:textColor="#000000"
+                        android:textSize="15sp"
+                        android:layout_toEndOf="@id/ic_trans"
+                        android:layout_marginStart="12dp"
+                        android:layout_centerVertical="true"/>
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:checked="true"
+                        android:layout_centerVertical="true"
+                        android:buttonTint="#0034C8"/>
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp">
+                    <ImageView
+                        android:id="@+id/ic_promo"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_my_gift"
+                        app:tint="#FF1744"
+                        android:layout_centerVertical="true"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Khuyến mãi"
+                        android:textColor="#000000"
+                        android:textSize="15sp"
+                        android:layout_toEndOf="@id/ic_promo"
+                        android:layout_marginStart="12dp"
+                        android:layout_centerVertical="true"/>
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:checked="true"
+                        android:layout_centerVertical="true"
+                        android:buttonTint="#0034C8"/>
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp">
+                    <ImageView
+                        android:id="@+id/ic_remind"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_reliable_score"
+                        app:tint="#00C853"
+                        android:layout_centerVertical="true"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nhắc nhở"
+                        android:textColor="#000000"
+                        android:textSize="15sp"
+                        android:layout_toEndOf="@id/ic_remind"
+                        android:layout_marginStart="12dp"
+                        android:layout_centerVertical="true"/>
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:checked="true"
+                        android:layout_centerVertical="true"
+                        android:buttonTint="#0034C8"/>
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <ImageView
+                        android:id="@+id/ic_other"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_notification"
+                        app:tint="#FF1744"
+                        android:layout_centerVertical="true"/>
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="20dp">
-                        <ImageView
-                            android:id="@+id/ic_trans"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_receipt"
-                            app:tint="#00C853"
-                            android:layout_centerVertical="true"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Giao dịch"
-                            android:textColor="#000000"
-                            android:textSize="15sp"
-                            android:layout_toEndOf="@id/ic_trans"
-                            android:layout_marginStart="12dp"
-                            android:layout_centerVertical="true"/>
-                        <CheckBox
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:checked="true"
-                            android:layout_centerVertical="true"
-                            android:buttonTint="#0034C8"/>
-                    </RelativeLayout>
-
-                    <!-- Category: Khuyến mãi -->
-                    <RelativeLayout
-                        android:layout_width="match_parent"
+                        android:text="Tài khoản và các thông báo khác"
+                        android:textColor="#000000"
+                        android:textSize="15sp"
+                        android:layout_toEndOf="@id/ic_other"
+                        android:layout_toStartOf="@+id/cb_other"
+                        android:layout_marginStart="12dp"
+                        android:layout_centerVertical="true"/>
+                    <CheckBox
+                        android:id="@+id/cb_other"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="20dp">
-                        <ImageView
-                            android:id="@+id/ic_promo"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_my_gift"
-                            app:tint="#FF1744"
-                            android:layout_centerVertical="true"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Khuyến mãi"
-                            android:textColor="#000000"
-                            android:textSize="15sp"
-                            android:layout_toEndOf="@id/ic_promo"
-                            android:layout_marginStart="12dp"
-                            android:layout_centerVertical="true"/>
-                        <CheckBox
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:checked="true"
-                            android:layout_centerVertical="true"
-                            android:buttonTint="#0034C8"/>
-                    </RelativeLayout>
+                        android:layout_alignParentEnd="true"
+                        android:checked="true"
+                        android:layout_centerVertical="true"
+                        android:buttonTint="#0034C8"/>
+                </RelativeLayout>
 
-                    <!-- Category: Nhắc nhở -->
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="20dp">
-                        <ImageView
-                            android:id="@+id/ic_remind"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_reliable_score"
-                            app:tint="#00E676"
-                            android:layout_centerVertical="true"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Nhắc nhở"
-                            android:textColor="#000000"
-                            android:textSize="15sp"
-                            android:layout_toEndOf="@id/ic_remind"
-                            android:layout_marginStart="12dp"
-                            android:layout_centerVertical="true"/>
-                        <CheckBox
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:checked="true"
-                            android:layout_centerVertical="true"
-                            android:buttonTint="#0034C8"/>
-                    </RelativeLayout>
-
-                    <!-- Category: Khác -->
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-                        <ImageView
-                            android:id="@+id/ic_other"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_notification"
-                            app:tint="#FF9100"
-                            android:layout_centerVertical="true"/>
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Tài khoản và các thông báo khác"
-                            android:textColor="#000000"
-                            android:textSize="15sp"
-                            android:layout_toEndOf="@id/ic_other"
-                            android:layout_toStartOf="@+id/cb_other"
-                            android:layout_marginStart="12dp"
-                            android:layout_centerVertical="true"/>
-                        <CheckBox
-                            android:id="@+id/cb_other"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:checked="true"
-                            android:layout_centerVertical="true"
-                            android:buttonTint="#0034C8"/>
-                    </RelativeLayout>
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-        </LinearLayout>
-    </ScrollView>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
 </LinearLayout>

@@ -1,5 +1,6 @@
 package com.example.uitpayapp.profile;
 
+import android.content.Context;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
@@ -16,29 +17,29 @@ import com.example.uitpayapp.R;
 
 import java.util.List;
 
-public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.ViewHolder> {
-    private List<ProfileActivity.GroupItemData> ListGroupItem;
+public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.MenuItemViewHolder> {
+    private List<GroupItemData> ListGroupItem;
     private Boolean IsAmountHiden=true;
     private OnProfileMenuItemClickListener Listener;
 
     //bat click
     public interface OnProfileMenuItemClickListener {
         //khi nhan click ben kia phai truyen vao 1 ham xu ly
-        void onMenuItemClick(ProfileActivity.MenuItemData item);
+        void onMenuItemClick(MenuItemData item);
     }
-    public ProfileMenuAdapter(ProfileActivity profileActivity, List<ProfileActivity.GroupItemData> ListGroupItem, OnProfileMenuItemClickListener Listener) {
+    public ProfileMenuAdapter(Context context, List<GroupItemData> ListGroupItem, OnProfileMenuItemClickListener Listener) {
         this.ListGroupItem = ListGroupItem;
         this.Listener=Listener;
     }
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MenuItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View cardviewGroupItem= LayoutInflater.from(parent.getContext()).inflate(R.layout.group_item_profile_layout,parent,false);
-        return new ViewHolder(cardviewGroupItem);
+        return new MenuItemViewHolder(cardviewGroupItem);
     }
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ProfileActivity.GroupItemData GroupItem = ListGroupItem.get(position);
+    public void onBindViewHolder(@NonNull MenuItemViewHolder holder, int position) {
+        GroupItemData GroupItem = ListGroupItem.get(position);
         if (GroupItem.getTitle()!="")
         {
             holder.group_title.setText(GroupItem.getTitle());
@@ -49,18 +50,18 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
             holder.group_title.setVisibility(View.GONE);
         }
         holder.items_container.removeAllViews();
-        for (ProfileActivity.MenuItemData MenuItem : GroupItem.getListItems())
+        for (MenuItemData MenuItem : GroupItem.getListItems())
         {
             View itemView;
             if (!MenuItem.IsSpecialItem)
             {
                 itemView=LayoutInflater.from(holder.itemView.getContext()).inflate(R.layout.menuitem_profile_screen,null);
-                ProfileActivity.SetDetaileMenuItem(itemView,MenuItem.getTitle(),MenuItem.getSubtitle(),MenuItem.getIcon());
+                ProfileActivity.SetDetailMenuItem(itemView,MenuItem.getTitle(),MenuItem.getSubtitle(),MenuItem.getIcon());
             } else
             {
                 itemView=LayoutInflater.from(holder.itemView.getContext()).inflate(R.layout.item_profile_wallet,null);
                 View title_balace=itemView.findViewById(R.id.balance_title);
-                ProfileActivity.SetDetaileMenuItem(title_balace,MenuItem.getTitle(),MenuItem.getSubtitle(),MenuItem.getIcon());
+                ProfileActivity.SetDetailMenuItem(title_balace,MenuItem.getTitle(),MenuItem.getSubtitle(),MenuItem.getIcon());
                 TextView wallet_balance=itemView.findViewById(R.id.wallet_balance);
                 TextView accmulated_balance=itemView.findViewById(R.id.accmulated_balance);
                 ImageView hide_show_amount=itemView.findViewById(R.id.hide_show_amount);
@@ -96,10 +97,10 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
     public int getItemCount() {
         return ListGroupItem.size();
     }
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    static class MenuItemViewHolder extends RecyclerView.ViewHolder {
         TextView group_title;
         LinearLayout items_container;
-        public ViewHolder(@NonNull View itemView) {
+        public MenuItemViewHolder(@NonNull View itemView) {
             super(itemView);
             group_title = itemView.findViewById(R.id.group_title);
             items_container=itemView.findViewById(R.id.items_container);

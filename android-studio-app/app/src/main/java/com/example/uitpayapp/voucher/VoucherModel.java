@@ -1,4 +1,4 @@
-package com.example.uitpayapp.profile;
+package com.example.uitpayapp.voucher;
 
 public class VoucherModel {
     private int icon;
@@ -11,6 +11,7 @@ public class VoucherModel {
         this.type = type;
         this.mainTitle = mainTitle;
         this.subTitle = subTitle;
+        this.voucherExpiration = voucherExpiration;
     }
     public int getIcon() { return icon; }
     public String getType() { return type; }

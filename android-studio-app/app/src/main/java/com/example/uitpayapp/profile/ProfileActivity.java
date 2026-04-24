@@ -1,13 +1,16 @@
 package com.example.uitpayapp.profile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -15,6 +18,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.ScanQRCode.QRScanActivity;
+import com.example.uitpayapp.gift.GiftActivity;
+import com.example.uitpayapp.voucher.VoucherActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.ArrayList;
@@ -30,7 +36,7 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile_screen);
         TextView pagetitle = findViewById(R.id.pagetilte);
         mainMenu = findViewById(R.id.main_menu);
-        LinearLayout profile_container = findViewById(R.id.profile_container);
+        ConstraintLayout navBottom = findViewById(R.id.bottomNavContainer);
         ViewCompat.setOnApplyWindowInsetsListener(pagetitle, (v, insets) -> {
             Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
             int safeTopPadding = cutout.top + 10;
@@ -38,8 +44,8 @@ public class ProfileActivity extends AppCompatActivity {
             //thanh duoi
             Insets navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
             int safeBottomPadding = navInsets.bottom+10;
-            if (profile_container != null) {
-                profile_container.setPadding(profile_container.getPaddingLeft(), profile_container.getPaddingTop(), profile_container.getPaddingRight(), safeBottomPadding);
+            if (navBottom != null) {
+                navBottom.setPadding(navBottom.getPaddingLeft(), navBottom.getPaddingTop(), navBottom.getPaddingRight(), safeBottomPadding);
             }
             return insets;
         });
@@ -60,13 +66,11 @@ public class ProfileActivity extends AppCompatActivity {
         List<MenuItemData> ListItems_finance = new ArrayList<>();
         ListItems_finance.add(new MenuItemData("Tài khoản/thẻ liên kết", "", R.drawable.ic_account_card_payment,true));
         ListItems_finance.add(new MenuItemData("Cài đặt thanh toán tự động", "Sắp xếp nguồn tiền, cài đặt dịch vụ", R.drawable.ic_payment,false));
-        ListItems_finance.add(new MenuItemData("Điểm tin cậy UITpay", "", R.drawable.ic_reliable_score,false));
         ListGroupItem.add(new GroupItemData("Quản lý tài chính", ListItems_finance));
         //Nhóm 3: Tiện ích
         List<MenuItemData> ListItems_tienich = new ArrayList<>();
         ListItems_tienich.add(new MenuItemData("Quản lý hóa đơn", "Thêm hóa đơn để thanh toán bạn nhé", R.drawable.ic_receipt,false));
         ListItems_tienich.add(new MenuItemData("Quản lý hợp đồng", "", R.drawable.ic_contract,false));
-        ListItems_tienich.add(new MenuItemData("Quản lý vé", "", R.drawable.ic_ticket,false));
         ListGroupItem.add(new GroupItemData("Tiện ích", ListItems_tienich));
         //Nhóm 4: Hỗ trợ
         List<MenuItemData> ListItems_support = new ArrayList<>();
@@ -93,7 +97,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (item == null) return;
         List<GroupItemData> ListGroupItem = new ArrayList<>();
         List<MenuItemData> ListItems = new ArrayList<>();
-        switch (item.title) {
+        switch (item.getTitle()) {
             case "Cài đặt thanh toán tự động":
                 ListItems.add(new MenuItemData("Thanh toán dịch vụ tự động","Sắp xếp thứ tự ưu tiên thẻ/tài khoản",R.drawable.ic_sort_payment,false));
                 ListItems.add(new MenuItemData("Thanh toán hóa đơn tự động","",R.drawable.ic_receipt,false));
@@ -105,15 +109,6 @@ public class ProfileActivity extends AppCompatActivity {
                 ListItems.add(new MenuItemData("Hợp đồng số dư sinh lời","",R.drawable.ic_accmulated_balance,false));
                 ListGroupItem.add(new GroupItemData("",ListItems));
                 ShowBottomSheet("Quản lý hợp đồng",ListGroupItem);
-                break;
-            case "Quản lý vé":
-                ListItems.add(new MenuItemData("Vé xem phim","",R.drawable.ic_movie_ticket,false));
-                ListItems.add(new MenuItemData("Vé máy bay","",R.drawable.ic_flight_ticket,false));
-                ListItems.add(new MenuItemData("Vé xe khách","",R.drawable.ic_bus_ticket,false));
-                ListItems.add(new MenuItemData("Vé tàu hỏa","",R.drawable.ic_train_ticket,false));
-                ListItems.add(new MenuItemData("Vé tham quan","",R.drawable.ic_tourist_attraction_ticket,false));
-                ListGroupItem.add(new GroupItemData("",ListItems));
-                ShowBottomSheet("Quản lý vé",ListGroupItem);
                 break;
             case "Trung tâm bảo mật":
                 ListItems.add(new MenuItemData("Bảo mật tài khoản","",R.drawable.ic_security_user,false));
@@ -137,15 +132,34 @@ public class ProfileActivity extends AppCompatActivity {
                 ListItems.add(new MenuItemData("các liên kết ngân hàng khác","",R.drawable.ic_link_bank,false));
                 ListGroupItem.add(new GroupItemData("",ListItems));
                 ShowBottomSheet("Quản lý tài chính",ListGroupItem);
+                break;
+            case "Quản lý hóa đơn":
+                Intent intentReceipt=new Intent(this,ReceiptActivity.class);
+                startActivity(intentReceipt);
+                break;
+            case "Quà của tôi":
+                Intent intentVoucher=new Intent(this, VoucherActivity.class);
+                startActivity(intentVoucher);
+                break;
+            case "Trung tâm hỗ trợ":
+                Intent intentSupport=new Intent(this, ProfileWebView.class);
+                intentSupport.putExtra("URL_KEY","https://support.zalopay.vn/faq/web");
+                startActivity(intentSupport);
+                break;
         }
     }
-    public static void SetDetaileMenuItem(View item, String item_title, String item_subtitle, int item_icon) {
+    public static void SetDetailMenuItem(View item, String item_title, String item_subtitle, int item_icon) {
         if (item == null) return;
         TextView titleTv = item.findViewById(R.id.menu_title);
         TextView subtitleTv = item.findViewById(R.id.menu_subtitle);
         ImageView iconIv = item.findViewById(R.id.menu_icon);
 
         if (titleTv != null) titleTv.setText(item_title);
+        if (item_icon==-1)
+        {
+            iconIv.setVisibility(View.GONE);
+        } else
+            iconIv.setImageResource(item_icon);
         if (subtitleTv != null) {
             if (item_subtitle != null && !item_subtitle.isEmpty()) {
                 subtitleTv.setVisibility(View.VISIBLE);
@@ -154,45 +168,56 @@ public class ProfileActivity extends AppCompatActivity {
                 subtitleTv.setVisibility(View.GONE);
             }
         }
-        if (iconIv != null) iconIv.setImageResource(item_icon);
-    }
-
-    public static class MenuItemData {
-        private String title, subtitle;
-        private int icon;
-        Boolean IsSpecialItem;
-        public MenuItemData(String title, String subtitle, int icon, Boolean IsSpecialItem) {
-            this.title = title; this.subtitle = subtitle; this.icon = icon;
-            this.IsSpecialItem = IsSpecialItem;
-        }
-        public String getTitle() { return title; }
-        public String getSubtitle() { return subtitle; }
-        public int getIcon() { return icon; }
-    }
-
-    public static class GroupItemData {
-        private String title;
-        private List<MenuItemData> ListItems;
-        public GroupItemData(String title, List<MenuItemData> ListItems) {
-            this.title = title; this.ListItems = ListItems;
-        }
-        public String getTitle() { return title; }
-        public List<MenuItemData> getListItems() { return ListItems; }
     }
     //Tam thoi code thu cong do du lieu con it
     private void ShowBottomSheet(String SheetTilte, List<GroupItemData> ListGroupItem) {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
-        View SheetView=getLayoutInflater().inflate(R.layout.layout_dynamic_bottom_sheet,null);
-        ((ImageView)SheetView.findViewById(R.id.btn_close)).setOnClickListener(v->bottomSheetDialog.dismiss());
-        ((TextView)SheetView.findViewById(R.id.sheet_title)).setText(SheetTilte);
-        RecyclerView sheet_container=SheetView.findViewById(R.id.sheet_container);
-        sheet_container.setLayoutManager(new LinearLayoutManager(this));
-        sheet_container.setAdapter(new ProfileMenuAdapter(this,ListGroupItem,null));
-        //TAM THOI DE LISTENER LA NULL, TRONG TUONG LAI LAM TIEP SE PHAN LOAI THEM 1 FUNCTION NUA
+        View SheetView = getLayoutInflater().inflate(R.layout.layout_dynamic_bottom_sheet, null);
+        ((ImageView) SheetView.findViewById(R.id.btn_close)).setOnClickListener(v -> bottomSheetDialog.dismiss());
+        ((TextView) SheetView.findViewById(R.id.sheet_title)).setText(SheetTilte);
+        LinearLayout container = (LinearLayout) SheetView.findViewById(R.id.sheet_container);
+        RecyclerView recyclerView = new RecyclerView(this);
+        recyclerView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        recyclerView.setBackgroundColor(android.graphics.Color.parseColor("#f1f5ff"));
+        recyclerView.setPadding(16,16,16,16);
+        container.addView(recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new ProfileMenuAdapter(this, ListGroupItem,ItemClick->HanleDetailItemClick(ItemClick)));
         bottomSheetDialog.setContentView(SheetView);
         bottomSheetDialog.show();
     }
-
+    private void HanleDetailItemClick(MenuItemData item) {
+        switch (item.getTitle()) {
+            case "Thông tin ứng dụng":
+                Intent intentInfo=new Intent(this,InfoApplication.class);
+                startActivity(intentInfo);
+                break;
+            case "Cài đặt thông báo":
+                Intent intentNotification=new Intent(this, NotificationSettings.class);
+                startActivity(intentNotification);
+                break;
+            case "Hợp đồng số dư sinh lời":
+                Intent intentAccmulated=new Intent(this, AccmulatedBalanceActivity.class);
+                startActivity(intentAccmulated);
+                break;
+            case "Thanh toán hóa đơn tự động":
+                Intent intentAutoPay=new Intent(this, AutoPaymentActivity.class);
+                startActivity(intentAutoPay);
+                break;
+            case "Bảo mật tài khoản":
+                Intent intentSecurity=new Intent(this, SecuritySettingsActivity.class);
+                startActivity(intentSecurity);
+                break;
+            case "Quét QR":
+                Intent intentQR=new Intent(this, QRScanActivity.class);
+                startActivity(intentQR);
+                break;
+            case "Bảo mật giao dịch":
+                Intent intentTransaction=new Intent(this, SecurityTransactionActivity.class);
+                startActivity(intentTransaction);
+                break;
+        }
+    }
     private void setupBottomNavigation() {
         android.widget.LinearLayout navHome = findViewById(R.id.navHome);
         android.widget.LinearLayout navHistory = findViewById(R.id.navHistory);

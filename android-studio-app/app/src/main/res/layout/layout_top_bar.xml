@@ -14,8 +14,7 @@
         android:text="Tiêu đề"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_centerVertical="true" />
+        android:textStyle="bold"/>
 
     <ImageView
         android:id="@+id/top_bar_back_btn"
@@ -29,6 +28,5 @@
         android:rotation="180"
         app:tint="#FFFFFF"
         android:clickable="true"
-        android:focusable="true"
-        android:layout_centerVertical="true" />
+        android:focusable="true"/>
 </RelativeLayout>
