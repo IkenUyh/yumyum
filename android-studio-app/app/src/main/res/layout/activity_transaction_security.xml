@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0034C8">
+
+    <!-- 1. Top Bar -->
+    <RelativeLayout
+        android:id="@+id/top_bar_security"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/btn_back"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_less_than"
+            app:tint="#FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Bảo mật giao dịch"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btn_close"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_close"
+            app:tint="#FFFFFF" />
+    </RelativeLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/top_bar_security">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 2. Header Illustration Section -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:paddingHorizontal="24dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="120dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Trung tâm kiểm tra bảo mật"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Kiểm soát và thiết lập bảo mật khi giao dịch"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Placeholder for Shield Illustration -->
+                <ImageView
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_security_transaction"
+                    android:alpha="0.8"/>
+            </RelativeLayout>
+
+            <!-- 3. Content Section (White Background) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_rounded_top_white"
+                android:minHeight="600dp"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hôm nay"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <!-- Green Status Bar -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_filter_selected"
+                    android:backgroundTint="#E8F5E9"
+                    android:gravity="center"
+                    android:paddingVertical="12dp"
+                    android:text="0 giao dịch bất thường"
+                    android:textColor="#4CAF50"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="Giao dịch bất thường gần đây"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <!-- Container for RecyclerView and Empty State -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_abnormal_transactions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone" />
+
+                    <!-- Empty State View -->
+                    <LinearLayout
+                        android:id="@+id/layout_empty_state"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp"
+                        android:background="@drawable/bg_white_circle"
+                        android:backgroundTint="#F5F7FA"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <ImageView
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:src="@drawable/ic_security_user" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="Không có giao dịch nào bất thường"
+                            android:textColor="#000000"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Tất cả mọi thứ đều an toàn"
+                            android:textColor="#757575"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <!-- History Item -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/btn_transaction_history"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:background="?attr/selectableItemBackground">
+
+                        <ImageView
+                            android:id="@+id/ic_history"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_history_24px"
+                            app:tint="#757575" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="12dp"
+                            android:layout_toEndOf="@id/ic_history"
+                            android:text="Lịch sử"
+                            android:textColor="#000000"
+                            android:textSize="15sp" />
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_right_arrow"
+                            app:tint="#BDBDBD" />
+                    </RelativeLayout>
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</RelativeLayout>

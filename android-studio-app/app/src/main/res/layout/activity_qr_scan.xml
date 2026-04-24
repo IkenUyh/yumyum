@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- Lớp Camera Preview (Sau này bạn sẽ gắn Camera vào đây) -->
+    <View
+        android:id="@+id/camera_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#222222" />
+
+    <!-- Lớp phủ mờ xung quanh khung quét -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#80000000" />
+
+        <!-- Khung quét mã -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="260dp"
+                android:layout_height="260dp"
+                android:background="@drawable/bg_qr_frame">
+
+                <!-- Hiệu ứng tia quét (Animation sẽ xử lý sau) -->
+                <View
+                    android:id="@+id/scan_line"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginTop="20dp"
+                    android:background="#0034C8" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Quét mã QR để thanh toán hoặc chuyển tiền"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- Các nút điều khiển -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:padding="20dp">
+
+            <ImageView
+                android:id="@+id/btn_close_scan"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_close"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Quét mã QR"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/ic_gear"
+                app:tint="#FFFFFF" />
+        </RelativeLayout>
+
+        <!-- Nút bật đèn Flash và Chọn ảnh từ Gallery -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="100dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_white_circle"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_alarm"
+                    app:tint="#000000" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Bật đèn"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="60dp"
+                android:gravity="center"
+                android:orientation="vertical">
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_white_circle"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_gift"
+                    app:tint="#000000" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Album"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+</FrameLayout>
