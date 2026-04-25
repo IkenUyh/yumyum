@@ -124,7 +124,7 @@ public class TransferConfirmationActivity extends AppCompatActivity {
         if (isEnabled) {
             btnConfirm.setEnabled(true);
             btnConfirm.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
-                    android.graphics.Color.parseColor("#4CAF50")
+                    android.graphics.Color.parseColor("#388E3C")
             ));
         } else {
             btnConfirm.setEnabled(false);
