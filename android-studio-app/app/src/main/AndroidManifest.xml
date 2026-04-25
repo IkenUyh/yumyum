@@ -79,11 +79,27 @@
         <activity android:name=".profile.SecurityTransactionActivity"
             android:exported="false"/>
         <activity
+            android:name=".home.my_qr.MyQRActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".profile.ContactSupportActivity"
             android:exported="false" />
+
         <activity
             android:name=".auth.PasscodeActivity"
             android:exported="false" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
     </application>
 
 </manifest>

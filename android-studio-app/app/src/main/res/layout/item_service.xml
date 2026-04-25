@@ -3,13 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
-    android:gravity="center"
-    android:orientation="vertical"
+    android:gravity="center_horizontal"   android:orientation="vertical"
     android:clickable="true"
     android:focusable="true"
     android:background="?attr/selectableItemBackground"
     android:paddingTop="8dp"
     android:paddingBottom="8dp">
+
     <FrameLayout
         android:layout_width="64dp"
         android:layout_height="64dp">
@@ -47,9 +47,9 @@
         android:text="Service Name"
         android:textColor="#000000"
         android:textSize="13sp"
+        android:minLines="2"
         android:maxLines="2"
         android:ellipsize="end"
-        android:gravity="center"
-        android:textAlignment="center"
+        android:gravity="top|center_horizontal" android:textAlignment="center"
         android:paddingHorizontal="2dp"/>
 </LinearLayout>
