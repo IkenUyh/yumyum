@@ -170,7 +170,7 @@
                             android:layout_marginTop="12dp"
                             android:text="Số dư ví"
                             android:textColor="#FFFFFF"
-                            android:textSize="14sp"
+                            android:textSize="10sp"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
 
@@ -200,10 +200,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
-                            android:layout_marginTop="12dp"
-                            android:text="1.513đ"
+                            android:layout_marginTop="5dp"
+                            android:text="970.000.513đ"
                             android:textColor="#FFFFFF"
-                            android:textSize="22sp"
+                            android:textSize="13sp"
                             android:textStyle="bold"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/tvSoDuTitle" />
