@@ -1,0 +1,78 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="160dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- ICON -->
+        <ImageView
+            android:id="@+id/imgIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_qr_code_24px" />
+
+        <!-- TITLE -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nhận/Nạp tiền bằng QR"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_marginTop="8dp"
+            android:maxLines="2"/>
+
+        <!-- COIN -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp">
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/img_coin"
+                android:layout_marginEnd="4dp"/>
+            <TextView
+                android:id="@+id/tvCoin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+5.000"
+                android:textColor="#00A86B"
+                android:textStyle="bold"/>
+        </LinearLayout>
+        <!-- BUTTON -->
+        <TextView
+            android:id="@+id/btnAction"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="Thực hiện"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_blue_rounded"/>
+
+        <!-- NOTE -->
+        <TextView
+            android:id="@+id/tvNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Còn 1 lần"
+            android:textSize="12sp"
+            android:textColor="#999"
+            android:layout_marginTop="6dp"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
