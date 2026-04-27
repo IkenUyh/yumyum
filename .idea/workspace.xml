@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="6ede221f-4f12-421c-89ba-30dec5d40c2c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android-studio-app/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android-studio-app/app/src/main/AndroidManifest.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,24 +38,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/app/build.gradle (1).executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/app/build.gradle.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/build.gradle.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/settings.gradle.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/thanh_cynpday/zalopay-android-integration&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/app/build.gradle (1).executor": "Run",
+    "Gradle.C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/app/build.gradle.executor": "Run",
+    "Gradle.C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/build.gradle.executor": "Run",
+    "Gradle.C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/settings.gradle.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "bugfix/hotfix__android__manifest",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/project/NhapMonUngDungDiDong/zalopay-android-integration",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Gradle.C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/settings.gradle">
     <configuration name="C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/app/build.gradle (1)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
@@ -166,7 +172,11 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1775750777315</updated>
+      <workItem from="1777038359067" duration="132000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
 </project>
