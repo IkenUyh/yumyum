@@ -93,6 +93,12 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        android.widget.LinearLayout btnNapRut = findViewById(R.id.btnNapRut);
+        btnNapRut.setOnClickListener(v-> {
+            android.content.Intent intent = new android.content.Intent(HomeActivity.this, com.example.uitpayapp.home.deposit_withdraw.DepositWithdrawActivity.class);
+            startActivity(intent);
+        });
+
         setupBottomNavigation();
     }
 

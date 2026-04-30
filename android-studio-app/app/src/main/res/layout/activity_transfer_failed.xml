@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#F2F4F7"
     android:fillViewport="true"
-    tools:context=".home.money_transfer.TransferSuccessActivity">
+    tools:context=".home.money_transfer.TransferFailedActivity">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,7 +20,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="260dp"
-                android:background="@drawable/bg_success_gradient" />
+                android:background="@drawable/bg_failed_gradient" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -28,12 +28,13 @@
                 android:orientation="vertical"
                 android:paddingTop="48dp"
                 android:paddingBottom="32dp">
+
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/iv_success_check"
+                        android:id="@+id/iv_failed_cross"
                         android:layout_width="64dp"
                         android:layout_height="64dp"
                         android:layout_marginStart="24dp"
@@ -41,15 +42,15 @@
                         app:cardBackgroundColor="@android:color/transparent"
                         app:cardCornerRadius="32dp"
                         app:cardElevation="0dp"
-                        app:strokeColor="#0bc36a"
+                        app:strokeColor="#E53935"
                         app:strokeWidth="5dp">
 
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:padding="10dp"
-                            android:src="@drawable/ic_bold_check"
-                            app:tint="#0bc36a" />
+                            android:padding="12dp"
+                            android:src="@drawable/ic_bold_close"
+                            app:tint="#E53935" />
                     </com.google.android.material.card.MaterialCardView>
                 </RelativeLayout>
 
@@ -58,8 +59,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:layout_marginTop="16dp"
-                    android:text="Giao dịch thành công"
-                    android:textColor="#0bc36a"
+                    android:text="Giao dịch thất bại"
+                    android:textColor="#E53935"
                     android:textSize="28sp"
                     android:textStyle="bold" />
 
@@ -71,33 +72,24 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/tv_transaction_id"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Mã giao dịch: #260418004556544"
-                        android:textColor="#757575"
-                        android:textSize="14sp" />
-
-                    <TextView
                         android:id="@+id/tv_transaction_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
                         android:text="Thời gian: 23:57 18/04/2026"
                         android:textColor="#757575"
                         android:textSize="14sp" />
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/tv_success_amount"
+                    android:id="@+id/tv_failed_amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="24dp"
                     android:layout_marginTop="16dp"
                     android:includeFontPadding="false"
                     android:maxLines="1"
-                    android:text=""
-                    android:textColor="#0A46A6"
+
+                    android:textColor="#000000"
                     android:textSize="56sp"
                     android:textStyle="bold"
                     app:autoSizeMaxTextSize="56sp"
@@ -130,7 +122,7 @@
                             app:cardElevation="0dp">
 
                             <ImageView
-                                android:id="@+id/iv_recipient_avatar_success"
+                                android:id="@+id/iv_recipient_avatar_failed"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
@@ -145,7 +137,6 @@
                             android:orientation="vertical">
 
                             <TextView
-                                android:id="@+id/tv_label_recipient_success"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="GỬI ĐẾN"
@@ -154,7 +145,7 @@
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:id="@+id/tv_recipient_name_success"
+                                android:id="@+id/tv_recipient_name_failed"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="USERNAME"
@@ -166,13 +157,13 @@
                 </com.google.android.material.card.MaterialCardView>
 
                 <TextView
-                    android:id="@+id/tv_transaction_note"
+                    android:id="@+id/tv_transaction_error_reason"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="24dp"
                     android:layout_marginTop="16dp"
-                    android:text="Ghi chú:"
-                    android:textColor="#000000"
+                    android:text="Lý do: "
+                    android:textColor="#E53935"
                     android:textSize="14sp" />
 
                 <Space
@@ -193,24 +184,24 @@
                         android:layout_height="56dp"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
-                        android:backgroundTint="#F2F6FE"
+                        android:backgroundTint="#FFF0F0"
                         android:text="Đóng"
                         android:textAllCaps="false"
-                        android:textColor="#0A46A6"
+                        android:textColor="#E53935"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         app:cornerRadius="12dp" />
 
                     <Button
-                        android:id="@+id/btn_transaction_details"
+                        android:id="@+id/btn_try_again"
                         android:layout_width="0dp"
                         android:layout_height="56dp"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
-                        android:backgroundTint="#F2F6FE"
-                        android:text="Chi tiết giao dịch"
+                        android:backgroundTint="#FFF0F0"
+                        android:text="Thử lại"
                         android:textAllCaps="false"
-                        android:textColor="#0A46A6"
+                        android:textColor="#E53935"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         app:cornerRadius="12dp" />
