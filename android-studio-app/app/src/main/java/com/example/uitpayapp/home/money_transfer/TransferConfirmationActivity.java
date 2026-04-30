@@ -124,7 +124,7 @@ public class TransferConfirmationActivity extends AppCompatActivity {
         if (isEnabled) {
             btnConfirm.setEnabled(true);
             btnConfirm.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
-                    android.graphics.Color.parseColor("#388E3C")
+                    android.graphics.Color.parseColor("#0bc36a")
             ));
         } else {
             btnConfirm.setEnabled(false);
@@ -161,7 +161,6 @@ public class TransferConfirmationActivity extends AppCompatActivity {
 
                     updatePinDots();
 
-                    // Nếu đã nhập đủ 6 số
                     if (currentPin.length() == 6) {
                         new Handler().postDelayed(() -> {
                             bottomSheetDialog.dismiss();

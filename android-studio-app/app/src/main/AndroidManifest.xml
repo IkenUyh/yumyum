@@ -83,6 +83,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".home.deposit_withdraw.DepositWithdrawActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".profile.ContactSupportActivity"
             android:exported="false" />
 

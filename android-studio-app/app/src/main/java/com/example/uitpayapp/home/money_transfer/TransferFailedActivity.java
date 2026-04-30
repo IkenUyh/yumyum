@@ -17,55 +17,35 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Random;
 
-public class TransferSuccessActivity extends AppCompatActivity {
+public class TransferFailedActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_transfer_success);
+        setContentView(R.layout.activity_transfer_failed);
+
         getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
 
         findViewById(R.id.btn_close_action).setOnClickListener(v -> returnToHome());
+        findViewById(R.id.btn_try_again).setOnClickListener(v -> finish());
 
         int avatarId = getIntent().getIntExtra("KEY_AVATAR", R.drawable.img_usagi);
         String name = getIntent().getStringExtra("KEY_NAME");
         String amount = getIntent().getStringExtra("KEY_AMOUNT");
 
-        ImageView ivSuccessAvatar = findViewById(R.id.iv_recipient_avatar_success);
-        TextView tvSuccessName = findViewById(R.id.tv_recipient_name_success);
-        TextView tvSuccessAmount = findViewById(R.id.tv_success_amount);
-
-        TextView tvTransactionId = findViewById(R.id.tv_transaction_id);
+        ImageView ivFailedAvatar = findViewById(R.id.iv_recipient_avatar_failed);
+        TextView tvFailedName = findViewById(R.id.tv_recipient_name_failed);
+        TextView tvFailedAmount = findViewById(R.id.tv_failed_amount);
         TextView tvTransactionTime = findViewById(R.id.tv_transaction_time);
-
-        SimpleDateFormat idFormat = new SimpleDateFormat("yyMMddHHmmss", Locale.getDefault());
-        String timePrefix = idFormat.format(new Date());
-
-        Random random = new Random();
-        int randomSuffix = random.nextInt(900) + 100;
-
-        String prefixText = "Mã giao dịch: ";
-        String codeText = "#" + timePrefix + randomSuffix;
-        String fullTransactionText = prefixText + codeText;
-
-        SpannableString spannableTransactionId = new SpannableString(fullTransactionText);
-        spannableTransactionId.setSpan(
-                new ForegroundColorSpan(Color.parseColor("#0A46A6")),
-                prefixText.length(),
-                fullTransactionText.length(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        tvTransactionId.setText(spannableTransactionId);
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault());
         String currentTime = sdf.format(new Date());
         tvTransactionTime.setText("Thời gian: " + currentTime);
 
-        ivSuccessAvatar.setImageResource(avatarId);
+        ivFailedAvatar.setImageResource(avatarId);
         if (name != null) {
-            tvSuccessName.setText(name.toUpperCase());
+            tvFailedName.setText(name.toUpperCase());
         }
 
         if (amount != null) {
@@ -89,16 +69,16 @@ public class TransferSuccessActivity extends AppCompatActivity {
                         new ForegroundColorSpan(Color.parseColor("#BDBDBD")),
                         startIndex, endIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-                tvSuccessAmount.setText(spannableString);
+                tvFailedAmount.setText(spannableString);
 
             } catch (Exception e) {
-                tvSuccessAmount.setText(amount + "đ");
+                tvFailedAmount.setText(amount + "đ");
             }
         }
     }
 
     private void returnToHome() {
-        Intent intent = new Intent(TransferSuccessActivity.this, HomeActivity.class);
+        Intent intent = new Intent(TransferFailedActivity.this, HomeActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();
