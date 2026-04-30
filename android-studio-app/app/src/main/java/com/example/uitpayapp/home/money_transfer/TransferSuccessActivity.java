@@ -32,13 +32,25 @@ public class TransferSuccessActivity extends AppCompatActivity {
         int avatarId = getIntent().getIntExtra("KEY_AVATAR", R.drawable.img_usagi);
         String name = getIntent().getStringExtra("KEY_NAME");
         String amount = getIntent().getStringExtra("KEY_AMOUNT");
+        String type = getIntent().getStringExtra("KEY_TYPE"); // LẤY TÍN HIỆU LOẠI GIAO DỊCH
 
         ImageView ivSuccessAvatar = findViewById(R.id.iv_recipient_avatar_success);
         TextView tvSuccessName = findViewById(R.id.tv_recipient_name_success);
         TextView tvSuccessAmount = findViewById(R.id.tv_success_amount);
-
         TextView tvTransactionId = findViewById(R.id.tv_transaction_id);
         TextView tvTransactionTime = findViewById(R.id.tv_transaction_time);
+
+        TextView tvLabelRecipient = findViewById(R.id.tv_label_recipient_success);
+
+        if (tvLabelRecipient != null) {
+            if ("DEPOSIT".equals(type)) {
+                tvLabelRecipient.setText("ĐÃ NẠP TIỀN TỪ");
+            } else if ("WITHDRAW".equals(type)) {
+                tvLabelRecipient.setText("ĐÃ RÚT TIỀN VỀ");
+            } else {
+                tvLabelRecipient.setText("GỬI ĐẾN");
+            }
+        }
 
         SimpleDateFormat idFormat = new SimpleDateFormat("yyMMddHHmmss", Locale.getDefault());
         String timePrefix = idFormat.format(new Date());

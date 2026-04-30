@@ -223,13 +223,12 @@ public class DepositWithdrawActivity extends AppCompatActivity {
     }
 
     private void showBankSelectionBottomSheet() {
-        BottomSheetDialog bottomSheetDialog =
-                new BottomSheetDialog(this, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
 
         View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_banks, null);
         bottomSheetDialog.setContentView(view);
 
-        View bottomSheet = bottomSheetDialog.getWindow().findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        View bottomSheet = (View) view.getParent();
         if (bottomSheet != null) {
             bottomSheet.setBackgroundResource(android.R.color.transparent);
         }
@@ -323,14 +322,12 @@ public class DepositWithdrawActivity extends AppCompatActivity {
 
         intent.putExtra("KEY_AMOUNT", currentAmount);
 
-        boolean isDeposit = tabDeposit.getCurrentTextColor() == Color.parseColor("#0A46A6");
-        if (isDeposit) {
-            intent.putExtra("KEY_NAME", "Nạp tiền từ\n" + bankName);
-        } else {
-            intent.putExtra("KEY_NAME", "Rút tiền về\n" + bankName);
-        }
+        intent.putExtra("KEY_NAME", bankName);
 
         intent.putExtra("KEY_AVATAR", bankIconId);
+
+        boolean isDeposit = tabDeposit.getCurrentTextColor() == Color.parseColor("#0A46A6");
+        intent.putExtra("KEY_TYPE", isDeposit ? "DEPOSIT" : "WITHDRAW");
 
         startActivity(intent);
         finish();
