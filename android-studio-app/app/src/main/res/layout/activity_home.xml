@@ -7,7 +7,7 @@
     android:fitsSystemWindows="true"
     android:background="#F5F6F8">
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/bottom_container"
@@ -170,7 +170,7 @@
                             android:layout_marginTop="12dp"
                             android:text="Số dư ví"
                             android:textColor="#FFFFFF"
-                            android:textSize="14sp"
+                            android:textSize="10sp"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
 
@@ -200,10 +200,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
-                            android:layout_marginTop="12dp"
-                            android:text="1.513đ"
+                            android:layout_marginTop="5dp"
+                            android:text="970.000.513đ"
                             android:textColor="#FFFFFF"
-                            android:textSize="22sp"
+                            android:textSize="13sp"
                             android:textStyle="bold"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/tvSoDuTitle" />
@@ -468,27 +468,6 @@
                 tools:itemCount="8"
                 tools:listitem="@layout/item_service" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="16dp"
-                android:text="Zalopay đề xuất"
-                android:textColor="#000000"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvDeXuat"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="5"
-                tools:listitem="@layout/item_service_horizontal" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rcvSuggest"
@@ -526,7 +505,7 @@
                 tools:listitem="@layout/item_suggestion_vertical" />
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_container"

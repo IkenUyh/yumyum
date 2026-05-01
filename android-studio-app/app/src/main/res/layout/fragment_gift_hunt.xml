@@ -6,14 +6,17 @@
     android:layout_height="match_parent"
     android:background="#F4F5F7">
 
+    <!-- TOP BAR -->
     <LinearLayout
         android:id="@+id/topBar"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
         android:background="#0052CC"
         android:gravity="center"
         android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
             android:layout_width="wrap_content"
@@ -21,27 +24,32 @@
             android:text="Săn Quà"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"/>
     </LinearLayout>
 
+    <!-- MAIN CONTENT -->
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/main_scroll_view"
-        android:layout_width="match_parent"
+        android:id="@+id/scrollView"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/topBar"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNavContainer">
+        app:layout_constraintBottom_toTopOf="@id/constraintLayout2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="40dp"> <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_sanqua_bg" />
+            android:orientation="vertical">
 
+            <!-- HEADER IMAGE -->
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_sanqua_bg"/>
+
+            <!-- BODY -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -50,15 +58,17 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- TITLE -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="Quét QR chuyển khoản\nTích xu - Đổi quà"
-                    android:textColor="#000000"
+                    android:text="Quét QR chuyển khoản&#10;Tích xu - Đổi quà"
                     android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:gravity="center"/>
 
+                <!-- ACTION ROW -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -66,483 +76,275 @@
                     android:gravity="center"
                     android:orientation="horizontal">
 
+                    <!-- BUTTON NHẬN -->
                     <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_keypad_button"
-                        android:backgroundTint="#FF8C00"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="8dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_orange_rounded"
+                        android:gravity="center"
+                        android:paddingLeft="10dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Nhận 5.000 "
-                            android:textColor="#FFFFFF"
-                            android:textStyle="bold" />
-
+                            android:text="Nhận 5.000"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold"/>
                         <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/ic_sanqua_coin" />
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/img_coin"/>
                     </LinearLayout>
 
+                    <!-- SPACE -->
                     <View
-                        android:layout_width="1dp"
-                        android:layout_height="20dp"
-                        android:layout_marginHorizontal="12dp"
-                        android:background="#E0E0E0" />
+                        android:layout_width="16dp"
+                        android:layout_height="1dp"/>
 
+                    <!-- HƯỚNG DẪN -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Hướng dẫn"
-                        android:textColor="#0052CC" />
+                        android:textSize="14sp"
+                        android:textColor="#0C40CC"
+                        android:textStyle="bold"/>
 
                     <View
-                        android:layout_width="1dp"
-                        android:layout_height="20dp"
-                        android:layout_marginHorizontal="12dp"
-                        android:background="#E0E0E0" />
+                        android:layout_width="16dp"
+                        android:layout_height="1dp"/>
 
-                    <LinearLayout
+                    <!-- LỊCH SỬ -->
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Lịch sử "
-                            android:textColor="#0052CC" />
-
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:src="@drawable/ic_sanqua_lichsu" />
-                    </LinearLayout>
+                        android:text="Lịch sử"
+                        android:textColor="#0C40CC"
+                        android:textSize="14sp"
+                        android:textStyle="bold"/>
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:paddingLeft="4dp"
+                        app:tint="#0C40CC"
+                        android:src="@drawable/ic_history_24px"/>
                 </LinearLayout>
 
+                <!-- CARD HỘP QUÀ -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp">
+                    android:layout_marginTop="16dp"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#EAF4FF">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_gradient_box"
-                        android:gravity="center"
                         android:orientation="vertical"
                         android:padding="16dp">
 
+                        <!-- TITLE -->
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="✨ Hộp Quà Đón Lễ ✨"
-                            android:textColor="#000000"
+                            android:textStyle="bold"
+                            android:gravity="center"
                             android:textSize="18sp"
-                            android:textStyle="bold" />
+                            android:textColor="#000"/>
 
-                        <LinearLayout
-                            android:layout_width="wrap_content"
+                        <TextView
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                            android:gravity="center"
+                            android:text="Nhấn vào hộp để xem quà"
+                            android:textSize="13sp"
+                            android:textColor="#666"
+                            android:layout_marginTop="4dp"/>
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Nhấn vào hộp để xem quà "
-                                android:textColor="#757575"
-                                android:textSize="14sp" />
-
-                            <ImageView
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:src="@drawable/ic_sanqua_eye" />
-                        </LinearLayout>
-
+                        <!-- BOX LIST -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:orientation="horizontal"
-                            android:weightSum="2">
+                            android:gravity="center">
 
+                            <!-- BOX 1 -->
                             <LinearLayout
-                                android:layout_width="0dp"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:gravity="center"
-                                android:orientation="vertical">
+                                android:orientation="vertical"
+                                android:gravity="center">
 
                                 <ImageView
-                                    android:layout_width="100dp"
-                                    android:layout_height="100dp"
-                                    android:src="@drawable/ic_sanqua_qua1" />
+                                    android:layout_width="120dp"
+                                    android:layout_height="120dp"
+                                    android:src="@drawable/ic_sanqua_qua1"
+                                    android:scaleType="fitCenter"/>
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
                                     android:text="Mở hộp"
-                                    android:textColor="#0052CC"
-                                    android:textStyle="bold" />
+                                    android:textColor="#0C40CC"
+                                    android:textStyle="bold"
+                                    android:layout_marginTop="6dp"/>
                             </LinearLayout>
 
+                            <View
+                                android:layout_width="24dp"
+                                android:layout_height="1dp"/>
+
+                            <!-- BOX 2 -->
                             <LinearLayout
-                                android:layout_width="0dp"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:gravity="center"
-                                android:orientation="vertical">
+                                android:orientation="vertical"
+                                android:gravity="center">
 
                                 <ImageView
-                                    android:layout_width="100dp"
-                                    android:layout_height="100dp"
-                                    android:src="@drawable/ic_sanqua_qua2" />
+                                    android:layout_width="120dp"
+                                    android:layout_height="120dp"
+                                    android:src="@drawable/ic_sanqua_qua2"
+                                    android:scaleType="fitCenter"/>
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
                                     android:text="Mở hộp"
-                                    android:textColor="#0052CC"
-                                    android:textStyle="bold" />
+                                    android:textColor="#0C40CC"
+                                    android:textStyle="bold"
+                                    android:layout_marginTop="6dp"/>
                             </LinearLayout>
                         </LinearLayout>
 
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvLogos"
+                            android:layout_width="match_parent"
+                            android:layout_height="40dp"
+                            android:layout_marginTop="12dp"
+                            android:nestedScrollingEnabled="false"/>
+
+                        <!-- BUTTON QR -->
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="20dp"
+                            android:layout_height="48dp"
+                            android:layout_marginTop="16dp"
+                            android:background="#0C40CC"
+                            android:gravity="center"
                             android:orientation="horizontal"
-                            android:weightSum="8">
+                            android:padding="8dp"
+                            android:layout_marginBottom="4dp"
+                            android:backgroundTint="#0C40CC"
+                            android:backgroundTintMode="src_atop"
+                            android:clipToOutline="true">
 
-                            <ImageView android:layout_width="0dp" android:layout_height="32dp" android:layout_marginHorizontal="2dp" android:layout_weight="1" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_brand1" />
-                            <ImageView android:layout_width="0dp" android:layout_height="32dp" android:layout_marginHorizontal="2dp" android:layout_weight="1" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_brand2" />
-                            <ImageView android:layout_width="0dp" android:layout_height="32dp" android:layout_marginHorizontal="2dp" android:layout_weight="1" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_brand3" />
-                            <ImageView android:layout_width="0dp" android:layout_height="32dp" android:layout_marginHorizontal="2dp" android:layout_weight="1" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_brand4" />
-                            <ImageView android:layout_width="0dp" android:layout_height="32dp" android:layout_marginHorizontal="2dp" android:layout_weight="1" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_brand5" />
-                            <ImageView android:layout_width="0dp" android:layout_height="32dp" android:layout_marginHorizontal="2dp" android:layout_weight="1" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_brand6" />
-                            <ImageView android:layout_width="0dp" android:layout_height="32dp" android:layout_marginHorizontal="2dp" android:layout_weight="1" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_brand7" />
-                            <ImageView android:layout_width="0dp" android:layout_height="32dp" android:layout_marginHorizontal="2dp" android:layout_weight="1" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_brand8" />
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_sanqua_qr" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=" Quét QR chuyển khoản để mở"
+                                android:textColor="@android:color/white"
+                                android:textStyle="bold"
+                                android:layout_marginStart="6dp"/>
                         </LinearLayout>
 
-                        <com.google.android.material.button.MaterialButton
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="20dp"
-                            android:backgroundTint="#0052CC"
-                            android:maxLines="1"
-                            android:paddingVertical="12dp"
-                            android:text="Quét QR chuyển khoản để mở"
-                            android:textAllCaps="false"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            app:cornerRadius="12dp"
-                            app:icon="@drawable/ic_sanqua_qr"
-                            app:iconGravity="textStart"
-                            app:iconSize="24dp"
-                            app:iconTint="@null" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <LinearLayout
+
+                <!-- GIFTS -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quà độc quyền Cửa hàng QR"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:layout_marginTop="24dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quà được thêm mới mỗi ngày"
+                    android:textSize="15sp"
+                    android:layout_marginBottom="5dp"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvGifts"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
-                    android:orientation="vertical">
+                    android:nestedScrollingEnabled="false"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Quà độc quyền Cửa hàng QR"
-                        android:textColor="#000000"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                <!-- EXCHANGE -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kiếm xu đổi quà"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:layout_marginTop="24dp"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Quà được thêm mới mỗi ngày"
-                        android:textColor="#757575"
-                        android:textSize="14sp" />
-
-                    <GridLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:columnCount="2"
-                        android:alignmentMode="alignMargins"
-                        android:useDefaultMargins="false"
-                        android:layout_gravity="center">
-
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="0dp"
-                            android:layout_height="110dp"
-                            android:layout_columnWeight="1"
-                            android:layout_marginEnd="6dp"
-                            android:layout_marginBottom="12dp"
-                            app:cardBackgroundColor="#FFFFFF"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="2dp">
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
-                                <ImageView android:layout_width="50dp" android:layout_height="50dp" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_dongho" />
-                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:orientation="vertical">
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" android:ellipsize="end" android:text="Apple Watch Series 11" android:textColor="#000000" android:textSize="13sp" android:textStyle="bold" />
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:maxLines="2" android:ellipsize="end" android:text="Quét QR để đổi" android:textColor="#757575" android:textSize="11sp" />
-                                </LinearLayout>
-                            </LinearLayout>
-                        </androidx.cardview.widget.CardView>
-
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="0dp"
-                            android:layout_height="110dp"
-                            android:layout_columnWeight="1"
-                            android:layout_marginStart="6dp"
-                            android:layout_marginBottom="12dp"
-                            app:cardBackgroundColor="#FFFFFF"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="2dp">
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
-                                <ImageView android:layout_width="50dp" android:layout_height="50dp" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_iphone" />
-                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:orientation="vertical">
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" android:ellipsize="end" android:text="iPhone 14 Promax" android:textColor="#000000" android:textSize="13sp" android:textStyle="bold" />
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:maxLines="2" android:ellipsize="end" android:text="Quét QR để đổi" android:textColor="#757575" android:textSize="11sp" />
-                                </LinearLayout>
-                            </LinearLayout>
-                        </androidx.cardview.widget.CardView>
-
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="0dp"
-                            android:layout_height="110dp"
-                            android:layout_columnWeight="1"
-                            android:layout_marginEnd="6dp"
-                            android:layout_marginBottom="12dp"
-                            app:cardBackgroundColor="#FFFFFF"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="2dp">
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
-                                <ImageView android:layout_width="50dp" android:layout_height="50dp" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_nenthom" />
-                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:orientation="vertical">
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" android:ellipsize="end" android:text="Nến thơm MUJI" android:textColor="#000000" android:textSize="13sp" android:textStyle="bold" />
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:maxLines="2" android:ellipsize="end" android:text="Quét QR để đổi" android:textColor="#757575" android:textSize="11sp" />
-                                </LinearLayout>
-                            </LinearLayout>
-                        </androidx.cardview.widget.CardView>
-
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="0dp"
-                            android:layout_height="110dp"
-                            android:layout_columnWeight="1"
-                            android:layout_marginStart="6dp"
-                            android:layout_marginBottom="12dp"
-                            app:cardBackgroundColor="#FFFFFF"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="2dp">
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
-                                <ImageView android:layout_width="50dp" android:layout_height="50dp" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_fumo" />
-                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:orientation="vertical">
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" android:ellipsize="end" android:text="Fumo Fumo" android:textColor="#000000" android:textSize="13sp" android:textStyle="bold" />
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:maxLines="2" android:ellipsize="end" android:text="Quét QR để đổi" android:textColor="#757575" android:textSize="11sp" />
-                                </LinearLayout>
-                            </LinearLayout>
-                        </androidx.cardview.widget.CardView>
-
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="0dp"
-                            android:layout_height="110dp"
-                            android:layout_columnWeight="1"
-                            android:layout_marginEnd="6dp"
-                            android:layout_marginBottom="12dp"
-                            app:cardBackgroundColor="#FFFFFF"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="2dp">
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
-                                <ImageView android:layout_width="50dp" android:layout_height="50dp" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_kemduong" />
-                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:orientation="vertical">
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" android:ellipsize="end" android:text="Kem tay Innisfree" android:textColor="#000000" android:textSize="13sp" android:textStyle="bold" />
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:maxLines="2" android:ellipsize="end" android:text="Quét QR để đổi" android:textColor="#757575" android:textSize="11sp" />
-                                </LinearLayout>
-                            </LinearLayout>
-                        </androidx.cardview.widget.CardView>
-
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="0dp"
-                            android:layout_height="110dp"
-                            android:layout_columnWeight="1"
-                            android:layout_marginStart="6dp"
-                            android:layout_marginBottom="12dp"
-                            app:cardBackgroundColor="#FFFFFF"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="2dp">
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
-                                <ImageView android:layout_width="50dp" android:layout_height="50dp" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_balo" />
-                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:orientation="vertical">
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" android:ellipsize="end" android:text="Ba lô Quechua" android:textColor="#000000" android:textSize="13sp" android:textStyle="bold" />
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:maxLines="2" android:ellipsize="end" android:text="Quét QR để đổi" android:textColor="#757575" android:textSize="11sp" />
-                                </LinearLayout>
-                            </LinearLayout>
-                        </androidx.cardview.widget.CardView>
-
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="0dp"
-                            android:layout_height="110dp"
-                            android:layout_columnWeight="1"
-                            android:layout_marginEnd="6dp"
-                            android:layout_marginBottom="12dp"
-                            app:cardBackgroundColor="#FFFFFF"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="2dp">
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
-                                <ImageView android:layout_width="50dp" android:layout_height="50dp" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_tainghe" />
-                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:orientation="vertical">
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" android:ellipsize="end" android:text="Tai nghe Bluetooth" android:textColor="#000000" android:textSize="13sp" android:textStyle="bold" />
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:maxLines="2" android:ellipsize="end" android:text="Quét QR để đổi" android:textColor="#757575" android:textSize="11sp" />
-                                </LinearLayout>
-                            </LinearLayout>
-                        </androidx.cardview.widget.CardView>
-
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="0dp"
-                            android:layout_height="110dp"
-                            android:layout_columnWeight="1"
-                            android:layout_marginStart="6dp"
-                            android:layout_marginBottom="12dp"
-                            app:cardBackgroundColor="#FFFFFF"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="2dp">
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
-                                <ImageView android:layout_width="50dp" android:layout_height="50dp" android:scaleType="fitCenter" android:src="@drawable/ic_sanqua_tui" />
-                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:orientation="vertical">
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" android:ellipsize="end" android:text="Túi xách nữ" android:textColor="#000000" android:textSize="13sp" android:textStyle="bold" />
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:maxLines="2" android:ellipsize="end" android:text="Quét QR để đổi" android:textColor="#757575" android:textSize="11sp" />
-                                </LinearLayout>
-                            </LinearLayout>
-                        </androidx.cardview.widget.CardView>
-
-                    </GridLayout>
-                </LinearLayout>
-
-                <LinearLayout
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvFeatures"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
-                    android:orientation="vertical">
+                    android:nestedScrollingEnabled="false"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tính năng đề xuất"
-                        android:textColor="#000000"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                <!-- RECOMMEND SERVICE -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tính năng đề xuất"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:layout_marginTop="20dp"/>
 
-                    <GridLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:columnCount="4"
-                        android:alignmentMode="alignMargins">
-
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginBottom="16dp" android:gravity="center" android:orientation="vertical">
-                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_sanqua_dienthoai" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Điện thoại" android:textAlignment="center" android:textColor="#000000" android:textSize="12sp" />
-                        </LinearLayout>
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginBottom="16dp" android:gravity="center" android:orientation="vertical">
-                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_sanqua_vephim" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Vé Phim" android:textAlignment="center" android:textColor="#000000" android:textSize="12sp" />
-                        </LinearLayout>
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginBottom="16dp" android:gravity="center" android:orientation="vertical">
-                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_sanqua_nhantien" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Nhận tiền" android:textAlignment="center" android:textColor="#000000" android:textSize="12sp" />
-                        </LinearLayout>
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginBottom="16dp" android:gravity="center" android:orientation="vertical">
-                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_sanqua_nhantienqt" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Nhận tiền\nquốc tế" android:textAlignment="center" android:textColor="#000000" android:textSize="12sp" />
-                        </LinearLayout>
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginBottom="16dp" android:gravity="center" android:orientation="vertical">
-                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_sanqua_trochoi" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Trò chơi" android:textAlignment="center" android:textColor="#000000" android:textSize="12sp" />
-                        </LinearLayout>
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginBottom="16dp" android:gravity="center" android:orientation="vertical">
-                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_sanqua_motk" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Mở TK có\nquà" android:textAlignment="center" android:textColor="#000000" android:textSize="12sp" />
-                        </LinearLayout>
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginBottom="16dp" android:gravity="center" android:orientation="vertical">
-                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_sanqua_taichinh" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Tài\nchính" android:textAlignment="center" android:textColor="#000000" android:textSize="12sp" />
-                        </LinearLayout>
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginBottom="16dp" android:gravity="center" android:orientation="vertical">
-                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_sanqua_trasau" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="TK trả\nsau" android:textAlignment="center" android:textColor="#000000" android:textSize="12sp" />
-                        </LinearLayout>
-                    </GridLayout>
-                </LinearLayout>
-
-                <LinearLayout
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvRecommendService"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
-                    android:orientation="vertical">
+                    android:nestedScrollingEnabled="false"
+                    android:layout_marginTop="12dp"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ưu đãi đang diễn ra 🔥"
-                        android:textColor="#000000"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                <!-- PROMOTION -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ưu đãi đang diễn ra🔥"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:layout_marginTop="20dp"/>
 
-                    <HorizontalScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:scrollbars="none"
-                        android:clipToPadding="false"
-                        android:paddingEnd="16dp">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvBanner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"/>
 
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <androidx.cardview.widget.CardView android:layout_width="300dp" android:layout_height="95dp" android:layout_marginEnd="12dp" android:layout_marginBottom="8dp" app:cardCornerRadius="12dp" app:cardElevation="2dp">
-                                <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:src="@drawable/ic_sanqua_uudai1" />
-                            </androidx.cardview.widget.CardView>
-
-                            <androidx.cardview.widget.CardView android:layout_width="300dp" android:layout_height="95dp" android:layout_marginEnd="12dp" android:layout_marginBottom="8dp" app:cardCornerRadius="12dp" app:cardElevation="2dp">
-                                <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:src="@drawable/ic_sanqua_uudai2" />
-                            </androidx.cardview.widget.CardView>
-
-                            <androidx.cardview.widget.CardView android:layout_width="300dp" android:layout_height="95dp" android:layout_marginEnd="12dp" android:layout_marginBottom="8dp" app:cardCornerRadius="12dp" app:cardElevation="2dp">
-                                <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:src="@drawable/ic_sanqua_uudai3" />
-                            </androidx.cardview.widget.CardView>
-
-                        </LinearLayout>
-                    </HorizontalScrollView>
-                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- BOTTOM NAV -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottomNavContainer"
-        android:layout_width="match_parent"
+        android:id="@+id/constraintLayout2"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:clipChildren="false"
-        android:clipToPadding="false">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:id="@+id/layoutBottomNav"
@@ -559,16 +361,18 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical"
+                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="?attr/selectableItemBackground">
+                android:gravity="center"
+                android:orientation="vertical">
+
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_home_24px"
                     app:tint="#757575" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -583,23 +387,26 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical"
+                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="?attr/selectableItemBackground">
+                android:gravity="center"
+                android:orientation="vertical">
+
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_history_24px"
                     app:tint="#757575" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="Lịch sử"
                     android:textColor="#757575"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <View
@@ -612,23 +419,24 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical"
+                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="?attr/selectableItemBackground">
+                android:gravity="center"
+                android:orientation="vertical">
+
                 <ImageView
                     android:layout_width="34dp"
                     android:layout_height="34dp"
-                    android:src="@drawable/ic_sanqua_qua3d"
-                    android:contentDescription="Săn quà" />
+                    android:contentDescription="Săn quà"
+                    android:src="@drawable/ic_sanqua_qua3d" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="Săn quà"
                     android:textColor="#0C40CC"
-                    android:textStyle="bold"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -637,16 +445,18 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical"
+                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="?attr/selectableItemBackground">
+                android:gravity="center"
+                android:orientation="vertical">
+
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_account_24px"
                     app:tint="#757575" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -655,7 +465,6 @@
                     android:textColor="#757575"
                     android:textSize="12sp" />
             </LinearLayout>
-
         </LinearLayout>
 
         <LinearLayout
@@ -695,6 +504,7 @@
                 android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
