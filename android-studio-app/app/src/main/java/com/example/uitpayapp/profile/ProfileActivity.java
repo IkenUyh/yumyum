@@ -19,7 +19,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.ScanQRCode.QRScanActivity;
+import com.example.uitpayapp.UITpayPriority.PriorityUITpayActivity;
 import com.example.uitpayapp.gift.GiftActivity;
+import com.example.uitpayapp.giftexchange.GiftExchangeActivity;
+import com.example.uitpayapp.insurance.InsuranceActivity;
+import com.example.uitpayapp.paymentorder.PaymentOrderActivity;
 import com.example.uitpayapp.voucher.VoucherActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
@@ -43,11 +47,21 @@ public class ProfileActivity extends AppCompatActivity {
             v.setPadding(v.getPaddingLeft(), safeTopPadding, v.getPaddingRight(), v.getPaddingBottom());
             //thanh duoi
             Insets navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
-            int safeBottomPadding = navInsets.bottom+10;
+            int safeBottomPadding = navInsets.bottom;
             if (navBottom != null) {
                 navBottom.setPadding(navBottom.getPaddingLeft(), navBottom.getPaddingTop(), navBottom.getPaddingRight(), safeBottomPadding);
             }
             return insets;
+        });
+        findViewById(R.id.profile_uitpay_priority).setOnClickListener(v->
+        {
+            Intent intentPriority=new Intent(this, PriorityUITpayActivity.class);
+            startActivity(intentPriority);
+        });
+        findViewById(R.id.profile_show_account_info).setOnClickListener(v->
+        {
+            Intent intentAccount=new Intent(this, AccountDetailActivity.class);
+            startActivity(intentAccount);
         });
         SetDataMainMenu(mainMenu);
         setupBottomNavigation();
@@ -97,6 +111,12 @@ public class ProfileActivity extends AppCompatActivity {
         if (item == null) return;
         List<GroupItemData> ListGroupItem = new ArrayList<>();
         List<MenuItemData> ListItems = new ArrayList<>();
+        if (item.IsSpecialItem)
+        {
+            Intent intent=new Intent(this,AccountManagementActivity.class);
+            startActivity(intent);
+            return;
+        }
         switch (item.getTitle()) {
             case "Cài đặt thanh toán tự động":
                 ListItems.add(new MenuItemData("Thanh toán dịch vụ tự động","Sắp xếp thứ tự ưu tiên thẻ/tài khoản",R.drawable.ic_sort_payment,false));
@@ -146,6 +166,11 @@ public class ProfileActivity extends AppCompatActivity {
                 intentSupport.putExtra("URL_KEY","https://support.zalopay.vn/faq/web");
                 startActivity(intentSupport);
                 break;
+            case "Xu tích lũy":
+                Intent intentCoin=new Intent(this, GiftExchangeActivity.class);
+                startActivity(intentCoin);
+                break;
+
         }
     }
     public static void SetDetailMenuItem(View item, String item_title, String item_subtitle, int item_icon) {
@@ -215,6 +240,14 @@ public class ProfileActivity extends AppCompatActivity {
             case "Bảo mật giao dịch":
                 Intent intentTransaction=new Intent(this, SecurityTransactionActivity.class);
                 startActivity(intentTransaction);
+                break;
+            case "Hợp đồng bảo hiểm":
+                Intent intentInsurance=new Intent(this, InsuranceActivity.class);
+                startActivity(intentInsurance);
+                break;
+            case "Thanh toán dịch vụ tự động":
+                Intent intentPaymentOrder=new Intent(this, PaymentOrderActivity.class);
+                startActivity(intentPaymentOrder);
                 break;
         }
     }

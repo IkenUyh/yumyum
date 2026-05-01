@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="#F5F7FA"
+    android:layout_marginBottom="12dp">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+        <TextView
+            android:id="@+id/tv_task_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/ll_reward"
+            android:text="Đố vui có thưởng"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            android:layout_centerVertical="true"/>
+        <LinearLayout
+            android:id="@+id/ll_reward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:layout_centerVertical="true">
+            <TextView
+                android:id="@+id/tv_reward_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+100"
+                android:textColor="#00C853"
+                android:textStyle="bold"
+                android:textSize="14sp"/>
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_sanqua_coin_removebg"
+                android:layout_marginStart="4dp"/>
+        </LinearLayout>
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>
