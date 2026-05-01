@@ -57,6 +57,19 @@
         <activity
             android:name=".home.money_transfer.TransferSuccessActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".home.my_qr.MyQRActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".home.deposit_withdraw.DepositWithdrawActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".home.exchange_voucher.ExchangeVoucherActivity"
+            android:exported="false" />
+
         <activity
             android:name=".profile.ReceiptActivity"
             android:exported="false" />
@@ -78,13 +91,6 @@
             android:exported="false" />
         <activity android:name=".profile.SecurityTransactionActivity"
             android:exported="false"/>
-        <activity
-            android:name=".home.my_qr.MyQRActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".home.deposit_withdraw.DepositWithdrawActivity"
-            android:exported="false" />
 
         <activity
             android:name=".profile.ContactSupportActivity"

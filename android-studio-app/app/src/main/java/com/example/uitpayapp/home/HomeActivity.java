@@ -99,6 +99,12 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        android.widget.LinearLayout btnUudai = findViewById(R.id.btnUuDai);
+        btnUudai.setOnClickListener(v-> {
+            android.content.Intent intent = new android.content.Intent(HomeActivity.this, com.example.uitpayapp.home.exchange_voucher.ExchangeVoucherActivity.class);
+            startActivity(intent);
+        });
+
         setupBottomNavigation();
     }
 
