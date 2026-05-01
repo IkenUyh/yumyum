@@ -56,7 +56,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:layout_marginBottom="3dp">
+                            android:layout_marginBottom="3dp"
+                            android:id="@+id/profile_show_account_info">
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -186,7 +187,7 @@
                                 <TextView
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:textSize="14sp"
+                                    android:textSize="10sp"
                                     android:textColor="#000000"
                                     android:text="Quản lý các mã QR quan trọng"
                                     android:textStyle="normal"/>
@@ -195,7 +196,8 @@
                                 android:layout_width="40dp"
                                 android:layout_height="40dp"
                                 android:src="@drawable/ic_qr_scan"
-                                android:scaleType="centerCrop"/>
+                                android:scaleType="centerCrop"
+                                android:layout_gravity="center_vertical"/>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
                     <androidx.cardview.widget.CardView
@@ -206,6 +208,7 @@
                         app:cardCornerRadius="12dp"
                         app:cardElevation="0dp">
                         <LinearLayout
+                            android:id="@+id/profile_uitpay_priority"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="horizontal"
@@ -225,7 +228,7 @@
                                 <TextView
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:textSize="14sp"
+                                    android:textSize="10sp"
                                     android:textColor="#000000"
                                     android:text="Thành viên"
                                     android:textStyle="normal"/>
@@ -234,7 +237,8 @@
                                 android:layout_width="40dp"
                                 android:layout_height="40dp"
                                 android:src="@drawable/ic_priority_uitpay"
-                                android:scaleType="centerCrop"/>
+                                android:scaleType="centerCrop"
+                                android:layout_gravity="center_vertical"/>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
                 </LinearLayout>
