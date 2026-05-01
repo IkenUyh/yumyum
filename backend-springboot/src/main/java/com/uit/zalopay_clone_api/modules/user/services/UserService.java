@@ -17,4 +17,17 @@ public class UserService {
         
         return userRepository.save(user);
     }
+
+    public User loginUser(String phoneNumber, String password) {
+        User existingUser = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new RuntimeException("Số điện thoại không tồn tại!"));
+
+        // 1. So sánh mật khẩu (hiện tại so sánh chuỗi thô, sau này dùng Bcrypt)
+        if (!existingUser.getPassword().equals(password)) {
+            throw new RuntimeException("Mật khẩu không chính xác!");
+        }
+
+        // 2. Đăng nhập thành công, trả về thông tin user
+        return existingUser;
+    }
 }
