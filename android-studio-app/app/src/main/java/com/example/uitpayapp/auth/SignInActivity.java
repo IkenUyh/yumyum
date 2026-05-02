@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -75,18 +76,24 @@ public class SignInActivity extends AppCompatActivity {
         };
         btnLogin.setOnClickListener(v -> {
             String phone = edtPhoneNumber.getText().toString();
+
+            if(phone.isEmpty()){
+                Toast.makeText(SignInActivity.this, "Vui lòng nhập số điện thoại", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             loading.setVisibility(View.VISIBLE);
             handler.post(runnable);
 
-            // giả lập loading 2 giây
+            // Giả lập loading nhẹ 0.5s cho mượt rồi chuyển màn hình
             new Handler().postDelayed(() -> {
                 loading.setVisibility(View.GONE);
                 handler.removeCallbacks(runnable);
                 sliderHandler.removeCallbacks(sliderRunnable);
-
                 android.content.Intent intent = new android.content.Intent(SignInActivity.this, PasscodeActivity.class);
+                intent.putExtra("PHONE_NUMBER", phone); // Gói dữ liệu
                 startActivity(intent);
-            }, 2000);
+            }, 500);
         });
         List <Integer> imageList = List.of(
                 R.drawable.img_advertisment1,
