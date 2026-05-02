@@ -59,7 +59,7 @@ public class ReceiptActivity extends AppCompatActivity {
         listReceiptService.add(new ServiceItem("Internet", R.drawable.ic_internet, ""));
         listReceiptService.add(new ServiceItem("Tài khoản\ntrả sau",R.drawable.ic_autopay_paylater,"+15Tr"));
         RecyclerView rvReceiptService = findViewById(R.id.rv_bill_services);
-        rvReceiptService.setAdapter(new ServiceAdapter(listReceiptService,R.layout.item_service));
+        rvReceiptService.setAdapter(new ServiceAdapter(listReceiptService, R.layout.item_service, item -> {}));
         SetDataPieChart();
         SetSpecialOffer();
     }

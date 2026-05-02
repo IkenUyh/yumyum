@@ -18,12 +18,11 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
+            android:id="@+id/iv_header_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/bg_circle_gray"
             android:padding="1dp"
-            android:src="@drawable/ic_transfer"
-            app:tint="#0A46A6" />
+            android:src="@drawable/ic_transfer" />
 
         <LinearLayout
             android:layout_width="0dp"

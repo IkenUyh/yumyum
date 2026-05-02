@@ -144,23 +144,60 @@
                             android:layout_weight="1"
                             android:orientation="vertical">
 
-                            <TextView
-                                android:id="@+id/tv_label_recipient_success"
+                            <!-- Hàng 1: Chứa Số Seri / Nhãn -->
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="GỬI ĐẾN"
-                                android:textColor="#9E9E9E"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/tv_recipient_name_success"
+                                <TextView
+                                    android:id="@+id/tv_label_recipient_success"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="GỬI ĐẾN"
+                                    android:textColor="#9E9E9E"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold" />
+
+                                <ImageView
+                                    android:id="@+id/iv_copy_seri"
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:layout_marginStart="8dp"
+                                    android:padding="2dp"
+                                    android:src="@drawable/ic_copy"
+                                    android:visibility="gone"
+                                    app:tint="#9E9E9E" />
+                            </LinearLayout>
+
+                            <!-- Hàng 2: Chứa Mã thẻ / Tên người nhận -->
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="USERNAME"
-                                android:textColor="#000000"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
+                                android:layout_marginTop="2dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/tv_recipient_name_success"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="USERNAME"
+                                    android:textColor="#000000"
+                                    android:textSize="15sp"
+                                    android:textStyle="bold" />
+
+                                <ImageView
+                                    android:id="@+id/iv_copy_pin"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_marginStart="8dp"
+                                    android:padding="2dp"
+                                    android:src="@drawable/ic_copy"
+                                    android:visibility="gone"
+                                    app:tint="#0A46A6" />
+                            </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>

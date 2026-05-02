@@ -1,4 +1,5 @@
-package com.example.uitpayapp.home;// File: ServiceAdapter.java
+package com.example.uitpayapp.home;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +16,16 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ServiceV
 
     private List<ServiceItem> serviceList;
     private int layoutResId;
+    private OnItemClickListener listener;
 
-    public ServiceAdapter(List<ServiceItem> serviceList, int layoutResId) {
+    public interface OnItemClickListener {
+        void onItemClick(ServiceItem item);
+    }
+
+    public ServiceAdapter(List<ServiceItem> serviceList, int layoutResId, OnItemClickListener listener) {
         this.serviceList = serviceList;
         this.layoutResId = layoutResId;
+        this.listener = listener;
     }
 
     @NonNull
@@ -32,16 +39,22 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ServiceV
     public void onBindViewHolder(@NonNull ServiceViewHolder holder, int position) {
         ServiceItem item = serviceList.get(position);
 
-        // Đặt tên và icon
         holder.tvServiceName.setText(item.getName());
         holder.ivServiceIcon.setImageResource(item.getIconResId());
 
+        // Xử lý hiển thị Badge
         if (item.getBadgeText() != null && !item.getBadgeText().isEmpty()) {
             holder.tvServiceBadge.setText(item.getBadgeText());
             holder.tvServiceBadge.setVisibility(View.VISIBLE);
         } else {
             holder.tvServiceBadge.setVisibility(View.GONE);
         }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(item);
+            }
+        });
     }
 
     @Override

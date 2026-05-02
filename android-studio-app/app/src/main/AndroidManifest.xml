@@ -67,7 +67,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".home.exchange_voucher.ExchangeVoucherActivity"
+            android:name=".home.phone_recharge.PhoneRechargeActivity"
             android:exported="false" />
 
         <activity
