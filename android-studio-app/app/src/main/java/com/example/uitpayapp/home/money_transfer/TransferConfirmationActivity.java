@@ -33,18 +33,46 @@ public class TransferConfirmationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Trả lại đúng giao diện của màn Xác nhận
         setContentView(R.layout.activity_transfer_confirmation);
+        getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
 
         TextView tvConfirmName = findViewById(R.id.tv_confirm_recipient_name);
         TextView tvConfirmAmount = findViewById(R.id.tv_confirm_amount);
+        ImageView ivHeaderIcon = findViewById(R.id.iv_header_icon);
         findViewById(R.id.btn_close_confirm).setOnClickListener(v -> finish());
 
         String amount = getIntent().getStringExtra("KEY_AMOUNT");
         String name = getIntent().getStringExtra("KEY_NAME");
         receivedAvatarId = getIntent().getIntExtra("KEY_AVATAR", R.drawable.img_usagi);
 
+        // Lấy cờ để nhận diện luồng
+        boolean isRecharge = getIntent().getBooleanExtra("KEY_IS_RECHARGE", false);
+        boolean isBuyCard = getIntent().getBooleanExtra("KEY_IS_BUY_CARD", false);
+        boolean isData = getIntent().getBooleanExtra("KEY_IS_DATA", false);
+
         if (name != null) {
-            tvConfirmName.setText("Chuyển tiền đến " + name);
+            if (isRecharge) {
+                if (isData) {
+                    tvConfirmName.setText("Nạp data ");
+                } else {
+                    tvConfirmName.setText("Nạp điện thoại ");
+                }
+
+                if (ivHeaderIcon != null) {
+                    ivHeaderIcon.setImageResource(R.drawable.ic_phone);
+                }
+            } else if (isBuyCard) {
+                tvConfirmName.setText("Thanh toán dịch vụ");
+                if (ivHeaderIcon != null) {
+                    ivHeaderIcon.setImageResource(R.drawable.ic_phone);
+                }
+            } else {
+                tvConfirmName.setText("Chuyển tiền đến " + name);
+                if (ivHeaderIcon != null) {
+                    ivHeaderIcon.setImageResource(R.drawable.ic_transfer);
+                }
+            }
         }
 
         if (amount != null) {
@@ -199,12 +227,16 @@ public class TransferConfirmationActivity extends AppCompatActivity {
     private void navigateToSuccessScreen() {
         Intent intent = new Intent(TransferConfirmationActivity.this, TransferSuccessActivity.class);
 
-        String receivedAmount = getIntent().getStringExtra("KEY_AMOUNT");
-        String receivedName = getIntent().getStringExtra("KEY_NAME");
+        boolean isRecharge = getIntent().getBooleanExtra("KEY_IS_RECHARGE", false);
+        boolean isBuyCard = getIntent().getBooleanExtra("KEY_IS_BUY_CARD", false);
+        boolean isData = getIntent().getBooleanExtra("KEY_IS_DATA", false);
 
         intent.putExtra("KEY_AMOUNT", getIntent().getStringExtra("KEY_AMOUNT"));
         intent.putExtra("KEY_NAME", getIntent().getStringExtra("KEY_NAME"));
         intent.putExtra("KEY_AVATAR", receivedAvatarId);
+        intent.putExtra("KEY_IS_RECHARGE", isRecharge);
+        intent.putExtra("KEY_IS_BUY_CARD", isBuyCard);
+        intent.putExtra("KEY_IS_DATA", isData); // Truyền sang màn Success
 
         startActivity(intent);
         finish();

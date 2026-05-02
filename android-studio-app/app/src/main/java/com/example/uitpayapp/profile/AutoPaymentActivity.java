@@ -61,7 +61,7 @@ public class AutoPaymentActivity extends AppCompatActivity {
         listReceiptService.add(new ServiceItem("Truyền hình", R.drawable.ic_receiptscreen_tv, ""));
         listReceiptService.add(new ServiceItem("Trả khoản vay", R.drawable.ic_receiptscreen_loan, ""));
         listReceiptService.add(new ServiceItem("Giáo dục", R.drawable.ic_receiptscreen_education, ""));
-        rvAutopayService.setAdapter(new ServiceAdapter(listReceiptService, R.layout.item_service));
+        rvAutopayService.setAdapter(new ServiceAdapter(listReceiptService, R.layout.item_service, item -> {}));
     }
 
     private void HanleInternetData(View view) {
@@ -70,7 +70,7 @@ public class AutoPaymentActivity extends AppCompatActivity {
         listPhoneService.add(new ServiceItem("Nạp ĐT", R.drawable.ic_autopay_credit, ""));
         listPhoneService.add(new ServiceItem("ĐT trả sau", R.drawable.ic_autopay_paylater, ""));
         listPhoneService.add(new ServiceItem("Nạp 4G/5G", R.drawable.ic_sanqua_4g, ""));
-        rvAutopayService.setAdapter(new ServiceAdapter(listPhoneService, R.layout.item_service));
+        rvAutopayService.setAdapter(new ServiceAdapter(listPhoneService, R.layout.item_service, item -> {}));
     }
 
     private void HanleAllData(View view) {

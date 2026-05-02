@@ -112,7 +112,9 @@ public class InsuranceActivity extends AppCompatActivity {
         items.add(new ServiceItem("Tai nạn", R.drawable.ic_security_user, ""));
         items.add(new ServiceItem("Điện tử", R.drawable.ic_autopay_credit, ""));
 
-        ServiceAdapter adapter = new ServiceAdapter(items, R.layout.item_service);
+        ServiceAdapter adapter = new ServiceAdapter(items, R.layout.item_service, item -> {
+
+        });
         rvCategories.setLayoutManager(new GridLayoutManager(this, 4));
         rvCategories.setAdapter(adapter);
     }
