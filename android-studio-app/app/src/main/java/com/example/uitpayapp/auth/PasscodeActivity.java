@@ -3,13 +3,26 @@ package com.example.uitpayapp.auth;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.uitpayapp.profile.ContactSupportActivity;
 import com.example.uitpayapp.home.HomeActivity;
 import com.example.uitpayapp.R;
+
+// Thêm các thư viện import của DTO và Retrofit
+import com.example.uitpayapp.models.ApiResponse;
+import com.example.uitpayapp.models.LoginRequestDTO;
+import com.example.uitpayapp.models.UserResponseDTO;
+import com.example.uitpayapp.network.RetrofitClient;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PasscodeActivity extends AppCompatActivity {
 
@@ -24,11 +37,17 @@ public class PasscodeActivity extends AppCompatActivity {
     private TextView tvErrorMessage;
     private boolean isChecking = false;
 
+    // Thêm biến để hứng số điện thoại từ màn hình trước
+    private String phoneNumber = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_passcode);
+
+        // Bắt lấy số điện thoại được truyền sang
+        phoneNumber = getIntent().getStringExtra("PHONE_NUMBER");
+        if (phoneNumber == null) phoneNumber = "";
 
         initViews();
         setupListeners();
@@ -75,7 +94,6 @@ public class PasscodeActivity extends AppCompatActivity {
         TextView btnNotMyAccount = findViewById(R.id.btn_not_my_account);
         btnNotMyAccount.setOnClickListener(v -> {
             android.content.Intent intent = new android.content.Intent(PasscodeActivity.this, ContactSupportActivity.class);
-
             startActivity(intent);
         });
     }
@@ -86,6 +104,7 @@ public class PasscodeActivity extends AppCompatActivity {
 
         passcode += number;
         updateDots();
+        tvErrorMessage.setVisibility(View.INVISIBLE); // Ẩn lỗi nếu đang nhập lại
 
         // Xử lý khi nhập đủ 6 số
         if (passcode.length() == MAX_LENGTH) {
@@ -102,16 +121,52 @@ public class PasscodeActivity extends AppCompatActivity {
         tvErrorMessage.setVisibility(View.INVISIBLE);
     }
 
-    // Chuyển sang HomeActivity khi nhập đủ 6 số
+    // XỬ LÝ GỌI API KHI NHẬP ĐỦ 6 SỐ
     private void handlePasscodeComplete() {
         isChecking = true;
-        
-        // Tạo Intent để chuyển sang HomeActivity
-        Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
-        startActivity(intent);
-        
-        // Kết thúc PasscodeActivity để người dùng không quay lại được bằng nút Back
-        finish();
+
+        // Tạo gói dữ liệu chuẩn bị gửi đi
+        LoginRequestDTO request = new LoginRequestDTO(phoneNumber, passcode);
+
+        RetrofitClient.getApiService().login(request).enqueue(new Callback<ApiResponse<UserResponseDTO>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<UserResponseDTO>> call, Response<ApiResponse<UserResponseDTO>> response) {
+                isChecking = false; // Mở khóa cho nhập tiếp nếu lỡ sai
+
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<UserResponseDTO> apiResponse = response.body();
+
+                    if (apiResponse.getCode() == 200) {
+                        // Thành công: Chuyển sang HomeActivity
+                        Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        // Sai pass hoặc lỗi backend trả về
+                        showLoginError(apiResponse.getMessage());
+                    }
+                } else {
+                    showLoginError("Hệ thống đang bận, thử lại sau!");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<UserResponseDTO>> call, Throwable t) {
+                isChecking = false;
+                Log.e("API_ERROR", "Lỗi: " + t.getMessage());
+                showLoginError("Mất kết nối máy chủ!");
+            }
+        });
+    }
+
+    // Hàm phụ trợ để báo lỗi và reset bàn phím
+    private void showLoginError(String message) {
+        tvErrorMessage.setText(message);
+        tvErrorMessage.setVisibility(View.VISIBLE);
+        // Xóa mã PIN và reset giao diện dấu chấm để người dùng nhập lại
+        passcode = "";
+        updateDots();
     }
 
     // Cập nhật giao diện 6 dấu chấm
