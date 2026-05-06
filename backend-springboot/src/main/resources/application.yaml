@@ -20,3 +20,8 @@ spring:
 
 server:
   port: 8081
+
+cloudinary:
+  cloud-name: "dkm39ilz8"
+  api-key: "392638882274686"
+  api-secret: "M4row-OumipTXq-Nqn8mUdZMs4Y"

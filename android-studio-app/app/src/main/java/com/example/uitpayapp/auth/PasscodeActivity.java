@@ -137,17 +137,24 @@ public class PasscodeActivity extends AppCompatActivity {
                     ApiResponse<UserResponseDTO> apiResponse = response.body();
 
                     if (apiResponse.getCode() == 200) {
+                        UserResponseDTO user = apiResponse.getData();
+                        android.content.SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                        android.content.SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("FULL_NAME", user.getFullName());
+                        editor.putString("PHONE_NUMBER", user.getPhoneNumber());
+                        editor.apply(); // Lưu lại
                         // Thành công: Chuyển sang HomeActivity
                         Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
                         startActivity(intent);
                         finish();
-                    } else {
-                        // Sai pass hoặc lỗi backend trả về
-                        showLoginError(apiResponse.getMessage());
                     }
-                } else {
-                    showLoginError("Hệ thống đang bận, thử lại sau!");
+                    else {
+                        showLoginError("Mã Pin không đúng. Vui lòng thử lại");
+                    }
+                }
+                else {
+                    showLoginError("Mã Pin không đúng. Vui lòng thử lại");
                 }
             }
 

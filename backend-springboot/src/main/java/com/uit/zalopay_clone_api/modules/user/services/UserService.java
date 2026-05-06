@@ -30,4 +30,16 @@ public class UserService {
         // 2. Đăng nhập thành công, trả về thông tin user
         return existingUser;
     }
+
+    public void updateAvatar(String phoneNumber, String avatarUrl) {
+        // 1. Tìm user theo số điện thoại
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        // 2. Gán link ảnh mới
+        user.setAvatarUrl(avatarUrl);
+
+        // 3. Lưu lại vào DB
+        userRepository.save(user);
+    }
 }

@@ -3,5 +3,7 @@ CREATE TABLE users (
         full_name VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
         phone_number VARCHAR(15) UNIQUE NOT NULL,
-        pin_code VARCHAR(6)
+        pin_code VARCHAR(6),
+        avatar_url VARCHAR(255)
 );
+
