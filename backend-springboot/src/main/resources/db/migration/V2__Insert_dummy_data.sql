@@ -5,7 +5,7 @@ INSERT INTO users (phone_number, password, full_name)
 VALUES ('0376171242', '111111', 'Cao Dat');
 
 INSERT INTO users (phone_number, password, full_name)
-VALUES ('0329815572', '366736', 'pbqhuy');
+VALUES ('0329815572', '555555', 'pbqhuy');
 
 INSERT INTO users (phone_number, password, full_name)
 VALUES ('6767676767', '666666', 'Trần Thanh Dân');

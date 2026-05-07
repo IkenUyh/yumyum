@@ -72,7 +72,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".profile.ReceiptActivity"
+            android:name=".home.receipt.ReceiptActivity"
             android:exported="false" />
         <activity android:name=".profile.InfoApplication"
             android:exported="false" />
@@ -80,7 +80,7 @@
             android:exported="false" />
         <activity android:name=".profile.ProfileWebView"
             android:exported="false" />
-        <activity android:name=".profile.AccmulatedBalanceActivity"
+        <activity android:name=".home.accmulated_balance.AccmulatedBalanceActivity"
             android:exported="false" />
         <activity android:name=".voucher.VoucherActivity"
             android:exported="false" />
