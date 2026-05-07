@@ -4,8 +4,10 @@ public class UserResponseDTO {
     private Long id;
     private String phoneNumber;
     private String fullName;
+    private String avatarUrl;
 
     public Long getId() { return id; }
     public String getPhoneNumber() { return phoneNumber; }
     public String getFullName() { return fullName; }
+    public String getAvatarUrl() { return avatarUrl; }
 }
