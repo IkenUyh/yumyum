@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#F5F7FA"
+    android:orientation="vertical"
+    android:id="@+id/voucher_screen_container">
+    <include layout="@layout/layout_top_bar"
+        android:id="@+id/top_bar_voucher"/>
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="8dp"
+        app:cardUseCompatPadding="true"
+        android:id="@+id/nav_voucher_button">
+        <include layout="@layout/menuitem_profile_screen"
+            android:id="@+id/button_find_new_voucher"/>
+    </androidx.cardview.widget.CardView>
+    <ScrollView
+        android:id="@+id/receipt_screen_main_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/top_bar_voucher"
+        android:layout_above="@id/nav_voucher_button">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_userinfo_gradient"
+                android:padding="20dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:background="@drawable/bg_button_login_rounded"
+                    android:backgroundTint="#FFFFFF"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="12dp">
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_search"
+                        app:tint="#757575"/>
+                    <EditText
+                        android:id="@+id/et_search_gift"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:hint="Tìm kiếm ưu đãi, thương hiệu"
+                        android:background="@null"
+                        android:textSize="14sp"
+                        android:textColor="#000000"
+                        android:textColorHint="#757575"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:imeOptions="actionSearch"
+                        android:importantForAutofill="no" />
+                </LinearLayout>
+            </LinearLayout>
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tab_vouchers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFF"
+                app:tabIndicatorColor="#0034C8"
+                app:tabSelectedTextColor="#0034C8"
+                app:tabTextColor="#757575">
+                <com.google.android.material.tabs.TabItem android:text="Ưu đãi từ ZaloPay"  android:layout_height="wrap_content" android:layout_width="wrap_content"/>
+                <com.google.android.material.tabs.TabItem android:text="Ưu đãi từ đối tác"
+                    android:layout_height="wrap_content" android:layout_width="wrap_content"/>
+            </com.google.android.material.tabs.TabLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rv_voucher"
+                android:padding="16dp"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager">
+            </androidx.recyclerview.widget.RecyclerView>
+        </LinearLayout>
+    </ScrollView>
+</RelativeLayout>

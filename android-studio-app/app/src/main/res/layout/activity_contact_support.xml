@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF"
     android:orientation="vertical"
-    tools:context=".ContactSupportActivity">
+    tools:context=".profile.ContactSupportActivity">
 
     <ImageView
         android:id="@+id/btn_back"

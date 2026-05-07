@@ -3,5 +3,6 @@
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryDark">@color/purple_700</item>
         <item name="colorAccent">@color/teal_200</item>
+        <item name="android:fontFamily">@font/svn_gotham_regular</item>
     </style>
 </resources>

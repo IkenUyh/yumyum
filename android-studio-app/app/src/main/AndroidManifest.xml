@@ -1,35 +1,129 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.uitpayapp">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA" />
     <application
+        android:usesCleartextTraffic="true"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_uitpay_demo"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Androidstudioapp">
-
         <activity
-            android:name=".LoadingScreenActivity"
+            android:name=".transaction.TransactionHistoryFiltered"
+            android:exported="false">
+
+        </activity>
+        <activity
+            android:name=".auth.LoadingScreenActivity"
             android:exported="true">
-            <intent-filter>
+           <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name=".SignInActivity"
+            android:name=".home.HomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".transaction.TransactionHistoryActivity"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".gift.GiftActivity"
+            android:exported="false" />
+        <activity
+            android:name=".profile.ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".auth.SignInActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
-            android:name=".ContactSupportActivity"
+            android:name=".home.money_transfer.MoneyTransferActivity"
             android:exported="false" />
 
         <activity
-            android:name=".PasscodeActivity"
+            android:name=".home.money_transfer.TransferConfirmationActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".home.money_transfer.TransferSuccessActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".home.my_qr.MyQRActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".home.deposit_withdraw.DepositWithdrawActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".home.phone_recharge.PhoneRechargeActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".profile.ReceiptActivity"
+            android:exported="false" />
+        <activity android:name=".profile.InfoApplication"
+            android:exported="false" />
+        <activity android:name=".profile.NotificationSettings"
+            android:exported="false" />
+        <activity android:name=".profile.ProfileWebView"
+            android:exported="false" />
+        <activity android:name=".profile.AccmulatedBalanceActivity"
+            android:exported="false" />
+        <activity android:name=".voucher.VoucherActivity"
+            android:exported="false" />
+        <activity android:name=".profile.AutoPaymentActivity"
+            android:exported="false" />
+        <activity android:name=".profile.SecuritySettingsActivity"
+            android:exported="false" />
+        <activity android:name=".ScanQRCode.QRScanActivity"
+            android:exported="false" />
+        <activity android:name=".profile.SecurityTransactionActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".profile.ContactSupportActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".auth.PasscodeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UITpayPriority.PriorityUITpayActivity"
+            android:exported="false" />
+        <activity android:name=".giftexchange.GiftExchangeActivity"
+            android:exported="false" />
+        <activity android:name=".profile.AccountManagementActivity"
+            android:exported="false" />
+        <activity android:name=".profile.AccountDetailActivity"
+            android:exported="false" />
+        <activity android:name=".insurance.InsuranceActivity"
+            android:exported="false" />
+        <activity android:name=".paymentorder.PaymentOrderActivity"
+            android:exported="false" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
     </application>
 
 </manifest>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingVertical="8dp">
+    <View
+        android:id="@+id/checkin_line_left"
+        android:layout_width="match_parent"
+        android:layout_height="1.5dp"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/checkin_content_wrapper"
+        android:layout_centerVertical="true"
+        android:background="#E0E0E0" />
+    <View
+        android:id="@+id/checkin_line_right"
+        android:layout_width="match_parent"
+        android:layout_height="1.5dp"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/checkin_content_wrapper"
+        android:layout_centerVertical="true"
+        android:background="#E0E0E0" />
+    <LinearLayout
+        android:id="@+id/checkin_content_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/checkin_coin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+100"
+            android:textColor="#BDBDBD"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+        <ImageView
+            android:id="@+id/checkin_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="6dp"
+            android:padding="2dp"
+            android:src="@drawable/img_flag"/>
+        <TextView
+            android:id="@+id/checkin_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Ngày 1"
+            android:textColor="#BDBDBD"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+</RelativeLayout>

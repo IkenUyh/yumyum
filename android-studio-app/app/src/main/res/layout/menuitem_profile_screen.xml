@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="10dp">
+    <ImageView
+        android:id="@+id/menu_icon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:scaleType="centerCrop"
+        app:tint="#0034c8"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="15dp">
+        <TextView
+            android:id="@+id/menu_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tiêu đề"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:textColor="#000000"
+            android:maxWidth="250dp"/>
+        <TextView
+            android:id="@+id/menu_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nội dung"
+            android:textSize="14sp"
+            android:textStyle="normal"
+            android:visibility="gone"
+            android:maxWidth="250dp"/>
+    </LinearLayout>
+    <View android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_less_than"
+        android:rotation="180"/>
+</LinearLayout>
