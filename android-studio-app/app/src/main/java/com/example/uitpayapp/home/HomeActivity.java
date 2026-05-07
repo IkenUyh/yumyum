@@ -23,6 +23,18 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        // === LOAD AVATAR TREN HOME ===
+        android.widget.ImageView ivAvatar = findViewById(R.id.ivAvatar);
+        android.content.SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String avatarUrl = prefs.getString("AVATAR_URL", "");
+
+        if (!avatarUrl.isEmpty() && ivAvatar != null) {
+            com.bumptech.glide.Glide.with(this)
+                    .load(avatarUrl)
+                    .circleCrop()
+                    .into(ivAvatar);
+        }
+
         // =========================================================
         // 1. ÁNH XẠ VIEW VÀ CẤU HÌNH CƠ BẢN
         // =========================================================

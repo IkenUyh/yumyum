@@ -18,6 +18,10 @@ spring:
     out-of-order: false
     table: flyway_schema_history
 
+  output:
+    ansi:
+      enabled: always
+
 server:
   port: 8081
 
