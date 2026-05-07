@@ -132,7 +132,23 @@ public class TransferSuccessActivity extends AppCompatActivity {
                 ivSuccessAvatar.setImageResource(avatarId);
             }
             if (tvTransactionNote != null) {
-                tvTransactionNote.setText("Ghi chú:");
+                String destination = getIntent().getStringExtra("KEY_DESTINATION");
+                if ("DEPOSIT".equals(type)) {
+                    if (destination != null && !destination.isEmpty()) {
+                        tvTransactionNote.setText("Nạp vào: " + destination);
+                    } else {
+                        tvTransactionNote.setVisibility(View.GONE);
+                    }
+                } else if ("WITHDRAW".equals(type)) {
+                    if (destination != null && !destination.isEmpty()) {
+                        tvTransactionNote.setText("Rút từ: " + destination);
+                    } else {
+                        tvTransactionNote.setVisibility(View.GONE);
+                    }
+                } else {
+                    tvTransactionNote.setVisibility(View.VISIBLE);
+                    tvTransactionNote.setText("Ghi chú:");
+                }
             }
         }
 

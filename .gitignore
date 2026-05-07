@@ -3,6 +3,7 @@
 /local.properties
 /.idea/
 /build
+/.vscode
 /captures
 .externalNativeBuild
 .cxx

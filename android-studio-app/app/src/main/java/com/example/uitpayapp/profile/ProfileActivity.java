@@ -178,7 +178,7 @@ public class ProfileActivity extends AppCompatActivity {
                 ShowBottomSheet("Quản lý tài chính",ListGroupItem);
                 break;
             case "Quản lý hóa đơn":
-                Intent intentReceipt=new Intent(this,ReceiptActivity.class);
+                Intent intentReceipt=new Intent(this, com.example.uitpayapp.home.receipt.ReceiptActivity.class);
                 startActivity(intentReceipt);
                 break;
             case "Quà của tôi":
@@ -246,7 +246,7 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(intentNotification);
                 break;
             case "Hợp đồng số dư sinh lời":
-                Intent intentAccmulated=new Intent(this, AccmulatedBalanceActivity.class);
+                Intent intentAccmulated=new Intent(this, com.example.uitpayapp.home.accmulated_balance.AccmulatedBalanceActivity.class);
                 startActivity(intentAccmulated);
                 break;
             case "Thanh toán hóa đơn tự động":

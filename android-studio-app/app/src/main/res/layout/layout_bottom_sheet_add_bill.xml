@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet_rounded"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Header -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:id="@+id/btn_close_add_bill"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            app:tint="#757575"/>
+
+        <TextView
+            android:id="@+id/tv_add_bill_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Thêm hóa đơn"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <!-- Icon + tên dịch vụ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingVertical="8dp">
+        <ImageView
+            android:id="@+id/iv_add_bill_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_receiptscreen_electric"/>
+        <TextView
+            android:id="@+id/tv_add_bill_service_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Tiền điện"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <!-- Nhập mã khách hàng -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Mã khách hàng"
+        android:textColor="#757575"
+        android:textSize="13sp"/>
+
+    <EditText
+        android:id="@+id/et_customer_code"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_edittext_rounded"
+        android:hint="Nhập mã khách hàng..."
+        android:paddingHorizontal="16dp"
+        android:textColor="#000000"
+        android:textColorHint="#9E9E9E"
+        android:textSize="14sp"
+        android:inputType="text"
+        android:maxLines="1"/>
+
+    <!-- Lưu ý -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Mã khách hàng được in trên hóa đơn giấy hoặc hợp đồng dịch vụ của bạn"
+        android:textColor="#9E9E9E"
+        android:textSize="11sp"/>
+
+    <!-- Nút xác nhận -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_confirm_add_bill"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_button_login_rounded"
+        android:text="Xác nhận"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"/>
+</LinearLayout>
