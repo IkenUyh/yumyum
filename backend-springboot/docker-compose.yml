@@ -18,11 +18,11 @@ services:
     depends_on:
       - mysql-db
     environment:
-      # Ket noi voi MySQL thong qua ten service (mysql-db)
+      # Ket noi voi MySQL thong qua ten service
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/zalopay_db?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
 
 volumes:
   mysql_data:
