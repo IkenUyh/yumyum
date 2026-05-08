@@ -10,5 +10,19 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
+  backend-app:
+    build: .
+    container_name: zalopay-backend-app
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql-db
+    environment:
+      # Ket noi voi MySQL thong qua ten service (mysql-db)
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/zalopay_db?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
 volumes:
   mysql_data:
