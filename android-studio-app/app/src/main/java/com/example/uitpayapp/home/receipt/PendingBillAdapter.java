@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
@@ -60,6 +61,7 @@ public class PendingBillAdapter extends RecyclerView.Adapter<PendingBillAdapter.
             holder.tvAmount.setTextColor(Color.parseColor("#757575"));
             // Ẩn phần auto-pay khi đã thanh toán
             holder.layoutAutoPay.setVisibility(View.GONE);
+            holder.btnPay.setVisibility(View.GONE);
         } else {
             holder.tvStatus.setText("Chưa thanh toán");
             holder.tvStatus.setTextColor(Color.parseColor("#FF9800"));
@@ -68,6 +70,7 @@ public class PendingBillAdapter extends RecyclerView.Adapter<PendingBillAdapter.
             holder.tvAmount.setTextColor(Color.parseColor("#D32F2F"));
             // Hiện phần auto-pay
             holder.layoutAutoPay.setVisibility(View.VISIBLE);
+            holder.btnPay.setVisibility(View.VISIBLE);
         }
 
         // Xử lý switch tự động thanh toán
@@ -96,7 +99,7 @@ public class PendingBillAdapter extends RecyclerView.Adapter<PendingBillAdapter.
             }
         });
 
-        holder.itemView.setOnClickListener(v -> {
+        holder.btnPay.setOnClickListener(v -> {
             if (clickListener != null) {
                 clickListener.onBillClick(bill, holder.getAdapterPosition());
             }
@@ -113,6 +116,7 @@ public class PendingBillAdapter extends RecyclerView.Adapter<PendingBillAdapter.
         TextView tvName, tvProvider, tvDue, tvAmount, tvStatus, tvAutoPayLabel;
         SwitchCompat switchAutoPay;
         LinearLayout layoutAutoPay;
+        Button btnPay;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -125,6 +129,7 @@ public class PendingBillAdapter extends RecyclerView.Adapter<PendingBillAdapter.
             switchAutoPay = itemView.findViewById(R.id.switch_auto_pay);
             tvAutoPayLabel = itemView.findViewById(R.id.tv_auto_pay_label);
             layoutAutoPay = itemView.findViewById(R.id.layout_auto_pay);
+            btnPay = itemView.findViewById(R.id.btn_pay);
         }
     }
 }
