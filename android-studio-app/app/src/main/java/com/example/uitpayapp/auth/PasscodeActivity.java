@@ -60,6 +60,56 @@ public class PasscodeActivity extends AppCompatActivity {
             dots[i] = findViewById(dotIds[i]);
         }
         tvErrorMessage = findViewById(R.id.tv_error_message);
+
+        // === LOAD AVATAR VA THONG TIN USER TU CACHE ===
+        android.widget.ImageView ivAvatar = findViewById(R.id.iv_avatar);
+        TextView tvUsername = findViewById(R.id.tv_username);
+        TextView tvPhoneNumber = findViewById(R.id.tv_phone_number);
+
+        android.content.SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String savedPhone = prefs.getString("PHONE_NUMBER", "");
+        String savedName = prefs.getString("FULL_NAME", "Username");
+        String avatarUrl = prefs.getString("AVATAR_URL", "");
+
+        // Kiem tra: Neu khop so dien thoai cu thi hien avatar
+        if (phoneNumber.equals(savedPhone)) {
+            if (!avatarUrl.isEmpty() && ivAvatar != null) {
+                com.bumptech.glide.Glide.with(this)
+                        .load(avatarUrl)
+                        .circleCrop()
+                        .into(ivAvatar);
+            }
+        }
+        else {
+            // Neu khong khop thi chi de chu "Username" co dinh
+            tvUsername.setText("Username");
+        }
+
+        // Hien thi so dien thoai da duoc che (Masked) voi ma vung
+        tvPhoneNumber.setText(formatMaskedPhone(phoneNumber));
+    }
+
+    // === HAM XU LY CHE SO DIEN THOAI VA MA VUNG ===
+    private String formatMaskedPhone(String phone) {
+        if (phone == null || phone.length() < 7) return phone;
+
+        // Mac dinh +84 cho Viet Nam.
+        // Co the ket hop TelephonyManager de lay dong theo quoc gia hien tai.
+        String countryCode = "+84";
+
+        String cleanPhone = phone;
+        if (phone.startsWith("0")) {
+            cleanPhone = phone.substring(1); // Cat so 0 o dau
+        }
+
+        // Lay 1 so dau (sau so 0) va 3 so cuoi, o giua la 4 dau sao
+        if (cleanPhone.length() >= 4) {
+            String firstDigit = cleanPhone.substring(0, 1);
+            String lastThreeDigits = cleanPhone.substring(cleanPhone.length() - 3);
+            return countryCode + firstDigit + "****" + lastThreeDigits;
+        }
+
+        return countryCode + cleanPhone;
     }
 
     // Cài đặt sự kiện click cho bàn phím
@@ -121,7 +171,7 @@ public class PasscodeActivity extends AppCompatActivity {
         tvErrorMessage.setVisibility(View.INVISIBLE);
     }
 
-    // XỬ LÝ GỌI API KHI NHẬP ĐỦ 6 SỐ
+    // Xử lý gọi API khi nhập đủ 6 số
     private void handlePasscodeComplete() {
         isChecking = true;
 
@@ -137,17 +187,25 @@ public class PasscodeActivity extends AppCompatActivity {
                     ApiResponse<UserResponseDTO> apiResponse = response.body();
 
                     if (apiResponse.getCode() == 200) {
+                        UserResponseDTO user = apiResponse.getData();
+                        android.content.SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                        android.content.SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("FULL_NAME", user.getFullName());
+                        editor.putString("PHONE_NUMBER", user.getPhoneNumber());
+                        editor.putString("AVATAR_URL", user.getAvatarUrl());
+                        editor.apply(); // Lưu lại
                         // Thành công: Chuyển sang HomeActivity
                         Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
                         startActivity(intent);
                         finish();
-                    } else {
-                        // Sai pass hoặc lỗi backend trả về
-                        showLoginError(apiResponse.getMessage());
                     }
-                } else {
-                    showLoginError("Hệ thống đang bận, thử lại sau!");
+                    else {
+                        showLoginError("Mã Pin không đúng. Vui lòng thử lại");
+                    }
+                }
+                else {
+                    showLoginError("Mã Pin không đúng. Vui lòng thử lại");
                 }
             }
 

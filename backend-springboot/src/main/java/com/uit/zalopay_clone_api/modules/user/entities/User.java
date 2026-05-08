@@ -27,4 +27,7 @@ public class User {
 
     @Column(length = 6)
     private String pinCode;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 }

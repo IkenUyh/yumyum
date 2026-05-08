@@ -1,6 +1,7 @@
 package com.example.uitpayapp.profile;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
@@ -17,6 +18,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.ScanQRCode.QRScanActivity;
 import com.example.uitpayapp.UITpayPriority.PriorityUITpayActivity;
@@ -53,6 +55,28 @@ public class ProfileActivity extends AppCompatActivity {
             }
             return insets;
         });
+        // =========================================================
+        // === THÊM MỚI: LOAD DATA TỪ SHAREDPREFERENCES & GLIDE ===
+        // =========================================================
+        TextView tvName = findViewById(R.id.tv_account_name);
+        TextView tvPhone = findViewById(R.id.tv_account_phone);
+        ImageView ivAvatar = findViewById(R.id.iv_account_avatar);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String savedName = sharedPreferences.getString("FULL_NAME", "Người dùng ZaloPay");
+        String savedPhone = sharedPreferences.getString("PHONE_NUMBER", "");
+        String savedAvatar = sharedPreferences.getString("AVATAR_URL", "");
+
+        if (tvName != null) tvName.setText(savedName);
+        if (tvPhone != null) tvPhone.setText(savedPhone);
+
+        // Load ảnh và bo tròn tự động
+        if (ivAvatar != null && !savedAvatar.isEmpty()) {
+            Glide.with(this)
+                    .load(savedAvatar)
+                    .circleCrop()
+                    .into(ivAvatar);
+        }
         findViewById(R.id.profile_uitpay_priority).setOnClickListener(v->
         {
             Intent intentPriority=new Intent(this, PriorityUITpayActivity.class);
@@ -154,7 +178,7 @@ public class ProfileActivity extends AppCompatActivity {
                 ShowBottomSheet("Quản lý tài chính",ListGroupItem);
                 break;
             case "Quản lý hóa đơn":
-                Intent intentReceipt=new Intent(this,ReceiptActivity.class);
+                Intent intentReceipt=new Intent(this, com.example.uitpayapp.home.receipt.ReceiptActivity.class);
                 startActivity(intentReceipt);
                 break;
             case "Quà của tôi":
@@ -222,7 +246,7 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(intentNotification);
                 break;
             case "Hợp đồng số dư sinh lời":
-                Intent intentAccmulated=new Intent(this, AccmulatedBalanceActivity.class);
+                Intent intentAccmulated=new Intent(this, com.example.uitpayapp.home.accmulated_balance.AccmulatedBalanceActivity.class);
                 startActivity(intentAccmulated);
                 break;
             case "Thanh toán hóa đơn tự động":
