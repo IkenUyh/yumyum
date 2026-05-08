@@ -2,6 +2,7 @@ services:
   mysql-db:
     image: mysql:9.0
     container_name: zalopay-mysql
+    restart: always
     ports:
       - "3306:3306"
     environment:
@@ -13,6 +14,7 @@ services:
   backend-app:
     build: .
     container_name: zalopay-backend-app
+    restart: always
     ports:
       - "8081:8081"
     depends_on:
