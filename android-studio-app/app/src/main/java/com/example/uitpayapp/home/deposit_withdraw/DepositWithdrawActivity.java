@@ -95,6 +95,16 @@ public class DepositWithdrawActivity extends AppCompatActivity {
             tabWithdraw.setTextColor(Color.parseColor("#0A46A6"));
             tabDeposit.setTextColor(Color.parseColor("#546E7A"));
         });
+
+        // Tự động chọn tab Rút tiền nếu được mở từ nút Rút
+        String tab = getIntent().getStringExtra("KEY_TAB");
+        if ("WITHDRAW".equals(tab)) {
+            tabDeposit.post(() -> {
+                tabSlider.setTranslationX(tabDeposit.getWidth());
+                tabWithdraw.setTextColor(Color.parseColor("#0A46A6"));
+                tabDeposit.setTextColor(Color.parseColor("#546E7A"));
+            });
+        }
     }
 
     private void setupQuickAmounts() {
@@ -222,6 +232,8 @@ public class DepositWithdrawActivity extends AppCompatActivity {
         }
     }
 
+    private String selectedDestination = "";
+
     private void showBankSelectionBottomSheet() {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
 
@@ -248,9 +260,36 @@ public class DepositWithdrawActivity extends AppCompatActivity {
 
         BankAdapter adapter = new BankAdapter(mockBanks, bank -> {
             bottomSheetDialog.dismiss();
-            showPasscodeBottomSheet(bank.getName(), bank.getIconResId());
+            showDestinationSelectionBottomSheet(bank.getName(), bank.getIconResId());
         });
         rvBanks.setAdapter(adapter);
+
+        bottomSheetDialog.show();
+    }
+
+    private void showDestinationSelectionBottomSheet(String bankName, int bankIconId) {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_destination, null);
+        bottomSheetDialog.setContentView(view);
+
+        View bottomSheet = (View) view.getParent();
+        if (bottomSheet != null) {
+            bottomSheet.setBackgroundResource(android.R.color.transparent);
+        }
+
+        view.findViewById(R.id.btn_close_destination).setOnClickListener(v -> bottomSheetDialog.dismiss());
+
+        view.findViewById(R.id.btn_dest_wallet).setOnClickListener(v -> {
+            selectedDestination = "Ví UIT Pay";
+            bottomSheetDialog.dismiss();
+            showPasscodeBottomSheet(bankName, bankIconId);
+        });
+
+        view.findViewById(R.id.btn_dest_saving).setOnClickListener(v -> {
+            selectedDestination = "Quỹ tiết kiệm";
+            bottomSheetDialog.dismiss();
+            showPasscodeBottomSheet(bankName, bankIconId);
+        });
 
         bottomSheetDialog.show();
     }
@@ -325,6 +364,10 @@ public class DepositWithdrawActivity extends AppCompatActivity {
         intent.putExtra("KEY_NAME", bankName);
 
         intent.putExtra("KEY_AVATAR", bankIconId);
+        
+        if (selectedDestination != null && !selectedDestination.isEmpty()) {
+            intent.putExtra("KEY_DESTINATION", selectedDestination);
+        }
 
         boolean isDeposit = tabDeposit.getCurrentTextColor() == Color.parseColor("#0A46A6");
         intent.putExtra("KEY_TYPE", isDeposit ? "DEPOSIT" : "WITHDRAW");

@@ -48,17 +48,26 @@ public class HomeActivity extends AppCompatActivity {
         List<ServiceItem> listPhobien = new ArrayList<>();
         listPhobien.add(new ServiceItem("Điện thoại", R.drawable.ic_phone, null));
         listPhobien.add(new ServiceItem("Hóa đơn", R.drawable.ic_receipt, null));
-        listPhobien.add(new ServiceItem("Quỹ tiết kiệm", R.drawable.ic_table, null));
+        listPhobien.add(new ServiceItem("Số dư sinh lời", R.drawable.ic_table, null));
         listPhobien.add(new ServiceItem("Đặt đồ ăn", R.drawable.ic_food, null));
         listPhobien.add(new ServiceItem("Vé phim", R.drawable.ic_film, null));
         listPhobien.add(new ServiceItem("Dò vé số", R.drawable.ic_lottery, null));
-        listPhobien.add(new ServiceItem("Lì xì", R.drawable.ic_suitcase, null));
+        listPhobien.add(new ServiceItem("Du lịch đi lại", R.drawable.ic_suitcase, null));
         listPhobien.add(new ServiceItem("Mua thẻ Game", R.drawable.ic_game, null));
 
         // Cập nhật: Thêm listener để xử lý chuyển trang khi click
         ServiceAdapter adapterPhobien = new ServiceAdapter(listPhobien, R.layout.item_service, item -> {
             if (item.getName().equals("Điện thoại")) {
                 Intent intent = new Intent(HomeActivity.this, PhoneRechargeActivity.class);
+                startActivity(intent);
+            } else if (item.getName().equals("Hóa đơn")) {
+                Intent intent = new Intent(HomeActivity.this, com.example.uitpayapp.home.receipt.ReceiptActivity.class);
+                startActivity(intent);
+            } else if (item.getName().equals("Số dư sinh lời")) {
+                Intent intent = new Intent(HomeActivity.this, com.example.uitpayapp.home.accmulated_balance.AccmulatedBalanceActivity.class);
+                startActivity(intent);
+            } else if (item.getName().equals("Đặt đồ ăn")) {
+                Intent intent = new Intent(HomeActivity.this, com.example.uitpayapp.home.food_order.FoodOrderActivity.class);
                 startActivity(intent);
             } else {
                 Toast.makeText(this, "Dịch vụ " + item.getName() + " đang phát triển", Toast.LENGTH_SHORT).show();
@@ -67,7 +76,7 @@ public class HomeActivity extends AppCompatActivity {
         rvDichVuPhoBien.setAdapter(adapterPhobien);
 
         // =========================================================
-        // 3. THIẾT LẬP DANH SÁCH: BANNER ĐỀ XUẤT (DẠNG NGANG)[cite: 4]
+        // 3. THIẾT LẬP DANH SÁCH: BANNER ĐỀ XUẤT (DẠNG NGANG)
         // =========================================================
         RecyclerView rcvSuggest = findViewById(R.id.rcvSuggest);
         rcvSuggest.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -81,7 +90,7 @@ public class HomeActivity extends AppCompatActivity {
         rcvSuggest.setAdapter(adapter);
 
         // =========================================================
-        // 4. THIẾT LẬP DANH SÁCH: ƯU ĐÃI SIÊU HỜI (DẠNG LƯỚI 2 CỘT)[cite: 4]
+        // 4. THIẾT LẬP DANH SÁCH: ƯU ĐÃI SIÊU HỜI (DẠNG LƯỚI 2 CỘT)
         // =========================================================
         RecyclerView rvUuDaiSieuHoi = findViewById(R.id.rvUuDaiSieuHoi);
         rvUuDaiSieuHoi.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(this, 2));
@@ -94,7 +103,7 @@ public class HomeActivity extends AppCompatActivity {
         rvUuDaiSieuHoi.setAdapter(adapterUuDai);
 
         // =========================================================
-        // 5. CHUYỂN TRANG CÁC NÚT CHỨC NĂNG CHÍNH[cite: 4]
+        // 5. CHUYỂN TRANG CÁC NÚT CHỨC NĂNG CHÍNH
         // =========================================================
         LinearLayout btnChuyenTien = findViewById(R.id.btnChuyenTien);
         btnChuyenTien.setOnClickListener(v -> {

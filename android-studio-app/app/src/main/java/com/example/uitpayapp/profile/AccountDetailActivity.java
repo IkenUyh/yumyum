@@ -4,8 +4,11 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -35,11 +38,11 @@ public class AccountDetailActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account_detail);
-
         initView();
         setNoVerifyData();
         infoNoVerifyMainStatus.setOnClickListener(v -> HanleVerifyAccount());
         findViewById(R.id.info_verify_showmore).setOnClickListener(v -> showInfoBottomSheet());
+        findViewById(R.id.update_secondary_info).setOnClickListener(v -> HanleUpdateSecondaryInfo());
     }
 
     private void initView() {
@@ -77,7 +80,6 @@ public class AccountDetailActivity extends AppCompatActivity {
         setRowData(R.id.inforow_email, "Email", "Chưa cập nhật");
         setRowData(R.id.inforow_address, "Địa chỉ", "Chưa cập nhật");
         setRowData(R.id.inforow_job, "Nghề nghiệp", "Chưa cập nhật");
-        setRowData(R.id.inforow_position, "Chức vụ", "Chưa cập nhật");
 
         infoVerifyMainStatus.setVisibility(View.GONE);
         infoNoVerifyMainStatus.setVisibility(View.VISIBLE);
@@ -124,7 +126,7 @@ public class AccountDetailActivity extends AppCompatActivity {
             setRowData(R.id.inforow_gender, "Giới tính", MainInfo.get(3));
             setRowData(R.id.inforow_address, "Địa chỉ", MainInfo.get(4));
             setRowData(R.id.inforow_issue_date, "Ngày cấp giấy tờ", HideMainInfo(MainInfo.get(5), 5));
-            setRowData(R.id.inforow_issue_place, "Nơi cấp giấy tờ", "CỤC CẢNH SÁT QUẢN LÝ HÀNH CHÍNH VỀ TRẬT TỰ XÃ HỘI");
+            setRowData(R.id.inforow_issue_place, "Nơi cấp giấy tờ", "CỤC CẢNH SÁT QUẢY LÝ HÀNH CHÍNH VỀ TRẬT TỰ XÃ HỘI");
             setVerifiedStatus();
         }
     }
@@ -160,6 +162,11 @@ public class AccountDetailActivity extends AppCompatActivity {
     }
     private void showInfoBottomSheet()
     {
+        if (infoNoVerifyMainStatus.getVisibility()==View.VISIBLE)
+        {
+            Toast.makeText(this,"Vui lòng xác thực tài khoản trước!",Toast.LENGTH_SHORT).show();
+            return;
+        }
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         View view=getLayoutInflater().inflate(R.layout.layout_dynamic_bottom_sheet,null);
         bottomSheetDialog.setContentView(view);
@@ -185,5 +192,50 @@ public class AccountDetailActivity extends AppCompatActivity {
         ((TextView) row.findViewById(R.id.tv_label)).setText(label);
         ((TextView) row.findViewById(R.id.tv_value)).setText(value);
         container.addView(row);
+    }
+    private void HanleUpdateSecondaryInfo() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_update_info, null);
+        bottomSheetDialog.setContentView(view);
+
+        EditText etEmail = view.findViewById(R.id.et_update_email);
+        EditText etAddress = view.findViewById(R.id.et_update_address);
+        TextView tvJob = view.findViewById(R.id.tv_update_job);
+
+        String currentEmail = ((TextView) findViewById(R.id.inforow_email).findViewById(R.id.tv_value)).getText().toString();
+        String currentAddress = ((TextView) findViewById(R.id.inforow_address).findViewById(R.id.tv_value)).getText().toString();
+        String currentJob = ((TextView) findViewById(R.id.inforow_job).findViewById(R.id.tv_value)).getText().toString();
+
+        if (!currentEmail.equals("Chưa cập nhật")) etEmail.setText(currentEmail);
+        if (!currentAddress.equals("Chưa cập nhật")) etAddress.setText(currentAddress);
+        if (!currentJob.equals("Chưa cập nhật")) tvJob.setText(currentJob);
+
+        view.findViewById(R.id.btn_close_update_secondary_info).setOnClickListener(v -> bottomSheetDialog.dismiss());
+        view.findViewById(R.id.btn_popup_job).setOnClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(this, v);
+            String[] jobs = {"Nhân viên văn phòng", "Kinh doanh tự do", "Học sinh/Sinh viên", "Công nhân","Nông dân", "Nghỉ hưu", "Khác"};
+            for (String job : jobs) {
+                popupMenu.getMenu().add(job);
+            }
+            popupMenu.setOnMenuItemClickListener(item -> {
+                tvJob.setText(item.getTitle());
+                return true;
+            });
+            popupMenu.show();
+        });
+
+        view.findViewById(R.id.btn_save_update).setOnClickListener(v -> {
+            String email = etEmail.getText().toString().trim();
+            String address = etAddress.getText().toString().trim();
+            String job = tvJob.getText().toString().trim();
+
+            if (!email.isEmpty()) setRowData(R.id.inforow_email, "Email", email);
+            if (!address.isEmpty()) setRowData(R.id.inforow_address, "Địa chỉ", address);
+            if (!job.isEmpty() && !job.equals("Chọn nghề nghiệp")) setRowData(R.id.inforow_job, "Nghề nghiệp", job);
+
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.show();
     }
 }

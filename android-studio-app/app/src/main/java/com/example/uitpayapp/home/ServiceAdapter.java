@@ -41,8 +41,7 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ServiceV
 
         holder.tvServiceName.setText(item.getName());
         holder.ivServiceIcon.setImageResource(item.getIconResId());
-
-        // Xử lý hiển thị Badge
+        
         if (item.getBadgeText() != null && !item.getBadgeText().isEmpty()) {
             holder.tvServiceBadge.setText(item.getBadgeText());
             holder.tvServiceBadge.setVisibility(View.VISIBLE);

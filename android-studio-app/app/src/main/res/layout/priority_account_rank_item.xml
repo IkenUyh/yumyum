@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.cardview.widget.CardView xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
     app:cardUseCompatPadding="true">
@@ -104,7 +104,7 @@
                     android:layout_height="wrap_content"
                     android:text="Tặng thêm 0.3% số dư sinh lời"
                     android:textColor="#000000"
-                    android:maxWidth="150dp"/>
+                    android:maxWidth="120dp"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -123,6 +123,7 @@
                     android:backgroundTint="#40FFFFFF"
                     android:padding="8dp"/>
                 <TextView
+                    android:id="@+id/tv_priority_explore"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="#0034c8"
@@ -131,5 +132,13 @@
                     android:textAlignment="textEnd"/>
             </LinearLayout>
         </RelativeLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:id="@+id/rv_priority_rank"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            tools:listitem="@layout/menuitem_profile_screen"
+            android:visibility="gone"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

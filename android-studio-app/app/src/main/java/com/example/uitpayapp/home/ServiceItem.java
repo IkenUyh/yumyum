@@ -11,7 +11,6 @@ public class ServiceItem {
         this.badgeText = badgeText;
     }
 
-    // Các hàm Getters
     public String getName() { return name; }
     public int getIconResId() { return iconResId; }
     public String getBadgeText() { return badgeText; }
