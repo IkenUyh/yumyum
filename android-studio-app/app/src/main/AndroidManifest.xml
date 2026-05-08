@@ -22,7 +22,7 @@
 
         </activity>
         <activity
-            android:name=".auth.LoadingScreenActivity"
+            android:name=".home.HomeActivity"
             android:exported="true">
            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,9 +30,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".home.HomeActivity"
-            android:exported="false" />
         <activity
             android:name=".transaction.TransactionHistoryActivity"
             android:exported="false">
@@ -113,9 +110,15 @@
             android:exported="false" />
         <activity android:name=".paymentorder.PaymentOrderActivity"
             android:exported="false" />
+        <activity android:name=".paymentorder.ElectricBillActivity"
+            android:exported="false" />
+        <activity android:name=".paymentorder.WaterBillSelectActivity"
+            android:exported="false"/>
+        <activity android:name=".paymentorder.WaterBillInputActivity"
+            android:exported="false"/>
         <activity android:name=".home.food_order.FoodOrderActivity"
             android:exported="false" />
-
+      
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

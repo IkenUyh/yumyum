@@ -1,5 +1,6 @@
 package com.example.uitpayapp.UITpayPriority;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,7 +18,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.giftexchange.ExchangeVoucherAdapter;
+import com.example.uitpayapp.giftexchange.ExchangeVoucherModel;
+import com.example.uitpayapp.giftexchange.GiftExchangeActivity;
 import com.example.uitpayapp.home.ImageSliderAdapter;
+import com.example.uitpayapp.profile.ProfileWebView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +68,41 @@ public class PriorityUITpayActivity extends AppCompatActivity {
         SetAccountRankingData();
         SetBannerData();
         SetCheckInData();
+        setListener();
+        setSecondaryData();
+    }
+    private void setSecondaryData() {
+        View rvExchangeVoucher = findViewById(R.id.rv_exchange_vouchers);
+        View rvPriorityTasks = findViewById(R.id.rv_priority_tasks);
+        List<ExchangeVoucherModel> ExVoucherList = new ArrayList<>();
+        ExVoucherList.add(new ExchangeVoucherModel(-1, "Giảm 50K Hóa đơn", "Cho hóa đơn điện từ 500K", "50", "5K", "hoadon"));
+        ExVoucherList.add(new ExchangeVoucherModel(-1, "Nạp thẻ 20K", "Chiết khấu nạp tiền điện thoại", "20", "2K", "dienthoai"));
+        ExVoucherList.add(new ExchangeVoucherModel(-1, "Giảm 100K Bảo hiểm", "Áp dụng bảo hiểm xe máy", "100", "10K", "baohiem"));
+        ExVoucherList.add(new ExchangeVoucherModel(-1, "Voucher Highlands 30K", "Áp dụng toàn quốc", "30", "3K", "muasam_anuong"));
+        ExchangeVoucherAdapter ExVoucherAdapter = new ExchangeVoucherAdapter(ExVoucherList);
+
+    }
+    private void setListener() {
+        findViewById(R.id.priority_question_contact).setOnClickListener(v->{
+            Intent intent=new Intent(PriorityUITpayActivity.this, ProfileWebView.class);
+            intent.putExtra("URL_KEY","https://support.zalopay.vn/faq/web/faq-folder-list");
+            startActivity(intent);
+        });
+        findViewById(R.id.priority_rule).setOnClickListener(v->{
+            Intent intent=new Intent(PriorityUITpayActivity.this, ProfileWebView.class);
+            intent.putExtra("URL_KEY","https://zalopay.vn/dich-vu/zalopay-priority");
+            startActivity(intent);
+        });
+        findViewById(R.id.priority_change_gift).setOnClickListener(v->{
+            Intent intent=new Intent(PriorityUITpayActivity.this, GiftExchangeActivity.class);
+            startActivity(intent);
+            this.finish();
+        });
+        findViewById(R.id.tv_priority_exchange_showmore).setOnClickListener(v-> {
+            Intent intent=new Intent(PriorityUITpayActivity.this, GiftExchangeActivity.class);
+            startActivity(intent);
+            this.finish();
+        });
     }
     private void SetAccountRankingData() {
         List<RankModel> rankList = new ArrayList<>();
