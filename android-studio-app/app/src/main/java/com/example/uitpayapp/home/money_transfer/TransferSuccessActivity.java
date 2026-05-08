@@ -41,6 +41,8 @@ public class TransferSuccessActivity extends AppCompatActivity {
         boolean isRecharge = getIntent().getBooleanExtra("KEY_IS_RECHARGE", false);
         boolean isBuyCard = getIntent().getBooleanExtra("KEY_IS_BUY_CARD", false);
         boolean isData = getIntent().getBooleanExtra("KEY_IS_DATA", false);
+        boolean isFoodOrder = getIntent().getBooleanExtra("KEY_IS_FOOD_ORDER", false);
+        String foodProducts = getIntent().getStringExtra("KEY_FOOD_PRODUCTS");
 
         ImageView ivSuccessAvatar = findViewById(R.id.iv_recipient_avatar_success);
         TextView tvSuccessName = findViewById(R.id.tv_recipient_name_success);
@@ -110,7 +112,9 @@ public class TransferSuccessActivity extends AppCompatActivity {
 
             if (tvLabelRecipient != null) {
                 tvLabelRecipient.setVisibility(View.VISIBLE);
-                if (isRecharge) {
+                if (isFoodOrder) {
+                    tvLabelRecipient.setText("THANH TOÁN CHO");
+                } else if (isRecharge) {
                     if (isData) {
                         tvLabelRecipient.setText("ĐÃ NẠP DATA CHO");
                     } else {
@@ -125,15 +129,22 @@ public class TransferSuccessActivity extends AppCompatActivity {
                 }
             }
 
-            if (name != null && tvSuccessName != null) {
-                tvSuccessName.setText(name.toUpperCase());
+            if (tvSuccessName != null) {
+                if (isFoodOrder) {
+                    tvSuccessName.setText("DỊCH VỤ ĐẶT ĐỒ ĂN");
+                } else if (name != null) {
+                    tvSuccessName.setText(name.toUpperCase());
+                }
             }
             if (ivSuccessAvatar != null) {
                 ivSuccessAvatar.setImageResource(avatarId);
             }
             if (tvTransactionNote != null) {
                 String destination = getIntent().getStringExtra("KEY_DESTINATION");
-                if ("DEPOSIT".equals(type)) {
+                if (isFoodOrder) {
+                    tvTransactionNote.setVisibility(View.VISIBLE);
+                    tvTransactionNote.setText("Sản phẩm: " + (foodProducts != null ? foodProducts : ""));
+                } else if ("DEPOSIT".equals(type)) {
                     if (destination != null && !destination.isEmpty()) {
                         tvTransactionNote.setText("Nạp vào: " + destination);
                     } else {

@@ -1,5 +1,6 @@
 package com.example.uitpayapp.home.food_order;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.home.money_transfer.TransferConfirmationActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.text.NumberFormat;
@@ -37,6 +39,7 @@ public class FoodOrderActivity extends AppCompatActivity {
     private String currentPin = "";
     private View[] pinDots = new View[6];
     private List<CartItem> pendingCart;
+    private List<CartItem> globalCart = new ArrayList<>();
     private String pendingRestaurantName;
     private String selectedCategory = null;
     private String currentSearchQuery = "";
@@ -66,6 +69,9 @@ public class FoodOrderActivity extends AppCompatActivity {
                 return insets;
             });
         }
+
+        // Header cart button
+        findViewById(R.id.btn_cart).setOnClickListener(v -> checkoutGlobalCart());
 
         // Header close button
         findViewById(R.id.btn_close).setOnClickListener(v -> finish());
@@ -318,10 +324,13 @@ public class FoodOrderActivity extends AppCompatActivity {
         View layoutCartSummary = view.findViewById(R.id.layout_cart_summary);
         TextView tvCartCount = view.findViewById(R.id.tv_cart_count);
         TextView tvCartTotal = view.findViewById(R.id.tv_cart_total);
-        View btnOrder = view.findViewById(R.id.btn_order);
+        TextView btnOrder = (TextView) view.findViewById(R.id.btn_order);
+        btnOrder.setText("Thêm vào giỏ");
 
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
 
+        // Chuyển globalCart items thành một danh sách clone nếu muốn phục hồi, 
+        // nhưng hiện tại FoodMenuAdapter quản lý cart của riêng nó.
         FoodMenuAdapter menuAdapter = new FoodMenuAdapter(restaurant.getMenu(), cart -> {
             if (cart.isEmpty()) {
                 layoutCartSummary.setVisibility(View.GONE);
@@ -340,20 +349,76 @@ public class FoodOrderActivity extends AppCompatActivity {
 
         rvMenu.setAdapter(menuAdapter);
 
-        // Order button
+        // Order button (Add to cart)
         btnOrder.setOnClickListener(v -> {
             List<CartItem> cart = menuAdapter.getCart();
             if (cart.isEmpty()) {
                 Toast.makeText(this, "Vui lòng chọn ít nhất 1 món", Toast.LENGTH_SHORT).show();
                 return;
             }
-            pendingCart = new ArrayList<>(cart);
-            pendingRestaurantName = restaurant.getName().replace("\n", " ");
+            
+            // Thêm các món vào global cart
+            for (CartItem item : cart) {
+                // Kiểm tra xem món đó đã có trong giỏ chưa
+                boolean exists = false;
+                for (CartItem gc : globalCart) {
+                    if (gc.getMenuItem().getName().equals(item.getMenuItem().getName())) {
+                        int newQuantity = gc.getQuantity() + item.getQuantity();
+                        // (CartItem hiện tại không có setter cho quantity nên ta thêm mới)
+                        globalCart.remove(gc);
+                        globalCart.add(new CartItem(item.getMenuItem(), newQuantity));
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    globalCart.add(item);
+                }
+            }
+            
+            updateGlobalCartBadge();
             dialog.dismiss();
-            showDestinationSelection();
+            Toast.makeText(this, "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
         });
 
         dialog.show();
+    }
+
+    private void updateGlobalCartBadge() {
+        TextView tvBadge = findViewById(R.id.tv_global_cart_badge);
+        int count = 0;
+        for (CartItem ci : globalCart) {
+            count += ci.getQuantity();
+        }
+        if (count > 0) {
+            tvBadge.setVisibility(View.VISIBLE);
+            tvBadge.setText(String.valueOf(count));
+        } else {
+            tvBadge.setVisibility(View.GONE);
+        }
+    }
+
+    private void checkoutGlobalCart() {
+        if (globalCart.isEmpty()) {
+            Toast.makeText(this, "Giỏ hàng của bạn đang trống!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        long totalAmount = 0;
+        StringBuilder productNames = new StringBuilder();
+        for (CartItem ci : globalCart) {
+            totalAmount += ci.getTotalPrice();
+            if (productNames.length() > 0) {
+                productNames.append(", ");
+            }
+            productNames.append(ci.getQuantity()).append("x ").append(ci.getMenuItem().getName());
+        }
+
+        Intent intent = new Intent(this, TransferConfirmationActivity.class);
+        intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
+        intent.putExtra("KEY_IS_FOOD_ORDER", true);
+        intent.putExtra("KEY_FOOD_PRODUCTS", productNames.toString());
+        startActivity(intent);
     }
 
     // ============ Payment flow (reuse pattern) ============

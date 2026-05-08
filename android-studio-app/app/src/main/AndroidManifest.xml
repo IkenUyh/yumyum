@@ -19,16 +19,10 @@
         <activity
             android:name=".transaction.TransactionHistoryFiltered"
             android:exported="false">
-
         </activity>
         <activity
             android:name=".home.HomeActivity"
             android:exported="true">
-           <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".transaction.TransactionHistoryActivity"
@@ -42,8 +36,13 @@
             android:exported="false" />
         <activity
             android:name=".auth.SignInActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".home.money_transfer.MoneyTransferActivity"
             android:exported="false" />
@@ -118,7 +117,7 @@
             android:exported="false"/>
         <activity android:name=".home.food_order.FoodOrderActivity"
             android:exported="false" />
-      
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

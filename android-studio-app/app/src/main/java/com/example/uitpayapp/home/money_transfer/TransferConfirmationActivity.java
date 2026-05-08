@@ -50,9 +50,15 @@ public class TransferConfirmationActivity extends AppCompatActivity {
         boolean isRecharge = getIntent().getBooleanExtra("KEY_IS_RECHARGE", false);
         boolean isBuyCard = getIntent().getBooleanExtra("KEY_IS_BUY_CARD", false);
         boolean isData = getIntent().getBooleanExtra("KEY_IS_DATA", false);
+        boolean isFoodOrder = getIntent().getBooleanExtra("KEY_IS_FOOD_ORDER", false);
 
-        if (name != null) {
-            if (isRecharge) {
+        if (name != null || isFoodOrder) {
+            if (isFoodOrder) {
+                tvConfirmName.setText("Thanh toán dịch vụ đặt đồ ăn");
+                if (ivHeaderIcon != null) {
+                    ivHeaderIcon.setImageResource(R.drawable.ic_home_24px); // or some food icon
+                }
+            } else if (isRecharge) {
                 if (isData) {
                     tvConfirmName.setText("Nạp data ");
                 } else {
@@ -230,13 +236,16 @@ public class TransferConfirmationActivity extends AppCompatActivity {
         boolean isRecharge = getIntent().getBooleanExtra("KEY_IS_RECHARGE", false);
         boolean isBuyCard = getIntent().getBooleanExtra("KEY_IS_BUY_CARD", false);
         boolean isData = getIntent().getBooleanExtra("KEY_IS_DATA", false);
+        boolean isFoodOrder = getIntent().getBooleanExtra("KEY_IS_FOOD_ORDER", false);
 
         intent.putExtra("KEY_AMOUNT", getIntent().getStringExtra("KEY_AMOUNT"));
         intent.putExtra("KEY_NAME", getIntent().getStringExtra("KEY_NAME"));
         intent.putExtra("KEY_AVATAR", receivedAvatarId);
         intent.putExtra("KEY_IS_RECHARGE", isRecharge);
         intent.putExtra("KEY_IS_BUY_CARD", isBuyCard);
-        intent.putExtra("KEY_IS_DATA", isData); // Truyền sang màn Success
+        intent.putExtra("KEY_IS_DATA", isData); 
+        intent.putExtra("KEY_IS_FOOD_ORDER", isFoodOrder);
+        intent.putExtra("KEY_FOOD_PRODUCTS", getIntent().getStringExtra("KEY_FOOD_PRODUCTS"));
 
         startActivity(intent);
         finish();
