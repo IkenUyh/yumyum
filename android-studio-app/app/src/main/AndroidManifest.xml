@@ -116,6 +116,9 @@
             android:exported="false"/>
         <activity android:name=".paymentorder.WaterBillInputActivity"
             android:exported="false"/>
+        <activity android:name=".home.food_order.FoodOrderActivity"
+            android:exported="false" />
+      
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

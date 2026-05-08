@@ -66,6 +66,9 @@ public class HomeActivity extends AppCompatActivity {
             } else if (item.getName().equals("Số dư sinh lời")) {
                 Intent intent = new Intent(HomeActivity.this, com.example.uitpayapp.home.accmulated_balance.AccmulatedBalanceActivity.class);
                 startActivity(intent);
+            } else if (item.getName().equals("Đặt đồ ăn")) {
+                Intent intent = new Intent(HomeActivity.this, com.example.uitpayapp.home.food_order.FoodOrderActivity.class);
+                startActivity(intent);
             } else {
                 Toast.makeText(this, "Dịch vụ " + item.getName() + " đang phát triển", Toast.LENGTH_SHORT).show();
             }
