@@ -2,6 +2,7 @@ services:
   mysql-db:
     image: mysql:9.0
     container_name: zalopay-mysql
+    restart: always
     ports:
       - "3306:3306"
     environment:
@@ -13,16 +14,32 @@ services:
   backend-app:
     build: .
     container_name: zalopay-backend-app
+    restart: always
     ports:
       - "8081:8081"
     depends_on:
       - mysql-db
     environment:
-      # Ket noi voi MySQL thong qua ten service (mysql-db)
+      # Ket noi voi MySQL thong qua ten service
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/zalopay_db?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+
+  # Them Caddy de lo vu HTTPS
+  reverse-proxy:
+    image: caddy:2-alpine
+    container_name: zalopay-caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
 
 volumes:
   mysql_data:
+  caddy_data:
+  caddy_config:
