@@ -1,0 +1,20 @@
+name: Deploy ZaloPay Backend
+
+on:
+  push:
+    branches: [ "develop", "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH vao VPS va Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          script: |
+            cd /root/zalopay-android-integration/backend-springboot
+            git pull origin develop
+            sudo docker compose -p zalopay-backend up -d --build
