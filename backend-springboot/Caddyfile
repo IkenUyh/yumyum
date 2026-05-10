@@ -1,3 +1,7 @@
 kienhuy-dev.name.vn {
     reverse_proxy backend-app:8081
 }
+
+passbook.kienhuy-dev.name.vn {
+    reverse_proxy 221.132.33.131:8082
+}
