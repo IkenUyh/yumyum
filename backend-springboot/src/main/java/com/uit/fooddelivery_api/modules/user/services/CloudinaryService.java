@@ -1,4 +1,4 @@
-package com.uit.zalopay_clone_api.modules.user.services;
+package com.uit.fooddelivery_api.modules.user.services;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

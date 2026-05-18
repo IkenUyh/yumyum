@@ -1,4 +1,4 @@
-package com.uit.zalopay_clone_api.config;
+package com.uit.fooddelivery_api.config;
 
 import org.flywaydb.core.Flyway;
 import org.springframework.stereotype.Component;

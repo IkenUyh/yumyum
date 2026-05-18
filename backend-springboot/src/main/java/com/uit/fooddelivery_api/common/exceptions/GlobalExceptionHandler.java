@@ -1,13 +1,10 @@
-package com.uit.zalopay_clone_api.common.exceptions;
+package com.uit.fooddelivery_api.common.exceptions;
 
-import com.uit.zalopay_clone_api.common.responses.ApiResponse;
+import com.uit.fooddelivery_api.common.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

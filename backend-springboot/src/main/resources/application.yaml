@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/zalopay_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/fooddelivery_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: "123456"
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -26,6 +26,10 @@ server:
   port: 8081
 
 cloudinary:
-  cloud-name: "dkm39ilz8"
+  cloud-name: "dkm39i1z8"
   api-key: "392638882274686"
   api-secret: "M4row-OumipTXq-Nqn8mUdZMs4Y"
+
+jwt:
+  secret: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
+  expiration: 86400000 # 1 ngay

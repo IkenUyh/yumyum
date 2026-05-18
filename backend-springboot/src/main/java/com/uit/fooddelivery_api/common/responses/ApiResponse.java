@@ -1,4 +1,4 @@
-package com.uit.zalopay_clone_api.common.responses;
+package com.uit.fooddelivery_api.common.responses;
 
 import lombok.*;
 

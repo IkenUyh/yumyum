@@ -1,10 +1,10 @@
-package com.uit.zalopay_clone_api;
+package com.uit.fooddelivery_api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ZalopayCloneApiApplicationTests {
+class FoodDeliveryApiApplicationTests {
 
 	@Test
 	void contextLoads() {
