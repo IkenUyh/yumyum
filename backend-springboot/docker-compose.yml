@@ -12,7 +12,7 @@ services:
       - mysql_data:/var/lib/mysql
 
   backend-app:
-    build: .
+    image: ikenuyh/fooddelivery-backend:latest
     container_name: fooddelivery-backend-app
     restart: always
     ports:
