@@ -1,4 +1,4 @@
-package com.uit.zalopay_clone_api.modules.user.dtos;
+package com.uit.fooddelivery_api.modules.user.dtos;
 
 import lombok.Getter;
 import lombok.Setter;
