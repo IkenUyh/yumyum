@@ -16,7 +16,7 @@ services:
     container_name: fooddelivery-backend-app
     restart: always
     ports:
-      - "8081:8081"
+      - "8083:8081"
     depends_on:
       - mysql-db
     environment:
