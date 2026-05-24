@@ -21,7 +21,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#0034C8"
+                android:background="@drawable/bg_userinfo_gradient"
                 android:padding="16dp"
                 android:orientation="vertical">
                 <LinearLayout
@@ -63,13 +63,14 @@
                         android:layout_height="40dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_button_login_rounded"
-                        android:backgroundTint="#FFA000"
+                        android:backgroundTint="#40FFFFFF"
                         android:gravity="center"
                         android:layout_marginEnd="8dp">
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-                            android:src="@drawable/ic_my_coin"/>
+                            android:src="@drawable/ic_my_coin"
+                            app:tint="#000000" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -83,7 +84,7 @@
                         android:layout_height="40dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_button_login_rounded"
-                        android:backgroundTint="#FFFFFF"
+                        android:backgroundTint="#40FFFFFF"
                         android:gravity="center"
                         android:layout_marginEnd="8dp"
                         android:clickable="true">
@@ -91,7 +92,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Quà của tôi"
-                            android:textColor="#000000"
+                            android:textColor="#FFFFFF"
                             android:textSize="12sp"
                             android:textStyle="bold"/>
                     </LinearLayout>
@@ -101,18 +102,49 @@
                         android:layout_height="40dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_button_login_rounded"
-                        android:backgroundTint="#FFFFFF"
+                        android:backgroundTint="#40FFFFFF"
                         android:gravity="center">
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Trang chủ"
-                            android:textColor="#000000"
+                            android:textColor="#FFFFFF"
                             android:textSize="12sp"
                             android:textStyle="bold"/>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                android:elevation="2dp"
+                app:cardUseCompatPadding="true"
+                android:layout_margin="16dp">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#fdfef8">
+                    <ImageView
+                        android:layout_width="300dp"
+                        android:layout_height="130dp"
+                        android:src="@drawable/img_trongdong"
+                        android:scaleType="centerCrop"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginRight="-150dp"
+                        app:tint="#fff1d6"/>
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_daily_checkin"
+                        android:layout_centerVertical="true"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        app:spanCount="7"
+                        tools:listitem="@layout/priority_checkin_item"
+                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                        tools:itemCount="7"/>
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -37,9 +37,9 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         holder.tvCategoryName.setText(category.getName());
 
         if (position == selectedPosition) {
-            holder.tvCategoryName.setBackgroundResource(R.drawable.bg_autopay_tab_selected);
+            holder.tvCategoryName.setBackgroundResource(R.drawable.bg_tab_selected);
         } else {
-            holder.tvCategoryName.setBackgroundResource(R.drawable.bg_autopay_tab_unselected);
+            holder.tvCategoryName.setBackgroundResource(R.drawable.bg_tab_unselected);
         }
 
         holder.itemView.setOnClickListener(v -> {

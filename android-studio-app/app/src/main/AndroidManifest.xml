@@ -21,7 +21,11 @@
         </activity>
         <activity
             android:name=".home.HomeActivity"
-            android:exported="false">
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".transaction.TransactionHistoryActivity"
@@ -35,12 +39,8 @@
             android:exported="false" />
         <activity
             android:name=".auth.SignInActivity"
-            android:exported="true"
+            android:exported="false"
             android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".home.money_transfer.MoneyTransferActivity"
@@ -96,7 +96,7 @@
             android:name=".auth.PasscodeActivity"
             android:exported="false" />
         <activity
-            android:name=".UITpayPriority.PriorityUITpayActivity"
+            android:name=".YumYumPriority.PriorityUITpayActivity"
             android:exported="false" />
         <activity android:name=".giftexchange.GiftExchangeActivity"
             android:exported="false" />
@@ -106,15 +106,11 @@
             android:exported="false" />
         <activity android:name=".insurance.InsuranceActivity"
             android:exported="false" />
-        <activity android:name=".paymentorder.PaymentOrderActivity"
+        <activity android:name=".deliveryaddressorder.AddressOrderActivity"
             android:exported="false" />
-        <activity android:name=".paymentorder.ElectricBillActivity"
-            android:exported="false" />
-        <activity android:name=".paymentorder.WaterBillSelectActivity"
-            android:exported="false"/>
-        <activity android:name=".paymentorder.WaterBillInputActivity"
-            android:exported="false"/>
         <activity android:name=".home.food_order.FoodOrderActivity"
+            android:exported="false" />
+        <activity android:name=".recommendeddeal.RecommendedDealActivity"
             android:exported="false" />
 
         <provider

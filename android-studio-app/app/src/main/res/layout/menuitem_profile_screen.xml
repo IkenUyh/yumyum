@@ -11,7 +11,7 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:scaleType="centerCrop"
-        app:tint="#0034c8"/>
+        app:tint="#f24405"/>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

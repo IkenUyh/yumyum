@@ -1,4 +1,4 @@
-package com.example.uitpayapp.UITpayPriority;
+package com.example.uitpayapp.YumYumPriority;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -38,7 +38,7 @@ public class PriorityCheckInAdapter extends RecyclerView.Adapter<PriorityCheckIn
         holder.imgIcon.setImageResource(config.getIconRes());
 
         if (item.isChecked()) {
-            holder.tvCoin.setTextColor(Color.parseColor("#e02449"));
+            holder.tvCoin.setTextColor(Color.parseColor("#f24405"));
             holder.tvDay.setTextColor(Color.parseColor("#000000"));
             holder.imgIcon.clearColorFilter();
         } else {

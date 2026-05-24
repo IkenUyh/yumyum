@@ -48,7 +48,7 @@ public class InfoApplication extends AppCompatActivity
     }
     private void HanleItemClick(MenuItemData item) {
         if (item.getTitle().equals("Bình chọn UITpay")) {
-            String packetName = "vn.com.vng.zalopay";
+            String packetName = "com.deliverynow";
             try {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packetName)));
             } catch (android.content.ActivityNotFoundException e) {

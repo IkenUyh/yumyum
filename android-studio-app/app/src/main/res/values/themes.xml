@@ -5,4 +5,9 @@
         <item name="colorAccent">@color/teal_200</item>
         <item name="android:fontFamily">@font/svn_gotham_regular</item>
     </style>
+    <style name="CustomTabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textAllCaps">false</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+    </style>
 </resources>

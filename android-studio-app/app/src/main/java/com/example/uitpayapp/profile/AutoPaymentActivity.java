@@ -59,7 +59,7 @@ public class AutoPaymentActivity extends AppCompatActivity {
         listReceiptService.add(new ServiceItem("Nước", R.drawable.ic_receiptscreen_water, ""));
         listReceiptService.add(new ServiceItem("Internet", R.drawable.ic_internet, "")); // Kiểm tra lại ID icon internet
         listReceiptService.add(new ServiceItem("Truyền hình", R.drawable.ic_receiptscreen_tv, ""));
-        listReceiptService.add(new ServiceItem("Trả khoản vay", R.drawable.ic_receiptscreen_loan, ""));
+        listReceiptService.add(new ServiceItem("Trả khoản vay", R.drawable.ic_your_deal, ""));
         listReceiptService.add(new ServiceItem("Giáo dục", R.drawable.ic_receiptscreen_education, ""));
         rvAutopayService.setAdapter(new ServiceAdapter(listReceiptService, R.layout.item_service, item -> {}));
     }
@@ -83,9 +83,9 @@ public class AutoPaymentActivity extends AppCompatActivity {
         // Load dịch vụ bảo hiểm
     }
     private void updateTabUI(View view) {
-        tabSelected.setBackgroundResource(R.drawable.bg_autopay_tab_unselected);
+        tabSelected.setBackgroundResource(R.drawable.bg_tab_unselected);
         tabSelected = view;
-        tabSelected.setBackgroundResource(R.drawable.bg_autopay_tab_selected);
+        tabSelected.setBackgroundResource(R.drawable.bg_tab_selected);
         if (rvAutopayService.getAdapter()!=null)
             rvAutopayService.setAdapter(null);
     }

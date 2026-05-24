@@ -18,19 +18,20 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:background="@drawable/bg_white_circle"
-            android:backgroundTint="#F0F4FF"
+            android:backgroundTint="#f2a88d"
             android:gravity="center"
             android:text="1"
-            android:textColor="#0034C8"
+            android:textColor="#ffffff"
             android:textSize="12sp"
             android:textStyle="bold" />
         <ImageView
-            android:id="@+id/ivMethodIcon"
+            android:id="@+id/iv_type_address"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="12dp"
             android:padding="4dp"
-            android:src="@drawable/ic_wallet" />
+            android:src="@drawable/ic_location"
+            app:tint="#f2a03d"/>
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -38,28 +39,56 @@
             android:layout_weight="1"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/tvMethodName"
+                android:id="@+id/tv_type_address_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Số dư sinh lời"
+                android:text="Loại địa chỉ"
                 android:textColor="#000000"
                 android:textSize="14sp"
                 android:textStyle="bold" />
             <TextView
-                android:id="@+id/tvMethodDetail"
+                android:id="@+id/tv_detail_address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Số dư: 0đ"
+                android:text="Khu phố 34, Phường Linh Xuân, TP. Hồ Chí Minh"
                 android:textColor="#757575"
-                android:textSize="13sp" />
+                android:textSize="13sp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+                <TextView
+                    android:id="@+id/tv_name_receiver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tên người nhận"
+                    android:textColor="#757575"
+                    android:textSize="9sp"/>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="#757575"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="5dp"/>
+                <TextView
+                    android:id="@+id/tv_phone_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Số điện thoại"
+                    android:textColor="#757575"
+                    android:textSize="9sp"/>
+            </LinearLayout>
         </LinearLayout>
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switchEnable"
+        <TextView
+            android:id="@+id/tv_edit_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
-            app:thumbTint="#FFFFFF"
-            app:trackTint="#0034c8" />
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:text="Sửa"
+            android:textColor="#0034C8"
+            android:layout_marginLeft="5dp"/>
         <ImageView
             android:id="@+id/ivDragHandle"
             android:layout_width="24dp"

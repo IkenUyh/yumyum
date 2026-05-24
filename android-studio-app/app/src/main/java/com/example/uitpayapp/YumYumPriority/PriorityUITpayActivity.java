@@ -1,4 +1,4 @@
-package com.example.uitpayapp.UITpayPriority;
+package com.example.uitpayapp.YumYumPriority;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,8 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -38,7 +36,7 @@ public class PriorityUITpayActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_uitpay_priority);
+        setContentView(R.layout.activity_yumyum_priority);
         View topBar = findViewById(R.id.top_bar_uit_priority);
         View mainContainer = findViewById(R.id.priority_uitpay_container);
         ViewCompat.setOnApplyWindowInsetsListener(topBar, (v, insets) -> {
@@ -56,31 +54,20 @@ public class PriorityUITpayActivity extends AppCompatActivity {
         });
         BannerSlider = findViewById(R.id.priority_image_slider);
         RankSlider = findViewById(R.id.priority_account_rank_slider);
-        RVCheckIn = findViewById(R.id.rv_priority_checkin);
         ((TextView)topBar.findViewById(R.id.top_bar_title)).setText("UITpay Priority");
         topBar.findViewById(R.id.top_bar_back_btn).setOnClickListener(v->finish());
         View questionContact=findViewById(R.id.priority_question_contact);
         View rule=findViewById(R.id.priority_rule);
-        ((ImageView)rule.findViewById(R.id.menu_icon)).setImageResource(R.drawable.ic_receiptscreen_loan);
+        ((ImageView)rule.findViewById(R.id.menu_icon)).setImageResource(R.drawable.ic_your_deal);
         ((TextView)rule.findViewById(R.id.menu_title)).setText("Thể lệ và hướng dẫn");
         ((ImageView)questionContact.findViewById(R.id.menu_icon)).setImageResource(R.drawable.ic_question_contact);
         ((TextView)questionContact.findViewById(R.id.menu_title)).setText("Câu hỏi thường gặp");
         SetAccountRankingData();
         SetBannerData();
-        SetCheckInData();
         setListener();
         setSecondaryData();
     }
     private void setSecondaryData() {
-        View rvExchangeVoucher = findViewById(R.id.rv_exchange_vouchers);
-        View rvPriorityTasks = findViewById(R.id.rv_priority_tasks);
-        List<ExchangeVoucherModel> ExVoucherList = new ArrayList<>();
-        ExVoucherList.add(new ExchangeVoucherModel(-1, "Giảm 50K Hóa đơn", "Cho hóa đơn điện từ 500K", "50", "5K", "hoadon"));
-        ExVoucherList.add(new ExchangeVoucherModel(-1, "Nạp thẻ 20K", "Chiết khấu nạp tiền điện thoại", "20", "2K", "dienthoai"));
-        ExVoucherList.add(new ExchangeVoucherModel(-1, "Giảm 100K Bảo hiểm", "Áp dụng bảo hiểm xe máy", "100", "10K", "baohiem"));
-        ExVoucherList.add(new ExchangeVoucherModel(-1, "Voucher Highlands 30K", "Áp dụng toàn quốc", "30", "3K", "muasam_anuong"));
-        ExchangeVoucherAdapter ExVoucherAdapter = new ExchangeVoucherAdapter(ExVoucherList);
-
     }
     private void setListener() {
         findViewById(R.id.priority_question_contact).setOnClickListener(v->{
@@ -94,11 +81,6 @@ public class PriorityUITpayActivity extends AppCompatActivity {
             startActivity(intent);
         });
         findViewById(R.id.priority_change_gift).setOnClickListener(v->{
-            Intent intent=new Intent(PriorityUITpayActivity.this, GiftExchangeActivity.class);
-            startActivity(intent);
-            this.finish();
-        });
-        findViewById(R.id.tv_priority_exchange_showmore).setOnClickListener(v-> {
             Intent intent=new Intent(PriorityUITpayActivity.this, GiftExchangeActivity.class);
             startActivity(intent);
             this.finish();
@@ -132,17 +114,5 @@ public class PriorityUITpayActivity extends AppCompatActivity {
         };
         sliderHandler.post(sliderRunnable);
 
-    }
-    private void SetCheckInData() {
-        List<CheckInModel> checkInList = new ArrayList<>();
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_1, true));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_2, false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_3, false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_4, false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_5, false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_6, false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_7, false));
-        PriorityCheckInAdapter adapter = new PriorityCheckInAdapter(checkInList);
-        RVCheckIn.setAdapter(adapter);
     }
 }

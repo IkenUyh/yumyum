@@ -7,7 +7,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#f1f5ff">
+        android:background="#f5f7fa">
 
         <TextView
             android:id="@+id/pagetilte"
@@ -19,7 +19,7 @@
             android:textAlignment="center"
             android:padding="15dp"
             android:textColor="#FFFFFF"
-            android:background="#0034c8"/>
+            android:background="#f24405"/>
 
         <ScrollView
             android:layout_below="@id/pagetilte"
@@ -110,7 +110,7 @@
                     android:layout_marginTop="-15dp"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
-                    android:backgroundTint="#f1f5ff">
+                    android:backgroundTint="#f5f7fa">
                     <LinearLayout
                         android:id="@+id/profile_container"
                         android:layout_width="match_parent"
@@ -185,14 +185,14 @@
                                     android:layout_height="wrap_content"
                                     android:textSize="14sp"
                                     android:textColor="#000000"
-                                    android:text="Quản lý mã"
+                                    android:text="Thanh toán"
                                     android:textStyle="bold"/>
                                 <TextView
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:textSize="10sp"
                                     android:textColor="#000000"
-                                    android:text="Quản lý các mã QR quan trọng"
+                                    android:text="Quét mã nhanh để thanh toán đơn hàng"
                                     android:textStyle="normal"/>
                             </LinearLayout>
                             <ImageView
@@ -226,7 +226,7 @@
                                     android:layout_height="wrap_content"
                                     android:textSize="14sp"
                                     android:textColor="#000000"
-                                    android:text="UITpay Priority"
+                                    android:text="YumYum Priority"
                                     android:textStyle="bold"/>
                                 <TextView
                                     android:layout_width="match_parent"

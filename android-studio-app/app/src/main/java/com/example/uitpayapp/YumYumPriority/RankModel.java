@@ -1,4 +1,4 @@
-package com.example.uitpayapp.UITpayPriority;
+package com.example.uitpayapp.YumYumPriority;
 
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.profile.MenuItemData;

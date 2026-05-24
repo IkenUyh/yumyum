@@ -1,5 +1,6 @@
 package com.example.uitpayapp.giftexchange;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,7 +21,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.UITpayPriority.PriorityUITpayActivity;
+import com.example.uitpayapp.YumYumPriority.CheckInModel;
+import com.example.uitpayapp.YumYumPriority.PriorityCheckInAdapter;
+import com.example.uitpayapp.YumYumPriority.PriorityUITpayActivity;
 import com.example.uitpayapp.home.ImageSliderAdapter;
 import com.example.uitpayapp.suggestion.SuggestAdapter;
 import com.example.uitpayapp.suggestion.SuggestionModel;
@@ -31,7 +34,7 @@ import java.util.List;
 
 public class GiftExchangeActivity extends AppCompatActivity {
 
-    private RecyclerView rvCategory;
+    private RecyclerView rvCategory,rvCheckIn;
     private CategoryAdapter categoryAdapter;
     private List<CategoryModel> categoryList;
 
@@ -60,6 +63,7 @@ public class GiftExchangeActivity extends AppCompatActivity {
         setExchangeVoucherData();
         setGift1CoinData();
         setBannerData();
+        SetCheckInData();
         findViewById(R.id.gift_exchange_my_voucher).setOnClickListener(v ->
         {
             Intent intent = new Intent(this, VoucherActivity.class);
@@ -81,6 +85,7 @@ public class GiftExchangeActivity extends AppCompatActivity {
         rvCategory = findViewById(R.id.rv_new_gift_exchange_menu);
         rvExchangeVoucher = findViewById(R.id.rv_new_gift_exchange);
         rvExchangeVoucherDemo = findViewById(R.id.rv_gift_exchange_demo);
+        rvCheckIn = findViewById(R.id.rv_daily_checkin);
         rvGift1Coin = findViewById(R.id.rv_gift_1coin);
         BannerSlider = findViewById(R.id.gift_exchange_image_slider);
         layoutNewGifts = findViewById(R.id.layout_new_gifts_section);
@@ -112,10 +117,8 @@ public class GiftExchangeActivity extends AppCompatActivity {
     private void setCategoryData() {
         categoryList = new ArrayList<>();
         categoryList.add(new CategoryModel("Tất cả", "all", true));
-        categoryList.add(new CategoryModel("Hóa đơn", "hoadon", false));
-        categoryList.add(new CategoryModel("Điện thoại", "dienthoai", false));
-        categoryList.add(new CategoryModel("Bảo hiểm", "baohiem", false));
-        categoryList.add(new CategoryModel("Mua sắm & Ăn uống", "muasam_anuong", false));
+        categoryList.add(new CategoryModel("Giảm giá món", "FOOD_DISCOUNT", false));
+        categoryList.add(new CategoryModel("Phí vận chuyển", "SHIPPING_FEE", false));
 
         categoryAdapter = new CategoryAdapter(categoryList, this::HandleCategoryClick);
 
@@ -125,15 +128,14 @@ public class GiftExchangeActivity extends AppCompatActivity {
 
     private void setExchangeVoucherData() {
         allVoucherList = new ArrayList<>();
-        allVoucherList.add(new ExchangeVoucherModel(-1, "Giảm 50K Hóa đơn", "Cho hóa đơn điện từ 500K", "50", "5K", "hoadon"));
-        allVoucherList.add(new ExchangeVoucherModel(-1, "Nạp thẻ 20K", "Chiết khấu nạp tiền điện thoại", "20", "2K", "dienthoai"));
-        allVoucherList.add(new ExchangeVoucherModel(-1, "Giảm 100K Bảo hiểm", "Áp dụng bảo hiểm xe máy", "100", "10K", "baohiem"));
-        allVoucherList.add(new ExchangeVoucherModel(-1, "Voucher Highlands 30K", "Áp dụng toàn quốc", "30", "3K", "muasam_anuong"));
-        allVoucherList.add(new ExchangeVoucherModel(-1, "Giảm 20K Nước", "Hóa đơn nước trên 100K", "20", "1K", "hoadon"));
-        allVoucherList.add(new ExchangeVoucherModel(-1, "Data 4G 10GB", "Gói cước Viettel 30 ngày", "50", "5K", "dienthoai"));
-        allVoucherList.add(new ExchangeVoucherModel(-1, "Voucher Phúc Long", "Giảm 10% tổng hóa đơn", "15", "Free", "muasam_anuong"));
-        
-        // Setup Demo RV
+        allVoucherList.add(new ExchangeVoucherModel("Khao 50K trà sữa", "Thưởng thức trà sữa đậm vị", "50", ExchangeVoucherModel.ExchangeVoucherType.FOOD_DISCOUNT));
+        allVoucherList.add(new ExchangeVoucherModel("Miễn phí vận chuyển", "Freeship cho mọi đơn hàng từ 0đ", "20", ExchangeVoucherModel.ExchangeVoucherType.SHIPPING_FEE));
+        allVoucherList.add(new ExchangeVoucherModel("Giảm 100K tiệc ngon", "Ăn uống linh đình, không lo về giá", "100", ExchangeVoucherModel.ExchangeVoucherType.FOOD_DISCOUNT));
+        allVoucherList.add(new ExchangeVoucherModel("Highlands Coffee -30K", "Đậm vị cà phê, khao bạn ly mới", "30", ExchangeVoucherModel.ExchangeVoucherType.FOOD_DISCOUNT));
+        allVoucherList.add(new ExchangeVoucherModel("Giảm ngay 20K phí ship", "Giao hàng hỏa tốc trong 30 phút", "20", ExchangeVoucherModel.ExchangeVoucherType.SHIPPING_FEE));
+        allVoucherList.add(new ExchangeVoucherModel("Freeship Extra 15K", "Giảm phí ship cho đơn từ 50K", "50", ExchangeVoucherModel.ExchangeVoucherType.SHIPPING_FEE));
+        allVoucherList.add(new ExchangeVoucherModel("Voucher Phúc Long 10%", "Trà sữa đậm vị chuẩn gu bạn", "15", ExchangeVoucherModel.ExchangeVoucherType.FOOD_DISCOUNT));
+
         List<ExchangeVoucherModel> demoList = new ArrayList<>();
         for (int i = 0; i < Math.min(4, allVoucherList.size()); i++) {
             demoList.add(allVoucherList.get(i));
@@ -143,7 +145,6 @@ public class GiftExchangeActivity extends AppCompatActivity {
         rvExchangeVoucherDemo.setAdapter(demoAdapter);
         rvExchangeVoucherDemo.setNestedScrollingEnabled(false);
 
-        // Setup Main RV
         displayVoucherList = new ArrayList<>(allVoucherList);
         exchangeVoucherAdapter = new ExchangeVoucherAdapter(displayVoucherList);
         rvExchangeVoucher.setLayoutManager(new GridLayoutManager(this, 2));
@@ -162,6 +163,7 @@ public class GiftExchangeActivity extends AppCompatActivity {
         rvGift1Coin.setAdapter(adapter);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void HandleCategoryClick(CategoryModel category) {
         String type = category.getType();
         displayVoucherList.clear();
@@ -169,7 +171,7 @@ public class GiftExchangeActivity extends AppCompatActivity {
             displayVoucherList.addAll(allVoucherList);
         } else {
             for (ExchangeVoucherModel item : allVoucherList) {
-                if (item.getType().equals(type)) {
+                if (item.getVoucherType().name().equals(type)) {
                     displayVoucherList.add(item);
                 }
             }
@@ -195,5 +197,17 @@ public class GiftExchangeActivity extends AppCompatActivity {
             }
         };
         sliderHandler.post(sliderRunnable);
+    }
+    private void SetCheckInData() {
+        List<CheckInModel> checkInList = new ArrayList<>();
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_1, true));
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_2, false));
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_3, false));
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_4, false));
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_5, false));
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_6, false));
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_7, false));
+        PriorityCheckInAdapter adapter = new PriorityCheckInAdapter(checkInList);
+        rvCheckIn.setAdapter(adapter);
     }
 }

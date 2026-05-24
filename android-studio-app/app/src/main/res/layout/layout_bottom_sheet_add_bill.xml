@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:style="http://schemas.android.com/tools"
     android:background="@drawable/bg_bottom_sheet_rounded"
     android:orientation="vertical"
     android:padding="20dp">
@@ -79,7 +80,7 @@
         android:inputType="text"
         android:maxLines="1"/>
 
-    <!-- Lưu ý -->
+    <!--Luu y-->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -87,6 +88,38 @@
         android:text="Mã khách hàng được in trên hóa đơn giấy hoặc hợp đồng dịch vụ của bạn"
         android:textColor="#9E9E9E"
         android:textSize="11sp"/>
+    <!--Don vi cung cap dich vu-->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Đơn vị cung cấp"
+        android:textColor="#757575"
+        android:textSize="13sp"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        app:boxBackgroundMode="outline"
+        app:boxStrokeWidth="1dp"
+        app:boxStrokeColor="#000000"
+        app:boxStrokeWidthFocused="2dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:endIconMode="dropdown_menu">
+        <AutoCompleteTextView
+            android:id="@+id/dropdown"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Chọn đơn vị cung cấp"
+            android:inputType="none"
+            android:paddingHorizontal="16dp"
+            android:textSize="14sp"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Nút xác nhận -->
     <androidx.appcompat.widget.AppCompatButton

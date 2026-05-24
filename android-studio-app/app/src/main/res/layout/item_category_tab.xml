@@ -10,5 +10,5 @@
     android:textSize="14sp"
     android:textStyle="bold"
     android:gravity="center"
-    android:background="@drawable/bg_autopay_tab_unselected"
-    android:textColor="#0034c8" />
+    android:background="@drawable/bg_tab_unselected"
+    android:textColor="#ffffff" />

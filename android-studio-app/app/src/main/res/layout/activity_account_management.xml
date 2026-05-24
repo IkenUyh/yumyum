@@ -32,8 +32,8 @@
                     android:text="Ngân hàng"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
-                    android:background="@drawable/bg_autopay_tab_unselected"
-                    android:textColor="#757575"
+                    android:background="@drawable/bg_tab_unselected"
+                    android:textColor="#ffffff"
                     android:textStyle="bold"
                     android:layout_marginEnd="8dp"/>
                 <TextView
@@ -43,8 +43,8 @@
                     android:text="Tài chính"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
-                    android:background="@drawable/bg_autopay_tab_selected"
-                    android:textColor="#0034c8"
+                    android:background="@drawable/bg_tab_selected"
+                    android:textColor="#f24405"
                     android:textStyle="bold"
                     android:layout_marginEnd="8dp"/>
                 <TextView
@@ -54,8 +54,8 @@
                     android:text="Số dư"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
-                    android:background="@drawable/bg_autopay_tab_unselected"
-                    android:textColor="#757575"
+                    android:background="@drawable/bg_tab_unselected"
+                    android:textColor="#ffffff"
                     android:textStyle="bold"/>
             </LinearLayout>
             <androidx.recyclerview.widget.RecyclerView

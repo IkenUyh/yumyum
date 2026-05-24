@@ -79,14 +79,14 @@ public class AccountManagementActivity extends AppCompatActivity {
         switch(type)
         {
             case TAI_CHINH:
-                tabSelected.setBackgroundResource(R.drawable.bg_autopay_tab_unselected);
+                tabSelected.setBackgroundResource(R.drawable.bg_tab_unselected);
                 tabSelected=findViewById(R.id.account_manage_type_finance);
-                tabSelected.setBackgroundResource(R.drawable.bg_autopay_tab_selected);
+                tabSelected.setBackgroundResource(R.drawable.bg_tab_selected);
                 break;
             case SO_DU:
-                tabSelected.setBackgroundResource(R.drawable.bg_autopay_tab_unselected);
+                tabSelected.setBackgroundResource(R.drawable.bg_tab_unselected);
                 tabSelected=findViewById(R.id.account_manage_type_coin);
-                tabSelected.setBackgroundResource(R.drawable.bg_autopay_tab_selected);
+                tabSelected.setBackgroundResource(R.drawable.bg_tab_selected);
                 break;
         }
 

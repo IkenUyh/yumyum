@@ -40,7 +40,7 @@
                             android:id="@+id/tab_all_autopay"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/bg_autopay_tab_unselected"
+                            android:background="@drawable/bg_tab_unselected"
                             android:gravity="center"
                             android:paddingHorizontal="16dp"
                             android:paddingVertical="8dp">
@@ -48,20 +48,20 @@
                                 android:layout_width="16dp"
                                 android:layout_height="16dp"
                                 android:src="@drawable/ic_menu_autopay"
-                                app:tint="#0034C8" />
+                                app:tint="#ffffff" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
                                 android:text="Tất cả"
-                                android:textColor="#0034C8"
+                                android:textColor="#ffffff"
                                 android:textStyle="bold" />
                         </LinearLayout>
                         <LinearLayout
                             android:id="@+id/tab_bill_autopay"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/bg_autopay_tab_selected"
+                            android:background="@drawable/bg_tab_selected"
                             android:gravity="center"
                             android:paddingHorizontal="16dp"
                             android:paddingVertical="8dp"
@@ -70,20 +70,20 @@
                                 android:layout_width="16dp"
                                 android:layout_height="16dp"
                                 android:src="@drawable/ic_receipt"
-                                app:tint="#0034C8" />
+                                app:tint="#f24405" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
                                 android:text="Hoá đơn"
-                                android:textColor="#0034C8"
+                                android:textColor="#f24405"
                                 android:textStyle="bold" />
                         </LinearLayout>
                         <LinearLayout
                             android:id="@+id/tab_internet_autopay"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/bg_autopay_tab_unselected"
+                            android:background="@drawable/bg_tab_unselected"
                             android:gravity="center"
                             android:paddingHorizontal="16dp"
                             android:paddingVertical="8dp"
@@ -92,20 +92,20 @@
                                 android:layout_width="16dp"
                                 android:layout_height="16dp"
                                 android:src="@drawable/ic_phone_autopay"
-                                app:tint="#0034C8" />
+                                app:tint="#ffffff" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
                                 android:text="Điện thoại"
-                                android:textColor="#0034C8"
+                                android:textColor="#ffffff"
                                 android:textStyle="bold" />
                         </LinearLayout>
                         <LinearLayout
                             android:id="@+id/tab_insurance_autopay"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/bg_autopay_tab_unselected"
+                            android:background="@drawable/bg_tab_unselected"
                             android:gravity="center"
                             android:paddingHorizontal="16dp"
                             android:paddingVertical="8dp"
@@ -114,13 +114,13 @@
                                 android:layout_width="16dp"
                                 android:layout_height="16dp"
                                 android:src="@drawable/ic_contract_insurance"
-                                app:tint="#0034C8" />
+                                app:tint="#ffffff" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
                                 android:text="Bảo hiểm"
-                                android:textColor="#0034C8"
+                                android:textColor="#ffffff"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>

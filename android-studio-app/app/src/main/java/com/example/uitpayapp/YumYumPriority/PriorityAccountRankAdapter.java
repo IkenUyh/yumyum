@@ -1,15 +1,13 @@
-package com.example.uitpayapp.UITpayPriority;
+package com.example.uitpayapp.YumYumPriority;
 
 import static android.view.View.VISIBLE;
 
 import android.graphics.Color;
-import android.opengl.Visibility;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.profile.GroupItemData;
-import com.example.uitpayapp.profile.MenuItemData;
 import com.example.uitpayapp.profile.ProfileMenuAdapter;
 
 import java.util.ArrayList;
