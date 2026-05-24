@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF"
     android:fitsSystemWindows="true"
-    tools:context=".home.money_transfer.TransferConfirmationActivity">
+    tools:context=".home.checkout.TransferConfirmationActivity">
 
     <LinearLayout
         android:id="@+id/layout_header"

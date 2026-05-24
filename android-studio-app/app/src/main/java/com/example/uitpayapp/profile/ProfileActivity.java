@@ -23,9 +23,7 @@ import com.example.uitpayapp.R;
 import com.example.uitpayapp.ScanQRCode.QRScanActivity;
 import com.example.uitpayapp.UITpayPriority.PriorityUITpayActivity;
 import com.example.uitpayapp.gift.GiftActivity;
-import com.example.uitpayapp.giftexchange.GiftExchangeActivity;
 import com.example.uitpayapp.insurance.InsuranceActivity;
-import com.example.uitpayapp.paymentorder.PaymentOrderActivity;
 import com.example.uitpayapp.voucher.VoucherActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
@@ -105,12 +103,7 @@ public class ProfileActivity extends AppCompatActivity {
         ListItems_finance.add(new MenuItemData("Tài khoản/thẻ liên kết", "", R.drawable.ic_account_card_payment,true));
         ListItems_finance.add(new MenuItemData("Cài đặt thanh toán tự động", "Sắp xếp nguồn tiền, cài đặt dịch vụ", R.drawable.ic_payment,false));
         ListGroupItem.add(new GroupItemData("Quản lý tài chính", ListItems_finance));
-        //Nhóm 3: Tiện ích
-        List<MenuItemData> ListItems_tienich = new ArrayList<>();
-        ListItems_tienich.add(new MenuItemData("Quản lý hóa đơn", "Thêm hóa đơn để thanh toán bạn nhé", R.drawable.ic_receipt,false));
-        ListItems_tienich.add(new MenuItemData("Quản lý hợp đồng", "", R.drawable.ic_contract,false));
-        ListGroupItem.add(new GroupItemData("Tiện ích", ListItems_tienich));
-        //Nhóm 4: Hỗ trợ
+        //Nhóm 3: Hỗ trợ
         List<MenuItemData> ListItems_support = new ArrayList<>();
         ListItems_support.add(new MenuItemData("Trung tâm hỗ trợ", "", R.drawable.ic_contact_support_ver2,false));
         ListItems_support.add(new MenuItemData("Trung tâm bảo mật", "", R.drawable.ic_security_user,false));
@@ -148,12 +141,6 @@ public class ProfileActivity extends AppCompatActivity {
                 ListGroupItem.add(new GroupItemData("",ListItems));
                 ShowBottomSheet("Cài đặt thanh toán tự động",ListGroupItem);
                 break;
-            case "Quản lý hợp đồng":
-                ListItems.add(new MenuItemData("Hợp đồng bảo hiểm","",R.drawable.ic_contract_insurance,false));
-                ListItems.add(new MenuItemData("Hợp đồng số dư sinh lời","",R.drawable.ic_accmulated_balance,false));
-                ListGroupItem.add(new GroupItemData("",ListItems));
-                ShowBottomSheet("Quản lý hợp đồng",ListGroupItem);
-                break;
             case "Trung tâm bảo mật":
                 ListItems.add(new MenuItemData("Bảo mật tài khoản","",R.drawable.ic_security_user,false));
                 ListItems.add(new MenuItemData("Bảo mật giao dịch","",R.drawable.ic_security_transaction,false));
@@ -177,10 +164,6 @@ public class ProfileActivity extends AppCompatActivity {
                 ListGroupItem.add(new GroupItemData("",ListItems));
                 ShowBottomSheet("Quản lý tài chính",ListGroupItem);
                 break;
-            case "Quản lý hóa đơn":
-                Intent intentReceipt=new Intent(this, com.example.uitpayapp.home.receipt.ReceiptActivity.class);
-                startActivity(intentReceipt);
-                break;
             case "Quà của tôi":
                 Intent intentVoucher=new Intent(this, VoucherActivity.class);
                 startActivity(intentVoucher);
@@ -190,11 +173,6 @@ public class ProfileActivity extends AppCompatActivity {
                 intentSupport.putExtra("URL_KEY","https://support.zalopay.vn/faq/web");
                 startActivity(intentSupport);
                 break;
-            case "Xu tích lũy":
-                Intent intentCoin=new Intent(this, GiftExchangeActivity.class);
-                startActivity(intentCoin);
-                break;
-
         }
     }
     public static void SetDetailMenuItem(View item, String item_title, String item_subtitle, int item_icon) {
@@ -245,10 +223,6 @@ public class ProfileActivity extends AppCompatActivity {
                 Intent intentNotification=new Intent(this, NotificationSettings.class);
                 startActivity(intentNotification);
                 break;
-            case "Hợp đồng số dư sinh lời":
-                Intent intentAccmulated=new Intent(this, com.example.uitpayapp.home.accmulated_balance.AccmulatedBalanceActivity.class);
-                startActivity(intentAccmulated);
-                break;
             case "Thanh toán hóa đơn tự động":
                 Intent intentAutoPay=new Intent(this, AutoPaymentActivity.class);
                 startActivity(intentAutoPay);
@@ -268,10 +242,6 @@ public class ProfileActivity extends AppCompatActivity {
             case "Hợp đồng bảo hiểm":
                 Intent intentInsurance=new Intent(this, InsuranceActivity.class);
                 startActivity(intentInsurance);
-                break;
-            case "Thanh toán dịch vụ tự động":
-                Intent intentPaymentOrder=new Intent(this, PaymentOrderActivity.class);
-                startActivity(intentPaymentOrder);
                 break;
         }
     }

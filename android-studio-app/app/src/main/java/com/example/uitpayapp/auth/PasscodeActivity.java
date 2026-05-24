@@ -194,17 +194,16 @@ public class PasscodeActivity extends AppCompatActivity {
                         editor.putString("PHONE_NUMBER", user.getPhoneNumber());
                         editor.putString("AVATAR_URL", user.getAvatarUrl());
                         editor.apply(); // Lưu lại
+
                         // Thành công: Chuyển sang HomeActivity
                         Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
                         startActivity(intent);
                         finish();
-                    }
-                    else {
+                    } else {
                         showLoginError("Mã Pin không đúng. Vui lòng thử lại");
                     }
-                }
-                else {
+                } else {
                     showLoginError("Mã Pin không đúng. Vui lòng thử lại");
                 }
             }

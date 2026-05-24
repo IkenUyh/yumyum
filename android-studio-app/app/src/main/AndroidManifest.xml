@@ -43,39 +43,21 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".home.money_transfer.MoneyTransferActivity"
+            android:name=".home.checkout.MoneyTransferActivity"
             android:exported="false" />
 
         <activity
-            android:name=".home.money_transfer.TransferConfirmationActivity"
+            android:name=".home.checkout.TransferConfirmationActivity"
             android:exported="false" />
 
         <activity
-            android:name=".home.money_transfer.TransferSuccessActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".home.my_qr.MyQRActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".home.deposit_withdraw.DepositWithdrawActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".home.phone_recharge.PhoneRechargeActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".home.receipt.ReceiptActivity"
+            android:name=".home.checkout.TransferSuccessActivity"
             android:exported="false" />
         <activity android:name=".profile.InfoApplication"
             android:exported="false" />
         <activity android:name=".profile.NotificationSettings"
             android:exported="false" />
         <activity android:name=".profile.ProfileWebView"
-            android:exported="false" />
-        <activity android:name=".home.accmulated_balance.AccmulatedBalanceActivity"
             android:exported="false" />
         <activity android:name=".voucher.VoucherActivity"
             android:exported="false" />
@@ -98,23 +80,11 @@
         <activity
             android:name=".UITpayPriority.PriorityUITpayActivity"
             android:exported="false" />
-        <activity android:name=".giftexchange.GiftExchangeActivity"
-            android:exported="false" />
         <activity android:name=".profile.AccountManagementActivity"
             android:exported="false" />
         <activity android:name=".profile.AccountDetailActivity"
             android:exported="false" />
         <activity android:name=".insurance.InsuranceActivity"
-            android:exported="false" />
-        <activity android:name=".paymentorder.PaymentOrderActivity"
-            android:exported="false" />
-        <activity android:name=".paymentorder.ElectricBillActivity"
-            android:exported="false" />
-        <activity android:name=".paymentorder.WaterBillSelectActivity"
-            android:exported="false"/>
-        <activity android:name=".paymentorder.WaterBillInputActivity"
-            android:exported="false"/>
-        <activity android:name=".home.food_order.FoodOrderActivity"
             android:exported="false" />
 
         <provider

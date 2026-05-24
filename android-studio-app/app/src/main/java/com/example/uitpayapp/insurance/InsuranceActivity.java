@@ -17,7 +17,7 @@ import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.home.ServiceAdapter;
+import com.example.uitpayapp.home.home_adapters.ServiceAdapter;
 import com.example.uitpayapp.home.ServiceItem;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +104,6 @@ public class InsuranceActivity extends AppCompatActivity {
         if (rvCategories == null) return;
 
         List<ServiceItem> items = new ArrayList<>();
-        items.add(new ServiceItem("Xe máy", R.drawable.ic_bus_ticket, "40K/năm"));
         items.add(new ServiceItem("Ô tô", R.drawable.ic_transfer, "-40%"));
         items.add(new ServiceItem("Điện gia dụng", R.drawable.ic_receiptscreen_electric, ""));
         items.add(new ServiceItem("Nhà", R.drawable.ic_home_24px, ""));

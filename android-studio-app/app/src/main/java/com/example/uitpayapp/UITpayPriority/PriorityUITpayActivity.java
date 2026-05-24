@@ -12,16 +12,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.giftexchange.ExchangeVoucherAdapter;
 import com.example.uitpayapp.giftexchange.ExchangeVoucherModel;
-import com.example.uitpayapp.giftexchange.GiftExchangeActivity;
-import com.example.uitpayapp.home.ImageSliderAdapter;
+import com.example.uitpayapp.home.home_adapters.ImageSliderAdapter;
 import com.example.uitpayapp.profile.ProfileWebView;
 
 import java.util.ArrayList;
@@ -92,16 +89,6 @@ public class PriorityUITpayActivity extends AppCompatActivity {
             Intent intent=new Intent(PriorityUITpayActivity.this, ProfileWebView.class);
             intent.putExtra("URL_KEY","https://zalopay.vn/dich-vu/zalopay-priority");
             startActivity(intent);
-        });
-        findViewById(R.id.priority_change_gift).setOnClickListener(v->{
-            Intent intent=new Intent(PriorityUITpayActivity.this, GiftExchangeActivity.class);
-            startActivity(intent);
-            this.finish();
-        });
-        findViewById(R.id.tv_priority_exchange_showmore).setOnClickListener(v-> {
-            Intent intent=new Intent(PriorityUITpayActivity.this, GiftExchangeActivity.class);
-            startActivity(intent);
-            this.finish();
         });
     }
     private void SetAccountRankingData() {

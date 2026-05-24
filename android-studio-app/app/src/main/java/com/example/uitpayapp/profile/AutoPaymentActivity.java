@@ -11,7 +11,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.home.ServiceAdapter;
+import com.example.uitpayapp.home.home_adapters.ServiceAdapter;
 import com.example.uitpayapp.home.ServiceItem;
 
 import java.util.ArrayList;
