@@ -20,6 +20,29 @@ public class FoodService {
     private final FoodRepository foodRepository;
     private final RestaurantRepository restaurantRepository;
     private final CategoryRepository categoryRepository;
+    private final com.uit.fooddelivery_api.modules.user.services.CloudinaryService cloudinaryService;
+
+    // Hàm xử lý upload ảnh món ăn
+    @jakarta.transaction.Transactional
+    public String updateFoodImage(Long foodId, org.springframework.web.multipart.MultipartFile file, User merchant) throws java.io.IOException {
+        // 1. Tìm món ăn xem có tồn tại không
+        Food food = foodRepository.findById(foodId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy món ăn!"));
+
+        // 2. CHECK BẢO MẬT: Thằng tài khoản này có đúng là chủ của nhà hàng chứa món ăn này không?
+        if (!food.getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Anh không có quyền đổi ảnh món ăn của nhà hàng khác!");
+        }
+
+        // 3. Bắn ảnh lên Cloudinary lấy link về
+        String imageUrl = cloudinaryService.uploadAvatar(file);
+
+        // 4. Cập nhật link ảnh vào món ăn và lưu lại
+        food.setImageUrl(imageUrl);
+        foodRepository.save(food);
+
+        return imageUrl;
+    }
 
     public Food createFood(CreateFoodDTO dto, User merchant) {
         Restaurant restaurant = restaurantRepository.findById(dto.getRestaurantId())
@@ -53,5 +76,45 @@ public class FoodService {
     // Nho import java.util.List;
     public List<Food> getFoodsByRestaurant(Long restaurantId) {
         return foodRepository.findByRestaurantId(restaurantId);
+    }
+
+    // API Cập nhật thông tin món ăn
+    @jakarta.transaction.Transactional
+    public Food updateFood(Long foodId, CreateFoodDTO dto, User merchant) {
+        Food food = foodRepository.findById(foodId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy món ăn!"));
+
+        // Check quyền chủ quán
+        if (!food.getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Anh không có quyền sửa món ăn của nhà hàng khác!");
+        }
+
+        food.setName(dto.getName());
+        food.setDescription(dto.getDescription());
+        food.setPrice(dto.getPrice());
+
+        if (dto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục món ăn!"));
+            food.setCategory(category);
+        }
+
+        return foodRepository.save(food);
+    }
+
+    // API Xóa món ăn (Xóa mềm - Ngưng bán)
+    @jakarta.transaction.Transactional
+    public void deleteFood(Long foodId, User merchant) {
+        Food food = foodRepository.findById(foodId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy món ăn!"));
+
+        // Check quyền chủ quán
+        if (!food.getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Anh không có quyền xóa món ăn của nhà hàng khác!");
+        }
+
+        // Chuyển trạng thái thành ngưng bán thay vì xóa data để giữ lịch sử hóa đơn
+        food.setIsAvailable(false);
+        foodRepository.save(food);
     }
 }
