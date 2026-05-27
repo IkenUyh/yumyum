@@ -30,4 +30,48 @@ public class FoodController {
 
         return ApiResponse.success(FoodResponseDTO.fromEntity(savedFood));
     }
+
+    // Thêm API upload ảnh món ăn
+    @PostMapping("/{id}/upload-image")
+    public ApiResponse<String> uploadFoodImage(
+            @PathVariable("id") Long foodId,
+            Authentication authentication,
+            @RequestParam("foodFile") org.springframework.web.multipart.MultipartFile file) {
+        try {
+            // Lấy thông tin chủ quán từ Token
+            User merchant = (User) authentication.getPrincipal();
+
+            // Gọi service xử lý cập nhật ảnh
+            String imageUrl = foodService.updateFoodImage(foodId, file, merchant);
+
+            return ApiResponse.success(imageUrl);
+        } catch (Exception e) {
+            throw new RuntimeException("Tải ảnh món ăn thất bại: " + e.getMessage());
+        }
+    }
+
+    // Endpoint Sửa món ăn
+    @PutMapping("/{id}")
+    public ApiResponse<FoodResponseDTO> updateFood(
+            @PathVariable("id") Long foodId,
+            Authentication authentication,
+            @RequestBody CreateFoodDTO dto) {
+
+        User merchant = (User) authentication.getPrincipal();
+        Food updatedFood = foodService.updateFood(foodId, dto, merchant);
+
+        return ApiResponse.success(FoodResponseDTO.fromEntity(updatedFood));
+    }
+
+    // Endpoint Xóa món ăn (Ngưng bán)
+    @DeleteMapping("/{id}")
+    public ApiResponse<String> deleteFood(
+            @PathVariable("id") Long foodId,
+            Authentication authentication) {
+
+        User merchant = (User) authentication.getPrincipal();
+        foodService.deleteFood(foodId, merchant);
+
+        return ApiResponse.success("Đã ngưng bán món ăn thành công!");
+    }
 }
