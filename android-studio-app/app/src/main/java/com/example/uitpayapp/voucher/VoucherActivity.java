@@ -58,9 +58,6 @@ public class VoucherActivity extends AppCompatActivity {
         ((TextView) topBar.findViewById(R.id.top_bar_title)).setText("Ví Voucher");
         topBar.findViewById(R.id.top_bar_back_btn).setOnClickListener(v -> finish());
 
-        View buttonFindNewVoucher = findViewById(R.id.button_find_new_voucher);
-        ((ImageView) buttonFindNewVoucher.findViewById(R.id.menu_icon)).setImageResource(R.drawable.ic_my_gift);
-        ((TextView) buttonFindNewVoucher.findViewById(R.id.menu_title)).setText("Tìm thêm ưu đãi");
 
         etSearch = findViewById(R.id.et_search_gift);
         etSearch.setOnEditorActionListener((v, actionId, event) -> {

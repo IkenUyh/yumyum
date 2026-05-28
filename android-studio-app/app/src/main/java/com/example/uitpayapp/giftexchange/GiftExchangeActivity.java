@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -21,9 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.YumYumPriority.CheckInModel;
-import com.example.uitpayapp.YumYumPriority.PriorityCheckInAdapter;
-import com.example.uitpayapp.YumYumPriority.PriorityUITpayActivity;
+import com.example.uitpayapp.YumYumPriority.PriorityYumYumActivity;
 import com.example.uitpayapp.home.ImageSliderAdapter;
 import com.example.uitpayapp.suggestion.SuggestAdapter;
 import com.example.uitpayapp.suggestion.SuggestionModel;
@@ -36,6 +36,7 @@ public class GiftExchangeActivity extends AppCompatActivity {
 
     private RecyclerView rvCategory,rvCheckIn;
     private CategoryAdapter categoryAdapter;
+    private PriorityCheckInAdapter checkinAdapter;
     private List<CategoryModel> categoryList;
 
     private RecyclerView rvExchangeVoucher, rvExchangeVoucherDemo, rvGift1Coin;
@@ -72,7 +73,7 @@ public class GiftExchangeActivity extends AppCompatActivity {
         });
         findViewById(R.id.gift_exchange_priority).setOnClickListener(v ->
         {
-            Intent intent = new Intent(this, PriorityUITpayActivity.class);
+            Intent intent = new Intent(this, PriorityYumYumActivity.class);
             startActivity(intent);
             this.finish();
         });
@@ -200,14 +201,21 @@ public class GiftExchangeActivity extends AppCompatActivity {
     }
     private void SetCheckInData() {
         List<CheckInModel> checkInList = new ArrayList<>();
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_1, true));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_2, false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_3, false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_4, false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_5, false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_6, false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_7, false));
-        PriorityCheckInAdapter adapter = new PriorityCheckInAdapter(checkInList);
-        rvCheckIn.setAdapter(adapter);
+        //sau nay goi api voi xu ly o day
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_1, true,false));
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_2, false,false));
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_3, false,false));
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_4, false,false));
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_5, false,false));
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_6, false,false));
+        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_7, false,false));
+        checkinAdapter= new PriorityCheckInAdapter(checkInList, item -> HandleCheckIn(item));
+        rvCheckIn.setAdapter(checkinAdapter);
+    }
+    private void HandleCheckIn(CheckInModel item)
+    {
+        //sau nay goi api voi xu ly o day
+        item.setChecked(true);
+        checkinAdapter.notifyDataSetChanged();
     }
 }

@@ -1,14 +1,12 @@
-package com.example.uitpayapp.profile;
+package com.example.uitpayapp.profile.accountPaymentManage;
 
 import android.graphics.Color;
-
-import com.example.uitpayapp.R;
 
 public class AccountCardModel {
 
     public enum AccountType {
-        TAI_CHINH("#FFF0F5"),
-        SO_DU("#E8F6FF");
+        NGAN_HANG("#E8F6FF"),
+        SO_DU("#FCE4E4");
 
         private final String bgColor;
 

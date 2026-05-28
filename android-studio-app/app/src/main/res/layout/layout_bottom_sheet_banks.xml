@@ -38,13 +38,12 @@
             app:layout_constraintTop_toTopOf="parent"
             app:tint="#000000" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
     <EditText
         android:id="@+id/et_search"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_marginHorizontal="16dp"
-        android:background="@drawable/bg_tab_unselected"
+        android:background="@drawable/bg_tab_selected"
         android:drawableStart="@drawable/ic_search_24"
         android:drawablePadding="12dp"
         android:hint="Tìm ứng dụng Ngân hàng"
@@ -52,7 +51,6 @@
         android:textColor="#000000"
         android:textColorHint="#9E9E9E"
         android:textSize="14sp" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_banks"
         android:layout_width="match_parent"
@@ -61,5 +59,4 @@
         android:clipToPadding="false"
         android:paddingBottom="24dp"
         tools:listitem="@layout/item_bank" />
-
 </LinearLayout>

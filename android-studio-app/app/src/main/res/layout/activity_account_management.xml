@@ -8,7 +8,6 @@
     android:background="#F5F7FA">
     <include layout="@layout/layout_top_bar"
             android:id="@+id/top_bar_account_manage"/>
-
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -37,18 +36,7 @@
                     android:textStyle="bold"
                     android:layout_marginEnd="8dp"/>
                 <TextView
-                    android:id="@+id/account_manage_type_finance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tài chính"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp"
-                    android:background="@drawable/bg_tab_selected"
-                    android:textColor="#f24405"
-                    android:textStyle="bold"
-                    android:layout_marginEnd="8dp"/>
-                <TextView
-                    android:id="@+id/account_manage_type_coin"
+                    android:id="@+id/account_manage_type_wallet"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Số dư"
@@ -62,33 +50,33 @@
                 android:id="@+id/rv_account_cards"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="20dp"
+                android:paddingVertical="10dp"
                 android:clipToPadding="false"
-                android:paddingHorizontal="16dp"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 tools:listitem="@layout/item_account_card_demo"/>
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_account_manage_openpacket"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_button_login_rounded"
-                android:text="+ Mở gói tiết kiệm"
+                android:text="+ Thêm thẻ/tài khoản ngân hàng"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:paddingVertical="8dp"
-                android:layout_marginLeft="40dp"
-                android:layout_marginRight="40dp"/>
+                android:paddingHorizontal="16dp"
+                android:layout_gravity="center"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="12dp"
-                android:text="Thứ tự nguồn tiền ↑↓"
+                android:text="Kích hoạt Ví UITpay"
                 android:textColor="#0034c8"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:visibility="gone"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -119,7 +107,7 @@
                         android:layout_marginEnd="8dp"
                         app:cardCornerRadius="12dp"
                         app:cardElevation="0dp"
-                        app:cardBackgroundColor="#E3F2FD">
+                        app:cardBackgroundColor="#FFBAA0">
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
@@ -138,6 +126,7 @@
                                 android:textSize="12sp"
                                 android:textColor="#757575"/>
                             <ImageView
+                                android:id="@+id/iv_account_manage_gift"
                                 android:layout_width="80dp"
                                 android:layout_height="80dp"
                                 android:scaleType="centerCrop"
@@ -147,7 +136,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="36dp"
                                 android:background="@drawable/bg_button_login_rounded"
-                                android:backgroundTint="#00B0FF"
+                                android:backgroundTint="#F24405"
                                 android:gravity="center"
                                 android:text="Mở ngay"
                                 android:textColor="#FFFFFF"
@@ -167,7 +156,7 @@
                             android:layout_marginBottom="8dp"
                             app:cardCornerRadius="12dp"
                             app:cardElevation="0dp"
-                            app:cardBackgroundColor="#F5F7FA">
+                            app:cardBackgroundColor="#FCE4E4">
                             <RelativeLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
@@ -176,11 +165,12 @@
                                     android:id="@+id/tv_coin_ac_manage"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Tích xu kép từ\nngân hàng"
+                                    android:text="Tích xu hàng ngày"
                                     android:textColor="#000000"
                                     android:textSize="13sp"
                                     android:textStyle="bold"/>
                                 <TextView
+                                    android:id="@+id/tv_account_manage_collect_coin"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_below="@id/tv_coin_ac_manage"
@@ -195,14 +185,13 @@
                                     android:src="@drawable/ic_sanqua_coin_removebg"/>
                             </RelativeLayout>
                         </androidx.cardview.widget.CardView>
-
                         <androidx.cardview.widget.CardView
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
                             app:cardCornerRadius="12dp"
                             app:cardElevation="0dp"
-                            app:cardBackgroundColor="#F5F7FA">
+                            app:cardBackgroundColor="#FCE4E4">
                             <RelativeLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
@@ -211,11 +200,12 @@
                                     android:id="@+id/tv2"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Gửi tiết kiệm"
+                                    android:text="Voucher hot"
                                     android:textColor="#000000"
                                     android:textSize="13sp"
                                     android:textStyle="bold"/>
                                 <TextView
+                                    android:id="@+id/tv_account_manage_voucher_hot"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_below="@id/tv2"
@@ -223,11 +213,11 @@
                                     android:textColor="#0034c8"
                                     android:textSize="12sp"/>
                                 <ImageView
-                                    android:layout_width="50dp"
-                                    android:layout_height="50dp"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
                                     android:layout_alignParentEnd="true"
                                     android:layout_alignParentBottom="true"
-                                    android:src="@drawable/ic_profile_accmulated_main"/>
+                                    android:src="@drawable/ic_discount_voucher"/>
                             </RelativeLayout>
                         </androidx.cardview.widget.CardView>
                     </LinearLayout>
@@ -242,90 +232,10 @@
                 android:layout_marginTop="16dp">
                 <ImageView
                     android:layout_width="match_parent"
-                    android:layout_height="100dp"
+                    android:layout_height="120dp"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/img_account_manage" />
+                    android:src="@drawable/img_advertisment_sale_77" />
             </androidx.cardview.widget.CardView>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tiện ích thêm"
-                    android:textColor="#000000"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="16dp"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:weightSum="3">
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:src="@drawable/ic_my_coin"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:gravity="center"
-                            android:text="Vay tiền\nnhanh"
-                            android:textColor="#000000"
-                            android:textSize="12sp"/>
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:src="@drawable/ic_autopay_paylater"
-                            app:tint="#0034c8"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:gravity="center"
-                            android:text="Tài khoản\ntrả sau"
-                            android:textColor="#000000"
-                            android:textSize="12sp"/>
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:src="@drawable/ic_accmulated_balance"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:gravity="center"
-                            android:text="Số dư\nsinh lời"
-                            android:textColor="#000000"
-                            android:textSize="12sp"/>
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

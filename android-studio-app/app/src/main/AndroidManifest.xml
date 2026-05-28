@@ -8,6 +8,8 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_uitpay_demo"
@@ -79,14 +81,8 @@
             android:exported="false" />
         <activity android:name=".voucher.VoucherActivity"
             android:exported="false" />
-        <activity android:name=".profile.AutoPaymentActivity"
-            android:exported="false" />
-        <activity android:name=".profile.SecuritySettingsActivity"
-            android:exported="false" />
         <activity android:name=".ScanQRCode.QRScanActivity"
             android:exported="false" />
-        <activity android:name=".profile.SecurityTransactionActivity"
-            android:exported="false"/>
 
         <activity
             android:name=".profile.ContactSupportActivity"
@@ -96,11 +92,11 @@
             android:name=".auth.PasscodeActivity"
             android:exported="false" />
         <activity
-            android:name=".YumYumPriority.PriorityUITpayActivity"
+            android:name=".YumYumPriority.PriorityYumYumActivity"
             android:exported="false" />
         <activity android:name=".giftexchange.GiftExchangeActivity"
             android:exported="false" />
-        <activity android:name=".profile.AccountManagementActivity"
+        <activity android:name=".profile.accountPaymentManage.AccountManagementActivity"
             android:exported="false" />
         <activity android:name=".profile.AccountDetailActivity"
             android:exported="false" />
@@ -112,7 +108,12 @@
             android:exported="false" />
         <activity android:name=".recommendeddeal.RecommendedDealActivity"
             android:exported="false" />
-
+        <activity android:name=".recommendeddeal.RecommendedDealDetailActivity"
+            android:exported="false"/>
+        <activity android:name=".deliveryaddressorder.MapPickerActivity"
+            android:exported="false" />
+        <activity android:name=".registerstore.RegisterStoreActivity"
+            android:exported="false" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

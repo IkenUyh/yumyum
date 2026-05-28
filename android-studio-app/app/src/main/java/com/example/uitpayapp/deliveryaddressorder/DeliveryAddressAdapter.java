@@ -68,6 +68,7 @@ public class DeliveryAddressAdapter extends RecyclerView.Adapter<DeliveryAddress
         notifyItemRangeChanged(Math.min(fromPosition, toPosition), Math.abs(fromPosition - toPosition) + 1);
     }
 
+
     @Override
     public int getItemCount() {
         return addressList.size();

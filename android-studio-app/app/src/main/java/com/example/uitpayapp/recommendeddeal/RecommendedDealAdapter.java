@@ -1,5 +1,7 @@
 package com.example.uitpayapp.recommendeddeal;
 
+import android.content.Intent;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,9 +48,34 @@ public class RecommendedDealAdapter extends RecyclerView.Adapter<RecommendedDeal
 
         holder.tvSoldCount.setText(deal.getSoldCount() + " Đã bán");
         holder.tvOriginalPrice.setText(currencyFormatter.format(deal.getOriginalPrice()));
+        //Gach ngang gia cu
+        holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+
         holder.tvDiscountPrice.setText(currencyFormatter.format(deal.getDiscountPrice()));
 
-        holder.btnBuyNow.setOnClickListener(v -> {});
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), RecommendedDealDetailActivity.class);
+            intent.putExtra("food_title", deal.getFoodTitle());
+            intent.putExtra("store_name", deal.getStoreName());
+            intent.putExtra("discount_price", deal.getDiscountPrice());
+            intent.putExtra("original_price", deal.getOriginalPrice());
+            intent.putExtra("distance", deal.getDistance());
+            intent.putExtra("delivery_time", deal.getDeliveryTime());
+            intent.putExtra("food_image", deal.getFoodImageResId());
+            v.getContext().startActivity(intent);
+        });
+
+        holder.btnBuyNow.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), RecommendedDealDetailActivity.class);
+            intent.putExtra("food_title", deal.getFoodTitle());
+            intent.putExtra("store_name", deal.getStoreName());
+            intent.putExtra("discount_price", deal.getDiscountPrice());
+            intent.putExtra("original_price", deal.getOriginalPrice());
+            intent.putExtra("distance", deal.getDistance());
+            intent.putExtra("delivery_time", deal.getDeliveryTime());
+            intent.putExtra("food_image", deal.getFoodImageResId());
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override

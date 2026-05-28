@@ -9,51 +9,35 @@ import java.util.List;
 
 public class RankModel {
     public enum RankType {
-        NEW("TÀI KHOẢN MỚI", "#10a941", "Hạng Thành viên", 0, Arrays.asList(
-                new MenuItemData("Giảm giá từ Xu", "Có 1 Xu, giảm 1đ", R.drawable.ic_my_coin, false),
-                new MenuItemData("Nhận ngay 1 Xu", "Với mỗi 5.000đ thanh toán", R.drawable.ic_qr, false),
-                new MenuItemData("Nhận x2 Xu khi thanh toán", "Bằng Số Dư Sinh Lời hoặc Tài Khoản Trả Sau", R.drawable.ic_accmulated_balance, false),
-                new MenuItemData("Dùng Xu đổi voucher hot", "Voucher giảm đến 50% siêu hot", R.drawable.ic_ticket, false),
-                new MenuItemData("Deal Flashsale Thứ 4 hằng tuần", "Voucher xịn giảm đến 100K", R.drawable.ic_fire, false)
+        NEW("THÀNH VIÊN", "#10a941", "Hạng Thành viên", 0, Arrays.asList(
+                new MenuItemData("Mã miễn phí vận chuyển hàng tháng", "Nhận 01 mã mỗi tháng", R.drawable.ic_check, false),
+                new MenuItemData("Ưu đãi Ngày hội Thành viên", "9H ngày 10 & 20 hàng tháng", R.drawable.ic_check, false)
         )),
-        SILVER("HẠNG BẠC", "#839bcb", "🥈 Hạng Bạc", 3000000, Arrays.asList(
-                new MenuItemData("Tặng thêm 0.1% mức sinh lời", "Khi dùng Số Dư Sinh Lời", R.drawable.ic_accmulated_balance, false),
-                new MenuItemData("Quà tặng lên hạng", "Nhận 1000 Xu khi lên hạng Bạc", R.drawable.ic_priority_account_rank, false),
-                new MenuItemData("Quà sinh nhật", "Quà sẽ được bật mí vào ngày sinh nhật", R.drawable.ic_gift, false),
-                new MenuItemData("Dùng Xu đổi voucher hot", "Nhiều deal xịn dành riêng hạng Bạc", R.drawable.ic_ticket, false),
-                new MenuItemData("Nhận ngay 1 Xu", "Với mỗi 5.000đ thanh toán", R.drawable.ic_qr, false),
-                new MenuItemData("Nhận x2 Xu khi thanh toán", "Bằng Số Dư Sinh Lời hoặc Tài Khoản Trả Sau", R.drawable.ic_accmulated_balance, false),
-                new MenuItemData("Giảm giá từ Xu", "Không cần voucher vẫn giảm giá", R.drawable.ic_my_coin, false),
-                new MenuItemData("Deal Flashsale Thứ 4 hằng tuần", "Voucher xịn giảm đến 100K", R.drawable.ic_fire, false)
+        SILVER("HẠNG BẠC", "#839bcb", "🥈 Hạng Bạc", 1000000, Arrays.asList(
+                new MenuItemData("Mã miễn phí vận chuyển hàng tháng", "Nhận 01 mã mỗi tháng", R.drawable.ic_check, false),
+                new MenuItemData("Ưu đãi Ngày hội Thành viên", "9H ngày 10 & 20 hàng tháng", R.drawable.ic_check, false),
+                new MenuItemData("Ưu đãi Độc quyền từ Thương hiệu và Đối tác", "Dành riêng cho hạng Bạc", R.drawable.ic_check, false),
+                new MenuItemData("Ưu đãi Độc quyền từ Người bán", "Ưu đãi từ người bán trên Shopee", R.drawable.ic_check, false),
+                new MenuItemData("Voucher HOT từ Shop", "Nhiều mã giảm giá hấp dẫn", R.drawable.ic_check, false)
         )),
-        GOLD("HẠNG VÀNG", "#bfad3d", "🥇 Hạng Vàng", 18000000, Arrays.asList(
-                new MenuItemData("Tặng thêm 0.3% mức sinh lời", "Khi dùng Số Dư Sinh Lời", R.drawable.ic_accmulated_balance, false),
-                new MenuItemData("Tặng thêm 0.1% số tiền", "Khi đáo hạn gói Gửi Tiết Kiệm 6 tháng", R.drawable.ic_wallet, false),
-                new MenuItemData("Giảm 50% phí dịch vụ hằng tháng", "Khi sử dụng Tài Khoản Trả Sau", R.drawable.ic_menu_autopay, false),
-                new MenuItemData("Hoàn phí mua/bán Chứng khoán", "Tối đa 15K cho Hội viên Vàng", R.drawable.ic_chart, false),
-                new MenuItemData("Quà sinh nhật", "Quà sẽ được bật mí vào ngày sinh nhật", R.drawable.ic_gift, false),
-                new MenuItemData("Quà tặng lên hạng", "Nhận 3000 Xu khi lên hạng Vàng", R.drawable.ic_priority_account_rank, false),
-                new MenuItemData("Dùng Xu đổi voucher hot", "Nhiều voucher giảm 50% cho hạng Vàng", R.drawable.ic_ticket, false),
-                new MenuItemData("Nhận ngay 1.2 Xu", "Với mỗi 5.000đ thanh toán", R.drawable.ic_qr, false),
-                new MenuItemData("Nhận x2.4 Xu khi thanh toán", "Bằng Số Dư Sinh Lời hoặc Tài Khoản Trả Sau", R.drawable.ic_accmulated_balance, false),
-                new MenuItemData("Giảm giá từ Xu", "Không cần voucher vẫn giảm giá", R.drawable.ic_my_coin, false),
-                new MenuItemData("Deal Flashsale Thứ 4 hằng tuần", "Voucher xịn giảm đến 100K", R.drawable.ic_fire, false)
+        GOLD("HẠNG VÀNG", "#bfad3d", "🥇 Hạng Vàng", 5000000, Arrays.asList(
+                new MenuItemData("Mã miễn phí vận chuyển hàng tháng", "Nhận 01 mã mỗi tháng", R.drawable.ic_check, false),
+                new MenuItemData("Ưu đãi Ngày hội Thành viên", "9H ngày 10 & 20 hàng tháng", R.drawable.ic_check, false),
+                new MenuItemData("Ưu đãi Độc quyền từ Thương hiệu và Đối tác", "Ưu tiên cho hạng Vàng", R.drawable.ic_check, false),
+                new MenuItemData("Ưu đãi Độc quyền từ Người bán", "Ưu đãi từ người bán trên Shopee", R.drawable.ic_check, false),
+                new MenuItemData("Voucher HOT từ Shop", "Mã giảm giá độc quyền", R.drawable.ic_check, false),
+                new MenuItemData("Voucher thăng hạng", "Quà tặng khi đạt hạng Vàng", R.drawable.ic_check, false),
+                new MenuItemData("Voucher sinh nhật", "Quà tặng đặc biệt ngày sinh nhật", R.drawable.ic_check, false)
         )),
-        DIAMOND("HẠNG KIM CƯƠNG", "#0d1e3c", "💎 Hạng Kim cương", 60000000, Arrays.asList(
-                new MenuItemData("Tặng thêm 0.5% mức sinh lời", "Khi dùng Số Dư Sinh Lời", R.drawable.ic_accmulated_balance, false),
-                new MenuItemData("Tặng thêm 0.3% số tiền", "Khi đáo hạn gói Gửi Tiết Kiệm 6 tháng", R.drawable.ic_wallet, false),
-                new MenuItemData("Miễn phí phí dịch vụ hằng tháng", "Khi sử dụng Tài Khoản Trả Sau", R.drawable.ic_menu_autopay, false),
-                new MenuItemData("Lối vượt ưu tiên", "Dành riêng Hội viên Kim Cương", R.drawable.ic_priority_account_rank, false),
-                new MenuItemData("Hoàn phí mua/bán Chứng khoán", "Tối đa 25K cho Hội viên Kim Cương", R.drawable.ic_chart, false),
-                new MenuItemData("Hotline ưu tiên", "Hỗ trợ nhanh chóng", R.drawable.ic_contact_sp, false),
-                new MenuItemData("Quà sinh nhật", "Quà sẽ được bật mí vào ngày sinh nhật", R.drawable.ic_gift, false),
-                new MenuItemData("Quà tặng lên hạng", "Nhận 5000 Xu khi lên hạng Kim Cương", R.drawable.ic_priority_account_rank, false),
-                new MenuItemData("Quà đặc biệt", "Dành riêng Hội viên Kim Cương", R.drawable.ic_priority_account_rank, false),
-                new MenuItemData("Dùng Xu đổi voucher hot", "+1000 voucher xịn cho hạng Kim Cương", R.drawable.ic_ticket, false),
-                new MenuItemData("Nhận ngay 1.5 Xu", "Với mỗi 5.000đ thanh toán", R.drawable.ic_qr, false),
-                new MenuItemData("Nhận x3 Xu khi thanh toán", "Bằng Số Dư Sinh Lời hoặc Tài Khoản Trả Sau", R.drawable.ic_accmulated_balance, false),
-                new MenuItemData("Giảm giá từ Xu", "Không cần voucher vẫn giảm giá", R.drawable.ic_my_coin, false),
-                new MenuItemData("Deal Flashsale Thứ 4 hằng tuần", "Voucher xịn giảm đến 100K", R.drawable.ic_fire, false)
+        DIAMOND("HẠNG KIM CƯƠNG", "#0d1e3c", "💎 Hạng Kim cương", 15000000, Arrays.asList(
+                new MenuItemData("02 Mã miễn phí Vận chuyển", "Tặng 02 mã mỗi tháng", R.drawable.ic_check, false),
+                new MenuItemData("Ưu đãi Ngày hội Thành viên", "9H ngày 10 & 20 hàng tháng", R.drawable.ic_check, false),
+                new MenuItemData("Ưu đãi Độc quyền từ Thương hiệu và Đối tác", "Đặc quyền cao cấp nhất", R.drawable.ic_check, false),
+                new MenuItemData("Ưu đãi Độc quyền từ Người bán", "Ưu đãi từ người bán trên Shopee", R.drawable.ic_check, false),
+                new MenuItemData("Voucher HOT từ Shop", "Mã giảm giá VIP", R.drawable.ic_check, false),
+                new MenuItemData("Voucher thăng hạng", "Quà tặng khi đạt hạng Kim cương", R.drawable.ic_check, false),
+                new MenuItemData("Voucher sinh nhật", "Quà tặng đặc biệt ngày sinh nhật", R.drawable.ic_check, false),
+                new MenuItemData("Voucher duy trì thứ hạng", "Dành riêng cho Kim Cương", R.drawable.ic_check, false)
         ));
 
         private final String title;
@@ -75,6 +59,7 @@ public class RankModel {
         public String getBadge() { return badge; }
         public long getThreshold() { return threshold; }
         public List<MenuItemData> getBenefits() { return benefits; }
+        public int getAmountBenifits() { return benefits.size(); }
 
         public RankType getNext() {
             RankType[] values = RankType.values();
@@ -89,13 +74,13 @@ public class RankModel {
     private RankType rankType;
     private long currentSpending;
     private String accumulatedBenefit;
-    private String voucherBenefit;
+    private String amountVoucherBenefit;
 
-    public RankModel(RankType rankType, long currentSpending, String benefit1, String benefit2) {
+    public RankModel(RankType rankType, long currentSpending, String benefit1) {
         this.rankType = rankType;
         this.currentSpending = currentSpending;
         this.accumulatedBenefit = benefit1;
-        this.voucherBenefit = benefit2;
+        this.amountVoucherBenefit =rankType.getAmountBenifits()>0?"+ "+rankType.getAmountBenifits()+" Ưu đãi":"";
     }
 
     public boolean isLocked() {
@@ -139,6 +124,6 @@ public class RankModel {
     public RankType getRankType() { return rankType; }
     public String getRankBadge() { return rankType.getBadge(); }
     public String getAccumulatedBenefit() { return accumulatedBenefit; }
-    public String getVoucherBenefit() { return voucherBenefit; }
+    public String getVoucherBenefit() { return amountVoucherBenefit; }
     public List<MenuItemData> getRankBenefits() { return rankType.getBenefits(); }
 }

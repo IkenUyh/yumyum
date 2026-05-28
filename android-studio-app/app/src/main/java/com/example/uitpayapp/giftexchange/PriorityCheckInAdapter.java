@@ -1,9 +1,11 @@
-package com.example.uitpayapp.YumYumPriority;
+package com.example.uitpayapp.giftexchange;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,9 +18,16 @@ import java.util.List;
 
 public class PriorityCheckInAdapter extends RecyclerView.Adapter<PriorityCheckInAdapter.ViewHolder> {
     private List<CheckInModel> checkInList;
+    private OnCheckInClickListener checkInClickListener;
 
-    public PriorityCheckInAdapter(List<CheckInModel> checkInList) {
+
+    public interface OnCheckInClickListener {
+        void onCheckInClick(CheckInModel item);
+    }
+
+    public PriorityCheckInAdapter(List<CheckInModel> checkInList, OnCheckInClickListener checkInClickListener) {
         this.checkInList = checkInList;
+        this.checkInClickListener = checkInClickListener;
     }
 
     @NonNull
@@ -37,15 +46,35 @@ public class PriorityCheckInAdapter extends RecyclerView.Adapter<PriorityCheckIn
         holder.tvCoin.setText("+" + config.getCoins());
         holder.imgIcon.setImageResource(config.getIconRes());
 
-        if (item.isChecked()) {
+        if (item.isOpened()) {
             holder.tvCoin.setTextColor(Color.parseColor("#f24405"));
             holder.tvDay.setTextColor(Color.parseColor("#000000"));
             holder.imgIcon.clearColorFilter();
+            if (item.isChecked()) {
+                holder.imgIcon.setImageResource(R.drawable.ic_circle_check);
+            }
         } else {
             holder.tvCoin.setTextColor(Color.parseColor("#BDBDBD"));
             holder.tvDay.setTextColor(Color.parseColor("#BDBDBD"));
             holder.imgIcon.setColorFilter(Color.parseColor("#BDBDBD"));
         }
+        holder.itemView.setOnClickListener(v -> {
+            if (checkInClickListener != null&& item.isOpened()&&!item.isChecked()) {
+                Animation animation = AnimationUtils.loadAnimation(holder.imgIcon.getContext(), R.anim.anim_collect_coin);
+                animation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                    }
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        checkInClickListener.onCheckInClick(item);
+                    }
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {}
+                });
+                holder.imgIcon.startAnimation(animation);
+            }
+        });
     }
 
     @Override

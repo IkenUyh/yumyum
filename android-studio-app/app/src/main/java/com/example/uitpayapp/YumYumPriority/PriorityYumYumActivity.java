@@ -16,16 +16,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.giftexchange.ExchangeVoucherAdapter;
-import com.example.uitpayapp.giftexchange.ExchangeVoucherModel;
 import com.example.uitpayapp.giftexchange.GiftExchangeActivity;
 import com.example.uitpayapp.home.ImageSliderAdapter;
 import com.example.uitpayapp.profile.ProfileWebView;
+import com.example.uitpayapp.voucher.VoucherActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PriorityUITpayActivity extends AppCompatActivity {
+public class PriorityYumYumActivity extends AppCompatActivity {
     ViewPager2 RankSlider;
     ViewPager2 BannerSlider;
     RecyclerView RVCheckIn;
@@ -56,42 +55,33 @@ public class PriorityUITpayActivity extends AppCompatActivity {
         RankSlider = findViewById(R.id.priority_account_rank_slider);
         ((TextView)topBar.findViewById(R.id.top_bar_title)).setText("UITpay Priority");
         topBar.findViewById(R.id.top_bar_back_btn).setOnClickListener(v->finish());
-        View questionContact=findViewById(R.id.priority_question_contact);
-        View rule=findViewById(R.id.priority_rule);
-        ((ImageView)rule.findViewById(R.id.menu_icon)).setImageResource(R.drawable.ic_your_deal);
-        ((TextView)rule.findViewById(R.id.menu_title)).setText("Thể lệ và hướng dẫn");
-        ((ImageView)questionContact.findViewById(R.id.menu_icon)).setImageResource(R.drawable.ic_question_contact);
-        ((TextView)questionContact.findViewById(R.id.menu_title)).setText("Câu hỏi thường gặp");
         SetAccountRankingData();
         SetBannerData();
         setListener();
-        setSecondaryData();
-    }
-    private void setSecondaryData() {
     }
     private void setListener() {
         findViewById(R.id.priority_question_contact).setOnClickListener(v->{
-            Intent intent=new Intent(PriorityUITpayActivity.this, ProfileWebView.class);
-            intent.putExtra("URL_KEY","https://support.zalopay.vn/faq/web/faq-folder-list");
-            startActivity(intent);
-        });
-        findViewById(R.id.priority_rule).setOnClickListener(v->{
-            Intent intent=new Intent(PriorityUITpayActivity.this, ProfileWebView.class);
-            intent.putExtra("URL_KEY","https://zalopay.vn/dich-vu/zalopay-priority");
+            Intent intent=new Intent(PriorityYumYumActivity.this, ProfileWebView.class);
+            intent.putExtra("URL_KEY","https://help.shopee.vn/portal/4/article/79254-[Shopee-Rewards]-C%C3%A1c-c%C3%A2u-h%E1%BB%8Fi-th%C6%B0%E1%BB%9Dng-g%E1%BA%B7p-v%E1%BB%81-Ch%C6%B0%C6%A1ng-tr%C3%ACnh-Kh%C3%A1ch-h%C3%A0ng-th%C3%A2n-thi%E1%BA%BFt-Shopee-(Shopee-Rewards)");
             startActivity(intent);
         });
         findViewById(R.id.priority_change_gift).setOnClickListener(v->{
-            Intent intent=new Intent(PriorityUITpayActivity.this, GiftExchangeActivity.class);
+            Intent intent=new Intent(PriorityYumYumActivity.this, VoucherActivity.class);
+            startActivity(intent);
+            this.finish();
+        });
+        findViewById(R.id.priority_coin).setOnClickListener(v->{
+            Intent intent=new Intent(PriorityYumYumActivity.this, GiftExchangeActivity.class);
             startActivity(intent);
             this.finish();
         });
     }
     private void SetAccountRankingData() {
         List<RankModel> rankList = new ArrayList<>();
-        rankList.add(new RankModel(RankModel.RankType.NEW, currentSpending, "Mê hay hông mê?", "5+ đặc quyền"));
-        rankList.add(new RankModel(RankModel.RankType.SILVER, currentSpending, "Ưu đãi nạp thẻ", "7+ đặc quyền"));
-        rankList.add(new RankModel(RankModel.RankType.GOLD, currentSpending, "Tặng 0.3% sinh lời", "10+ đặc quyền"));
-        rankList.add(new RankModel(RankModel.RankType.DIAMOND, currentSpending, "Hoàn tiền không giới hạn", "12+ đặc quyền"));
+        rankList.add(new RankModel(RankModel.RankType.NEW, currentSpending, "Mê hay hông mê?"));
+        rankList.add(new RankModel(RankModel.RankType.SILVER, currentSpending, "Ưu đãi độc quyền"));
+        rankList.add(new RankModel(RankModel.RankType.GOLD, currentSpending, "Tặng voucher thăng hạng"));
+        rankList.add(new RankModel(RankModel.RankType.DIAMOND, currentSpending, "Voucher duy trì hạng"));
         PriorityAccountRankAdapter adapter = new PriorityAccountRankAdapter(rankList);
         RankSlider.setAdapter(adapter);
     }

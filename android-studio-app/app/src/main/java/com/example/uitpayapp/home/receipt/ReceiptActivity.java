@@ -118,17 +118,13 @@ public class ReceiptActivity extends AppCompatActivity {
 
     private void showAddBillBottomSheet(ServiceItem service) {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
-        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_add_bill, null);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_add_account_payment, null);
         dialog.setContentView(view);
 
         View bottomSheet = (View) view.getParent();
         if (bottomSheet != null) {
             bottomSheet.setBackgroundResource(android.R.color.transparent);
         }
-
-        // Cập nhật UI với thông tin dịch vụ
-        ((TextView) view.findViewById(R.id.tv_add_bill_service_name)).setText(service.getName().replace("\n", " "));
-        ((ImageView) view.findViewById(R.id.iv_add_bill_icon)).setImageResource(service.getIconResId());
 
         view.findViewById(R.id.btn_close_add_bill).setOnClickListener(v -> dialog.dismiss());
 

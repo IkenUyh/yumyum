@@ -144,7 +144,7 @@ public class RecommendedDealActivity extends AppCompatActivity {
         allDeals.add(new RecommendedDealModel(
                 "The Coffee House - Kha Vạn Cân",
                 1.2, 10,
-                R.drawable.img_priority_banner1,
+                R.drawable.img_food_bubbletea,
                 "-30%",
                 "Trà Đào Cam Sả (L) + Bánh Mì Que",
                 50,
@@ -155,7 +155,7 @@ public class RecommendedDealActivity extends AppCompatActivity {
         allDeals.add(new RecommendedDealModel(
                 "Phúc Long Tea & Coffee",
                 3.5, 25,
-                R.drawable.img_priority_banner2,
+                R.drawable.img_food_coffee,
                 "-20%",
                 "Trà Sữa Phúc Long + Thạch Cafe",
                 200,

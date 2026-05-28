@@ -86,9 +86,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_toStartOf="@id/iv_chevron"
-                        android:text="Chọn địa chỉ"
-                        android:textColor="#BDBDBD"
-                        android:textSize="16sp" />
+                        android:hint="Chọn địa chỉ"
+                        android:textColorHint="#757575"
+                        android:textColor="#000000"
+                        android:textSize="16sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:foreground="?android:attr/selectableItemBackground"/>
                     <ImageView
                         android:id="@+id/iv_chevron"
                         android:layout_width="20dp"

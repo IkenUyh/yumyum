@@ -1,10 +1,13 @@
 package com.example.uitpayapp.deliveryaddressorder;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,11 +30,12 @@ public class AddressOrderActivity extends AppCompatActivity {
     private DeliveryAddressAdapter adapter;
     private List<DeliveryAddress> deliveryAddresses;
     private ItemTouchHelper itemTouchHelper;
+    private TextView tvSelectedAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_payment_order);
+        setContentView(R.layout.activity_address_order);
         initView();
         setUpDataAddress();
         setupRecyclerView();
@@ -114,6 +118,7 @@ public class AddressOrderActivity extends AppCompatActivity {
         TextView btnTypeWork = view.findViewById(R.id.btn_type_work);
         View btnSave = view.findViewById(R.id.btn_save_address);
         View btnClose = view.findViewById(R.id.btn_close_address_sheet);
+        tvSelectedAddress = view.findViewById(R.id.tv_selected_address);
 
         final DeliveryAddress.AddressType[] selectedType = {DeliveryAddress.AddressType.HOME};
 
@@ -121,6 +126,7 @@ public class AddressOrderActivity extends AppCompatActivity {
             tvTitle.setText("Chỉnh sửa địa chỉ");
             etName.setText(address.getReceiverName());
             etPhone.setText(address.getPhoneNumber());
+            tvSelectedAddress.setText(address.getAddressDetail());
             selectedType[0] = address.getAddressType();
             updateTypeUI(btnTypeHome, btnTypeWork, selectedType[0]);
             btnSave.setEnabled(true);
@@ -143,7 +149,18 @@ public class AddressOrderActivity extends AppCompatActivity {
         });
 
         btnSave.setOnClickListener(v -> {
+            if (address!=null) {
+                address.updateAddress(tvSelectedAddress.getText().toString(),etName.getText().toString(),etPhone.getText().toString());
+            }
+            else
+                deliveryAddresses.add(new DeliveryAddress(selectedType[0],tvSelectedAddress.getText().toString(),etName.getText().toString(),etPhone.getText().toString()));
+            adapter.notifyDataSetChanged();
             bottomSheetDialog.dismiss();
+        });
+        tvSelectedAddress.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MapPickerActivity.class);
+            intent.putExtra("ADDRESS_PUT",tvSelectedAddress.getText().toString());
+            startActivityForResult(intent, 1);
         });
 
         btnClose.setOnClickListener(v -> bottomSheetDialog.dismiss());
@@ -162,6 +179,17 @@ public class AddressOrderActivity extends AppCompatActivity {
             work.setTextColor(Color.parseColor("#f24405"));
             home.setBackgroundResource(R.drawable.bg_tab_unselected);
             home.setTextColor(Color.WHITE);
+        }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            String address = data.getStringExtra("ADDRESS_SELECTED");
+            if (address != null) {
+                Toast.makeText(this, "Address: " + address, Toast.LENGTH_SHORT).show();
+                tvSelectedAddress.setText(address);
+            }
         }
     }
 }

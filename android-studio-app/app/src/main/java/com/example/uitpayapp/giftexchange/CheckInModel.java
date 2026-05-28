@@ -1,4 +1,4 @@
-package com.example.uitpayapp.YumYumPriority;
+package com.example.uitpayapp.giftexchange;
 
 import com.example.uitpayapp.R;
 
@@ -29,10 +29,12 @@ public class CheckInModel {
     }
 
     private DayConfig config;
+    private boolean isOpened;
     private boolean isChecked;
 
-    public CheckInModel(DayConfig config, boolean isChecked) {
+    public CheckInModel(DayConfig config, boolean isOpened, boolean isChecked) {
         this.config = config;
+        this.isOpened = isOpened;
         this.isChecked = isChecked;
     }
 
@@ -40,4 +42,5 @@ public class CheckInModel {
     public void setConfig(DayConfig config) { this.config = config; }
     public boolean isChecked() { return isChecked; }
     public void setChecked(boolean checked) { isChecked = checked; }
+    public boolean isOpened() { return isOpened; }
 }

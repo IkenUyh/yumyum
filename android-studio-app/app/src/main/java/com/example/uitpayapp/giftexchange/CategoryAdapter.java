@@ -1,5 +1,6 @@
 package com.example.uitpayapp.giftexchange;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,8 +39,10 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
 
         if (position == selectedPosition) {
             holder.tvCategoryName.setBackgroundResource(R.drawable.bg_tab_selected);
+            holder.tvCategoryName.setTextColor(Color.parseColor("#f24405"));
         } else {
             holder.tvCategoryName.setBackgroundResource(R.drawable.bg_tab_unselected);
+            holder.tvCategoryName.setTextColor(Color.parseColor("#ffffff"));
         }
 
         holder.itemView.setOnClickListener(v -> {

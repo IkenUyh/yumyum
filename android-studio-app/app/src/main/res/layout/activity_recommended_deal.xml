@@ -12,9 +12,10 @@
         layout="@layout/layout_top_bar" />
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_userinfo_gradient"
-        android:padding="20dp">
+        android:layout_height="140dp"
+        android:background="@drawable/img_recommend_deal_banner"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="8dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="45dp"
@@ -60,13 +61,30 @@
         <com.google.android.material.tabs.TabItem android:text="Gần tôi"
             android:layout_height="wrap_content" android:layout_width="wrap_content"/>
     </com.google.android.material.tabs.TabLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_recommended_deals"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:padding="8dp"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        tools:listitem="@layout/item_food_recommend_deal" />
+        android:layout_height="match_parent">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_recommended_deals"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingRight="8dp"
+            android:paddingLeft="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="50dp"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            tools:listitem="@layout/item_food_recommend_deal" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp"
+            android:background="@drawable/bg_tab_unselected"
+            android:text="Deal của bạn (0)"
+            android:textColor="#ffffff"
+            android:layout_marginBottom="10dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"/>
+    </RelativeLayout>
 </LinearLayout>

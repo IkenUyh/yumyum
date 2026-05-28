@@ -33,7 +33,7 @@
                         android:id="@+id/iv_avatar"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
-                        android:src="@drawable/ic_uitpay_demo"
+                        android:src="@drawable/yumyum_demo_logo"
                         android:scaleType="centerCrop"/>
                 </androidx.cardview.widget.CardView>
 
@@ -103,7 +103,7 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:layout_alignParentEnd="true"
-                        android:src="@drawable/ic_uitpay_demo"
+                        android:src="@drawable/ic_account_payment_management"
                         android:alpha="0.2"
                         app:tint="#2E7D32"/>
                 </RelativeLayout>
