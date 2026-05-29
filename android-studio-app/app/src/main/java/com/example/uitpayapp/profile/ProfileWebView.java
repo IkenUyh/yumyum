@@ -34,7 +34,7 @@ public class ProfileWebView extends AppCompatActivity {
             }
             return insets;
         });
-        ((TextView) topBar.findViewById(R.id.top_bar_title)).setText("UITpay");
+        ((TextView) topBar.findViewById(R.id.top_bar_title)).setText("Yum Yum");
         topBar.findViewById(R.id.top_bar_back_btn).setOnClickListener(v -> finish());
         String url = getIntent().getStringExtra("URL_KEY");
         if (url != null && !url.isEmpty()) {

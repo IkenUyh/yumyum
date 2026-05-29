@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -102,7 +103,7 @@ public class ReceiptActivity extends AppCompatActivity {
         List<ServiceItem> listReceiptService = new ArrayList<>();
         listReceiptService.add(new ServiceItem("Điện", R.drawable.ic_receiptscreen_electric, ""));
         listReceiptService.add(new ServiceItem("Nước", R.drawable.ic_receiptscreen_water, ""));
-        listReceiptService.add(new ServiceItem("Thanh toán\nkhoản vay", R.drawable.ic_receiptscreen_loan, ""));
+        listReceiptService.add(new ServiceItem("Thanh toán\nkhoản vay", R.drawable.ic_your_deal, ""));
         listReceiptService.add(new ServiceItem("Bảo hiểm", R.drawable.ic_receiptscreen_heath, ""));
         listReceiptService.add(new ServiceItem("Giáo dục", R.drawable.ic_receiptscreen_education, ""));
         listReceiptService.add(new ServiceItem("Truyền hình", R.drawable.ic_receiptscreen_tv, ""));
@@ -117,7 +118,7 @@ public class ReceiptActivity extends AppCompatActivity {
 
     private void showAddBillBottomSheet(ServiceItem service) {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
-        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_add_bill, null);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_add_account_payment, null);
         dialog.setContentView(view);
 
         View bottomSheet = (View) view.getParent();
@@ -125,11 +126,58 @@ public class ReceiptActivity extends AppCompatActivity {
             bottomSheet.setBackgroundResource(android.R.color.transparent);
         }
 
-        // Cập nhật UI với thông tin dịch vụ
-        ((TextView) view.findViewById(R.id.tv_add_bill_service_name)).setText(service.getName().replace("\n", " "));
-        ((ImageView) view.findViewById(R.id.iv_add_bill_icon)).setImageResource(service.getIconResId());
-
         view.findViewById(R.id.btn_close_add_bill).setOnClickListener(v -> dialog.dismiss());
+
+        // Thiết lập dữ liệu cho dropdown đơn vị cung cấp (với Logo và Subtitle)
+        AutoCompleteTextView dropdown = view.findViewById(R.id.dropdown);
+        List<ProviderItem> providerList = new ArrayList<>();
+        String serviceName = service.getName();
+
+        if (serviceName.contains("Điện")) {
+            providerList.add(new ProviderItem("EVN Hồ Chí Minh", "Tổng công ty Điện lực TP.HCM", R.drawable.ic_evn));
+            providerList.add(new ProviderItem("EVN Hà Nội", "Tổng công ty Điện lực TP.Hà Nội", R.drawable.ic_evn));
+            providerList.add(new ProviderItem("EVN Miền Nam", "Tổng công ty Điện lực Miền Nam", R.drawable.ic_evn));
+            providerList.add(new ProviderItem("EVN Miền Trung", "Tổng công ty Điện lực Miền Trung", R.drawable.ic_evn));
+        } else if (serviceName.contains("Nước")) {
+            providerList.add(new ProviderItem("SAWACO", "Tổng công ty Cấp nước Sài Gòn", R.drawable.ic_receiptscreen_water));
+            providerList.add(new ProviderItem("Viwasupco", "Công ty CP Đầu tư nước sạch Sông Đà", R.drawable.ic_receiptscreen_water));
+            providerList.add(new ProviderItem("Biwase", "Công ty CP - MTV Nước - Môi trường Bình Dương", R.drawable.ic_receiptscreen_water));
+            providerList.add(new ProviderItem("Nước sạch Hà Nội", "Công ty TNHH MTV Nước sạch Hà Nội", R.drawable.ic_receiptscreen_water));
+        } else if (serviceName.contains("Internet")) {
+            providerList.add(new ProviderItem("FPT Telecom", "Công ty CP Viễn thông FPT", R.drawable.ic_internet));
+            providerList.add(new ProviderItem("Viettel Telecom", "Tổng Công ty Viễn thông Viettel", R.drawable.img_viettel));
+            providerList.add(new ProviderItem("VNPT", "Tập đoàn Bưu chính Viễn thông Việt Nam", R.drawable.ic_internet));
+        } else if (serviceName.contains("Truyền hình")) {
+            providerList.add(new ProviderItem("VTVcab", "Tổng Công ty Truyền hình Cáp Việt Nam", R.drawable.ic_receiptscreen_tv));
+            providerList.add(new ProviderItem("SCTV", "Công ty Truyền hình cáp Saigontourist", R.drawable.ic_receiptscreen_tv));
+            providerList.add(new ProviderItem("FPT Play", "Dịch vụ truyền hình FPT", R.drawable.ic_receiptscreen_tv));
+        } else if (serviceName.contains("Bảo hiểm")) {
+            providerList.add(new ProviderItem("Bảo Việt", "Tập đoàn Bảo hiểm Bảo Việt", R.drawable.ic_receiptscreen_heath));
+            providerList.add(new ProviderItem("Prudential", "Bảo hiểm nhân thọ Prudential", R.drawable.ic_receiptscreen_heath));
+            providerList.add(new ProviderItem("Manulife", "Bảo hiểm nhân thọ Manulife", R.drawable.ic_receiptscreen_heath));
+        } else if (serviceName.contains("Giáo dục")) {
+            providerList.add(new ProviderItem("ĐH CNTT - ĐHQG", "Trường Đại học Công nghệ Thông tin", R.drawable.logo_uit_updated));
+            providerList.add(new ProviderItem("ĐH Bách Khoa", "Trường Đại học Bách Khoa TP.HCM", R.drawable.ic_receiptscreen_education));
+            providerList.add(new ProviderItem("Vinschool", "Hệ thống giáo dục Vinschool", R.drawable.ic_receiptscreen_education));
+        } else if (serviceName.contains("trả sau")) {
+            providerList.add(new ProviderItem("Mobifone", "Tổng công ty Viễn thông MobiFone", R.drawable.img_mobifone));
+            providerList.add(new ProviderItem("Viettel", "Tổng Công ty Viễn thông Viettel", R.drawable.img_viettel));
+            providerList.add(new ProviderItem("Vinaphone", "Tổng công ty Dịch vụ Viễn thông VNPT", R.drawable.img_vinaphone));
+        } else if (serviceName.contains("khoản vay")) {
+            providerList.add(new ProviderItem("Home Credit", "Công ty tài chính Home Credit", R.drawable.ic_your_deal));
+            providerList.add(new ProviderItem("FE Credit", "Công ty tài chính FE Credit", R.drawable.ic_your_deal));
+            providerList.add(new ProviderItem("Shinhan Finance", "Công ty tài chính Shinhan Việt Nam", R.drawable.ic_your_deal));
+        };
+
+        ProviderAdapter providerAdapter = new ProviderAdapter(this, providerList);
+        dropdown.setAdapter(providerAdapter);
+        if (!providerList.isEmpty()) {
+            dropdown.setText(providerList.get(0).getTitle(), false);
+        }
+        dropdown.setOnItemClickListener((parent, view1, position, id) -> {
+                String selectedProvider = providerList.get(position).getTitle();
+                dropdown.setText(selectedProvider, false);
+        });
 
         EditText etCode = view.findViewById(R.id.et_customer_code);
 
@@ -140,18 +188,20 @@ public class ReceiptActivity extends AppCompatActivity {
                 return;
             }
 
+            String selectedProvider = dropdown.getText().toString();
+
             // Kiểm tra trùng lặp
-            String serviceName = service.getName().replace("\n", " ");
+            String serviceTitle = service.getName().replace("\n", " ");
             for (PendingBill bill : pendingBills) {
-                if (bill.getName().equals(serviceName)) {
-                    Toast.makeText(this, "Hóa đơn " + serviceName + " đã tồn tại", Toast.LENGTH_SHORT).show();
+                if (bill.getName().equals(serviceTitle)) {
+                    Toast.makeText(this, "Hóa đơn " + serviceTitle + " đã tồn tại", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                     return;
                 }
             }
 
             // Tạo hóa đơn giả lập
-            PendingBill newBill = generateMockBill(service);
+            PendingBill newBill = generateMockBill(service, selectedProvider);
             pendingBills.add(0, newBill); // Thêm lên đầu danh sách
             billAdapter.notifyItemInserted(0);
 
@@ -160,22 +210,20 @@ public class ReceiptActivity extends AppCompatActivity {
 
             updateSummary();
             dialog.dismiss();
-            Toast.makeText(this, "Đã thêm hóa đơn " + serviceName + " (MKH: " + code + ")", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Đã thêm hóa đơn " + serviceTitle + " từ " + selectedProvider, Toast.LENGTH_SHORT).show();
         });
 
         dialog.show();
     }
 
-    private PendingBill generateMockBill(ServiceItem service) {
+    private PendingBill generateMockBill(ServiceItem service, String provider) {
         String serviceName = service.getName().replace("\n", " ");
         Random random = new Random();
 
-        // Lấy thông tin nhà cung cấp + khoảng tiền
-        String provider = "Nhà cung cấp";
+        // Lấy thông tin khoảng tiền
         long minAmount = 100000, maxAmount = 500000;
         String[] info = SERVICE_PROVIDERS.get(service.getName());
         if (info != null) {
-            provider = info[0];
             minAmount = Long.parseLong(info[1]);
             maxAmount = Long.parseLong(info[2]);
         }

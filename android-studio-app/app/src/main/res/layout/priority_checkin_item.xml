@@ -41,7 +41,7 @@
             android:layout_height="32dp"
             android:layout_marginTop="6dp"
             android:padding="2dp"
-            android:src="@drawable/img_flag"/>
+            android:src="@drawable/ic_coin"/>
         <TextView
             android:id="@+id/checkin_day"
             android:layout_width="wrap_content"

@@ -26,6 +26,11 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.VoucherV
         this.Listener = Listener;
     }
 
+    public void updateList(List<VoucherModel> newList) {
+        this.listVoucher = newList;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public VoucherViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -36,20 +41,19 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.VoucherV
     public void onBindViewHolder(@NonNull VoucherViewHolder holder, int position) {
         VoucherModel voucher = listVoucher.get(position);
         if (voucher == null) return;
-        if (voucher.getIcon() > 0) {
-            holder.imgIcon.setImageResource(voucher.getIcon());
-        }
-        holder.tvType.setText(voucher.getType());
+        VoucherModel.VoucherType type = voucher.getVoucherType();
+        holder.imgIcon.setImageResource(type.getIconResId());
+        holder.tvType.setText(type.getDisplayName());
         holder.tvMainTitle.setText(voucher.getMainTitle());
-        if (voucher.getSubTitle().length()>0) {
+        holder.tvSubTitle.setText(voucher.getSubTitle());
+        holder.tvExpiration.setText(voucher.getVoucherExpiration());
+        if (!voucher.getSubTitle().isEmpty()) {
             holder.tvSubTitle.setVisibility(View.VISIBLE);
-            holder.tvSubTitle.setText(voucher.getSubTitle());
         } else {
             holder.tvSubTitle.setVisibility(View.GONE);
         }
-        if (voucher.getVoucherExpiration().length()>0) {
+        if (!voucher.getVoucherExpiration().isEmpty()) {
             holder.tvExpiration.setVisibility(View.VISIBLE);
-            holder.tvExpiration.setText(voucher.getVoucherExpiration());
         } else {
             holder.tvExpiration.setVisibility(View.GONE);
         }

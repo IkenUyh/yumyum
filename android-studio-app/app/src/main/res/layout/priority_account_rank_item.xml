@@ -25,15 +25,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#10a941">
-                <ImageView
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    android:layout_marginTop="-10dp"
-                    android:layout_marginRight="-10dp"
-                    android:layout_alignParentEnd="true"
-                    android:src="@drawable/ic_priority_account_rank"
-                    android:scaleType="centerCrop"
-                    app:tint="#40FFFFFF"/>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -79,6 +70,14 @@
                         android:progressTint="#B3FFFFFF"
                         android:progressBackgroundTint="#40000000"/>
                 </LinearLayout>
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginRight="20dp"
+                    android:src="@drawable/ic_food_soup"
+                    app:tint="#40FFFFFF"/>
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
         <RelativeLayout
@@ -95,7 +94,7 @@
                 <ImageView
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:src="@drawable/ic_accmulated_balance"
+                    android:src="@drawable/ic_gift_24px"
                     app:tint="#40000000"/>
                 <TextView
                     android:id="@+id/priority_accumulated_balance"
