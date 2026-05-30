@@ -5,7 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6ede221f-4f12-421c-89ba-30dec5d40c2c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/android-studio-app/app/src/main/java/com/example/uitpayapp/auth/RegisterOTP.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android-studio-app/app/src/main/java/com/example/uitpayapp/utils/KeypadManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android-studio-app/app/src/main/res/color/text_input_stroke.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android-studio-app/app/src/main/res/drawable/bg_circle_blue.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android-studio-app/app/src/main/res/layout/activity_register_otp.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android-studio-app/app/src/main/res/layout/gift_hunt_tutorial.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android-studio-app/app/src/main/res/menu/gift_history_menu.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android-studio-app/app/src/main/res/menu/menu.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android-studio-app/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android-studio-app/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android-studio-app/app/src/main/java/com/example/uitpayapp/gift/GiftActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/android-studio-app/app/src/main/java/com/example/uitpayapp/gift/GiftActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android-studio-app/app/src/main/res/layout/fragment_gift_hunt.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android-studio-app/app/src/main/res/layout/fragment_gift_hunt.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,7 +65,7 @@
     "cidr.known.project.marker": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "bugfix/hotfix__android__manifest",
+    "git-widget-placeholder": "feature/52__completete__registration__and__gift__screen",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
@@ -80,11 +91,8 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>false</RunAsTest>
-      <GradleProfilingDisabled>false</GradleProfilingDisabled>
-      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
     <configuration name="C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/app/build.gradle" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -103,11 +111,8 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>false</RunAsTest>
-      <GradleProfilingDisabled>false</GradleProfilingDisabled>
-      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
     <configuration name="C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/build.gradle" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -126,11 +131,8 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>false</RunAsTest>
-      <GradleProfilingDisabled>false</GradleProfilingDisabled>
-      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
     <configuration name="C:/Users/thanh_cynpday/zalopay-android-integration/android-studio-app/settings.gradle" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -149,11 +151,8 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>false</RunAsTest>
-      <GradleProfilingDisabled>false</GradleProfilingDisabled>
-      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
     <recent_temporary>

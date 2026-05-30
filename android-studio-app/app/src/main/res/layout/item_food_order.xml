@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="6dp"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="14dp">
+
+        <!-- Hàng 1: Loại đơn hàng + Mã đơn (Trái) và Ngày tháng (Phải) -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Đồ ăn "
+                    android:textColor="#212121"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvOrderHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="#21056-633329498"
+                    android:textColor="#757575"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvOrderDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="21/05/2026"
+                android:textColor="#9E9E9E"
+                android:textSize="13sp" />
+        </RelativeLayout>
+
+        <!-- Hàng 2: Tag Yêu thích + Icon Xác minh + Tên quán + Mũi tên góc -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Tag Yêu thích nền cam chữ trắng -->
+            <TextView
+                android:id="@+id/tvFavoriteTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#EE4D2D"
+                android:paddingHorizontal="4dp"
+                android:paddingVertical="1dp"
+                android:text="Yêu thích"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="4dp" />
+
+            <!-- Icon khiên/tích vàng xác minh của ShopeeFood -->
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@android:drawable/button_onoff_indicator_on"
+                android:layout_marginEnd="6dp"
+                app:tint="#FF9800" />
+
+            <TextView
+                android:id="@+id/tvMerchantName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Hồng Trà Sữa Ba Cô Gái Tam Hảo - Tổng Kho"
+                android:textColor="#212121"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="›"
+                android:textColor="#9E9E9E"
+                android:textSize="18sp"
+                android:layout_marginStart="4dp"/>
+        </LinearLayout>
+
+        <!-- Hàng 3: Chi tiết món ăn (Ảnh vuông bên trái, thông tin & giá bên phải) -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp">
+
+            <!-- Ảnh món ăn bo góc nhẹ -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvFoodImage"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/ivFoodImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@android:drawable/ic_menu_gallery" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- Tên món ăn -->
+            <TextView
+                android:id="@+id/tvFoodItemName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/cvFoodImage"
+                android:layout_marginStart="12dp"
+                android:layout_alignTop="@id/cvFoodImage"
+                android:text="Hồng Trà Bí Đao\nĐặc Biệt L"
+                android:textColor="#212121"
+                android:textSize="14sp"
+                android:lineSpacingExtra="2dp" />
+
+            <!-- Khối hiển thị Giá tiền và Số lượng món phía bên phải -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignBottom="@id/cvFoodImage"
+                android:gravity="end"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvFoodPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="21.400đ"
+                    android:textColor="#212121"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tvFoodCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1 món ›"
+                    android:textColor="#757575"
+                    android:textSize="12sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- Thanh phân cách ngang mảnh -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#E0E0E0"
+            android:layout_marginTop="14dp" />
+
+        <!-- Hàng 4: Trạng thái đơn hàng (Trái) & Cặp nút bấm Đánh giá / Đặt lại (Phải) -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:id="@+id/tvOrderStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="Hoàn thành"
+                android:textColor="#616161"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- Nút Đánh giá: dạng viền rỗng (Outlined), chữ cam kèm icon xu -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnRate"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingHorizontal="10dp"
+                    android:text="Đánh giá 🪙 +500"
+                    android:textColor="#EE4D2D"
+                    android:textSize="12sp"
+                    app:strokeColor="#EE4D2D"
+                    app:strokeWidth="0.8dp"
+                    app:cornerRadius="3dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <!-- Nút Đặt lại: dạng nền cam đặc, chữ trắng -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnReorder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingHorizontal="14dp"
+                    android:text="Đặt lại"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    app:backgroundTint="#EE4D2D"
+                    app:cornerRadius="3dp" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- Hàng 5: Banner thông báo nhắc nhở Đánh giá nhận Shopee Xu phía cuối Card -->
+        <LinearLayout
+            android:id="@+id/layoutReviewNotice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="#F7F7F7"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚠️"
+                android:textSize="12sp"
+                android:layout_marginEnd="6dp"/>
+
+            <TextView
+                android:id="@+id/tvReviewNotice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đánh giá trong vòng 4 ngày để nhận 500 Shopee Xu"
+                android:textColor="#6D6D6D"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
