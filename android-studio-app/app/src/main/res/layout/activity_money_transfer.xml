@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF"
     android:fitsSystemWindows="true"
-    tools:context=".home.money_transfer.MoneyTransferActivity">
+    tools:context=".home.checkout.MoneyTransferActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_header"

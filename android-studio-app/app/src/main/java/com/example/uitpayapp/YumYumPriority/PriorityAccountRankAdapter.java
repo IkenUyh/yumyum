@@ -55,9 +55,9 @@ public class PriorityAccountRankAdapter extends RecyclerView.Adapter<PriorityAcc
         group.add(new GroupItemData("Chi tiết đặc quyền",model.getRankBenefits()));
         ((RecyclerView)holder.rvBenefit).setAdapter(new ProfileMenuAdapter(holder.itemView.getContext(),group,null));
         if (exploreMode==View.GONE) {
-            holder.tvExplore.setText("Thu gọn <");
-        } else {
             holder.tvExplore.setText("Khám phá >");
+        } else {
+            holder.tvExplore.setText("Thu gọn <");
         }
         holder.rvBenefit.setVisibility(exploreMode);
         holder.tvExplore.setOnClickListener(v->

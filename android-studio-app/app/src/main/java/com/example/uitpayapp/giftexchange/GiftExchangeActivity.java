@@ -24,9 +24,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.YumYumPriority.PriorityYumYumActivity;
-import com.example.uitpayapp.home.ImageSliderAdapter;
-import com.example.uitpayapp.suggestion.SuggestAdapter;
-import com.example.uitpayapp.suggestion.SuggestionModel;
+import com.example.uitpayapp.home.home_adapters.ImageSliderAdapter;
 import com.example.uitpayapp.voucher.VoucherActivity;
 
 import java.util.ArrayList;
@@ -39,7 +37,7 @@ public class GiftExchangeActivity extends AppCompatActivity {
     private PriorityCheckInAdapter checkinAdapter;
     private List<CategoryModel> categoryList;
 
-    private RecyclerView rvExchangeVoucher, rvExchangeVoucherDemo, rvGift1Coin;
+    private RecyclerView rvExchangeVoucher, rvExchangeVoucherDemo;
     private ExchangeVoucherAdapter exchangeVoucherAdapter;
     private List<ExchangeVoucherModel> allVoucherList;
     private List<ExchangeVoucherModel> displayVoucherList;
@@ -62,7 +60,6 @@ public class GiftExchangeActivity extends AppCompatActivity {
         initView();
         setCategoryData();
         setExchangeVoucherData();
-        setGift1CoinData();
         setBannerData();
         SetCheckInData();
         findViewById(R.id.gift_exchange_my_voucher).setOnClickListener(v ->
@@ -87,7 +84,6 @@ public class GiftExchangeActivity extends AppCompatActivity {
         rvExchangeVoucher = findViewById(R.id.rv_new_gift_exchange);
         rvExchangeVoucherDemo = findViewById(R.id.rv_gift_exchange_demo);
         rvCheckIn = findViewById(R.id.rv_daily_checkin);
-        rvGift1Coin = findViewById(R.id.rv_gift_1coin);
         BannerSlider = findViewById(R.id.gift_exchange_image_slider);
         layoutNewGifts = findViewById(R.id.layout_new_gifts_section);
         tvSeeMore = findViewById(R.id.tv_see_more_exchange_voucher);
@@ -151,17 +147,6 @@ public class GiftExchangeActivity extends AppCompatActivity {
         rvExchangeVoucher.setLayoutManager(new GridLayoutManager(this, 2));
         rvExchangeVoucher.setAdapter(exchangeVoucherAdapter);
         rvExchangeVoucher.setNestedScrollingEnabled(false);
-    }
-
-    private void setGift1CoinData() {
-        List<SuggestionModel> list1Coin = new ArrayList<>();
-        list1Coin.add(new SuggestionModel(SuggestionModel.TYPE_HORIZONTAL, R.drawable.img_priority_banner1, "[Cỏ Cây Hoa Lá] E-voucher Giảm 20%", "1 Xu"));
-        list1Coin.add(new SuggestionModel(SuggestionModel.TYPE_HORIZONTAL, R.drawable.img_priority_banner2, "[PamperMe] E-voucher Giảm 50% ưu đãi", "1 Xu"));
-        list1Coin.add(new SuggestionModel(SuggestionModel.TYPE_HORIZONTAL, R.drawable.img_priority_banner3, "[Ladomax] E-voucher Giảm 50%", "1 Xu"));
-        
-        SuggestAdapter adapter = new SuggestAdapter(list1Coin);
-        rvGift1Coin.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rvGift1Coin.setAdapter(adapter);
     }
 
     @SuppressLint("NotifyDataSetChanged")

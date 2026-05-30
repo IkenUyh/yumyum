@@ -17,7 +17,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.giftexchange.GiftExchangeActivity;
-import com.example.uitpayapp.home.ImageSliderAdapter;
+import com.example.uitpayapp.home.home_adapters.ImageSliderAdapter;
 import com.example.uitpayapp.profile.ProfileWebView;
 import com.example.uitpayapp.voucher.VoucherActivity;
 

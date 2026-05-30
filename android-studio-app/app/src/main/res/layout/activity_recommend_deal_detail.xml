@@ -116,11 +116,6 @@
                 android:layout_marginTop="16dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
-                <ImageView
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:src="@drawable/ic_ticket"
-                    app:tint="#ee4d2d" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
