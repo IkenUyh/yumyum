@@ -3,44 +3,61 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="0dp"
-    app:cardBackgroundColor="#F8F9FA"
-    android:layout_margin="4dp">
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:cardUseCompatPadding="true">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="10dp"
-        android:gravity="center_vertical">
-        <ImageView
-            android:id="@+id/iv_brand_logo"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/ic_uitpay_demo"
-            android:scaleType="fitCenter"/>
+        android:minHeight="80dp"
+        android:gravity="center">
+        <LinearLayout
+            android:id="@+id/ll_exchange_left_side"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:background="#f24405"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/iv_exchange_type"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/ic_food"
+                app:tint="#FFFFFF" />
+            <TextView
+                android:id="@+id/tv_exchange_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:text="Giảm giá món"
+                android:textColor="#FFFFFF"
+                android:textSize="6sp"/>
+        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginStart="10dp">
+            android:padding="8dp">
             <TextView
                 android:id="@+id/tv_exchange_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Giảm 100K"
-                android:textColor="#000000"
+                android:textColor="#212121"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:maxLines="1"
                 android:ellipsize="end"/>
             <TextView
                 android:id="@+id/tv_exchange_condition"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:text="Cho đơn từ 499K"
                 android:textColor="#757575"
-                android:textSize="11sp"
+                android:textSize="7sp"
                 android:maxLines="1"
                 android:ellipsize="end" />
             <LinearLayout
@@ -48,10 +65,10 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginTop="4dp">
+                android:layout_gravity="end">
                 <ImageView
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
                     android:src="@drawable/ic_sanqua_coin_removebg"/>
                 <TextView
                     android:id="@+id/tv_coin_cost"
@@ -60,16 +77,8 @@
                     android:text="100"
                     android:textColor="#F57C00"
                     android:textStyle="bold"
-                    android:textSize="12sp"
-                    android:layout_marginStart="4dp"/>
-                <TextView
-                    android:id="@+id/tv_original_cost"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="5K"
-                    android:textColor="#BDBDBD"
                     android:textSize="11sp"
-                    android:layout_marginStart="6dp"/>
+                    android:layout_marginStart="2dp"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

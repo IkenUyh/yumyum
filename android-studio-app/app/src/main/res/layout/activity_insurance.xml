@@ -121,29 +121,29 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/bg_autopay_tab_selected"
+                            android:background="@drawable/bg_tab_selected"
                             android:paddingHorizontal="16dp"
                             android:paddingVertical="8dp"
                             android:text="Sống tự tin"
-                            android:textColor="#0034c8" />
+                            android:textColor="#f24405" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:background="@drawable/bg_autopay_tab_unselected"
+                            android:background="@drawable/bg_tab_unselected"
                             android:paddingHorizontal="16dp"
                             android:paddingVertical="8dp"
                             android:text="Màn hình điện thoại"
-                            android:textColor="#0034c8" />
+                            android:textColor="#ffffff" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:background="@drawable/bg_autopay_tab_unselected"
+                            android:background="@drawable/bg_tab_unselected"
                             android:paddingHorizontal="16dp"
                             android:paddingVertical="8dp"
                             android:text="An ninh mạng"
-                            android:textColor="#0034c8" />
+                            android:textColor="#ffffff" />
                     </LinearLayout>
                 </HorizontalScrollView>
                 <androidx.cardview.widget.CardView

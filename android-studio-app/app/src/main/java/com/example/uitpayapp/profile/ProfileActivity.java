@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -21,9 +20,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.ScanQRCode.QRScanActivity;
-import com.example.uitpayapp.UITpayPriority.PriorityUITpayActivity;
-import com.example.uitpayapp.gift.GiftActivity;
-import com.example.uitpayapp.insurance.InsuranceActivity;
+import com.example.uitpayapp.YumYumPriority.PriorityYumYumActivity;
+import com.example.uitpayapp.giftexchange.GiftExchangeActivity;
+import com.example.uitpayapp.profile.accountPaymentManage.AccountManagementActivity;
 import com.example.uitpayapp.voucher.VoucherActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
@@ -53,9 +52,6 @@ public class ProfileActivity extends AppCompatActivity {
             }
             return insets;
         });
-        // =========================================================
-        // === THÊM MỚI: LOAD DATA TỪ SHAREDPREFERENCES & GLIDE ===
-        // =========================================================
         TextView tvName = findViewById(R.id.tv_account_name);
         TextView tvPhone = findViewById(R.id.tv_account_phone);
         ImageView ivAvatar = findViewById(R.id.iv_account_avatar);
@@ -77,13 +73,17 @@ public class ProfileActivity extends AppCompatActivity {
         }
         findViewById(R.id.profile_uitpay_priority).setOnClickListener(v->
         {
-            Intent intentPriority=new Intent(this, PriorityUITpayActivity.class);
+            Intent intentPriority=new Intent(this, PriorityYumYumActivity.class);
             startActivity(intentPriority);
         });
         findViewById(R.id.profile_show_account_info).setOnClickListener(v->
         {
             Intent intentAccount=new Intent(this, AccountDetailActivity.class);
             startActivity(intentAccount);
+        });
+        findViewById(R.id.qr_manage_card).setOnClickListener(v->{
+            Intent intentQR=new Intent(this, QRScanActivity.class);
+            startActivity(intentQR);
         });
         SetDataMainMenu(mainMenu);
         setupBottomNavigation();
@@ -95,33 +95,28 @@ public class ProfileActivity extends AppCompatActivity {
         List<GroupItemData> ListGroupItem = new ArrayList<>();
         //Nhóm 1: Ưu đãi
         List<MenuItemData> ListItems_uudai = new ArrayList<>();
-        ListItems_uudai.add(new MenuItemData("Quà của tôi", "0 ưu đãi", R.drawable.ic_my_gift,false));
+        ListItems_uudai.add(new MenuItemData("Deal hời cho bạn","",R.drawable.ic_your_deal,false));
+        ListItems_uudai.add(new MenuItemData("Ví Voucher", "0 ưu đãi", R.drawable.ic_my_gift,false));
         ListItems_uudai.add(new MenuItemData("Xu tích lũy", "0 xu", R.drawable.ic_my_coin,false));
         ListGroupItem.add(new GroupItemData("Ưu đãi", ListItems_uudai));
         //Nhóm 2: Quản lý tài chính (Mục đặc chứa thành phần đặc biệt)
         List<MenuItemData> ListItems_finance = new ArrayList<>();
         ListItems_finance.add(new MenuItemData("Tài khoản/thẻ liên kết", "", R.drawable.ic_account_card_payment,true));
-        ListItems_finance.add(new MenuItemData("Cài đặt thanh toán tự động", "Sắp xếp nguồn tiền, cài đặt dịch vụ", R.drawable.ic_payment,false));
-        ListGroupItem.add(new GroupItemData("Quản lý tài chính", ListItems_finance));
-        //Nhóm 3: Hỗ trợ
+        ListItems_finance.add(new MenuItemData("Vị trí", "Thêm và sắp xếp các địa chỉ giao hàng của bạn", R.drawable.ic_location,false));
+        ListGroupItem.add(new GroupItemData("Quản lý thông tin đơn hàng", ListItems_finance));
+        //Nhóm 3: Tiện ích
+        List<MenuItemData> ListItems_tienich = new ArrayList<>();
+        ListItems_tienich.add(new MenuItemData("Mời bạn bè", "", R.drawable.ic_invite_friend,false));
+        ListItems_tienich.add(new MenuItemData("Cửa hàng của bạn", "", R.drawable.ic_my_store,false));
+        ListGroupItem.add(new GroupItemData("Tiện ích", ListItems_tienich));
+        //Nhóm 4: Hỗ trợ
         List<MenuItemData> ListItems_support = new ArrayList<>();
         ListItems_support.add(new MenuItemData("Trung tâm hỗ trợ", "", R.drawable.ic_contact_support_ver2,false));
-        ListItems_support.add(new MenuItemData("Trung tâm bảo mật", "", R.drawable.ic_security_user,false));
+        ListItems_support.add(new MenuItemData("Chính sách bảo mật", "", R.drawable.ic_security_user,false));
         ListItems_support.add(new MenuItemData("Cài đặt ứng dụng", "", R.drawable.ic_setting,false));
         ListGroupItem.add(new GroupItemData("Hỗ trợ và Cài đặt", ListItems_support));
 
         mainMenu.setAdapter(new ProfileMenuAdapter(this, ListGroupItem,ItemClick->HanleItemClick(ItemClick)));
-
-        findViewById(R.id.qr_manage_card).setOnClickListener(v->
-        {
-            List<MenuItemData> ListItems_QRManger = new ArrayList<>();
-            List<GroupItemData> ListGroupItemQRManger = new ArrayList<>();
-            ListItems_QRManger.add(new MenuItemData("Mã nhận tiền","Chia sẻ mã này để nhận tiền những người xung quanh",R.drawable.ic_receive,false));
-            ListItems_QRManger.add(new MenuItemData("Mã thanh toán","Đưa mã này cho thu ngân cửa hàng để thanh toán nhé",R.drawable.ic_qr_code,false));
-            ListItems_QRManger.add(new MenuItemData("Quét QR","Hướng camera vào mã QR để quyét",R.drawable.ic_scan,false));
-            ListGroupItemQRManger.add(new GroupItemData("Các mã QR quan trọng",ListItems_QRManger));
-            ShowBottomSheet("Quản lý mã",ListGroupItemQRManger);
-        });
 
     }
     public void HanleItemClick(MenuItemData item) {
@@ -130,48 +125,56 @@ public class ProfileActivity extends AppCompatActivity {
         List<MenuItemData> ListItems = new ArrayList<>();
         if (item.IsSpecialItem)
         {
-            Intent intent=new Intent(this,AccountManagementActivity.class);
+            Intent intent=new Intent(this, AccountManagementActivity.class);
             startActivity(intent);
             return;
         }
         switch (item.getTitle()) {
-            case "Cài đặt thanh toán tự động":
-                ListItems.add(new MenuItemData("Thanh toán dịch vụ tự động","Sắp xếp thứ tự ưu tiên thẻ/tài khoản",R.drawable.ic_sort_payment,false));
-                ListItems.add(new MenuItemData("Thanh toán hóa đơn tự động","",R.drawable.ic_receipt,false));
-                ListGroupItem.add(new GroupItemData("",ListItems));
-                ShowBottomSheet("Cài đặt thanh toán tự động",ListGroupItem);
+            case "Ví Voucher":
+                Intent intentVoucher=new Intent(this,VoucherActivity.class);
+                startActivity(intentVoucher);
                 break;
-            case "Trung tâm bảo mật":
-                ListItems.add(new MenuItemData("Bảo mật tài khoản","",R.drawable.ic_security_user,false));
-                ListItems.add(new MenuItemData("Bảo mật giao dịch","",R.drawable.ic_security_transaction,false));
-                ListGroupItem.add(new GroupItemData("",ListItems));
-                ShowBottomSheet("Trung tâm bảo mật",ListGroupItem);
+            case "Chính sách bảo mật":
+                Intent intentSecurity=new Intent(this,ProfileWebView.class);
+                intentSecurity.putExtra("URL_KEY","https://help.cs.shopeefood.vn/portal/103/article/73879-Ch%C3%ADnh-s%C3%A1ch-b%E1%BA%A3o-m%E1%BA%ADt");
+                startActivity(intentSecurity);
                 break;
             case "Cài đặt ứng dụng":
                 ListItems.add(new MenuItemData("Cài đặt thông báo","",R.drawable.ic_notification,false));
-                ListGroupItem.add(new GroupItemData("Cài đặt cho ứng dụng UITpay",ListItems));
+                ListGroupItem.add(new GroupItemData("Cài đặt cho ứng dụng YumYum",ListItems));
                 List<MenuItemData> ListItems2 = new ArrayList<>();
-                ListItems2.add(new MenuItemData("Thông tin ứng dụng","",R.drawable.ic_uitpay_information,false));
+                ListItems2.add(new MenuItemData("Thông tin ứng dụng","",R.drawable.ic_app_information,false));
                 ListItems2.add(new MenuItemData("Dọn dẹp bộ nhớ tạm","",R.drawable.ic_clean,false));
                 ListGroupItem.add(new GroupItemData("Khác",ListItems2));
                 ShowBottomSheet("Cài đặt ứng dụng",ListGroupItem);
                 break;
-            case "Quản lý tài chính":
-                ListItems.add(new MenuItemData("Tài khoản/thẻ liên kết","",R.drawable.ic_account_card_payment,false));
-                ListItems.add(new MenuItemData("Cài đặt thanh toán tự động","Sắp xếp nguồn tiền, cài đặt dịch vụ",R.drawable.ic_payment,false));
-                ListItems.add(new MenuItemData("Điểm tin cậy UITpay","",R.drawable.ic_reliable_score,false));
-                ListItems.add(new MenuItemData("các liên kết ngân hàng khác","",R.drawable.ic_link_bank,false));
-                ListGroupItem.add(new GroupItemData("",ListItems));
-                ShowBottomSheet("Quản lý tài chính",ListGroupItem);
-                break;
-            case "Quà của tôi":
-                Intent intentVoucher=new Intent(this, VoucherActivity.class);
-                startActivity(intentVoucher);
-                break;
             case "Trung tâm hỗ trợ":
                 Intent intentSupport=new Intent(this, ProfileWebView.class);
-                intentSupport.putExtra("URL_KEY","https://support.zalopay.vn/faq/web");
+                intentSupport.putExtra("URL_KEY","https://help.cs.shopeefood.vn/portal/102");
                 startActivity(intentSupport);
+                break;
+            case "Xu tích lũy":
+                Intent intentCoin=new Intent(this, GiftExchangeActivity.class);
+                startActivity(intentCoin);
+                break;
+            case "Deal hời cho bạn":
+                Intent intentDeal=new Intent(this, com.example.uitpayapp.recommendeddeal.RecommendedDealActivity.class);
+                startActivity(intentDeal);
+                break;
+            case "Mời bạn bè":
+                ListItems.add(new MenuItemData("Gửi qua SMS","",R.drawable.ic_bold_check,false));
+                ListItems.add(new MenuItemData("Gửi qua Email","",R.drawable.ic_bold_check,false));
+                ListItems.add(new MenuItemData("Sao chép đường dẫn tải ứng dụng","",R.drawable.ic_bold_check,false));
+                ListGroupItem.add(new GroupItemData("",ListItems));
+                ShowBottomSheet("Mời bạn bè",ListGroupItem);
+                break;
+            case "Vị trí":
+                Intent intentLocation=new Intent(this, com.example.uitpayapp.deliveryaddressorder.AddressOrderActivity.class);
+                startActivity(intentLocation);
+                break;
+            case "Cửa hàng của bạn":
+                Intent intentStore=new Intent(this, com.example.uitpayapp.registerstore.RegisterStoreActivity.class);
+                startActivity(intentStore);
                 break;
         }
     }
@@ -214,6 +217,7 @@ public class ProfileActivity extends AppCompatActivity {
         bottomSheetDialog.show();
     }
     private void HanleDetailItemClick(MenuItemData item) {
+        String message="YumYum ứng dụng đặt thức ăn online siêu tiện lợi. Hãy tham gia YumYum ngay để nhận nhiều ưu đãi hấp dẫn";
         switch (item.getTitle()) {
             case "Thông tin ứng dụng":
                 Intent intentInfo=new Intent(this,InfoApplication.class);
@@ -223,25 +227,26 @@ public class ProfileActivity extends AppCompatActivity {
                 Intent intentNotification=new Intent(this, NotificationSettings.class);
                 startActivity(intentNotification);
                 break;
-            case "Thanh toán hóa đơn tự động":
-                Intent intentAutoPay=new Intent(this, AutoPaymentActivity.class);
-                startActivity(intentAutoPay);
-                break;
-            case "Bảo mật tài khoản":
-                Intent intentSecurity=new Intent(this, SecuritySettingsActivity.class);
-                startActivity(intentSecurity);
-                break;
             case "Quét QR":
                 Intent intentQR=new Intent(this, QRScanActivity.class);
                 startActivity(intentQR);
                 break;
-            case "Bảo mật giao dịch":
-                Intent intentTransaction=new Intent(this, SecurityTransactionActivity.class);
-                startActivity(intentTransaction);
+            case "Gửi qua SMS":
+                Intent intentSMS=new Intent(Intent.ACTION_SENDTO);
+                intentSMS.setData(android.net.Uri.parse("smsto:"));
+                intentSMS.putExtra("sms_body", message);
+                startActivity(intentSMS);
                 break;
-            case "Hợp đồng bảo hiểm":
-                Intent intentInsurance=new Intent(this, InsuranceActivity.class);
-                startActivity(intentInsurance);
+            case "Gửi qua Email":
+                Intent intentEmail=new Intent(Intent.ACTION_SENDTO);
+                String subject="Lời mời tham gia YumYum";
+                intentEmail.setData(android.net.Uri.parse("mailto:?subject="+android.net.Uri.encode(subject)+"&body=" + android.net.Uri.encode(message)));
+                startActivity(intentEmail);
+                break;
+            case "Sao chép đường dẫn tải ứng dụng":
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+                android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text",message);
+                clipboard.setPrimaryClip(clip);
                 break;
         }
     }

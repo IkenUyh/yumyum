@@ -8,6 +8,10 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_uitpay_demo"
@@ -21,7 +25,11 @@
         </activity>
         <activity
             android:name=".home.HomeActivity"
-            android:exported="false">
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".transaction.TransactionHistoryActivity"
@@ -35,12 +43,8 @@
             android:exported="false" />
         <activity
             android:name=".auth.SignInActivity"
-            android:exported="true"
+            android:exported="false"
             android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".home.checkout.MoneyTransferActivity"
@@ -61,14 +65,8 @@
             android:exported="false" />
         <activity android:name=".voucher.VoucherActivity"
             android:exported="false" />
-        <activity android:name=".profile.AutoPaymentActivity"
-            android:exported="false" />
-        <activity android:name=".profile.SecuritySettingsActivity"
-            android:exported="false" />
         <activity android:name=".ScanQRCode.QRScanActivity"
             android:exported="false" />
-        <activity android:name=".profile.SecurityTransactionActivity"
-            android:exported="false"/>
 
         <activity
             android:name=".profile.ContactSupportActivity"
@@ -77,16 +75,26 @@
         <activity
             android:name=".auth.PasscodeActivity"
             android:exported="false" />
-        <activity
-            android:name=".UITpayPriority.PriorityUITpayActivity"
+        <activity android:name=".deliveryaddressorder.AddressOrderActivity"
             android:exported="false" />
-        <activity android:name=".profile.AccountManagementActivity"
+        <activity android:name=".recommendeddeal.RecommendedDealActivity"
+            android:exported="false" />
+        <activity android:name=".recommendeddeal.RecommendedDealDetailActivity"
+            android:exported="false"/>
+        <activity android:name=".deliveryaddressorder.MapPickerActivity"
+            android:exported="false" />
+        <activity android:name=".registerstore.RegisterStoreActivity"
             android:exported="false" />
         <activity android:name=".profile.AccountDetailActivity"
             android:exported="false" />
         <activity android:name=".insurance.InsuranceActivity"
             android:exported="false" />
-
+        <activity android:name=".YumYumPriority.PriorityYumYumActivity"
+            android:exported="false" />
+        <activity android:name=".giftexchange.GiftExchangeActivity"
+            android:exported="false"/>
+        <activity android:name=".profile.accountPaymentManage.AccountManagementActivity"
+            android:exported="false" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

@@ -63,23 +63,19 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
                 View title_balace=itemView.findViewById(R.id.balance_title);
                 ProfileActivity.SetDetailMenuItem(title_balace,MenuItem.getTitle(),MenuItem.getSubtitle(),MenuItem.getIcon());
                 TextView wallet_balance=itemView.findViewById(R.id.wallet_balance);
-                TextView accmulated_balance=itemView.findViewById(R.id.accmulated_balance);
                 ImageView hide_show_amount=itemView.findViewById(R.id.hide_show_amount);
                 //sau nay goi api thi co kha nang goi o day
                 wallet_balance.setText("0đ");
-                accmulated_balance.setText("0đ");
                 hide_show_amount.setOnClickListener(v->
                 {
                     IsAmountHiden=!IsAmountHiden;
                     if (IsAmountHiden)
                     {
                         wallet_balance.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                        accmulated_balance.setTransformationMethod(PasswordTransformationMethod.getInstance());
                         hide_show_amount.setImageResource(R.drawable.ic_eye);
                     } else
                     {
                         wallet_balance.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                        accmulated_balance.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                         hide_show_amount.setImageResource(R.drawable.ic_invisible_eye);
                     }
                 });

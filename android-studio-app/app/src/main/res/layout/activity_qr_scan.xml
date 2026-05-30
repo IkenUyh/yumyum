@@ -29,28 +29,6 @@
                 android:layout_height="30dp"
                 android:src="@drawable/ic_less_than"
                 app:tint="#FFFFFF" />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:background="@drawable/bg_button_login_rounded"
-                android:backgroundTint="#40FFFFFF"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="8dp"
-                android:gravity="center">
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@drawable/ic_qr_scan_camera"
-                    app:tint="#FFFFFF"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="1x"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginStart="4dp"
-                    android:textSize="12sp"/>
-            </LinearLayout>
             <ImageView
                 android:id="@+id/qrscan_btn_flash"
                 android:layout_width="30dp"

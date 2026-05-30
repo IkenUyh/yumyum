@@ -9,23 +9,11 @@
     android:id="@+id/voucher_screen_container">
     <include layout="@layout/layout_top_bar"
         android:id="@+id/top_bar_voucher"/>
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="8dp"
-        app:cardUseCompatPadding="true"
-        android:id="@+id/nav_voucher_button">
-        <include layout="@layout/menuitem_profile_screen"
-            android:id="@+id/button_find_new_voucher"/>
-    </androidx.cardview.widget.CardView>
     <ScrollView
         android:id="@+id/receipt_screen_main_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/top_bar_voucher"
-        android:layout_above="@id/nav_voucher_button">
+        android:layout_below="@id/top_bar_voucher">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -69,11 +57,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                app:tabIndicatorColor="#0034C8"
-                app:tabSelectedTextColor="#0034C8"
-                app:tabTextColor="#757575">
-                <com.google.android.material.tabs.TabItem android:text="Ưu đãi từ ZaloPay"  android:layout_height="wrap_content" android:layout_width="wrap_content"/>
-                <com.google.android.material.tabs.TabItem android:text="Ưu đãi từ đối tác"
+                app:tabIndicatorColor="#f24405"
+                app:tabSelectedTextColor="#f24405"
+                app:tabTextColor="#757575"
+                app:tabTextAppearance="@style/CustomTabTextAppearance">
+                <com.google.android.material.tabs.TabItem android:text="Tất cả"
+                    android:layout_height="wrap_content" android:layout_width="wrap_content" />
+                <com.google.android.material.tabs.TabItem android:text="Giảm giá món"
+                    android:layout_height="wrap_content" android:layout_width="wrap_content"/>
+                <com.google.android.material.tabs.TabItem android:text="Phí vận chuyển"
                     android:layout_height="wrap_content" android:layout_width="wrap_content"/>
             </com.google.android.material.tabs.TabLayout>
             <androidx.recyclerview.widget.RecyclerView
@@ -81,7 +73,8 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/rv_voucher"
                 android:padding="16dp"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager">
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                tools:listitem="@layout/item_voucher">
             </androidx.recyclerview.widget.RecyclerView>
         </LinearLayout>
     </ScrollView>

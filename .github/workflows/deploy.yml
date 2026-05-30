@@ -1,11 +1,37 @@
-name: Deploy ZaloPay Backend
+name: Deploy Food Delivery Backend
 
 on:
   push:
     branches: [ "develop", "main" ]
 
 jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dang nhap Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build va push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend-springboot
+          file: ./backend-springboot/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/fooddelivery-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   deploy:
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: SSH vao VPS va Deploy
@@ -15,6 +41,14 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
           script: |
-            cd /root/zalopay-android-integration/backend-springboot
+            # 1. Nhảy vào thư mục gốc của repo trên VPS để pull code mới
+            cd /root/zalopay-android-integration
+            git checkout develop
             git pull origin develop
-            sudo docker compose -p zalopay-backend up -d --build
+            
+            # 2. Nhảy tiếp vào thư mục chứa docker-compose.yml để ra lệnh chạy
+            cd backend-springboot
+            
+            # 3. Kéo image từ Docker Hub về và restart container
+            sudo docker compose pull
+            sudo docker compose up -d

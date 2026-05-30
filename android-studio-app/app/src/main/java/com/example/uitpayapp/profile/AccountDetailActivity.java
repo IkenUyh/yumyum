@@ -213,7 +213,7 @@ public class AccountDetailActivity extends AppCompatActivity {
         view.findViewById(R.id.btn_close_update_secondary_info).setOnClickListener(v -> bottomSheetDialog.dismiss());
         view.findViewById(R.id.btn_popup_job).setOnClickListener(v -> {
             PopupMenu popupMenu = new PopupMenu(this, v);
-            String[] jobs = {"Nhân viên văn phòng", "Kinh doanh tự do", "Học sinh/Sinh viên", "Công nhân","Nông dân", "Nghỉ hưu", "Khác"};
+            String[] jobs = {"Công chức","Nhân viên văn phòng", "Kinh doanh tự do", "Học sinh/Sinh viên", "Công nhân","Nông dân", "Nghỉ hưu", "Khác"};
             for (String job : jobs) {
                 popupMenu.getMenu().add(job);
             }
