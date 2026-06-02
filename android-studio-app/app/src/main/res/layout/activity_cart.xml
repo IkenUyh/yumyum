@@ -46,20 +46,6 @@
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold" />
-
-        <!-- Badge số lượng -->
-        <TextView
-            android:id="@+id/tv_cart_badge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_circle_gray"
-            android:gravity="center"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="2dp"
-            android:text="0 món"
-            android:textColor="#F24405"
-            android:textSize="12sp"
-            android:textStyle="bold" />
     </LinearLayout>
 
     <!-- NỘI DUNG GIỎ HÀNG -->

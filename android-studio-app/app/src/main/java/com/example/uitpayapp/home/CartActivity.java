@@ -31,7 +31,6 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
     private CartAdapter cartAdapter;
     private CartManager cartManager;
     private TextView tvTotalPrice;
-    private TextView tvCartBadge;
     private LinearLayout layoutEmptyCart;
     private RecyclerView rvCartItems;
     private LinearLayout layoutBottomBar;
@@ -42,12 +41,10 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
 
-        // Tràn viền status bar
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
         setContentView(R.layout.activity_cart);
 
-        // Xử lý padding cho status bar
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.layout_cart_header), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(v.getPaddingLeft(), systemBars.top + 16, v.getPaddingRight(), v.getPaddingBottom());
@@ -63,25 +60,19 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
         formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
         cartManager = CartManager.getInstance();
 
-        // Ánh xạ view
         tvTotalPrice = findViewById(R.id.tv_total_price);
-        tvCartBadge = findViewById(R.id.tv_cart_badge);
         layoutEmptyCart = findViewById(R.id.layout_empty_cart);
         rvCartItems = findViewById(R.id.rv_cart_items);
         layoutBottomBar = findViewById(R.id.layout_bottom_bar);
 
-        // Nút quay lại
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
 
-        // Setup RecyclerView
         rvCartItems.setLayoutManager(new LinearLayoutManager(this));
         cartAdapter = new CartAdapter(cartManager.getCart(), this);
         rvCartItems.setAdapter(cartAdapter);
 
-        // Nút thanh toán
         findViewById(R.id.btn_checkout).setOnClickListener(v -> checkout());
 
-        // Cập nhật UI
         updateCartUI();
     }
 
@@ -95,7 +86,6 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
             layoutEmptyCart.setVisibility(View.GONE);
             layoutBottomBar.setVisibility(View.VISIBLE);
             tvTotalPrice.setText(cartManager.getFormattedTotalPrice());
-            tvCartBadge.setText(cartManager.getTotalItemCount() + " món");
         }
     }
 
@@ -116,7 +106,6 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
                     Toast.makeText(this, "Đã xóa khỏi giỏ hàng", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Hủy", (dialog, which) -> {
-                    // Giữ lại số lượng = 1
                     dialog.dismiss();
                 })
                 .setCancelable(false)
@@ -139,7 +128,6 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
         intent.putExtra("KEY_FROM_CART", true);
         startActivity(intent);
 
-        // Xóa giỏ hàng và quay về Home
         cartManager.clearCart();
         finish();
     }

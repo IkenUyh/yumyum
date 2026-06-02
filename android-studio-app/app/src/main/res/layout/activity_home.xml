@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F7FA">
 
-    <!-- NỀN CAM GRADIENT (Chìm phía dưới) -->
     <View
         android:id="@+id/bg_top_gradient"
         android:layout_width="match_parent"
@@ -13,7 +13,6 @@
         android:background="@drawable/bg_orange_gradient"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- NỘI DUNG CHÍNH (Cuộn đè lên nền cam) -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/food_main_scroll"
         android:layout_width="match_parent"
@@ -27,7 +26,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- 1. HÀNG ĐỊA CHỈ & GIỎ HÀNG -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -37,7 +35,6 @@
                 android:paddingTop="16dp"
                 android:paddingBottom="12dp">
 
-                <!-- Địa chỉ giao hàng -->
                 <LinearLayout
                     android:id="@+id/layout_address_bar"
                     android:layout_width="0dp"
@@ -80,7 +77,6 @@
                         android:textSize="22sp" />
                 </LinearLayout>
 
-                <!-- Nút Giỏ Hàng (Đẩy sang góc phải) -->
                 <FrameLayout
                     android:id="@+id/btn_cart"
                     android:layout_width="wrap_content"
@@ -105,11 +101,12 @@
                         android:textColor="#F24405"
                         android:textSize="10sp"
                         android:textStyle="bold"
-                        android:visibility="gone" />
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        tools:text="3" />
                 </FrameLayout>
             </LinearLayout>
 
-            <!-- 2. THANH TÌM KIẾM -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -146,15 +143,14 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 3. SLIDER QUẢNG CÁO -->
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/imgAdvertisement"
                 android:layout_width="match_parent"
                 android:layout_height="140dp"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="16dp"
+                tools:background="#E0E0E0" />
 
-            <!-- 4. DANH MỤC (Nền trắng) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -168,7 +164,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:clipToPadding="false"
-                    android:overScrollMode="never" />
+                    android:overScrollMode="never"
+                    tools:listitem="@layout/item_food_category"
+                    tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    tools:spanCount="2"
+                    tools:orientation="horizontal"
+                    tools:itemCount="10" />
             </LinearLayout>
 
             <View
@@ -176,7 +177,6 @@
                 android:layout_height="8dp"
                 android:background="#F0F0F0" />
 
-            <!-- 5. THƯƠNG HIỆU NỔI BẬT -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -199,7 +199,9 @@
                     android:layout_marginTop="12dp"
                     android:nestedScrollingEnabled="false"
                     app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                    app:spanCount="4" />
+                    app:spanCount="4"
+                    tools:listitem="@layout/item_food_category"
+                    tools:itemCount="4" />
             </LinearLayout>
 
             <View
@@ -207,7 +209,6 @@
                 android:layout_height="8dp"
                 android:background="#F0F0F0" />
 
-            <!-- 6. ƯU ĐÃI -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -229,12 +230,13 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:nestedScrollingEnabled="false"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_food_voucher"
+                    tools:itemCount="3" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- BOTTOM NAVIGATION (Giữ nguyên) -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_container"
         android:layout_width="match_parent"
