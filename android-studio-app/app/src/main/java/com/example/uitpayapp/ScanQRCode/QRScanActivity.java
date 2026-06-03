@@ -44,8 +44,8 @@ public class QRScanActivity extends AppCompatActivity {
     private Boolean isFlashOn=false;
     ImageView btnFlash;
     View useImgFromStore;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+     /* @Override
+     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qr_scan);
         initView();
@@ -66,8 +66,8 @@ public class QRScanActivity extends AppCompatActivity {
         {
             selectedImgFromStore.launch(new PickVisualMediaRequest.Builder().setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE).build());
         });
-    }
-    private void initView()
+    } */
+    /* private void initView()
     {
         barcodeView = findViewById(R.id.barcode_scanner);
         View topBar = findViewById(R.id.top_bar_qrScan);
@@ -85,7 +85,7 @@ public class QRScanActivity extends AppCompatActivity {
             TextView isScanCCCD = findViewById(R.id.isScanCCCD);
             if (isScanCCCD != null) isScanCCCD.setVisibility(View.VISIBLE);
         }
-    }
+    } */
     @Override
     protected void onResume() {
         super.onResume();

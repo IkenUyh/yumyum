@@ -24,13 +24,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.home.checkout.TransferConfirmationActivity;
 import com.example.uitpayapp.home.home_adapters.BrandAdapter;
 import com.example.uitpayapp.home.home_adapters.FoodCategoryAdapter;
 import com.example.uitpayapp.home.home_adapters.FoodMenuAdapter;
 import com.example.uitpayapp.home.home_adapters.FoodVoucherAdapter;
 import com.example.uitpayapp.home.home_adapters.ImageSliderAdapter;
 import com.example.uitpayapp.home.home_models.CartItem;
+import com.example.uitpayapp.home.home_models.CartManager;
 import com.example.uitpayapp.home.home_models.FoodCategory;
 import com.example.uitpayapp.home.home_models.FoodMenuItem;
 import com.example.uitpayapp.home.home_models.FoodVoucher;
@@ -49,7 +49,8 @@ public class HomeActivity extends AppCompatActivity {
     private List<Restaurant> filteredRestaurants;
     private BrandAdapter brandAdapter;
     private FoodCategoryAdapter categoryAdapter;
-    private List<CartItem> globalCart = new ArrayList<>();
+    private List<CartItem> globalCart;
+
     private String selectedCategory = null;
     private String currentSearchQuery = "";
     private TextView tvDeliveryAddress;
@@ -70,12 +71,12 @@ public class HomeActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
 
-        // Cấu hình tràn viền status bar
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
         setContentView(R.layout.activity_home);
 
-        // Xử lý padding để UI không bị che khuất bởi tai thỏ và thanh điều hướng hệ thống
+        globalCart = CartManager.getInstance().getCart();
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.layout_header_content), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(v.getPaddingLeft(), systemBars.top + 16, v.getPaddingRight(), v.getPaddingBottom());
@@ -88,13 +89,10 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Thiết lập Image Slider cho Banner quảng cáo mẫu
         setupImageSlider();
 
-        // Nút giỏ hàng ở Header
         findViewById(R.id.btn_cart).setOnClickListener(v -> checkoutGlobalCart());
 
-        // Thanh chọn địa chỉ giao hàng
         tvDeliveryAddress = findViewById(R.id.tv_delivery_address);
         findViewById(R.id.layout_address_bar).setOnClickListener(v -> showAddressSelection());
 
@@ -103,9 +101,15 @@ public class HomeActivity extends AppCompatActivity {
         setupBrands();
         setupSearch();
         setupVouchers();
-
-        // Thanh điều hướng Navigation dưới
         setupBottomNavigation();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (globalCart != null) {
+            updateGlobalCartBadge();
+        }
     }
 
     private void setupImageSlider() {
@@ -208,12 +212,6 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setupCategories() {
         List<FoodCategory> categories = new ArrayList<>();
-        // GridLayoutManager(HORIZONTAL, spanCount=2) fills column-by-column:
-        // Column 0: item[0](row0), item[1](row1)
-        // Column 1: item[2](row0), item[3](row1)
-        // So we interleave row0 and row1 items:
-        // Row 0: Cà phê, Gà rán, Cơm, Bánh, Bún, Lẩu, Chọn tất cả
-        // Row 1: Đồ uống, Trái cây, Sushi, Đồ ăn vặt, Chè, BBQ
         categories.add(new FoodCategory("Cà phê\nTrà sữa", "☕", Color.parseColor("#FFF3E0")));
         categories.add(new FoodCategory("Đồ uống", "🧃", Color.parseColor("#E8F5E9")));
         categories.add(new FoodCategory("Gà rán\nBurger", "🍔", Color.parseColor("#FBE9E7")));
@@ -226,7 +224,6 @@ public class HomeActivity extends AppCompatActivity {
         categories.add(new FoodCategory("Chè\nTráng miệng", "🍧", Color.parseColor("#F3E5F5")));
         categories.add(new FoodCategory("Lẩu", "🍲", Color.parseColor("#FBE9E7")));
         categories.add(new FoodCategory("BBQ\nNướng", "🍖", Color.parseColor("#FFEBEE")));
-        // Nút "Chọn tất cả" — cuối dòng 1 (row 0)
         categories.add(new FoodCategory("Chọn\ntất cả", "»", Color.parseColor("#E8EAF6"), true));
 
         RecyclerView rv = findViewById(R.id.rv_categories);
@@ -441,8 +438,10 @@ public class HomeActivity extends AppCompatActivity {
     private void updateGlobalCartBadge() {
         TextView tvBadge = findViewById(R.id.tv_global_cart_badge);
         int count = 0;
-        for (CartItem ci : globalCart) {
-            count += ci.getQuantity();
+        if (globalCart != null) {
+            for (CartItem ci : globalCart) {
+                count += ci.getQuantity();
+            }
         }
         if (count > 0) {
             tvBadge.setVisibility(View.VISIBLE);
@@ -451,27 +450,8 @@ public class HomeActivity extends AppCompatActivity {
             tvBadge.setVisibility(View.GONE);
         }
     }
-
     private void checkoutGlobalCart() {
-        if (globalCart.isEmpty()) {
-            Toast.makeText(this, "Giỏ hàng của bạn đang trống!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        long totalAmount = 0;
-        StringBuilder productNames = new StringBuilder();
-        for (CartItem ci : globalCart) {
-            totalAmount += ci.getTotalPrice();
-            if (productNames.length() > 0) {
-                productNames.append(", ");
-            }
-            productNames.append(ci.getQuantity()).append("x ").append(ci.getMenuItem().getName());
-        }
-
-        Intent intent = new Intent(this, TransferConfirmationActivity.class);
-        intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
-        intent.putExtra("KEY_IS_FOOD_ORDER", true);
-        intent.putExtra("KEY_FOOD_PRODUCTS", productNames.toString());
+        Intent intent = new Intent(this, CartActivity.class);
         startActivity(intent);
     }
 
