@@ -3,5 +3,5 @@ kienhuy-dev.name.vn {
 }
 
 passbook.kienhuy-dev.name.vn {
-    reverse_proxy 221.132.33.131:8082
+    reverse_proxy 221.132.33.131:8083
 }
