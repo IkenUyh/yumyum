@@ -24,22 +24,23 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.home.home_adapters.BrandAdapter;
 import com.example.uitpayapp.home.home_adapters.FoodCategoryAdapter;
 import com.example.uitpayapp.home.home_adapters.FoodMenuAdapter;
-import com.example.uitpayapp.home.home_adapters.FoodVoucherAdapter;
 import com.example.uitpayapp.home.home_adapters.ImageSliderAdapter;
 import com.example.uitpayapp.home.home_models.CartItem;
 import com.example.uitpayapp.home.home_models.CartManager;
 import com.example.uitpayapp.home.home_models.FoodCategory;
 import com.example.uitpayapp.home.home_models.FoodMenuItem;
-import com.example.uitpayapp.home.home_models.FoodVoucher;
 import com.example.uitpayapp.home.home_models.Restaurant;
+import com.example.uitpayapp.recommendeddeal.RecommendedDealAdapter;
+import com.example.uitpayapp.recommendeddeal.RecommendedDealModel;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.tabs.TabLayout;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -47,9 +48,13 @@ public class HomeActivity extends AppCompatActivity {
 
     private List<Restaurant> restaurants;
     private List<Restaurant> filteredRestaurants;
-    private BrandAdapter brandAdapter;
     private FoodCategoryAdapter categoryAdapter;
     private List<CartItem> globalCart;
+
+    private List<RecommendedDealModel> allDeals;
+    private List<RecommendedDealModel> displayDeals;
+    private RecommendedDealAdapter dealAdapter;
+    private TabLayout tabHomeDeals;
 
     private String selectedCategory = null;
     private String currentSearchQuery = "";
@@ -98,9 +103,8 @@ public class HomeActivity extends AppCompatActivity {
 
         setupRestaurants();
         setupCategories();
-        setupBrands();
         setupSearch();
-        setupVouchers();
+        setupDeals();
         setupBottomNavigation();
     }
 
@@ -267,7 +271,7 @@ public class HomeActivity extends AppCompatActivity {
                 filteredRestaurants.add(r);
             }
         }
-        brandAdapter.updateData(filteredRestaurants);
+        // Categories filter only affects restaurant list, deals are independent
     }
 
     private void setupRestaurants() {
@@ -339,27 +343,96 @@ public class HomeActivity extends AppCompatActivity {
         filteredRestaurants = new ArrayList<>(restaurants);
     }
 
-    private void setupBrands() {
-        RecyclerView rv = findViewById(R.id.rv_brands);
-        brandAdapter = new BrandAdapter(filteredRestaurants, this::showRestaurantMenu);
-        rv.setAdapter(brandAdapter);
+    @android.annotation.SuppressLint("NotifyDataSetChanged")
+    private void setupDeals() {
+        tabHomeDeals = findViewById(R.id.tab_home_deals);
+        RecyclerView rvDeals = findViewById(R.id.rv_home_deals);
+
+        allDeals = new ArrayList<>();
+        displayDeals = new ArrayList<>();
+
+        // Load dummy deal data (same as RecommendedDealActivity)
+        allDeals.add(new RecommendedDealModel(
+                "Gà Rán Popeyes - Võ Văn Ngân",
+                9.1, 9,
+                R.drawable.img_food_chicken,
+                "-52%",
+                "1 MIẾNG GÀ RÁN GIÒN + 1 GÀ POPCORN + 1 KHOAI TÂY CHIÊN",
+                100,
+                118000.0,
+                57000.0
+        ));
+        allDeals.add(new RecommendedDealModel(
+                "The Coffee House - Kha Vạn Cân",
+                1.2, 10,
+                R.drawable.img_food_bubbletea,
+                "-30%",
+                "Trà Đào Cam Sả (L) + Bánh Mì Que",
+                50,
+                75000.0,
+                52000.0
+        ));
+        allDeals.add(new RecommendedDealModel(
+                "Phúc Long Tea & Coffee",
+                3.5, 25,
+                R.drawable.img_food_coffee,
+                "-20%",
+                "Trà Sữa Phúc Long + Thạch Cafe",
+                200,
+                65000.0,
+                52000.0
+        ));
+        allDeals.add(new RecommendedDealModel(
+                "KFC - Đặng Văn Bi",
+                0.5, 10,
+                R.drawable.img_food_chicken,
+                "-15%",
+                "Combo Gà Rán Hạnh Phúc",
+                80,
+                150000.0,
+                125000.0
+        ));
+
+        dealAdapter = new RecommendedDealAdapter(displayDeals);
+        rvDeals.setLayoutManager(new LinearLayoutManager(this));
+        rvDeals.setAdapter(dealAdapter);
+
+        filterDeals();
+
+        tabHomeDeals.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                filterDeals();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
     }
 
-    private void setupVouchers() {
-        List<FoodVoucher> vouchers = new ArrayList<>();
-        vouchers.add(new FoodVoucher("KFC", "Giảm 30.000đ", "Cho đơn từ 150.000đ", Color.parseColor("#E4002B")));
-        vouchers.add(new FoodVoucher("Phúc Long", "Giảm 10.000đ", "Khi dùng Tài khoản UIT Pay", Color.parseColor("#006241")));
-        vouchers.add(new FoodVoucher("Jollibee", "Giảm 20.000đ", "Cho đơn từ 100.000đ", Color.parseColor("#E31837")));
-        vouchers.add(new FoodVoucher("Highlands", "Giảm 15.000đ", "Cho đơn từ 80.000đ", Color.parseColor("#6F4E37")));
-        vouchers.add(new FoodVoucher("Texas", "Giảm 30.000đ", "Khi dùng Tài khoản UIT Pay", Color.parseColor("#FF6900")));
-        vouchers.add(new FoodVoucher("MAYCHA", "Giảm 10.000đ", "Cho đơn từ 50.000đ", Color.parseColor("#FF69B4")));
-        vouchers.add(new FoodVoucher("Burger King", "Giảm 35.000đ", "Khi dùng Tài khoản UIT Pay", Color.parseColor("#FF8C00")));
-        vouchers.add(new FoodVoucher("Domino's", "Giảm 25.000đ", "Cho đơn từ 200.000đ", Color.parseColor("#006491")));
-        vouchers.add(new FoodVoucher("Tous Les Jours", "Giảm 20.000đ", "Cho đơn từ 100.000đ", Color.parseColor("#C62828")));
-
-        RecyclerView rv = findViewById(R.id.rv_vouchers);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(new FoodVoucherAdapter(vouchers));
+    @android.annotation.SuppressLint("NotifyDataSetChanged")
+    private void filterDeals() {
+        int selectedTab = tabHomeDeals.getSelectedTabPosition();
+        displayDeals.clear();
+        switch (selectedTab) {
+            case 0: // Tất cả
+                displayDeals.addAll(allDeals);
+                break;
+            case 1: // Bán chạy
+                List<RecommendedDealModel> saleList = new ArrayList<>(allDeals);
+                Collections.sort(saleList, (d1, d2) -> Double.compare(d2.getSoldCount(), d1.getSoldCount()));
+                displayDeals.addAll(saleList);
+                break;
+            case 2: // Gần tôi
+                List<RecommendedDealModel> nearMeList = new ArrayList<>(allDeals);
+                Collections.sort(nearMeList, (d1, d2) -> Double.compare(d1.getDistance(), d2.getDistance()));
+                displayDeals.addAll(nearMeList);
+                break;
+        }
+        dealAdapter.notifyDataSetChanged();
     }
 
     private void showRestaurantMenu(Restaurant restaurant) {

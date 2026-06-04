@@ -181,58 +181,59 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Thương hiệu nổi bật"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="4dp"
+                    android:text="Deal hời cho bạn"
                     android:textColor="#000000"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_brands"
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tab_home_deals"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:nestedScrollingEnabled="false"
-                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                    app:spanCount="4"
-                    tools:listitem="@layout/item_food_category"
-                    tools:itemCount="4" />
-            </LinearLayout>
+                    android:background="#FFFFFF"
+                    app:tabIndicatorColor="#F24405"
+                    app:tabSelectedTextColor="#F24405"
+                    app:tabTextColor="#757575"
+                    app:tabTextAppearance="@style/CustomTabTextAppearance"
+                    app:tabGravity="fill"
+                    app:tabMode="fixed">
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:background="#F0F0F0" />
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tất cả" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="vertical"
-                android:padding="16dp">
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Bán chạy" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Ưu đãi"
-                    android:textColor="#000000"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Gần tôi" />
+                </com.google.android.material.tabs.TabLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_vouchers"
+                    android:id="@+id/rv_home_deals"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:clipToPadding="false"
                     android:nestedScrollingEnabled="false"
+                    android:paddingHorizontal="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/item_food_voucher"
-                    tools:itemCount="3" />
+                    tools:listitem="@layout/item_food_recommend_deal"
+                    tools:itemCount="4" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
