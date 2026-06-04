@@ -177,22 +177,37 @@
                 android:layout_height="8dp"
                 android:background="#F0F0F0" />
 
+            <include
+                android:id="@+id/topic_section_1"
+                layout="@layout/layout_topic_section" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="#F0F0F0" />
+
+            <include
+                android:id="@+id/topic_section_2"
+                layout="@layout/layout_topic_section" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="#F0F0F0" />
+
+            <include
+                android:id="@+id/topic_section_3"
+                layout="@layout/layout_topic_section" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="#F0F0F0" />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
                 android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="16dp"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="4dp"
-                    android:text="Deal hời cho bạn"
-                    android:textColor="#000000"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
 
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/tab_home_deals"
@@ -237,6 +252,36 @@
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_home_deals_sticky"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:visibility="gone"
+        app:tabIndicatorColor="#F24405"
+        app:tabSelectedTextColor="#F24405"
+        app:tabTextColor="#757575"
+        app:tabTextAppearance="@style/CustomTabTextAppearance"
+        app:tabGravity="fill"
+        app:tabMode="fixed"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tất cả" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bán chạy" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gần tôi" />
+    </com.google.android.material.tabs.TabLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_container"

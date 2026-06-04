@@ -19,6 +19,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -26,13 +27,16 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.home.home_adapters.FoodCategoryAdapter;
 import com.example.uitpayapp.home.home_adapters.FoodMenuAdapter;
+import com.example.uitpayapp.home.home_adapters.HomeDealAdapter;
+import com.example.uitpayapp.home.home_adapters.TopicStoreAdapter;
 import com.example.uitpayapp.home.home_adapters.ImageSliderAdapter;
 import com.example.uitpayapp.home.home_models.CartItem;
 import com.example.uitpayapp.home.home_models.CartManager;
 import com.example.uitpayapp.home.home_models.FoodCategory;
 import com.example.uitpayapp.home.home_models.FoodMenuItem;
 import com.example.uitpayapp.home.home_models.Restaurant;
-import com.example.uitpayapp.recommendeddeal.RecommendedDealAdapter;
+import com.example.uitpayapp.home.home_models.TopicStore;
+import com.example.uitpayapp.recommendeddeal.RecommendedDealActivity;
 import com.example.uitpayapp.recommendeddeal.RecommendedDealModel;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
@@ -40,9 +44,9 @@ import com.google.android.material.tabs.TabLayout;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -51,10 +55,16 @@ public class HomeActivity extends AppCompatActivity {
     private FoodCategoryAdapter categoryAdapter;
     private List<CartItem> globalCart;
 
-    private List<RecommendedDealModel> allDeals;
-    private List<RecommendedDealModel> displayDeals;
-    private RecommendedDealAdapter dealAdapter;
+    private List<Object> dealItems; // Mixed list: RecommendedDealModel, BannerItem, null(loading)
+    private HomeDealAdapter homeDealAdapter;
     private TabLayout tabHomeDeals;
+    private TabLayout stickyTabLayout;
+    private boolean isSyncing = false;
+    private int statusBarHeight = 0;
+    private boolean isLoadingMore = false;
+    private int dealItemCount = 0; // Counts only deal items (not banners)
+    private int nextBannerAt = 5; // Insert banner after this many deal items
+    private final Random bannerRandom = new Random();
 
     private String selectedCategory = null;
     private String currentSearchQuery = "";
@@ -94,6 +104,14 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
+        stickyTabLayout = findViewById(R.id.tab_home_deals_sticky);
+        ViewCompat.setOnApplyWindowInsetsListener(stickyTabLayout, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            statusBarHeight = systemBars.top;
+            v.setPadding(v.getPaddingLeft(), systemBars.top, v.getPaddingRight(), v.getPaddingBottom());
+            return insets;
+        });
+
         setupImageSlider();
 
         findViewById(R.id.btn_cart).setOnClickListener(v -> checkoutGlobalCart());
@@ -104,7 +122,9 @@ public class HomeActivity extends AppCompatActivity {
         setupRestaurants();
         setupCategories();
         setupSearch();
+        setupTopics();
         setupDeals();
+        setupStickyTab();
         setupBottomNavigation();
     }
 
@@ -343,66 +363,108 @@ public class HomeActivity extends AppCompatActivity {
         filteredRestaurants = new ArrayList<>(restaurants);
     }
 
+    private void setupTopics() {
+        // Topic 1: Bún Phở
+        View section1 = findViewById(R.id.topic_section_1);
+        setupTopicSection(section1,
+                "🍜 Bún Phở Hội Tụ",
+                "Top quán bún phở được yêu thích nhất!",
+                Arrays.asList(
+                        new TopicStore("Phở Bò Lý Quốc Sư", R.drawable.img_food_chicken),
+                        new TopicStore("Bún Bò Huế O Xuân", R.drawable.img_food_pizza),
+                        new TopicStore("Phở 24 - Võ Văn Ngân", R.drawable.img_food_chicken),
+                        new TopicStore("Bún Riêu Cua Hà Nội", R.drawable.img_food_pizza),
+                        new TopicStore("Hủ Tiếu Nam Vang", R.drawable.img_food_chicken)
+                ));
+
+        // Topic 2: Gà Rán
+        View section2 = findViewById(R.id.topic_section_2);
+        setupTopicSection(section2,
+                "🍗 Gà Rán Chất Lượng",
+                "Giòn tan, thơm lừng \u2013 đậm đà vị gà!",
+                Arrays.asList(
+                        new TopicStore("KFC - Đặng Văn Bi", R.drawable.img_food_chicken),
+                        new TopicStore("Jollibee - Phạm Văn Đồng", R.drawable.img_food_chicken),
+                        new TopicStore("Texas Chicken", R.drawable.img_food_chicken),
+                        new TopicStore("Popeyes - Võ Văn Ngân", R.drawable.img_food_chicken),
+                        new TopicStore("Gà Rán Ông Già", R.drawable.img_food_chicken)
+                ));
+
+        // Topic 3: Cà Phê & Trà Sữa
+        View section3 = findViewById(R.id.topic_section_3);
+        setupTopicSection(section3,
+                "\u2615 Cà Phê & Trà Sữa",
+                "Nạp năng lượng, thưởng thức từng giọt!",
+                Arrays.asList(
+                        new TopicStore("Phúc Long Tea & Coffee", R.drawable.img_food_coffee),
+                        new TopicStore("Highlands Coffee", R.drawable.img_food_coffee),
+                        new TopicStore("The Coffee House", R.drawable.img_food_bubbletea),
+                        new TopicStore("MAYCHA - Trà Sữa", R.drawable.img_food_bubbletea),
+                        new TopicStore("Ông Bầu Coffee", R.drawable.img_food_coffee)
+                ));
+    }
+
+    private void setupTopicSection(View sectionView, String title, String subtitle, List<TopicStore> stores) {
+        TextView tvTitle = sectionView.findViewById(R.id.tv_topic_title);
+        TextView tvSubtitle = sectionView.findViewById(R.id.tv_topic_subtitle);
+        TextView tvSeeMore = sectionView.findViewById(R.id.tv_topic_see_more);
+        RecyclerView rvStores = sectionView.findViewById(R.id.rv_topic_stores);
+
+        tvTitle.setText(title);
+        tvSubtitle.setText(subtitle);
+
+        rvStores.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvStores.setAdapter(new TopicStoreAdapter(stores));
+
+        tvSeeMore.setOnClickListener(v -> {
+            Intent intent = new Intent(this, RecommendedDealActivity.class);
+            startActivity(intent);
+        });
+    }
+
     @android.annotation.SuppressLint("NotifyDataSetChanged")
     private void setupDeals() {
         tabHomeDeals = findViewById(R.id.tab_home_deals);
         RecyclerView rvDeals = findViewById(R.id.rv_home_deals);
 
-        allDeals = new ArrayList<>();
-        displayDeals = new ArrayList<>();
+        dealItems = new ArrayList<>();
 
-        // Load dummy deal data (same as RecommendedDealActivity)
-        allDeals.add(new RecommendedDealModel(
-                "Gà Rán Popeyes - Võ Văn Ngân",
-                9.1, 9,
-                R.drawable.img_food_chicken,
-                "-52%",
-                "1 MIẾNG GÀ RÁN GIÒN + 1 GÀ POPCORN + 1 KHOAI TÂY CHIÊN",
-                100,
-                118000.0,
-                57000.0
-        ));
-        allDeals.add(new RecommendedDealModel(
-                "The Coffee House - Kha Vạn Cân",
-                1.2, 10,
-                R.drawable.img_food_bubbletea,
-                "-30%",
-                "Trà Đào Cam Sả (L) + Bánh Mì Que",
-                50,
-                75000.0,
-                52000.0
-        ));
-        allDeals.add(new RecommendedDealModel(
-                "Phúc Long Tea & Coffee",
-                3.5, 25,
-                R.drawable.img_food_coffee,
-                "-20%",
-                "Trà Sữa Phúc Long + Thạch Cafe",
-                200,
-                65000.0,
-                52000.0
-        ));
-        allDeals.add(new RecommendedDealModel(
-                "KFC - Đặng Văn Bi",
-                0.5, 10,
-                R.drawable.img_food_chicken,
-                "-15%",
-                "Combo Gà Rán Hạnh Phúc",
-                80,
-                150000.0,
-                125000.0
-        ));
-
-        dealAdapter = new RecommendedDealAdapter(displayDeals);
+        homeDealAdapter = new HomeDealAdapter(dealItems);
         rvDeals.setLayoutManager(new LinearLayoutManager(this));
-        rvDeals.setAdapter(dealAdapter);
+        rvDeals.setAdapter(homeDealAdapter);
 
-        filterDeals();
+        // Initial load
+        resetAndLoadDeals();
 
         tabHomeDeals.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                filterDeals();
+                if (!isSyncing) {
+                    isSyncing = true;
+                    TabLayout.Tab stickyTab = stickyTabLayout.getTabAt(tab.getPosition());
+                    if (stickyTab != null) stickyTab.select();
+                    isSyncing = false;
+                }
+                resetAndLoadDeals();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+
+        stickyTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (!isSyncing) {
+                    isSyncing = true;
+                    TabLayout.Tab originalTab = tabHomeDeals.getTabAt(tab.getPosition());
+                    if (originalTab != null) originalTab.select();
+                    isSyncing = false;
+                }
+                resetAndLoadDeals();
             }
 
             @Override
@@ -414,25 +476,82 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     @android.annotation.SuppressLint("NotifyDataSetChanged")
-    private void filterDeals() {
-        int selectedTab = tabHomeDeals.getSelectedTabPosition();
-        displayDeals.clear();
-        switch (selectedTab) {
-            case 0: // Tất cả
-                displayDeals.addAll(allDeals);
-                break;
-            case 1: // Bán chạy
-                List<RecommendedDealModel> saleList = new ArrayList<>(allDeals);
-                Collections.sort(saleList, (d1, d2) -> Double.compare(d2.getSoldCount(), d1.getSoldCount()));
-                displayDeals.addAll(saleList);
-                break;
-            case 2: // Gần tôi
-                List<RecommendedDealModel> nearMeList = new ArrayList<>(allDeals);
-                Collections.sort(nearMeList, (d1, d2) -> Double.compare(d1.getDistance(), d2.getDistance()));
-                displayDeals.addAll(nearMeList);
-                break;
-        }
-        dealAdapter.notifyDataSetChanged();
+    private void resetAndLoadDeals() {
+        dealItems.clear();
+        dealItemCount = 0;
+        nextBannerAt = 5 + bannerRandom.nextInt(3); // 5-7
+        homeDealAdapter.notifyDataSetChanged();
+        isLoadingMore = false;
+        loadMoreDeals();
+    }
+
+    @android.annotation.SuppressLint("NotifyDataSetChanged")
+    private void loadMoreDeals() {
+        if (isLoadingMore) return;
+        isLoadingMore = true;
+
+        // Add loading indicator
+        dealItems.add(null);
+        homeDealAdapter.notifyItemInserted(dealItems.size() - 1);
+
+        int tabIndex = tabHomeDeals.getSelectedTabPosition();
+        int delay = 800 + bannerRandom.nextInt(700); // 800-1500ms
+
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // Remove loading indicator
+            int loadingPos = dealItems.indexOf(null);
+            if (loadingPos >= 0) {
+                dealItems.remove(loadingPos);
+                homeDealAdapter.notifyItemRemoved(loadingPos);
+            }
+
+            // Generate 5 fake deals
+            List<RecommendedDealModel> newDeals = FakeDealGenerator.generateDeals(5, tabIndex);
+
+            for (RecommendedDealModel deal : newDeals) {
+                dealItems.add(deal);
+                dealItemCount++;
+
+                // Insert banner every 5-7 deal items
+                if (dealItemCount >= nextBannerAt) {
+                    dealItems.add(HomeDealAdapter.BannerItem.random());
+                    nextBannerAt = dealItemCount + 5 + bannerRandom.nextInt(3);
+                }
+            }
+
+            homeDealAdapter.notifyDataSetChanged();
+            isLoadingMore = false;
+        }, delay);
+    }
+
+    private void setupStickyTab() {
+        NestedScrollView scrollView = findViewById(R.id.food_main_scroll);
+
+        scrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            // Sticky tab logic
+            int[] tabLocation = new int[2];
+            tabHomeDeals.getLocationOnScreen(tabLocation);
+            int tabTopOnScreen = tabLocation[1];
+
+            if (tabTopOnScreen < statusBarHeight) {
+                if (stickyTabLayout.getVisibility() != View.VISIBLE) {
+                    stickyTabLayout.setVisibility(View.VISIBLE);
+                }
+            } else {
+                if (stickyTabLayout.getVisibility() != View.GONE) {
+                    stickyTabLayout.setVisibility(View.GONE);
+                }
+            }
+
+            // Infinite scroll: load more when near bottom
+            View child = v.getChildAt(0);
+            if (child != null) {
+                int scrollRange = child.getHeight() - v.getHeight();
+                if (scrollY >= scrollRange - 500 && !isLoadingMore) {
+                    loadMoreDeals();
+                }
+            }
+        });
     }
 
     private void showRestaurantMenu(Restaurant restaurant) {
