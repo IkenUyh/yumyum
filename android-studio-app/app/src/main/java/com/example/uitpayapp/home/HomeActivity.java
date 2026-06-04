@@ -236,16 +236,16 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setupCategories() {
         List<FoodCategory> categories = new ArrayList<>();
-        categories.add(new FoodCategory("Cơm", R.drawable.ic_cat_com, Color.parseColor("#FFF3E0")));
-        categories.add(new FoodCategory("Bún\nPhở", R.drawable.ic_cat_bun_pho, Color.parseColor("#E0F7FA")));
-        categories.add(new FoodCategory("Bánh mì", R.drawable.ic_cat_banh_mi, Color.parseColor("#FBE9E7")));
-        categories.add(new FoodCategory("Đồ Ăn\nnhanh", R.drawable.ic_cat_fastfood, Color.parseColor("#FCE4EC")));
-        categories.add(new FoodCategory("Lẩu", R.drawable.ic_cat_lau, Color.parseColor("#FBE9E7")));
-        categories.add(new FoodCategory("Đồ nướng\nBBQ", R.drawable.ic_cat_bbq, Color.parseColor("#FFEBEE")));
-        categories.add(new FoodCategory("Cà phê\nTrà sữa", R.drawable.ic_cat_ca_phe, Color.parseColor("#FFF3E0")));
-        categories.add(new FoodCategory("Ăn vặt\nBánh ngọt", R.drawable.ic_cat_an_vat, Color.parseColor("#F3E5F5")));
-        categories.add(new FoodCategory("Hải sản", R.drawable.ic_cat_hai_san, Color.parseColor("#E8F5E9")));
-        categories.add(new FoodCategory("Tất cả", R.drawable.ic_cat_all, Color.parseColor("#E8EAF6"), true));
+        categories.add(new FoodCategory("Cơm", R.drawable.ic_cat_com, Color.parseColor("#E65100")));
+        categories.add(new FoodCategory("Bún\nPhở", R.drawable.ic_cat_bun_pho, Color.parseColor("#00838F")));
+        categories.add(new FoodCategory("Bánh mì", R.drawable.ic_cat_banh_mi, Color.parseColor("#BF360C")));
+        categories.add(new FoodCategory("Đồ Ăn\nnhanh", R.drawable.ic_cat_fastfood, Color.parseColor("#C62828")));
+        categories.add(new FoodCategory("Lẩu", R.drawable.ic_cat_lau, Color.parseColor("#D84315")));
+        categories.add(new FoodCategory("Đồ nướng\nBBQ", R.drawable.ic_cat_bbq, Color.parseColor("#B71C1C")));
+        categories.add(new FoodCategory("Cà phê\nTrà sữa", R.drawable.ic_cat_ca_phe, Color.parseColor("#4E342E")));
+        categories.add(new FoodCategory("Ăn vặt\nBánh ngọt", R.drawable.ic_cat_an_vat, Color.parseColor("#6A1B9A")));
+        categories.add(new FoodCategory("Hải sản", R.drawable.ic_cat_hai_san, Color.parseColor("#1B5E20")));
+        categories.add(new FoodCategory("Tất cả", R.drawable.ic_cat_all, Color.parseColor("#283593"), true));
 
         RecyclerView rv = findViewById(R.id.rv_categories);
         rv.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(

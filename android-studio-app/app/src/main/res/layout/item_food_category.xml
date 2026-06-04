@@ -6,28 +6,11 @@
     android:orientation="vertical"
     android:padding="8dp">
 
-    <FrameLayout
-        android:layout_width="56dp"
-        android:layout_height="56dp">
-        <View
-            android:id="@+id/view_category_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_food_category_circle" />
-        <TextView
-            android:id="@+id/tv_category_emoji"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:textSize="28sp"
-            android:visibility="gone" />
-        <ImageView
-            android:id="@+id/iv_category_icon"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_gravity="center"
-            android:visibility="gone" />
-    </FrameLayout>
+    <ImageView
+        android:id="@+id/iv_category_icon"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_gravity="center" />
 
     <TextView
         android:id="@+id/tv_category_name"
