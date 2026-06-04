@@ -191,7 +191,7 @@ public class HomeActivity extends AppCompatActivity {
         View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_destination, null);
         dialog.setContentView(view);
 
-        ((TextView) view.findViewById(R.id.tv_destination_title)).setText("Chọn địa chỉ giao");
+        ((TextView) view.findViewById(R.id.tv_destination_title)).setText("Chá»n Ä‘á»‹a chá»‰ giao");
 
         View bottomSheet = (View) view.getParent();
         if (bottomSheet != null) {
@@ -209,13 +209,13 @@ public class HomeActivity extends AppCompatActivity {
         llWallet.setOnClickListener(v -> {
             tvDeliveryAddress.setText(ADDRESSES[0]);
             dialog.dismiss();
-            Toast.makeText(this, "Giao tới: " + ADDRESSES[0], Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Giao tá»›i: " + ADDRESSES[0], Toast.LENGTH_SHORT).show();
         });
 
         llSaving.setOnClickListener(v -> {
             tvDeliveryAddress.setText(ADDRESSES[1]);
             dialog.dismiss();
-            Toast.makeText(this, "Giao tới: " + ADDRESSES[1], Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Giao tá»›i: " + ADDRESSES[1], Toast.LENGTH_SHORT).show();
         });
 
         dialog.show();
@@ -236,19 +236,16 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setupCategories() {
         List<FoodCategory> categories = new ArrayList<>();
-        categories.add(new FoodCategory("Cà phê\nTrà sữa", "☕", Color.parseColor("#FFF3E0")));
-        categories.add(new FoodCategory("Đồ uống", "🧃", Color.parseColor("#E8F5E9")));
-        categories.add(new FoodCategory("Gà rán\nBurger", "🍔", Color.parseColor("#FBE9E7")));
-        categories.add(new FoodCategory("Trái cây", "🍓", Color.parseColor("#FCE4EC")));
-        categories.add(new FoodCategory("Cơm\nPizza", "🍕", Color.parseColor("#FCE4EC")));
-        categories.add(new FoodCategory("Sushi", "🍣", Color.parseColor("#FFF9C4")));
-        categories.add(new FoodCategory("Bánh\nKem", "🍰", Color.parseColor("#F3E5F5")));
-        categories.add(new FoodCategory("Đồ ăn vặt", "🍿", Color.parseColor("#FFF3E0")));
-        categories.add(new FoodCategory("Bún\nPhở", "🍜", Color.parseColor("#E0F7FA")));
-        categories.add(new FoodCategory("Chè\nTráng miệng", "🍧", Color.parseColor("#F3E5F5")));
-        categories.add(new FoodCategory("Lẩu", "🍲", Color.parseColor("#FBE9E7")));
-        categories.add(new FoodCategory("BBQ\nNướng", "🍖", Color.parseColor("#FFEBEE")));
-        categories.add(new FoodCategory("Chọn\ntất cả", "»", Color.parseColor("#E8EAF6"), true));
+        categories.add(new FoodCategory("Cơm", R.drawable.ic_cat_com, Color.parseColor("#FFF3E0")));
+        categories.add(new FoodCategory("Bún\nPhở", R.drawable.ic_cat_bun_pho, Color.parseColor("#E0F7FA")));
+        categories.add(new FoodCategory("Bánh mì", R.drawable.ic_cat_banh_mi, Color.parseColor("#FBE9E7")));
+        categories.add(new FoodCategory("Đồ Ăn\nnhanh", R.drawable.ic_cat_fastfood, Color.parseColor("#FCE4EC")));
+        categories.add(new FoodCategory("Lẩu", R.drawable.ic_cat_lau, Color.parseColor("#FBE9E7")));
+        categories.add(new FoodCategory("Đồ nướng\nBBQ", R.drawable.ic_cat_bbq, Color.parseColor("#FFEBEE")));
+        categories.add(new FoodCategory("Cà phê\nTrà sữa", R.drawable.ic_cat_ca_phe, Color.parseColor("#FFF3E0")));
+        categories.add(new FoodCategory("Ăn vặt\nBánh ngọt", R.drawable.ic_cat_an_vat, Color.parseColor("#F3E5F5")));
+        categories.add(new FoodCategory("Hải sản", R.drawable.ic_cat_hai_san, Color.parseColor("#E8F5E9")));
+        categories.add(new FoodCategory("Tất cả", R.drawable.ic_cat_all, Color.parseColor("#E8EAF6"), true));
 
         RecyclerView rv = findViewById(R.id.rv_categories);
         rv.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(
@@ -341,9 +338,9 @@ public class HomeActivity extends AppCompatActivity {
 
         restaurants.add(new Restaurant("Burger\nKing", "BK", Color.parseColor("#FF8C00"), "Gà rán\nBurger", Arrays.asList(
                 new FoodMenuItem("Whopper", 79000, R.drawable.img_food_chicken, "Burger bò nướng lửa cỡ lớn"),
-                new FoodMenuItem("Combo Whopper", 109000, R.drawable.img_food_chicken, "Whopper + khoai + nước"),
-                new FoodMenuItem("Chicken Nuggets 6pc", 45000, R.drawable.img_food_chicken, "6 miếng gà viên chiên"),
-                new FoodMenuItem("Onion Rings", 35000, R.drawable.img_food_pizza, "Hành tây chiên giòn")
+                new FoodMenuItem("Combo Whopper", 109000, R.drawable.img_food_chicken, "Whopper + khoai + nÆ°á»›c"),
+                new FoodMenuItem("Chicken Nuggets 6pc", 45000, R.drawable.img_food_chicken, "6 miáº¿ng gĂ  viĂªn chiĂªn"),
+                new FoodMenuItem("Onion Rings", 35000, R.drawable.img_food_pizza, "HĂ nh tĂ¢y chiĂªn giĂ²n")
         )));
 
         restaurants.add(new Restaurant("Domino's\nPizza", "DP", Color.parseColor("#006491"), "Cơm\nPizza", Arrays.asList(
@@ -364,45 +361,66 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setupTopics() {
-        // Topic 1: Bún Phở
-        View section1 = findViewById(R.id.topic_section_1);
-        setupTopicSection(section1,
-                "🍜 Bún Phở Hội Tụ",
-                "Top quán bún phở được yêu thích nhất!",
-                Arrays.asList(
-                        new TopicStore("Phở Bò Lý Quốc Sư", R.drawable.img_food_chicken),
-                        new TopicStore("Bún Bò Huế O Xuân", R.drawable.img_food_pizza),
-                        new TopicStore("Phở 24 - Võ Văn Ngân", R.drawable.img_food_chicken),
-                        new TopicStore("Bún Riêu Cua Hà Nội", R.drawable.img_food_pizza),
-                        new TopicStore("Hủ Tiếu Nam Vang", R.drawable.img_food_chicken)
-                ));
+        List<Object[]> topicPool = new ArrayList<>();
+        topicPool.add(new Object[]{"Bún Phở Hội Tụ", "Top quán bún phở được yêu thích nhất!", Arrays.asList(
+                new TopicStore("Phở Bò Lý Quốc Sư", R.drawable.img_food_chicken),
+                new TopicStore("Bún Bò Huế O Xuân", R.drawable.img_food_pizza),
+                new TopicStore("Phở 24 - Võ Văn Ngân", R.drawable.img_food_chicken),
+                new TopicStore("Bún Riêu Cua Hà Nội", R.drawable.img_food_pizza),
+                new TopicStore("Hủ Tiếu Nam Vang", R.drawable.img_food_chicken))});
+        topicPool.add(new Object[]{"Gà Rán Chất Lượng", "Giòn tan, thơm lừng – đậm đà vị gà!", Arrays.asList(
+                new TopicStore("KFC - Đặng Văn Bi", R.drawable.img_food_chicken),
+                new TopicStore("Jollibee - Phạm Văn Đồng", R.drawable.img_food_chicken),
+                new TopicStore("Texas Chicken", R.drawable.img_food_chicken),
+                new TopicStore("Popeyes - Võ Văn Ngân", R.drawable.img_food_chicken),
+                new TopicStore("Gà Rán Ông Già", R.drawable.img_food_chicken))});
+        topicPool.add(new Object[]{"Cà Phê & Trà Sữa", "Nạp năng lượng, thưởng thức từng giọt!", Arrays.asList(
+                new TopicStore("Phúc Long Tea & Coffee", R.drawable.img_food_coffee),
+                new TopicStore("Highlands Coffee", R.drawable.img_food_coffee),
+                new TopicStore("The Coffee House", R.drawable.img_food_bubbletea),
+                new TopicStore("MAYCHA - Trà Sữa", R.drawable.img_food_bubbletea),
+                new TopicStore("Ông Bầu Coffee", R.drawable.img_food_coffee))});
+        topicPool.add(new Object[]{"Cơm Ngon Mỗi Ngày", "Bữa cơm ấm bụng, giá cả phải chăng!", Arrays.asList(
+                new TopicStore("Cơm Tấm Phúc Lộc Thọ", R.drawable.img_food_chicken),
+                new TopicStore("Cơm Gà Xối Mỡ", R.drawable.img_food_chicken),
+                new TopicStore("Cơm Văn Phòng Sài Gòn", R.drawable.img_food_pizza),
+                new TopicStore("Cơm Tấm Cali - Thủ Đức", R.drawable.img_food_chicken),
+                new TopicStore("Cơm Chiên Dương Châu", R.drawable.img_food_pizza))});
+        topicPool.add(new Object[]{"Lẩu Quây Quần", "Quây quần bên bạn bè, ấm áp mùa đông!", Arrays.asList(
+                new TopicStore("Lẩu Bò Nhúng Dấm", R.drawable.img_food_pizza),
+                new TopicStore("Lẩu Thái Chua Cay", R.drawable.img_food_pizza),
+                new TopicStore("Lẩu Hải Sản Phú Quốc", R.drawable.img_food_bubbletea),
+                new TopicStore("Lẩu Gà Lá É", R.drawable.img_food_chicken),
+                new TopicStore("Lẩu Nấm Chay Tịnh", R.drawable.img_food_pizza))});
+        topicPool.add(new Object[]{"Bánh Mì Sài Gòn", "Ổ bánh mì nóng giòn, đậm đà hương vị!", Arrays.asList(
+                new TopicStore("Bánh Mì Huynh Hoa", R.drawable.img_food_chicken),
+                new TopicStore("Bánh Mì Bảy Hổ", R.drawable.img_food_chicken),
+                new TopicStore("Bánh Mì Phượng Hội An", R.drawable.img_food_pizza),
+                new TopicStore("Bánh Mì Chảo Ốp La", R.drawable.img_food_pizza),
+                new TopicStore("Bánh Mì Doner Kebab", R.drawable.img_food_chicken))});
+        topicPool.add(new Object[]{"Hải Sản Tươi Sống", "Tôm cua cá mực, tươi ngon mỗi ngày!", Arrays.asList(
+                new TopicStore("Hải Sản Bé Mặn", R.drawable.img_food_bubbletea),
+                new TopicStore("Ốc Đào - Nguyễn Trãi", R.drawable.img_food_bubbletea),
+                new TopicStore("Cua Biển 1 Pound", R.drawable.img_food_pizza),
+                new TopicStore("Tôm Hùm BBQ", R.drawable.img_food_chicken),
+                new TopicStore("Sò Điệp Nướng Mỡ Hành", R.drawable.img_food_pizza))});
+        topicPool.add(new Object[]{"Ăn Vặt Đường Phố", "Món ngon vừa hè, nhớ mãi không quên!", Arrays.asList(
+                new TopicStore("Bánh Tráng Trộn", R.drawable.img_food_pizza),
+                new TopicStore("Xiên Que Nướng", R.drawable.img_food_chicken),
+                new TopicStore("Chè Khúc Bạch", R.drawable.img_food_bubbletea),
+                new TopicStore("Takoyaki Bạch Tuộc", R.drawable.img_food_pizza),
+                new TopicStore("Khoai Lắc Phô Mai", R.drawable.img_food_chicken))});
 
-        // Topic 2: Gà Rán
-        View section2 = findViewById(R.id.topic_section_2);
-        setupTopicSection(section2,
-                "🍗 Gà Rán Chất Lượng",
-                "Giòn tan, thơm lừng \u2013 đậm đà vị gà!",
-                Arrays.asList(
-                        new TopicStore("KFC - Đặng Văn Bi", R.drawable.img_food_chicken),
-                        new TopicStore("Jollibee - Phạm Văn Đồng", R.drawable.img_food_chicken),
-                        new TopicStore("Texas Chicken", R.drawable.img_food_chicken),
-                        new TopicStore("Popeyes - Võ Văn Ngân", R.drawable.img_food_chicken),
-                        new TopicStore("Gà Rán Ông Già", R.drawable.img_food_chicken)
-                ));
-
-        // Topic 3: Cà Phê & Trà Sữa
-        View section3 = findViewById(R.id.topic_section_3);
-        setupTopicSection(section3,
-                "\u2615 Cà Phê & Trà Sữa",
-                "Nạp năng lượng, thưởng thức từng giọt!",
-                Arrays.asList(
-                        new TopicStore("Phúc Long Tea & Coffee", R.drawable.img_food_coffee),
-                        new TopicStore("Highlands Coffee", R.drawable.img_food_coffee),
-                        new TopicStore("The Coffee House", R.drawable.img_food_bubbletea),
-                        new TopicStore("MAYCHA - Trà Sữa", R.drawable.img_food_bubbletea),
-                        new TopicStore("Ông Bầu Coffee", R.drawable.img_food_coffee)
-                ));
+        java.util.Collections.shuffle(topicPool);
+        int[] sectionIds = {R.id.topic_section_1, R.id.topic_section_2, R.id.topic_section_3, R.id.topic_section_4};
+        for (int i = 0; i < 4; i++) {
+            Object[] topic = topicPool.get(i);
+            @SuppressWarnings("unchecked")
+            List<TopicStore> stores = (List<TopicStore>) topic[2];
+            setupTopicSection(findViewById(sectionIds[i]), (String) topic[0], (String) topic[1], stores);
+        }
     }
+
 
     private void setupTopicSection(View sectionView, String title, String subtitle, List<TopicStore> stores) {
         TextView tvTitle = sectionView.findViewById(R.id.tv_topic_title);
@@ -574,7 +592,7 @@ public class HomeActivity extends AppCompatActivity {
         TextView tvCartCount = view.findViewById(R.id.tv_cart_count);
         TextView tvCartTotal = view.findViewById(R.id.tv_cart_total);
         TextView btnOrder = (TextView) view.findViewById(R.id.btn_order);
-        btnOrder.setText("Thêm vào giỏ");
+        btnOrder.setText("ThĂªm vĂ o giá»");
 
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
 
@@ -589,8 +607,8 @@ public class HomeActivity extends AppCompatActivity {
                     totalItems += ci.getQuantity();
                     totalPrice += ci.getTotalPrice();
                 }
-                tvCartCount.setText(totalItems + " món");
-                tvCartTotal.setText(formatter.format(totalPrice) + "đ");
+                tvCartCount.setText(totalItems + " mĂ³n");
+                tvCartTotal.setText(formatter.format(totalPrice) + "Ä‘");
             }
         });
 

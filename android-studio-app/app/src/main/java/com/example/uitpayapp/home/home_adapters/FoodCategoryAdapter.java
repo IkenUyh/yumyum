@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -48,43 +49,62 @@ public class FoodCategoryAdapter extends RecyclerView.Adapter<FoodCategoryAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         FoodCategory category = categories.get(position);
-        holder.tvEmoji.setText(category.getEmoji());
         holder.tvName.setText(category.getName());
 
-        // Xử lý item "Chọn tất cả" — hiển thị khác biệt
+        // Switch between icon and emoji
+        if (category.hasIcon()) {
+            holder.tvEmoji.setVisibility(View.GONE);
+            holder.ivIcon.setVisibility(View.VISIBLE);
+            holder.ivIcon.setImageResource(category.getIconResId());
+        } else {
+            holder.tvEmoji.setVisibility(View.VISIBLE);
+            holder.ivIcon.setVisibility(View.GONE);
+            holder.tvEmoji.setText(category.getEmoji());
+        }
+
+        // Xử lý item "Tất cả"
         if (category.isSelectAll()) {
             holder.viewBg.setBackgroundTintList(ColorStateList.valueOf(category.getBgColor()));
-            holder.tvEmoji.setTextSize(22f);
-            holder.tvEmoji.setTypeface(null, Typeface.BOLD);
+            if (category.hasIcon()) {
+                holder.ivIcon.setColorFilter(Color.parseColor("#5C6BC0"));
+            } else {
+                holder.tvEmoji.setTextSize(22f);
+                holder.tvEmoji.setTypeface(null, Typeface.BOLD);
+            }
             holder.tvName.setTextColor(Color.parseColor("#5C6BC0"));
             holder.tvName.setTextSize(11f);
             holder.itemView.setAlpha(1.0f);
-            // Hiện tại chưa đụng tới — không xử lý click
             holder.itemView.setOnClickListener(null);
             return;
         }
 
-        holder.tvEmoji.setTextSize(28f);
-        holder.tvEmoji.setTypeface(null, Typeface.NORMAL);
+        if (!category.hasIcon()) {
+            holder.tvEmoji.setTextSize(28f);
+            holder.tvEmoji.setTypeface(null, Typeface.NORMAL);
+        }
 
         boolean isSelected = position == selectedPosition;
         holder.viewBg.setBackgroundTintList(ColorStateList.valueOf(category.getBgColor()));
 
-        // Highlight selected category
         if (isSelected) {
             holder.tvName.setTextColor(Color.parseColor("#0034c8"));
             holder.tvName.setTextSize(12.5f);
             holder.itemView.setAlpha(1.0f);
+            if (category.hasIcon()) {
+                holder.ivIcon.setColorFilter(Color.parseColor("#0034c8"));
+            }
         } else {
             holder.tvName.setTextColor(Color.parseColor("#333333"));
             holder.tvName.setTextSize(12f);
             holder.itemView.setAlpha(selectedPosition == -1 ? 1.0f : 0.6f);
+            if (category.hasIcon()) {
+                holder.ivIcon.setColorFilter(Color.parseColor("#757575"));
+            }
         }
 
         holder.itemView.setOnClickListener(v -> {
             int oldPos = selectedPosition;
             if (selectedPosition == holder.getAdapterPosition()) {
-                // Deselect — show all
                 selectedPosition = -1;
             } else {
                 selectedPosition = holder.getAdapterPosition();
@@ -103,11 +123,13 @@ public class FoodCategoryAdapter extends RecyclerView.Adapter<FoodCategoryAdapte
     static class ViewHolder extends RecyclerView.ViewHolder {
         View viewBg;
         TextView tvEmoji, tvName;
+        ImageView ivIcon;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             viewBg = itemView.findViewById(R.id.view_category_bg);
             tvEmoji = itemView.findViewById(R.id.tv_category_emoji);
+            ivIcon = itemView.findViewById(R.id.iv_category_icon);
             tvName = itemView.findViewById(R.id.tv_category_name);
         }
     }

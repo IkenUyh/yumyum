@@ -19,7 +19,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:textSize="28sp" />
+            android:textSize="28sp"
+            android:visibility="gone" />
+        <ImageView
+            android:id="@+id/iv_category_icon"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center"
+            android:visibility="gone" />
     </FrameLayout>
 
     <TextView
