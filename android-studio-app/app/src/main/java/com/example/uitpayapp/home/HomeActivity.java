@@ -19,37 +19,52 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.home.home_adapters.BrandAdapter;
 import com.example.uitpayapp.home.home_adapters.FoodCategoryAdapter;
 import com.example.uitpayapp.home.home_adapters.FoodMenuAdapter;
-import com.example.uitpayapp.home.home_adapters.FoodVoucherAdapter;
+import com.example.uitpayapp.home.home_adapters.HomeDealAdapter;
+import com.example.uitpayapp.home.home_adapters.TopicStoreAdapter;
 import com.example.uitpayapp.home.home_adapters.ImageSliderAdapter;
 import com.example.uitpayapp.home.home_models.CartItem;
 import com.example.uitpayapp.home.home_models.CartManager;
 import com.example.uitpayapp.home.home_models.FoodCategory;
 import com.example.uitpayapp.home.home_models.FoodMenuItem;
-import com.example.uitpayapp.home.home_models.FoodVoucher;
 import com.example.uitpayapp.home.home_models.Restaurant;
+import com.example.uitpayapp.home.home_models.TopicStore;
+import com.example.uitpayapp.recommendeddeal.RecommendedDealActivity;
+import com.example.uitpayapp.recommendeddeal.RecommendedDealModel;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.tabs.TabLayout;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 public class HomeActivity extends AppCompatActivity {
 
     private List<Restaurant> restaurants;
     private List<Restaurant> filteredRestaurants;
-    private BrandAdapter brandAdapter;
     private FoodCategoryAdapter categoryAdapter;
     private List<CartItem> globalCart;
+
+    private List<Object> dealItems; // Mixed list: RecommendedDealModel, BannerItem, null(loading)
+    private HomeDealAdapter homeDealAdapter;
+    private TabLayout tabHomeDeals;
+    private TabLayout stickyTabLayout;
+    private boolean isSyncing = false;
+    private int statusBarHeight = 0;
+    private boolean isLoadingMore = false;
+    private int dealItemCount = 0; // Counts only deal items (not banners)
+    private int nextBannerAt = 5; // Insert banner after this many deal items
+    private final Random bannerRandom = new Random();
 
     private String selectedCategory = null;
     private String currentSearchQuery = "";
@@ -89,6 +104,14 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
+        stickyTabLayout = findViewById(R.id.tab_home_deals_sticky);
+        ViewCompat.setOnApplyWindowInsetsListener(stickyTabLayout, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            statusBarHeight = systemBars.top;
+            v.setPadding(v.getPaddingLeft(), systemBars.top, v.getPaddingRight(), v.getPaddingBottom());
+            return insets;
+        });
+
         setupImageSlider();
 
         findViewById(R.id.btn_cart).setOnClickListener(v -> checkoutGlobalCart());
@@ -98,9 +121,10 @@ public class HomeActivity extends AppCompatActivity {
 
         setupRestaurants();
         setupCategories();
-        setupBrands();
         setupSearch();
-        setupVouchers();
+        setupTopics();
+        setupDeals();
+        setupStickyTab();
         setupBottomNavigation();
     }
 
@@ -167,7 +191,7 @@ public class HomeActivity extends AppCompatActivity {
         View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_destination, null);
         dialog.setContentView(view);
 
-        ((TextView) view.findViewById(R.id.tv_destination_title)).setText("Chọn địa chỉ giao");
+        ((TextView) view.findViewById(R.id.tv_destination_title)).setText("Chá»n Ä‘á»‹a chá»‰ giao");
 
         View bottomSheet = (View) view.getParent();
         if (bottomSheet != null) {
@@ -185,13 +209,13 @@ public class HomeActivity extends AppCompatActivity {
         llWallet.setOnClickListener(v -> {
             tvDeliveryAddress.setText(ADDRESSES[0]);
             dialog.dismiss();
-            Toast.makeText(this, "Giao tới: " + ADDRESSES[0], Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Giao tá»›i: " + ADDRESSES[0], Toast.LENGTH_SHORT).show();
         });
 
         llSaving.setOnClickListener(v -> {
             tvDeliveryAddress.setText(ADDRESSES[1]);
             dialog.dismiss();
-            Toast.makeText(this, "Giao tới: " + ADDRESSES[1], Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Giao tá»›i: " + ADDRESSES[1], Toast.LENGTH_SHORT).show();
         });
 
         dialog.show();
@@ -212,19 +236,16 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setupCategories() {
         List<FoodCategory> categories = new ArrayList<>();
-        categories.add(new FoodCategory("Cà phê\nTrà sữa", "☕", Color.parseColor("#FFF3E0")));
-        categories.add(new FoodCategory("Đồ uống", "🧃", Color.parseColor("#E8F5E9")));
-        categories.add(new FoodCategory("Gà rán\nBurger", "🍔", Color.parseColor("#FBE9E7")));
-        categories.add(new FoodCategory("Trái cây", "🍓", Color.parseColor("#FCE4EC")));
-        categories.add(new FoodCategory("Cơm\nPizza", "🍕", Color.parseColor("#FCE4EC")));
-        categories.add(new FoodCategory("Sushi", "🍣", Color.parseColor("#FFF9C4")));
-        categories.add(new FoodCategory("Bánh\nKem", "🍰", Color.parseColor("#F3E5F5")));
-        categories.add(new FoodCategory("Đồ ăn vặt", "🍿", Color.parseColor("#FFF3E0")));
-        categories.add(new FoodCategory("Bún\nPhở", "🍜", Color.parseColor("#E0F7FA")));
-        categories.add(new FoodCategory("Chè\nTráng miệng", "🍧", Color.parseColor("#F3E5F5")));
-        categories.add(new FoodCategory("Lẩu", "🍲", Color.parseColor("#FBE9E7")));
-        categories.add(new FoodCategory("BBQ\nNướng", "🍖", Color.parseColor("#FFEBEE")));
-        categories.add(new FoodCategory("Chọn\ntất cả", "»", Color.parseColor("#E8EAF6"), true));
+        categories.add(new FoodCategory("Cơm", R.drawable.ic_cat_com, Color.parseColor("#E65100")));
+        categories.add(new FoodCategory("Bún\nPhở", R.drawable.ic_cat_bun_pho, Color.parseColor("#00838F")));
+        categories.add(new FoodCategory("Bánh mì", R.drawable.ic_cat_banh_mi, Color.parseColor("#BF360C")));
+        categories.add(new FoodCategory("Đồ Ăn\nnhanh", R.drawable.ic_cat_fastfood, Color.parseColor("#C62828")));
+        categories.add(new FoodCategory("Lẩu", R.drawable.ic_cat_lau, Color.parseColor("#D84315")));
+        categories.add(new FoodCategory("Đồ nướng\nBBQ", R.drawable.ic_cat_bbq, Color.parseColor("#B71C1C")));
+        categories.add(new FoodCategory("Cà phê\nTrà sữa", R.drawable.ic_cat_ca_phe, Color.parseColor("#4E342E")));
+        categories.add(new FoodCategory("Ăn vặt\nBánh ngọt", R.drawable.ic_cat_an_vat, Color.parseColor("#6A1B9A")));
+        categories.add(new FoodCategory("Hải sản", R.drawable.ic_cat_hai_san, Color.parseColor("#1B5E20")));
+        categories.add(new FoodCategory("Tất cả", R.drawable.ic_cat_all, Color.parseColor("#283593"), true));
 
         RecyclerView rv = findViewById(R.id.rv_categories);
         rv.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(
@@ -267,7 +288,7 @@ public class HomeActivity extends AppCompatActivity {
                 filteredRestaurants.add(r);
             }
         }
-        brandAdapter.updateData(filteredRestaurants);
+        // Categories filter only affects restaurant list, deals are independent
     }
 
     private void setupRestaurants() {
@@ -317,9 +338,9 @@ public class HomeActivity extends AppCompatActivity {
 
         restaurants.add(new Restaurant("Burger\nKing", "BK", Color.parseColor("#FF8C00"), "Gà rán\nBurger", Arrays.asList(
                 new FoodMenuItem("Whopper", 79000, R.drawable.img_food_chicken, "Burger bò nướng lửa cỡ lớn"),
-                new FoodMenuItem("Combo Whopper", 109000, R.drawable.img_food_chicken, "Whopper + khoai + nước"),
-                new FoodMenuItem("Chicken Nuggets 6pc", 45000, R.drawable.img_food_chicken, "6 miếng gà viên chiên"),
-                new FoodMenuItem("Onion Rings", 35000, R.drawable.img_food_pizza, "Hành tây chiên giòn")
+                new FoodMenuItem("Combo Whopper", 109000, R.drawable.img_food_chicken, "Whopper + khoai + nÆ°á»›c"),
+                new FoodMenuItem("Chicken Nuggets 6pc", 45000, R.drawable.img_food_chicken, "6 miáº¿ng gĂ  viĂªn chiĂªn"),
+                new FoodMenuItem("Onion Rings", 35000, R.drawable.img_food_pizza, "HĂ nh tĂ¢y chiĂªn giĂ²n")
         )));
 
         restaurants.add(new Restaurant("Domino's\nPizza", "DP", Color.parseColor("#006491"), "Cơm\nPizza", Arrays.asList(
@@ -339,27 +360,216 @@ public class HomeActivity extends AppCompatActivity {
         filteredRestaurants = new ArrayList<>(restaurants);
     }
 
-    private void setupBrands() {
-        RecyclerView rv = findViewById(R.id.rv_brands);
-        brandAdapter = new BrandAdapter(filteredRestaurants, this::showRestaurantMenu);
-        rv.setAdapter(brandAdapter);
+    private void setupTopics() {
+        List<Object[]> topicPool = new ArrayList<>();
+        topicPool.add(new Object[]{"Bún Phở Hội Tụ", "Top quán bún phở được yêu thích nhất!", Arrays.asList(
+                new TopicStore("Phở Bò Lý Quốc Sư", R.drawable.img_food_chicken),
+                new TopicStore("Bún Bò Huế O Xuân", R.drawable.img_food_pizza),
+                new TopicStore("Phở 24 - Võ Văn Ngân", R.drawable.img_food_chicken),
+                new TopicStore("Bún Riêu Cua Hà Nội", R.drawable.img_food_pizza),
+                new TopicStore("Hủ Tiếu Nam Vang", R.drawable.img_food_chicken))});
+        topicPool.add(new Object[]{"Gà Rán Chất Lượng", "Giòn tan, thơm lừng – đậm đà vị gà!", Arrays.asList(
+                new TopicStore("KFC - Đặng Văn Bi", R.drawable.img_food_chicken),
+                new TopicStore("Jollibee - Phạm Văn Đồng", R.drawable.img_food_chicken),
+                new TopicStore("Texas Chicken", R.drawable.img_food_chicken),
+                new TopicStore("Popeyes - Võ Văn Ngân", R.drawable.img_food_chicken),
+                new TopicStore("Gà Rán Ông Già", R.drawable.img_food_chicken))});
+        topicPool.add(new Object[]{"Cà Phê & Trà Sữa", "Nạp năng lượng, thưởng thức từng giọt!", Arrays.asList(
+                new TopicStore("Phúc Long Tea & Coffee", R.drawable.img_food_coffee),
+                new TopicStore("Highlands Coffee", R.drawable.img_food_coffee),
+                new TopicStore("The Coffee House", R.drawable.img_food_bubbletea),
+                new TopicStore("MAYCHA - Trà Sữa", R.drawable.img_food_bubbletea),
+                new TopicStore("Ông Bầu Coffee", R.drawable.img_food_coffee))});
+        topicPool.add(new Object[]{"Cơm Ngon Mỗi Ngày", "Bữa cơm ấm bụng, giá cả phải chăng!", Arrays.asList(
+                new TopicStore("Cơm Tấm Phúc Lộc Thọ", R.drawable.img_food_chicken),
+                new TopicStore("Cơm Gà Xối Mỡ", R.drawable.img_food_chicken),
+                new TopicStore("Cơm Văn Phòng Sài Gòn", R.drawable.img_food_pizza),
+                new TopicStore("Cơm Tấm Cali - Thủ Đức", R.drawable.img_food_chicken),
+                new TopicStore("Cơm Chiên Dương Châu", R.drawable.img_food_pizza))});
+        topicPool.add(new Object[]{"Lẩu Quây Quần", "Quây quần bên bạn bè, ấm áp mùa đông!", Arrays.asList(
+                new TopicStore("Lẩu Bò Nhúng Dấm", R.drawable.img_food_pizza),
+                new TopicStore("Lẩu Thái Chua Cay", R.drawable.img_food_pizza),
+                new TopicStore("Lẩu Hải Sản Phú Quốc", R.drawable.img_food_bubbletea),
+                new TopicStore("Lẩu Gà Lá É", R.drawable.img_food_chicken),
+                new TopicStore("Lẩu Nấm Chay Tịnh", R.drawable.img_food_pizza))});
+        topicPool.add(new Object[]{"Bánh Mì Sài Gòn", "Ổ bánh mì nóng giòn, đậm đà hương vị!", Arrays.asList(
+                new TopicStore("Bánh Mì Huynh Hoa", R.drawable.img_food_chicken),
+                new TopicStore("Bánh Mì Bảy Hổ", R.drawable.img_food_chicken),
+                new TopicStore("Bánh Mì Phượng Hội An", R.drawable.img_food_pizza),
+                new TopicStore("Bánh Mì Chảo Ốp La", R.drawable.img_food_pizza),
+                new TopicStore("Bánh Mì Doner Kebab", R.drawable.img_food_chicken))});
+        topicPool.add(new Object[]{"Hải Sản Tươi Sống", "Tôm cua cá mực, tươi ngon mỗi ngày!", Arrays.asList(
+                new TopicStore("Hải Sản Bé Mặn", R.drawable.img_food_bubbletea),
+                new TopicStore("Ốc Đào - Nguyễn Trãi", R.drawable.img_food_bubbletea),
+                new TopicStore("Cua Biển 1 Pound", R.drawable.img_food_pizza),
+                new TopicStore("Tôm Hùm BBQ", R.drawable.img_food_chicken),
+                new TopicStore("Sò Điệp Nướng Mỡ Hành", R.drawable.img_food_pizza))});
+        topicPool.add(new Object[]{"Ăn Vặt Đường Phố", "Món ngon vừa hè, nhớ mãi không quên!", Arrays.asList(
+                new TopicStore("Bánh Tráng Trộn", R.drawable.img_food_pizza),
+                new TopicStore("Xiên Que Nướng", R.drawable.img_food_chicken),
+                new TopicStore("Chè Khúc Bạch", R.drawable.img_food_bubbletea),
+                new TopicStore("Takoyaki Bạch Tuộc", R.drawable.img_food_pizza),
+                new TopicStore("Khoai Lắc Phô Mai", R.drawable.img_food_chicken))});
+
+        java.util.Collections.shuffle(topicPool);
+        int[] sectionIds = {R.id.topic_section_1, R.id.topic_section_2, R.id.topic_section_3, R.id.topic_section_4};
+        for (int i = 0; i < 4; i++) {
+            Object[] topic = topicPool.get(i);
+            @SuppressWarnings("unchecked")
+            List<TopicStore> stores = (List<TopicStore>) topic[2];
+            setupTopicSection(findViewById(sectionIds[i]), (String) topic[0], (String) topic[1], stores);
+        }
     }
 
-    private void setupVouchers() {
-        List<FoodVoucher> vouchers = new ArrayList<>();
-        vouchers.add(new FoodVoucher("KFC", "Giảm 30.000đ", "Cho đơn từ 150.000đ", Color.parseColor("#E4002B")));
-        vouchers.add(new FoodVoucher("Phúc Long", "Giảm 10.000đ", "Khi dùng Tài khoản UIT Pay", Color.parseColor("#006241")));
-        vouchers.add(new FoodVoucher("Jollibee", "Giảm 20.000đ", "Cho đơn từ 100.000đ", Color.parseColor("#E31837")));
-        vouchers.add(new FoodVoucher("Highlands", "Giảm 15.000đ", "Cho đơn từ 80.000đ", Color.parseColor("#6F4E37")));
-        vouchers.add(new FoodVoucher("Texas", "Giảm 30.000đ", "Khi dùng Tài khoản UIT Pay", Color.parseColor("#FF6900")));
-        vouchers.add(new FoodVoucher("MAYCHA", "Giảm 10.000đ", "Cho đơn từ 50.000đ", Color.parseColor("#FF69B4")));
-        vouchers.add(new FoodVoucher("Burger King", "Giảm 35.000đ", "Khi dùng Tài khoản UIT Pay", Color.parseColor("#FF8C00")));
-        vouchers.add(new FoodVoucher("Domino's", "Giảm 25.000đ", "Cho đơn từ 200.000đ", Color.parseColor("#006491")));
-        vouchers.add(new FoodVoucher("Tous Les Jours", "Giảm 20.000đ", "Cho đơn từ 100.000đ", Color.parseColor("#C62828")));
 
-        RecyclerView rv = findViewById(R.id.rv_vouchers);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(new FoodVoucherAdapter(vouchers));
+    private void setupTopicSection(View sectionView, String title, String subtitle, List<TopicStore> stores) {
+        TextView tvTitle = sectionView.findViewById(R.id.tv_topic_title);
+        TextView tvSubtitle = sectionView.findViewById(R.id.tv_topic_subtitle);
+        TextView tvSeeMore = sectionView.findViewById(R.id.tv_topic_see_more);
+        RecyclerView rvStores = sectionView.findViewById(R.id.rv_topic_stores);
+
+        tvTitle.setText(title);
+        tvSubtitle.setText(subtitle);
+
+        rvStores.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvStores.setAdapter(new TopicStoreAdapter(stores));
+
+        tvSeeMore.setOnClickListener(v -> {
+            Intent intent = new Intent(this, RecommendedDealActivity.class);
+            startActivity(intent);
+        });
+    }
+
+    @android.annotation.SuppressLint("NotifyDataSetChanged")
+    private void setupDeals() {
+        tabHomeDeals = findViewById(R.id.tab_home_deals);
+        RecyclerView rvDeals = findViewById(R.id.rv_home_deals);
+
+        dealItems = new ArrayList<>();
+
+        homeDealAdapter = new HomeDealAdapter(dealItems);
+        rvDeals.setLayoutManager(new LinearLayoutManager(this));
+        rvDeals.setAdapter(homeDealAdapter);
+
+        // Initial load
+        resetAndLoadDeals();
+
+        tabHomeDeals.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (!isSyncing) {
+                    isSyncing = true;
+                    TabLayout.Tab stickyTab = stickyTabLayout.getTabAt(tab.getPosition());
+                    if (stickyTab != null) stickyTab.select();
+                    isSyncing = false;
+                }
+                resetAndLoadDeals();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+
+        stickyTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (!isSyncing) {
+                    isSyncing = true;
+                    TabLayout.Tab originalTab = tabHomeDeals.getTabAt(tab.getPosition());
+                    if (originalTab != null) originalTab.select();
+                    isSyncing = false;
+                }
+                resetAndLoadDeals();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+    }
+
+    @android.annotation.SuppressLint("NotifyDataSetChanged")
+    private void resetAndLoadDeals() {
+        dealItems.clear();
+        dealItemCount = 0;
+        nextBannerAt = 5 + bannerRandom.nextInt(3); // 5-7
+        homeDealAdapter.notifyDataSetChanged();
+        isLoadingMore = false;
+        loadMoreDeals();
+    }
+
+    @android.annotation.SuppressLint("NotifyDataSetChanged")
+    private void loadMoreDeals() {
+        if (isLoadingMore) return;
+        isLoadingMore = true;
+
+        // Add loading indicator
+        dealItems.add(null);
+        homeDealAdapter.notifyItemInserted(dealItems.size() - 1);
+
+        int tabIndex = tabHomeDeals.getSelectedTabPosition();
+        int delay = 800 + bannerRandom.nextInt(700); // 800-1500ms
+
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // Remove loading indicator
+            int loadingPos = dealItems.indexOf(null);
+            if (loadingPos >= 0) {
+                dealItems.remove(loadingPos);
+                homeDealAdapter.notifyItemRemoved(loadingPos);
+            }
+
+            // Generate 5 fake deals
+            List<RecommendedDealModel> newDeals = FakeDealGenerator.generateDeals(5, tabIndex);
+
+            for (RecommendedDealModel deal : newDeals) {
+                dealItems.add(deal);
+                dealItemCount++;
+
+                // Insert banner every 5-7 deal items
+                if (dealItemCount >= nextBannerAt) {
+                    dealItems.add(HomeDealAdapter.BannerItem.random());
+                    nextBannerAt = dealItemCount + 5 + bannerRandom.nextInt(3);
+                }
+            }
+
+            homeDealAdapter.notifyDataSetChanged();
+            isLoadingMore = false;
+        }, delay);
+    }
+
+    private void setupStickyTab() {
+        NestedScrollView scrollView = findViewById(R.id.food_main_scroll);
+
+        scrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            // Sticky tab logic
+            int[] tabLocation = new int[2];
+            tabHomeDeals.getLocationOnScreen(tabLocation);
+            int tabTopOnScreen = tabLocation[1];
+
+            if (tabTopOnScreen < statusBarHeight) {
+                if (stickyTabLayout.getVisibility() != View.VISIBLE) {
+                    stickyTabLayout.setVisibility(View.VISIBLE);
+                }
+            } else {
+                if (stickyTabLayout.getVisibility() != View.GONE) {
+                    stickyTabLayout.setVisibility(View.GONE);
+                }
+            }
+
+            // Infinite scroll: load more when near bottom
+            View child = v.getChildAt(0);
+            if (child != null) {
+                int scrollRange = child.getHeight() - v.getHeight();
+                if (scrollY >= scrollRange - 500 && !isLoadingMore) {
+                    loadMoreDeals();
+                }
+            }
+        });
     }
 
     private void showRestaurantMenu(Restaurant restaurant) {
@@ -382,7 +592,7 @@ public class HomeActivity extends AppCompatActivity {
         TextView tvCartCount = view.findViewById(R.id.tv_cart_count);
         TextView tvCartTotal = view.findViewById(R.id.tv_cart_total);
         TextView btnOrder = (TextView) view.findViewById(R.id.btn_order);
-        btnOrder.setText("Thêm vào giỏ");
+        btnOrder.setText("ThĂªm vĂ o giá»");
 
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
 
@@ -397,8 +607,8 @@ public class HomeActivity extends AppCompatActivity {
                     totalItems += ci.getQuantity();
                     totalPrice += ci.getTotalPrice();
                 }
-                tvCartCount.setText(totalItems + " món");
-                tvCartTotal.setText(formatter.format(totalPrice) + "đ");
+                tvCartCount.setText(totalItems + " mĂ³n");
+                tvCartTotal.setText(formatter.format(totalPrice) + "Ä‘");
             }
         });
 

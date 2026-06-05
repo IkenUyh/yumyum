@@ -51,12 +51,8 @@
             android:windowSoftInputMode="adjustResize">
         </activity>
         <activity
-            android:name=".home.checkout.MoneyTransferActivity"
-            android:exported="false" />
-        <activity
             android:name=".home.checkout.TransferConfirmationActivity"
             android:exported="false" />
-
         <activity
             android:name=".home.checkout.TransferSuccessActivity"
             android:exported="false" />
