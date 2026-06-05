@@ -1,22 +1,28 @@
 package com.example.uitpayapp.profile;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.bumptech.glide.Glide;
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.ScanQRCode.QRScanActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -31,7 +37,18 @@ import java.util.List;
 public class AccountDetailActivity extends AppCompatActivity {
     TextView tvVerifyStatus;
     View infoVerifyMainStatus, infoNoVerifyMainStatus;
+    ImageView ivAvatar;
     List<String> MainInfo;
+    private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
+            registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
+                if (uri != null) {
+                    updateAvatar(uri.toString());
+                    // Lưu vào SharedPreferences để đồng bộ với ProfileActivity
+                    SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                    sharedPreferences.edit().putString("AVATAR_URL", uri.toString()).apply();
+                    Toast.makeText(this, "Đã cập nhật ảnh đại diện", Toast.LENGTH_SHORT).show();
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,10 +56,17 @@ public class AccountDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account_detail);
         initView();
+        loadUserData();
         setNoVerifyData();
         infoNoVerifyMainStatus.setOnClickListener(v -> HanleVerifyAccount());
         findViewById(R.id.info_verify_showmore).setOnClickListener(v -> showInfoBottomSheet());
         findViewById(R.id.update_secondary_info).setOnClickListener(v -> HanleUpdateSecondaryInfo());
+
+        findViewById(R.id.btn_change_avatar).setOnClickListener(v -> {
+            pickMedia.launch(new PickVisualMediaRequest.Builder()
+                    .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                    .build());
+        });
     }
 
     private void initView() {
@@ -53,6 +77,7 @@ public class AccountDetailActivity extends AppCompatActivity {
         tvVerifyStatus = findViewById(R.id.info_tv_verify_status);
         infoVerifyMainStatus = findViewById(R.id.info_verify_main_status);
         infoNoVerifyMainStatus = findViewById(R.id.info_no_verify_main_status);
+        ivAvatar = findViewById(R.id.iv_avatar);
 
         ViewCompat.setOnApplyWindowInsetsListener(topBar, (v, insets) -> {
             Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
@@ -67,6 +92,33 @@ public class AccountDetailActivity extends AppCompatActivity {
             }
             return insets;
         });
+    }
+
+    private void loadUserData() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String savedName = sharedPreferences.getString("FULL_NAME", "Người dùng ZaloPay");
+        String savedPhone = sharedPreferences.getString("PHONE_NUMBER", "Chưa cập nhật");
+        String savedAvatar = sharedPreferences.getString("AVATAR_URL", "");
+
+        TextView tvFullName = findViewById(R.id.tv_full_name);
+        TextView tvPhone = findViewById(R.id.tv_phone_number);
+
+        if (tvFullName != null) tvFullName.setText(savedName);
+        if (tvPhone != null) tvPhone.setText(savedPhone);
+        
+        if (!savedAvatar.isEmpty()) {
+            updateAvatar(savedAvatar);
+        }
+    }
+
+    private void updateAvatar(String url) {
+        if (ivAvatar != null) {
+            Glide.with(this)
+                    .load(url)
+                    .circleCrop()
+                    .placeholder(R.drawable.yumyum_demo_logo)
+                    .into(ivAvatar);
+        }
     }
 
     private void setNoVerifyData() {

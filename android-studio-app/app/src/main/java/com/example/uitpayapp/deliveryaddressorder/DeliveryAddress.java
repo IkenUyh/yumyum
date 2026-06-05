@@ -34,9 +34,10 @@ public class DeliveryAddress {
     public String getAddressDetail() { return addressDetail; }
     public String getReceiverName() { return receiverName; }
     public String getPhoneNumber() { return phoneNumber; }
-    public void updateAddress(String addressDetail, String receiverName, String phoneNumber) {
+    public void updateAddress(String addressDetail, String receiverName, String phoneNumber, AddressType addressType) {
         this.addressDetail = addressDetail;
         this.receiverName = receiverName;
         this.phoneNumber = phoneNumber;
+        this.addressType = addressType;
     }
 }

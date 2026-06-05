@@ -41,6 +41,10 @@ import org.osmdroid.views.MapView;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import android.os.Handler;
+import android.os.Looper;
 
 public class MapPickerActivity extends AppCompatActivity {
     private static final int REQUEST_LOCATION_PERMISSION = 1;
@@ -49,6 +53,9 @@ public class MapPickerActivity extends AppCompatActivity {
     View mapPickerFinish, mapPickerCurrentLocation;
     FusedLocationProviderClient fusedLocationClient;
     Location userLocation;
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable updateRunnable;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,8 +106,15 @@ public class MapPickerActivity extends AppCompatActivity {
         });
         mapView.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP){
-                GeoPoint point=new GeoPoint(mapView.getMapCenter().getLatitude(),mapView.getMapCenter().getLongitude());
-                updatePosition(point);
+                if (updateRunnable != null) {
+                    handler.removeCallbacks(updateRunnable);
+                }
+                updateRunnable = () -> {
+                    GeoPoint newPosition = new GeoPoint(mapView.getMapCenter().getLatitude(), mapView.getMapCenter().getLongitude());
+                    updatePosition(newPosition);
+                };
+                handler.postDelayed(updateRunnable, 1000);
+
             }
             return false;//coi nhu chua xu ly de cac su kien khac lam viec
         });
@@ -120,7 +134,8 @@ public class MapPickerActivity extends AppCompatActivity {
         //mac dinh
         mapView.setTileSource(TileSourceFactory.MAPNIK);
         mapView.setMultiTouchControls(true);
-        mapView.getController().setZoom(20.0);
+        mapView.getController().setZoom(16.0);
+        mapView.setMaxZoomLevel(20.0);
         //lan luot vi do (ngang) va kinh do
         GeoPoint startPoint = new GeoPoint(10.87044, 106.80217);
         mapView.getController().setCenter(startPoint);
@@ -155,39 +170,46 @@ public class MapPickerActivity extends AppCompatActivity {
     }
     private void goToSearchAddress(String address)
     {
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocationName(address, 1);
-            if (addresses != null && !addresses.isEmpty()) {
-                Address firstAddress = addresses.get(0);
-                GeoPoint newPosition = new GeoPoint(firstAddress.getLatitude(), firstAddress.getLongitude());
-                updatePosition(newPosition);
-            } else
-                Toast.makeText(this, "Không tìm thấy địa chỉ", Toast.LENGTH_SHORT).show();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        executorService.execute(() -> {
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            try {
+                List<Address> addresses = geocoder.getFromLocationName(address, 1);
+                if (addresses != null && !addresses.isEmpty()) {
+                    Address firstAddress = addresses.get(0);
+                    GeoPoint newPosition = new GeoPoint(firstAddress.getLatitude(), firstAddress.getLongitude());
+                    runOnUiThread(() -> {
+                        mapView.getController().setZoom(16.0);
+                        mapView.getController().animateTo(newPosition);
+                        etSearchAddress.setText(address);
+                    });
+                }
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
     private void updatePosition(GeoPoint newPosition)
     {
         mapView.getController().setCenter(newPosition);
         //lay ngon ngu theo may, do hien tai ko thay co TV
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(newPosition.getLatitude(), newPosition.getLongitude(), 1);
-            if (addresses != null && !addresses.isEmpty()) {
-                Address address = addresses.get(0);
-                String fullAddress = address.getAddressLine(0);
-                etSearchAddress.setText(fullAddress);
-            } else
-                Toast.makeText(this, "Không tìm thấy địa chỉ", Toast.LENGTH_SHORT).show();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        executorService.execute(() -> {
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            try {
+                List<Address> addresses = geocoder.getFromLocation(newPosition.getLatitude(), newPosition.getLongitude(), 1);
+                if (addresses != null && !addresses.isEmpty()) {
+                    Address firstAddress = addresses.get(0);
+                    String address = firstAddress.getAddressLine(0);
+                    runOnUiThread(() ->{
+                        mapView.getController().animateTo(newPosition);
+                        etSearchAddress.setText(address);
+                    });
+                }
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -197,6 +219,14 @@ public class MapPickerActivity extends AppCompatActivity {
                 goToCurrentPosition();
             }
         }
+    }
+    @Override
+    protected void onDestroy() {
+        executorService.shutdown();
+        if (updateRunnable != null) {
+            handler.removeCallbacks(updateRunnable);
+        }
+        super.onDestroy();
     }
 
 }

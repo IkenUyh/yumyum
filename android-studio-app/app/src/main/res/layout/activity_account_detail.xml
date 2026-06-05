@@ -62,13 +62,17 @@
                         android:textSize="14sp" />
                 </LinearLayout>
                 <TextView
+                    android:id="@+id/btn_change_avatar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
-                    android:text="Thay đổi số điện thoại >"
+                    android:text="Thay đổi ảnh đại diện >"
                     android:textColor="#0034C8"
-                    android:textSize="13sp" />
+                    android:textSize="13sp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground"/>
             </RelativeLayout>
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
