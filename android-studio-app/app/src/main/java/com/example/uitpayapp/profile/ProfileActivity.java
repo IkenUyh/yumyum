@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.ScanQRCode.QRScanActivity;
 import com.example.uitpayapp.YumYumPriority.PriorityYumYumActivity;
 import com.example.uitpayapp.auth.SignInActivity;
 import com.example.uitpayapp.giftexchange.GiftExchangeActivity;
@@ -266,10 +265,6 @@ public class ProfileActivity extends AppCompatActivity {
             case "Cài đặt thông báo":
                 Intent intentNotification=new Intent(this, NotificationSettings.class);
                 startActivity(intentNotification);
-                break;
-            case "Quét QR":
-                Intent intentQR=new Intent(this, QRScanActivity.class);
-                startActivity(intentQR);
                 break;
             case "Gửi qua SMS":
                 Intent intentSMS=new Intent(Intent.ACTION_SENDTO);

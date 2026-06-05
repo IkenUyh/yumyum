@@ -74,89 +74,6 @@
                     android:focusable="true"
                     android:background="?attr/selectableItemBackground"/>
             </RelativeLayout>
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="#E8F5E9"
-                android:id="@+id/info_verify_main_status"
-                android:visibility="gone">
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp">
-                    <TextView
-                        android:id="@+id/tv_verify_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Đã xác thực"
-                        android:textColor="#2E7D32"
-                        android:textStyle="bold"
-                        android:textSize="16sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/tv_verify_title"
-                        android:layout_marginTop="8dp"
-                        android:text="Tài khoản được bảo vệ tối đa"
-                        android:textColor="#2E7D32"
-                        android:textSize="14sp"/>
-                    <ImageView
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_alignParentEnd="true"
-                        android:src="@drawable/ic_account_payment_management"
-                        android:alpha="0.2"
-                        app:tint="#2E7D32"/>
-                </RelativeLayout>
-            </androidx.cardview.widget.CardView>
-            <TextView
-                android:id="@+id/info_no_verify_main_status"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
-                android:text="Xác thực ngay >"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="#e02449"
-                android:background="@drawable/bg_button_login_rounded"
-                android:backgroundTint="#fbebeb"/>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp">
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:text="Trạng thái tài khoản"
-                        android:textColor="#757575"/>
-                    <TextView
-                        android:id="@+id/info_tv_verify_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:background="@drawable/bg_button_login_rounded"
-                        android:backgroundTint="#E8F5E9"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="8dp"
-                        android:text="Đã xác thực"
-                        android:textColor="#2E7D32"
-                        android:textStyle="bold"
-                        android:textSize="12sp"/>
-                </RelativeLayout>
-            </LinearLayout>
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -164,41 +81,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Thông tin xác thực"
-                    android:textColor="#000000"
-                    android:textStyle="bold"
-                    android:textSize="14sp"/>
-                <TextView
-                    android:id="@+id/info_verify_showmore"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Kiểm tra thông tin"
-                    android:textColor="#0034c8"
-                    android:textSize="14sp"
-                    android:layout_alignParentEnd="true"/>
-            </RelativeLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="vertical">
-
-                <include layout="@layout/item_info_row" android:id="@+id/inforow_name"/>
-                <include layout="@layout/item_info_row" android:id="@+id/inforow_gender"/>
-                <include layout="@layout/item_info_row" android:id="@+id/inforow_birthday"/>
-                <include layout="@layout/item_info_row" android:id="@+id/inforow_id_number"/>
-                <include layout="@layout/item_info_row" android:id="@+id/inforow_issue_date"/>
-                <include layout="@layout/item_info_row" android:id="@+id/inforow_issue_place"/>
-            </LinearLayout>
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Thông tin bổ sung"
+                    android:text="Thông tin người dùng"
                     android:textColor="#000000"
                     android:textStyle="bold"
                     android:textSize="14sp"/>
@@ -216,8 +99,10 @@
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
                 android:orientation="vertical">
+                <include layout="@layout/item_info_row" android:id="@+id/inforow_username"/>
                 <include layout="@layout/item_info_row" android:id="@+id/inforow_email"/>
-                <include layout="@layout/item_info_row" android:id="@+id/inforow_address"/>
+                <include layout="@layout/item_info_row" android:id="@+id/inforow_gender"/>
+                <include layout="@layout/item_info_row" android:id="@+id/inforow_birthday"/>
                 <include layout="@layout/item_info_row" android:id="@+id/inforow_job"/>
             </LinearLayout>
 
