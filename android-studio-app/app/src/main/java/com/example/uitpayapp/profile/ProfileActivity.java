@@ -266,7 +266,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         // 2. Luồng bấm qua LỊCH SỬ
         navHistory.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.transaction.TransactionHistoryActivity.class);
+            android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.history.TransactionHistoryActivity.class);
             intent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
             overridePendingTransition(0, 0);

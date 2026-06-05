@@ -165,7 +165,7 @@ public class HomeActivity extends AppCompatActivity {
         LinearLayout navAccount = findViewById(R.id.navAccount);
 
         navHistory.setOnClickListener(v -> {
-            Intent intent = new Intent(this, com.example.uitpayapp.transaction.TransactionHistoryActivity.class);
+            Intent intent = new Intent(this, com.example.uitpayapp.history.TransactionHistoryActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
             overridePendingTransition(0, 0);

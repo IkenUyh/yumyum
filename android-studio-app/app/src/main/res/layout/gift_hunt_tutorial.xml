@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    app:cardCornerRadius="20dp"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardElevation="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Header: Icon Hộp quà và Nút Đóng -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/ivGiftIcon"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_sanqua_qua3d" />
+
+            <ImageView
+                android:id="@+id/btnCloseDialog"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_transactionhistory_close_24px"
+                app:tint="#A0A0A0"/>
+            <!-- (Lưu ý: Bạn tự trỏ id hình dấu X hoặc dùng @android:drawable/ic_menu_close_clear_cancel tạm) -->
+        </RelativeLayout>
+
+        <!-- Tiêu đề -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Hướng dẫn đổi quà"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Bạn hãy thực hiện các bước sau để có thể nhận xu và đổi quà:"
+            android:textColor="#333333"
+            android:textSize="14sp" />
+
+        <!-- Bước 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/bg_circle_blue"
+                android:text="1"
+                android:textColor="#0C40CC"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/tvBuoc1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Quét mã QR chuyển tiền ngân hàng thành công để tích xu*"
+                android:textColor="#333333"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <!-- Bước 2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/bg_circle_blue"
+                android:text="2"
+                android:textColor="#0C40CC"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/tvBuoc2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Vào Chuyển tiền > chọn Đổi quà > chọn quà bạn muốn đổi"
+                android:textColor="#333333"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <!-- Ghi chú -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="*Không áp dụng đối với quét mã QR được tải lên từ thư viện ảnh."
+            android:textColor="#888888"
+            android:textSize="13sp" />
+
+        <!-- Nút hành động -->
+        <LinearLayout
+            android:id="@+id/btnScanQRDialog"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_blue_rounded"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_qr_code_24px"
+                app:tint="@android:color/white"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Quét QR chuyển khoản"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:textSize="16sp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
