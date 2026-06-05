@@ -89,18 +89,11 @@
                         android:textColor="#000000" />
                 </LinearLayout>
             </LinearLayout>
-            <androidx.cardview.widget.CardView
+            <androidx.viewpager2.widget.ViewPager2
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:cardUseCompatPadding="true"
-                android:layout_margin="16dp">
-                <androidx.viewpager2.widget.ViewPager2
-                    android:layout_width="match_parent"
-                    android:layout_height="155dp"
-                    android:id="@+id/priority_image_slider"/>
-            </androidx.cardview.widget.CardView>
+                android:layout_height="155dp"
+                android:id="@+id/priority_image_slider"
+                android:layout_margin="16dp"/>
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

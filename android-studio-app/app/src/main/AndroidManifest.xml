@@ -8,6 +8,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -33,14 +35,15 @@
         <activity
             android:name=".home.HomeActivity"
             android:exported="true" />
-        <activity
-            android:name=".history.TransactionHistoryActivity"
-            android:exported="true">
-            <intent-filter>
+                  <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        <activity
+            android:name=".history.TransactionHistoryActivity"
+            android:exported="false">
+
         </activity>
         <activity
             android:name=".gift.GiftActivity"
