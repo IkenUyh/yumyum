@@ -37,92 +37,58 @@
             android:text="Nhập các thông tin sau để tăng cường bảo mật và có thêm hình thức xác thực sở hữu cho Ví của bạn"
             android:textColor="#757575"
             android:textSize="14sp" />
-        <LinearLayout
+        <EditText
+            android:id="@+id/et_fullname"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginBottom="16dp"
+            android:hint="Họ và tên"
+            android:background="@drawable/bg_edittext_rounded"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
+            android:textSize="16sp"
+            android:textColor="#000000" />
+        <EditText
+            android:id="@+id/et_email"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginBottom="16dp"
+            android:hint="Email"
+            android:background="@drawable/bg_edittext_rounded"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
+            android:textSize="16sp"
+            android:textColor="#000000" />
+        <Spinner
+            android:id="@+id/sp_gender"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
             android:layout_marginBottom="16dp"
             android:background="@drawable/bg_edittext_rounded"
-            android:orientation="vertical"
-            android:padding="12dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nhập email"
-                android:textColor="#757575"
-                android:textSize="12sp" />
-            <EditText
-                android:id="@+id/et_update_email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:hint="Email"
-                android:inputType="textEmailAddress"
-                android:textColor="#000000"
-                android:textSize="16sp" />
-        </LinearLayout>
-        <LinearLayout
+            android:paddingHorizontal="16dp"
+            android:textSize="16sp"
+            android:textColor="#000000"/>
+        <EditText
+            android:id="@+id/et_birthday"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginBottom="16dp"
+            android:hint="Ngày sinh"
+            android:background="@drawable/bg_edittext_rounded"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
+            android:textSize="16sp"
+            android:textColor="#000000"/>
+        <Spinner
+            android:id="@+id/sp_job"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
             android:layout_marginBottom="16dp"
             android:background="@drawable/bg_edittext_rounded"
-            android:orientation="vertical"
-            android:padding="12dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nhập địa chỉ"
-                android:textColor="#757575"
-                android:textSize="12sp" />
-            <EditText
-                android:id="@+id/et_update_address"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:hint="Địa chỉ"
-                android:inputType="textMultiLine"
-                android:textColor="#000000"
-                android:textSize="16sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:background="@drawable/bg_edittext_rounded"
-            android:orientation="vertical"
-            android:padding="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Chọn nghề nghiệp"
-                android:textColor="#757575"
-                android:textSize="12sp" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/tv_update_job"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Nhân viên văn phòng"
-                    android:textColor="#000000"
-                    android:textSize="16sp" />
-
-                <ImageView
-                    android:id="@+id/btn_popup_job"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_less_than"
-                    android:rotation="270"
-                    app:tint="#757575" />
-            </RelativeLayout>
-        </LinearLayout>
-
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
+            android:textSize="16sp"
+            android:textColor="#000000"/>
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_save_update"
             android:layout_width="match_parent"

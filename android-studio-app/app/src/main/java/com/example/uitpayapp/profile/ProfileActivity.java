@@ -1,5 +1,6 @@
 package com.example.uitpayapp.profile;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -19,8 +21,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.ScanQRCode.QRScanActivity;
 import com.example.uitpayapp.YumYumPriority.PriorityYumYumActivity;
+import com.example.uitpayapp.auth.SignInActivity;
 import com.example.uitpayapp.giftexchange.GiftExchangeActivity;
 import com.example.uitpayapp.profile.accountPaymentManage.AccountManagementActivity;
 import com.example.uitpayapp.voucher.VoucherActivity;
@@ -31,7 +33,10 @@ import java.util.List;
 
 public class ProfileActivity extends AppCompatActivity {
     RecyclerView mainMenu;
+    View rlLoginProfile,llUserInfo;
+    boolean isLogin = false;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -52,41 +57,65 @@ public class ProfileActivity extends AppCompatActivity {
             }
             return insets;
         });
-        TextView tvName = findViewById(R.id.tv_account_name);
-        TextView tvPhone = findViewById(R.id.tv_account_phone);
-        ImageView ivAvatar = findViewById(R.id.iv_account_avatar);
-
+        rlLoginProfile = findViewById(R.id.rl_login_profile);
+        llUserInfo = findViewById(R.id.ll_user_info);
+        checkLoginStatus();
+        setListener();
+        SetDataMainMenu(mainMenu);
+        setupBottomNavigation();
+    }
+    void checkLoginStatus()
+    {
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        String savedName = sharedPreferences.getString("FULL_NAME", "Người dùng ZaloPay");
-        String savedPhone = sharedPreferences.getString("PHONE_NUMBER", "");
-        String savedAvatar = sharedPreferences.getString("AVATAR_URL", "");
-
-        if (tvName != null) tvName.setText(savedName);
-        if (tvPhone != null) tvPhone.setText(savedPhone);
-
-        // Load ảnh và bo tròn tự động
-        if (ivAvatar != null && !savedAvatar.isEmpty()) {
-            Glide.with(this)
-                    .load(savedAvatar)
-                    .circleCrop()
-                    .into(ivAvatar);
-        }
-        findViewById(R.id.profile_uitpay_priority).setOnClickListener(v->
+        String savedPhone=sharedPreferences.getString("PHONE_NUMBER","");
+        if (!savedPhone.isEmpty())
         {
-            Intent intentPriority=new Intent(this, PriorityYumYumActivity.class);
-            startActivity(intentPriority);
-        });
+            isLogin=true;
+            rlLoginProfile.setVisibility(View.GONE);
+            llUserInfo.setVisibility(View.VISIBLE);
+            TextView tvName = findViewById(R.id.tv_account_name);
+            TextView tvPhone = findViewById(R.id.tv_account_phone);
+            ImageView ivAvatar = findViewById(R.id.iv_account_avatar);
+
+            String savedName = sharedPreferences.getString("FULL_NAME", "Người dùng ZaloPay");
+            String savedAvatar = sharedPreferences.getString("AVATAR_URL", "");
+
+            if (tvName != null) tvName.setText(savedName);
+            if (tvPhone != null) tvPhone.setText(savedPhone);
+
+            // Load ảnh và bo tròn tự động
+            if (ivAvatar != null && !savedAvatar.isEmpty()) {
+                Glide.with(this)
+                        .load(savedAvatar)
+                        .circleCrop()
+                        .into(ivAvatar);
+            }
+        } else
+        {
+            isLogin=false;
+            rlLoginProfile.setVisibility(View.VISIBLE);
+            llUserInfo.setVisibility(View.GONE);
+        }
+    }
+    void setListener()
+    {
         findViewById(R.id.profile_show_account_info).setOnClickListener(v->
         {
             Intent intentAccount=new Intent(this, AccountDetailActivity.class);
             startActivity(intentAccount);
         });
-        findViewById(R.id.qr_manage_card).setOnClickListener(v->{
-            Intent intentQR=new Intent(this, QRScanActivity.class);
-            startActivity(intentQR);
+        findViewById(R.id.btn_logout).setOnClickListener(v->{
+            SharedPreferences.Editor editor = getSharedPreferences("UserPrefs", MODE_PRIVATE).edit();
+            editor.clear();
+            editor.apply();
+            checkLoginStatus();
+            Toast.makeText(this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
         });
-        SetDataMainMenu(mainMenu);
-        setupBottomNavigation();
+        findViewById(R.id.btn_login_profile).setOnClickListener(v->
+        {
+            Intent intentLogin=new Intent(this, SignInActivity.class);
+            startActivity(intentLogin);
+        });
     }
 
     void SetDataMainMenu(RecyclerView mainMenu) {
@@ -95,6 +124,7 @@ public class ProfileActivity extends AppCompatActivity {
         List<GroupItemData> ListGroupItem = new ArrayList<>();
         //Nhóm 1: Ưu đãi
         List<MenuItemData> ListItems_uudai = new ArrayList<>();
+        ListItems_uudai.add(new MenuItemData("YumYum Priority","Thành viên",R.drawable.ic_priority_yumyum,false));
         ListItems_uudai.add(new MenuItemData("Deal hời cho bạn","",R.drawable.ic_your_deal,false));
         ListItems_uudai.add(new MenuItemData("Ví Voucher", "0 ưu đãi", R.drawable.ic_my_gift,false));
         ListItems_uudai.add(new MenuItemData("Xu tích lũy", "0 xu", R.drawable.ic_my_coin,false));
@@ -121,6 +151,11 @@ public class ProfileActivity extends AppCompatActivity {
     }
     public void HanleItemClick(MenuItemData item) {
         if (item == null) return;
+        if (!isLogin)
+        {
+            Toast.makeText(this, "Vui lòng đăng nhập", Toast.LENGTH_SHORT).show();
+            return;
+        }
         List<GroupItemData> ListGroupItem = new ArrayList<>();
         List<MenuItemData> ListItems = new ArrayList<>();
         if (item.IsSpecialItem)
@@ -130,6 +165,10 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
         switch (item.getTitle()) {
+            case "YumYum Priority":
+                Intent intentPriority=new Intent(this, PriorityYumYumActivity.class);
+                startActivity(intentPriority);
+                break;
             case "Ví Voucher":
                 Intent intentVoucher=new Intent(this,VoucherActivity.class);
                 startActivity(intentVoucher);
@@ -227,10 +266,6 @@ public class ProfileActivity extends AppCompatActivity {
                 Intent intentNotification=new Intent(this, NotificationSettings.class);
                 startActivity(intentNotification);
                 break;
-            case "Quét QR":
-                Intent intentQR=new Intent(this, QRScanActivity.class);
-                startActivity(intentQR);
-                break;
             case "Gửi qua SMS":
                 Intent intentSMS=new Intent(Intent.ACTION_SENDTO);
                 intentSMS.setData(android.net.Uri.parse("smsto:"));
@@ -253,31 +288,43 @@ public class ProfileActivity extends AppCompatActivity {
     private void setupBottomNavigation() {
         android.widget.LinearLayout navHome = findViewById(R.id.navHome);
         android.widget.LinearLayout navHistory = findViewById(R.id.navHistory);
-        android.widget.LinearLayout navGift = findViewById(R.id.navGift);
+        android.widget.LinearLayout navFavorite = findViewById(R.id.navFavorite);
+        android.widget.LinearLayout navNotification = findViewById(R.id.navNotification);
         android.widget.LinearLayout navAccount = findViewById(R.id.navAccount);
 
-        // 1. Luồng bấm về TRANG CHỦ
         navHome.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.home.HomeActivity.class);
-            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            Intent intent = new Intent(this, com.example.uitpayapp.home.HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
             overridePendingTransition(0, 0);
         });
 
-        // 2. Luồng bấm qua LỊCH SỬ
         navHistory.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.history.TransactionHistoryActivity.class);
-            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            Intent intent = new Intent(this, com.example.uitpayapp.history.TransactionHistoryActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
             overridePendingTransition(0, 0);
         });
 
-        // 3. Luồng bấm qua SĂN QUÀ
-        navGift.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.gift.GiftActivity.class);
-            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        navFavorite.setOnClickListener(v -> {
+            Intent intent = new Intent(this, com.example.uitpayapp.favorite.FavoriteActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
             overridePendingTransition(0, 0);
         });
+
+        navNotification.setOnClickListener(v -> {
+            Intent intent = new Intent(this, com.example.uitpayapp.notification.NotificationActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
+        
+        // Hiện tại đang ở Account (Profile), không cần chuyển
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkLoginStatus();
     }
 }

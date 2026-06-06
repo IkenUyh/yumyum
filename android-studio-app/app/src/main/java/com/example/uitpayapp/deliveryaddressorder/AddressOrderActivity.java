@@ -150,7 +150,7 @@ public class AddressOrderActivity extends AppCompatActivity {
 
         btnSave.setOnClickListener(v -> {
             if (address!=null) {
-                address.updateAddress(tvSelectedAddress.getText().toString(),etName.getText().toString(),etPhone.getText().toString());
+                address.updateAddress(tvSelectedAddress.getText().toString(),etName.getText().toString(),etPhone.getText().toString(),selectedType[0]);
             }
             else
                 deliveryAddresses.add(new DeliveryAddress(selectedType[0],tvSelectedAddress.getText().toString(),etName.getText().toString(),etPhone.getText().toString()));

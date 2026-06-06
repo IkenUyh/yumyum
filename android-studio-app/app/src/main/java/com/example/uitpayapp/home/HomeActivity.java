@@ -160,30 +160,54 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setupBottomNavigation() {
+        LinearLayout navHome = findViewById(R.id.navHome);
         LinearLayout navHistory = findViewById(R.id.navHistory);
-        LinearLayout navGift = findViewById(R.id.navGift);
+        LinearLayout navFavorite = findViewById(R.id.navFavorite);
+        LinearLayout navNotification = findViewById(R.id.navNotification);
         LinearLayout navAccount = findViewById(R.id.navAccount);
 
-        navHistory.setOnClickListener(v -> {
-            Intent intent = new Intent(this, com.example.uitpayapp.history.TransactionHistoryActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            startActivity(intent);
-            overridePendingTransition(0, 0);
-        });
+        if (navHome != null) {
+            navHome.setOnClickListener(v -> {
+                NestedScrollView scrollView = findViewById(R.id.food_main_scroll);
+                if (scrollView != null) scrollView.smoothScrollTo(0, 0);
+            });
+        }
 
-        navGift.setOnClickListener(v -> {
-            Intent intent = new Intent(this, com.example.uitpayapp.gift.GiftActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            startActivity(intent);
-            overridePendingTransition(0, 0);
-        });
+        if (navHistory != null) {
+            navHistory.setOnClickListener(v -> {
+                Intent intent = new Intent(this, com.example.uitpayapp.history.TransactionHistoryActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+            });
+        }
 
-        navAccount.setOnClickListener(v -> {
-            Intent intent = new Intent(this, com.example.uitpayapp.profile.ProfileActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            startActivity(intent);
-            overridePendingTransition(0, 0);
-        });
+        if (navFavorite != null) {
+            navFavorite.setOnClickListener(v -> {
+                Intent intent = new Intent(this, com.example.uitpayapp.favorite.FavoriteActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+            });
+        }
+
+        if (navNotification != null) {
+            navNotification.setOnClickListener(v -> {
+                Intent intent = new Intent(this, com.example.uitpayapp.notification.NotificationActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+            });
+        }
+
+        if (navAccount != null) {
+            navAccount.setOnClickListener(v -> {
+                Intent intent = new Intent(this, com.example.uitpayapp.profile.ProfileActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+            });
+        }
     }
 
     private void showAddressSelection() {
