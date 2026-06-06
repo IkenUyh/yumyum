@@ -57,4 +57,28 @@ public class OrderController {
         Order order = orderService.completeOrder(orderId, driver);
         return ApiResponse.success(OrderResponseDTO.fromEntity(order));
     }
+
+    // API xem lịch sử đơn hàng của Khách (Customer)
+    @GetMapping("/history/customer")
+    public ApiResponse<java.util.List<OrderResponseDTO>> getCustomerHistory(
+            Authentication authentication) {
+        User customer = (User) authentication.getPrincipal();
+        java.util.List<OrderResponseDTO> list = orderService.getCustomerOrderHistory(customer)
+                .stream()
+                .map(OrderResponseDTO::fromEntity)
+                .toList();
+        return ApiResponse.success(list);
+    }
+
+    // API xem lịch sử đơn bán của Chủ quán (Merchant)
+    @GetMapping("/history/merchant")
+    public ApiResponse<java.util.List<OrderResponseDTO>> getMerchantHistory(
+            Authentication authentication) {
+        User merchant = (User) authentication.getPrincipal();
+        java.util.List<OrderResponseDTO> list = orderService.getMerchantOrderHistory(merchant)
+                .stream()
+                .map(OrderResponseDTO::fromEntity)
+                .toList();
+        return ApiResponse.success(list);
+    }
 }
