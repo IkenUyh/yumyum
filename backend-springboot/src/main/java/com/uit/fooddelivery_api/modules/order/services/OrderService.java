@@ -88,4 +88,47 @@ public class OrderService {
         // 7. Lưu đơn hàng
         return orderRepository.save(order);
     }
+
+    // 1. Lấy danh sách đơn đang chờ tài xế
+    public List<Order> getAvailableOrders() {
+        return orderRepository.findByStatus("PENDING");
+    }
+
+    // 2. Tài xế nhận đơn
+    @Transactional
+    public Order acceptOrder(Long orderId, User driver) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+
+        if (!order.getStatus().equals("PENDING")) {
+            throw new RuntimeException("Đơn hàng này đã có người nhận hoặc bị hủy!");
+        }
+
+        order.setDriver(driver);
+        order.setStatus("DELIVERING");
+        return orderRepository.save(order);
+    }
+
+    // 3. Tài xế giao xong -> Chuyển tiền cho chủ quán
+    @Transactional
+    public Order completeOrder(Long orderId, User driver) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+
+        if (!order.getStatus().equals("DELIVERING") || !order.getDriver().getId().equals(driver.getId())) {
+            throw new RuntimeException("Anh không có quyền hoàn thành đơn hàng này!");
+        }
+
+        // Đổi trạng thái đơn
+        order.setStatus("COMPLETED");
+
+        // Bắn tiền cho chủ quán (Merchant)
+        Wallet merchantWallet = walletRepository.findByUserId(order.getRestaurant().getMerchant().getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy ví của chủ quán!"));
+
+        merchantWallet.setBalance(merchantWallet.getBalance().add(order.getTotalAmount()));
+        walletRepository.save(merchantWallet);
+
+        return orderRepository.save(order);
+    }
 }

@@ -27,4 +27,34 @@ public class OrderController {
 
         return ApiResponse.success(OrderResponseDTO.fromEntity(savedOrder));
     }
+
+    // API Lấy danh sách đơn chờ nhận
+    @GetMapping("/available")
+    public ApiResponse<java.util.List<OrderResponseDTO>> getAvailableOrders() {
+        java.util.List<OrderResponseDTO> list = orderService.getAvailableOrders()
+                .stream()
+                .map(OrderResponseDTO::fromEntity)
+                .toList();
+        return ApiResponse.success(list);
+    }
+
+    // API Tài xế nhận đơn
+    @PutMapping("/{id}/accept")
+    public ApiResponse<OrderResponseDTO> acceptOrder(
+            @PathVariable("id") Long orderId,
+            Authentication authentication) {
+        User driver = (User) authentication.getPrincipal();
+        Order order = orderService.acceptOrder(orderId, driver);
+        return ApiResponse.success(OrderResponseDTO.fromEntity(order));
+    }
+
+    // API Tài xế hoàn thành đơn
+    @PutMapping("/{id}/complete")
+    public ApiResponse<OrderResponseDTO> completeOrder(
+            @PathVariable("id") Long orderId,
+            Authentication authentication) {
+        User driver = (User) authentication.getPrincipal();
+        Order order = orderService.completeOrder(orderId, driver);
+        return ApiResponse.success(OrderResponseDTO.fromEntity(order));
+    }
 }
