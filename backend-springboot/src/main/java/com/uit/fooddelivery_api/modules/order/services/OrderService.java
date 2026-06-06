@@ -131,4 +131,14 @@ public class OrderService {
 
         return orderRepository.save(order);
     }
+
+    // Lấy lịch sử đơn hàng cho Khách hàng
+    public List<Order> getCustomerOrderHistory(User customer) {
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(customer.getId());
+    }
+
+    // Lấy lịch sử đơn hàng cho Chủ quán (Merchant)
+    public List<Order> getMerchantOrderHistory(User merchant) {
+        return orderRepository.findByRestaurantMerchantIdOrderByCreatedAtDesc(merchant.getId());
+    }
 }
