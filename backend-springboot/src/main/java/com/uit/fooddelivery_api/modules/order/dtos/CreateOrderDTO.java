@@ -8,5 +8,5 @@ import lombok.Setter;
 public class CreateOrderDTO {
     private Long restaurantId;
     private Long addressId; // Bổ sung ID địa chỉ giao hàng
-    // Có thể truyền thêm mã voucher vào đây sau này
+    private String voucherCode;
 }

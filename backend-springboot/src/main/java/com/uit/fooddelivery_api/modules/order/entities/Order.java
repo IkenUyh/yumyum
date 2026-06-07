@@ -46,4 +46,11 @@ public class Order {
 
     @Column(name = "shipping_fee", precision = 19, scale = 2)
     private BigDecimal shippingFee;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "voucher_id")
+    private com.uit.fooddelivery_api.modules.voucher.entities.Voucher voucher;
+
+    @Column(name = "discount_amount", precision = 19, scale = 2)
+    private BigDecimal discountAmount;
 }
