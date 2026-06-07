@@ -39,4 +39,10 @@ public class Restaurant {
 
     @Column(name = "is_active")
     private Boolean isActive;
+
+    @Column(precision = 10, scale = 8)
+    private java.math.BigDecimal latitude;
+
+    @Column(precision = 11, scale = 8)
+    private java.math.BigDecimal longitude;
 }
