@@ -31,4 +31,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "GROUP BY oi.food.id, oi.food.name " +
             "ORDER BY SUM(oi.quantity) DESC")
     java.util.List<Object[]> getFoodSalesStatsByMerchant(@org.springframework.data.repository.query.Param("merchantId") Long merchantId);
+
+    // Lấy các đơn hàng PENDING mà thời gian tạo đã vượt qua mốc thời gian quy định
+    @org.springframework.data.jpa.repository.Query("SELECT o " +
+            "FROM Order o " +
+            "WHERE o.status = 'PENDING' AND o.createdAt <= :cutoffTime")
+    java.util.List<Order> findStalePendingOrders(@org.springframework.data.repository.query.Param("cutoffTime") java.time.LocalDateTime cutoffTime);
 }
