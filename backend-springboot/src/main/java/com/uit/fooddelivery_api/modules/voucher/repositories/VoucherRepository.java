@@ -10,4 +10,10 @@ import java.util.Optional;
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     // Chỉ lấy những Voucher đang được bật (is_active = true)
     Optional<Voucher> findByCodeAndIsActiveTrue(String code);
+
+    // Quét các Voucher đang kích hoạt nhưng đã quá ngày kết thúc
+    @org.springframework.data.jpa.repository.Query("SELECT v " +
+            "FROM Voucher v " +
+            "WHERE v.isActive = true AND v.endDate <= :now")
+    java.util.List<Voucher> findExpiredActiveVouchers(@org.springframework.data.repository.query.Param("now") java.time.LocalDateTime now);
 }
