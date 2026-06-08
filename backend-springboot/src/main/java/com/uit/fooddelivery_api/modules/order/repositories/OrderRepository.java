@@ -13,4 +13,22 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // 2. Tìm tất cả đơn hàng thuộc về các Nhà hàng của một Chủ quán
     java.util.List<Order> findByRestaurantMerchantIdOrderByCreatedAtDesc(Long merchantId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(o.totalAmount), 0) " +
+            "FROM Order o " +
+            "WHERE o.restaurant.merchant.id = :merchantId AND o.status = 'COMPLETED'")
+    java.math.BigDecimal calculateTotalRevenueByMerchant(@org.springframework.data.repository.query.Param("merchantId") Long merchantId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(o) " +
+            "FROM Order o " +
+            "WHERE o.restaurant.merchant.id = :merchantId AND o.status = 'COMPLETED'")
+    Long countCompletedOrdersByMerchant(@org.springframework.data.repository.query.Param("merchantId") Long merchantId);
+
+    // Tính tổng số lượng bán ra của từng món, xếp giảm dần
+    @org.springframework.data.jpa.repository.Query("SELECT oi.food.id, oi.food.name, SUM(oi.quantity) " +
+            "FROM OrderItem oi " +
+            "WHERE oi.order.restaurant.merchant.id = :merchantId AND oi.order.status = 'COMPLETED' " +
+            "GROUP BY oi.food.id, oi.food.name " +
+            "ORDER BY SUM(oi.quantity) DESC")
+    java.util.List<Object[]> getFoodSalesStatsByMerchant(@org.springframework.data.repository.query.Param("merchantId") Long merchantId);
 }
