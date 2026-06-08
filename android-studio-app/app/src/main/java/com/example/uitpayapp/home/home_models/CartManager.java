@@ -2,6 +2,7 @@ package com.example.uitpayapp.home.home_models;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -26,13 +27,44 @@ public class CartManager {
     public void addItem(CartItem item) {
         for (int i = 0; i < cartItems.size(); i++) {
             CartItem existing = cartItems.get(i);
-            if (existing.getMenuItem().getName().equals(item.getMenuItem().getName())) {
+            
+            // Check if food name and toppings match
+            boolean sameName = existing.getMenuItem().getName().equals(item.getMenuItem().getName());
+            boolean sameToppings = new HashSet<>(existing.getSelectedToppings()).equals(new HashSet<>(item.getSelectedToppings()));
+            
+            if (sameName && sameToppings) {
                 int newQty = existing.getQuantity() + item.getQuantity();
-                cartItems.set(i, new CartItem(item.getMenuItem(), newQty));
+                CartItem updatedItem = new CartItem(item.getMenuItem(), newQty, item.getSelectedToppings());
+                cartItems.set(i, updatedItem);
                 return;
             }
         }
         cartItems.add(item);
+    }
+    
+    public void updateItem(int position, CartItem newItem) {
+        if (position >= 0 && position < cartItems.size()) {
+            cartItems.remove(position);
+            
+            boolean merged = false;
+            for (int i = 0; i < cartItems.size(); i++) {
+                CartItem existing = cartItems.get(i);
+                boolean sameName = existing.getMenuItem().getName().equals(newItem.getMenuItem().getName());
+                boolean sameToppings = new HashSet<>(existing.getSelectedToppings()).equals(new HashSet<>(newItem.getSelectedToppings()));
+                
+                if (sameName && sameToppings) {
+                    int newQty = existing.getQuantity() + newItem.getQuantity();
+                    CartItem updatedItem = new CartItem(newItem.getMenuItem(), newQty, newItem.getSelectedToppings());
+                    cartItems.set(i, updatedItem);
+                    merged = true;
+                    break;
+                }
+            }
+            
+            if (!merged) {
+                cartItems.add(position, newItem);
+            }
+        }
     }
 
     public void removeItem(int position) {

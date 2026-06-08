@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.home.home_models.CartItem;
+import com.example.uitpayapp.home.home_models.CartTopping;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -21,6 +22,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public interface CartActionListener {
         void onQuantityChanged();
         void onRequestRemoveItem(int position, CartItem item);
+        void onEditItemClick(int position, CartItem item);
     }
 
     private final List<CartItem> cartItems;
@@ -47,8 +49,36 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         holder.imgItem.setImageResource(item.getMenuItem().getImageResId());
         holder.tvName.setText(item.getMenuItem().getName());
-        holder.tvPrice.setText(formatter.format(item.getMenuItem().getPrice()) + "đ");
+        
+        // Show total price of one single item including toppings (or wait, the price per item including toppings, or just base price?)
+        // Total price of an item is item price + toppings. The display in cart usually shows (base + toppings) * 1.
+        long unitPrice = item.getTotalPrice() / item.getQuantity();
+        holder.tvPrice.setText(formatter.format(unitPrice) + "đ");
+        
         holder.tvQuantity.setText(String.valueOf(item.getQuantity()));
+
+        if (item.getSelectedToppings() != null && !item.getSelectedToppings().isEmpty()) {
+            holder.tvToppings.setVisibility(View.VISIBLE);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < item.getSelectedToppings().size(); i++) {
+                if (i > 0) sb.append(", ");
+                sb.append("+ ").append(item.getSelectedToppings().get(i).getName());
+            }
+            holder.tvToppings.setText(sb.toString());
+        } else {
+            holder.tvToppings.setVisibility(View.GONE);
+        }
+
+        View.OnClickListener editListener = v -> {
+            int pos = holder.getAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION) {
+                listener.onEditItemClick(pos, cartItems.get(pos));
+            }
+        };
+
+        holder.tvEditToppings.setOnClickListener(editListener);
+        holder.imgItem.setOnClickListener(editListener);
+        holder.tvName.setOnClickListener(editListener);
 
         holder.btnIncrease.setOnClickListener(v -> {
             int pos = holder.getAdapterPosition();
@@ -89,13 +119,15 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     static class CartViewHolder extends RecyclerView.ViewHolder {
         ImageView imgItem;
-        TextView tvName, tvPrice, tvQuantity, btnIncrease, btnDecrease;
+        TextView tvName, tvPrice, tvToppings, tvEditToppings, tvQuantity, btnIncrease, btnDecrease;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
             imgItem = itemView.findViewById(R.id.img_cart_item);
             tvName = itemView.findViewById(R.id.tv_cart_item_name);
             tvPrice = itemView.findViewById(R.id.tv_cart_item_price);
+            tvToppings = itemView.findViewById(R.id.tv_cart_item_toppings);
+            tvEditToppings = itemView.findViewById(R.id.tv_edit_toppings);
             tvQuantity = itemView.findViewById(R.id.tv_cart_item_quantity);
             btnIncrease = itemView.findViewById(R.id.btn_increase);
             btnDecrease = itemView.findViewById(R.id.btn_decrease);

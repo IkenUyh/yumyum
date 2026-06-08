@@ -10,16 +10,22 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.home.home_models.TopicStore;
+import com.example.uitpayapp.home.home_models.FoodMenuItem;
 
 import java.util.List;
 
 public class TopicStoreAdapter extends RecyclerView.Adapter<TopicStoreAdapter.ViewHolder> {
 
-    private final List<TopicStore> stores;
+    public interface OnTopicFoodClickListener {
+        void onFoodClick(FoodMenuItem item, ViewHolder holder);
+    }
 
-    public TopicStoreAdapter(List<TopicStore> stores) {
-        this.stores = stores;
+    private final List<FoodMenuItem> foods;
+    private final OnTopicFoodClickListener listener;
+
+    public TopicStoreAdapter(List<FoodMenuItem> foods, OnTopicFoodClickListener listener) {
+        this.foods = foods;
+        this.listener = listener;
     }
 
     @NonNull
@@ -32,24 +38,30 @@ public class TopicStoreAdapter extends RecyclerView.Adapter<TopicStoreAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        TopicStore store = stores.get(position);
-        holder.tvName.setText(store.getName());
-        holder.ivImage.setImageResource(store.getImageResId());
+        FoodMenuItem food = foods.get(position);
+        holder.tvName.setText(food.getName());
+        holder.tvPrice.setText(food.getFormattedPrice());
+        holder.ivImage.setImageResource(food.getImageResId());
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onFoodClick(food, holder);
+        });
     }
 
     @Override
     public int getItemCount() {
-        return stores != null ? stores.size() : 0;
+        return foods != null ? foods.size() : 0;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivImage;
-        TextView tvName;
+        public ImageView ivImage;
+        TextView tvName, tvPrice;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivImage = itemView.findViewById(R.id.iv_topic_store_image);
-            tvName = itemView.findViewById(R.id.tv_topic_store_name);
+            tvName = itemView.findViewById(R.id.tv_topic_food_name);
+            tvPrice = itemView.findViewById(R.id.tv_topic_food_price);
         }
     }
 }

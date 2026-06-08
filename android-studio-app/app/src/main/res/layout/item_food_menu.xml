@@ -5,6 +5,9 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
     android:paddingVertical="10dp">
 
     <androidx.cardview.widget.CardView
@@ -89,7 +92,7 @@
             android:layout_height="28dp"
             android:gravity="center"
             android:text="+"
-            android:textColor="#0034c8"
+            android:textColor="#F24405"
             android:textSize="18sp"
             android:textStyle="bold"
             android:background="?android:attr/selectableItemBackgroundBorderless" />

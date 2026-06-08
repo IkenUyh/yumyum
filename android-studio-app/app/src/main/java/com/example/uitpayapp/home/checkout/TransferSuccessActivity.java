@@ -131,13 +131,19 @@ public class TransferSuccessActivity extends AppCompatActivity {
 
             if (tvSuccessName != null) {
                 if (isFoodOrder) {
-                    tvSuccessName.setText("DỊCH VỤ ĐẶT ĐỒ ĂN");
+                    tvSuccessName.setText("UIT FOOD");
                 } else if (name != null) {
                     tvSuccessName.setText(name.toUpperCase());
                 }
             }
             if (ivSuccessAvatar != null) {
-                ivSuccessAvatar.setImageResource(avatarId);
+                if (isFoodOrder) {
+                    ivSuccessAvatar.setImageResource(R.drawable.ic_food);
+                    ivSuccessAvatar.setPadding(10, 10, 10, 10);
+                    ivSuccessAvatar.setColorFilter(android.graphics.Color.parseColor("#F57C00"));
+                } else {
+                    ivSuccessAvatar.setImageResource(avatarId);
+                }
             }
             if (tvTransactionNote != null) {
                 String destination = getIntent().getStringExtra("KEY_DESTINATION");
@@ -172,7 +178,7 @@ public class TransferSuccessActivity extends AppCompatActivity {
 
         SpannableString spannableTransactionId = new SpannableString(fullTransactionText);
         spannableTransactionId.setSpan(
-                new ForegroundColorSpan(Color.parseColor("#0A46A6")),
+                new ForegroundColorSpan(Color.parseColor("#000000")),
                 prefixText.length(),
                 fullTransactionText.length(),
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -214,7 +220,7 @@ public class TransferSuccessActivity extends AppCompatActivity {
 
     private void returnToHome() {
         Intent intent = new Intent(this, com.example.uitpayapp.home.HomeActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
         finish();
     }

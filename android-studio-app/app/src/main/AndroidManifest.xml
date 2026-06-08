@@ -101,6 +101,15 @@
         <activity
             android:name=".registerstore.RegisterStoreActivity"
             android:exported="false" />
+        <activity
+            android:name=".home.CartActivity"
+            android:exported="false" />
+        <activity
+            android:name=".home.checkout.FoodCheckoutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".home.checkout.TransferSuccessActivity"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

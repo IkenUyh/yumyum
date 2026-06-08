@@ -73,42 +73,46 @@
                 android:clipToPadding="false"
                 android:paddingTop="4dp" />
 
-            <!-- Empty state -->
-            <LinearLayout
-                android:id="@+id/layout_empty_cart"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="48dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🛒"
-                    android:textSize="64sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Giỏ hàng trống"
-                    android:textColor="#757575"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center"
-                    android:text="Hãy thêm món ăn yêu thích\nvào giỏ hàng nhé!"
-                    android:textColor="#9E9E9E"
-                    android:textSize="14sp" />
-            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Empty state (Centered in remaining space) -->
+    <LinearLayout
+        android:id="@+id/layout_empty_cart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="48dp"
+        android:visibility="gone"
+        app:layout_constraintVertical_bias="0.3"
+        app:layout_constraintTop_toBottomOf="@+id/layout_cart_header"
+        app:layout_constraintBottom_toTopOf="@+id/layout_bottom_bar">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🛒"
+            android:textSize="64sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Giỏ hàng trống"
+            android:textColor="#757575"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="Hãy thêm món ăn yêu thích\nvào giỏ hàng nhé!"
+            android:textColor="#9E9E9E"
+            android:textSize="14sp" />
+    </LinearLayout>
 
     <!-- BOTTOM BAR: Tổng tiền + Nút thanh toán -->
     <LinearLayout

@@ -130,49 +130,7 @@ public class RecommendedDealActivity extends AppCompatActivity {
     }
 
     private void loadDummyData() {
-        allDeals.add(new RecommendedDealModel(
-                "Gà Rán Popeyes - Võ Văn Ngân",
-                9.1, 9,
-                R.drawable.img_food_chicken,
-                "-52%",
-                "1 MIẾNG GÀ RÁN GIÒN + 1 GÀ POPCORN + 1 KHOAI TÂY CHIÊN",
-                100,
-                118000.0,
-                57000.0
-        ));
-        
-        allDeals.add(new RecommendedDealModel(
-                "The Coffee House - Kha Vạn Cân",
-                1.2, 10,
-                R.drawable.img_food_bubbletea,
-                "-30%",
-                "Trà Đào Cam Sả (L) + Bánh Mì Que",
-                50,
-                75000.0,
-                52000.0
-        ));
-
-        allDeals.add(new RecommendedDealModel(
-                "Phúc Long Tea & Coffee",
-                3.5, 25,
-                R.drawable.img_food_coffee,
-                "-20%",
-                "Trà Sữa Phúc Long + Thạch Cafe",
-                200,
-                65000.0,
-                52000.0
-        ));
-
-        allDeals.add(new RecommendedDealModel(
-                "KFC - Đặng Văn Bi",
-                0.5, 10,
-                R.drawable.img_food_chicken,
-                "-15%",
-                "Combo Gà Rán Hạnh Phúc",
-                80,
-                150000.0,
-                125000.0
-        ));
+        allDeals.addAll(com.example.uitpayapp.home.HomeActivity.HomeRepository.getInstance().getRecommendedDeals());
         filterDeals();
     }
 }

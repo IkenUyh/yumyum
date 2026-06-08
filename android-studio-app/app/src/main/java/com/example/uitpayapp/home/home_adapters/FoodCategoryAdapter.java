@@ -59,8 +59,15 @@ public class FoodCategoryAdapter extends RecyclerView.Adapter<FoodCategoryAdapte
             holder.tvName.setTextSize(11f);
             holder.itemView.setAlpha(1.0f);
             holder.itemView.setOnClickListener(null);
+            
+            // Thêm padding cho icon "Tất cả" để nó thu nhỏ lại cho đồng đều với các icon khác
+            int padding = (int) (6 * holder.itemView.getContext().getResources().getDisplayMetrics().density);
+            holder.ivIcon.setPadding(padding, padding, padding, padding);
             return;
         }
+
+        // Reset padding cho các mục bình thường
+        holder.ivIcon.setPadding(0, 0, 0, 0);
 
         boolean isSelected = position == selectedPosition;
 

@@ -13,12 +13,96 @@
         android:background="@drawable/bg_orange_gradient"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <LinearLayout
+        android:id="@+id/layout_header_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="12dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:elevation="4dp">
+
+        <LinearLayout
+            android:id="@+id/layout_address_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Giao đến:"
+                    android:textColor="#FCE4EC"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tv_delivery_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Nhà C, Thủ Đức, Hồ Chí Minh"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="›"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/btn_cart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:padding="4dp">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_cart"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/tv_global_cart_badge"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/bg_circle_gray"
+                android:gravity="center"
+                android:text="0"
+                android:textColor="#F24405"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </FrameLayout>
+    </LinearLayout>
+
     <androidx.core.widget.NestedScrollView
         android:id="@+id/food_main_scroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/bottom_container"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/layout_header_bar">
 
         <LinearLayout
             android:id="@+id/layout_header_content"
@@ -33,14 +117,14 @@
                 android:orientation="horizontal"
                 android:paddingHorizontal="16dp"
                 android:paddingTop="16dp"
-                android:paddingBottom="12dp">
+                android:paddingBottom="12dp"
+                android:visibility="gone">
 
                 <LinearLayout
-                    android:id="@+id/layout_address_bar"
+                    android:id="@+id/layout_address_bar_dummy"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="?android:attr/selectableItemBackground"
                     android:gravity="center_vertical">
 
                     <LinearLayout
@@ -57,7 +141,6 @@
                             android:textSize="12sp" />
 
                         <TextView
-                            android:id="@+id/tv_delivery_address"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:ellipsize="end"
@@ -67,31 +150,17 @@
                             android:textSize="15sp"
                             android:textStyle="bold" />
                     </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="›"
-                        android:textColor="#FFFFFF"
-                        android:textSize="22sp" />
                 </LinearLayout>
 
                 <FrameLayout
-                    android:id="@+id/btn_cart"
+                    android:id="@+id/btn_cart_dummy"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:padding="4dp">
 
-                    <ImageView
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:src="@drawable/ic_cart"
-                        app:tint="#FFFFFF" />
-
                     <TextView
-                        android:id="@+id/tv_global_cart_badge"
+                        android:id="@+id/tv_global_cart_badge_dummy"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:layout_gravity="top|end"
@@ -221,7 +290,7 @@
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/tab_home_deals"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:background="#FFFFFF"
                     app:tabIndicatorColor="#F24405"
                     app:tabSelectedTextColor="#F24405"
@@ -265,7 +334,7 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_home_deals_sticky"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:background="#FFFFFF"
         android:visibility="gone"
         app:tabIndicatorColor="#F24405"
@@ -274,7 +343,7 @@
         app:tabTextAppearance="@style/CustomTabTextAppearance"
         app:tabGravity="fill"
         app:tabMode="fixed"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/layout_header_bar">
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
