@@ -139,7 +139,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="GỬI ĐẾN"
+                                android:text="THANH TOÁN CHO"
                                 android:textColor="#9E9E9E"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
@@ -184,10 +184,10 @@
                         android:layout_height="56dp"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
-                        android:backgroundTint="#FFF0F0"
-                        android:text="Đóng"
+                        android:backgroundTint="#F57C00"
+                        android:text="Về trang chủ"
                         android:textAllCaps="false"
-                        android:textColor="#E53935"
+                        android:textColor="#FFFFFF"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         app:cornerRadius="12dp" />
@@ -198,10 +198,10 @@
                         android:layout_height="56dp"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
-                        android:backgroundTint="#FFF0F0"
+                        android:backgroundTint="#FFF3E0"
                         android:text="Thử lại"
                         android:textAllCaps="false"
-                        android:textColor="#E53935"
+                        android:textColor="#F57C00"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         app:cornerRadius="12dp" />

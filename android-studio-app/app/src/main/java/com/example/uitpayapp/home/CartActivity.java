@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.home.checkout.TransferConfirmationActivity;
+
 import com.example.uitpayapp.home.home_adapters.CartAdapter;
 import com.example.uitpayapp.home.home_models.CartItem;
 import com.example.uitpayapp.home.home_models.CartManager;
@@ -96,39 +96,192 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
 
     @Override
     public void onRequestRemoveItem(int position, CartItem item) {
-        new AlertDialog.Builder(this)
-                .setTitle("Xác nhận")
-                .setMessage("Bạn muốn loại bỏ món \"" + item.getMenuItem().getName() + "\" khỏi giỏ hàng?")
-                .setPositiveButton("Xóa", (dialog, which) -> {
-                    cartManager.removeItem(position);
-                    cartAdapter.removeItem(position);
-                    updateCartUI();
-                    Toast.makeText(this, "Đã xóa khỏi giỏ hàng", Toast.LENGTH_SHORT).show();
-                })
-                .setNegativeButton("Hủy", (dialog, which) -> {
-                    dialog.dismiss();
-                })
-                .setCancelable(false)
-                .show();
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.layout_dialog_confirm_delete);
+        
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            int width = (int)(getResources().getDisplayMetrics().widthPixels * 0.9);
+            dialog.getWindow().setLayout(width, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setGravity(android.view.Gravity.CENTER);
+        }
+
+        android.widget.ImageView imgFood = dialog.findViewById(R.id.img_dialog_food);
+        TextView tvFoodName = dialog.findViewById(R.id.tv_dialog_food_name);
+        TextView btnCancel = dialog.findViewById(R.id.btn_dialog_cancel);
+        TextView btnDelete = dialog.findViewById(R.id.btn_dialog_delete);
+
+        imgFood.setImageResource(item.getMenuItem().getImageResId());
+        tvFoodName.setText(item.getMenuItem().getName());
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnDelete.setOnClickListener(v -> {
+            cartManager.removeItem(position);
+            cartAdapter.removeItem(position);
+            updateCartUI();
+            showCustomSnackbar("Đã xóa khỏi giỏ hàng");
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 
     private void checkout() {
         if (cartManager.isEmpty()) {
-            Toast.makeText(this, "Giỏ hàng của bạn đang trống!", Toast.LENGTH_SHORT).show();
+            showCustomSnackbar("Giỏ hàng của bạn đang trống!");
             return;
         }
 
         long totalAmount = cartManager.getTotalPrice();
         String productNames = cartManager.getProductSummary();
 
-        Intent intent = new Intent(this, TransferConfirmationActivity.class);
-        intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
-        intent.putExtra("KEY_IS_FOOD_ORDER", true);
-        intent.putExtra("KEY_FOOD_PRODUCTS", productNames);
-        intent.putExtra("KEY_FROM_CART", true);
+        Intent intent = new Intent(this, com.example.uitpayapp.home.checkout.FoodCheckoutActivity.class);
         startActivity(intent);
 
-        cartManager.clearCart();
-        finish();
+        // We do NOT clear cart here because checkout might be cancelled.
+        // Cart will be cleared upon successful confirmation inside FoodCheckoutActivity.
+        // We also do not finish() so that the back button returns to the CartActivity.
+    }
+
+    @Override
+    public void onEditItemClick(int position, CartItem item) {
+        showEditFoodPopup(item, position);
+    }
+
+    private void showEditFoodPopup(CartItem item, int position) {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_food_detail, null);
+        dialog.setContentView(view);
+
+        View bottomSheet = (View) view.getParent();
+        if (bottomSheet != null) {
+            bottomSheet.setBackgroundResource(android.R.color.transparent);
+        }
+
+        android.widget.ImageView btnClose = view.findViewById(R.id.btn_close);
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+
+        android.widget.ImageView ivFoodImage = view.findViewById(R.id.iv_food_image);
+        TextView tvFoodName = view.findViewById(R.id.tv_food_name);
+        TextView tvFoodDesc = view.findViewById(R.id.tv_food_desc);
+        TextView tvFoodPrice = view.findViewById(R.id.tv_food_price);
+
+        ivFoodImage.setImageResource(item.getMenuItem().getImageResId());
+        tvFoodName.setText(item.getMenuItem().getName());
+        tvFoodDesc.setText(item.getMenuItem().getDescription());
+        tvFoodPrice.setText(item.getMenuItem().getFormattedPrice());
+
+        final int[] popupQty = {item.getQuantity()};
+        TextView tvQuantity = view.findViewById(R.id.tv_quantity);
+        View btnDecrease = view.findViewById(R.id.btn_decrease);
+        View btnIncrease = view.findViewById(R.id.btn_increase);
+        TextView btnAddToCart = view.findViewById(R.id.btn_add_to_cart);
+        
+        tvQuantity.setText(String.valueOf(popupQty[0]));
+
+        final int[] toppingTotal = {0};
+
+        // Add mock toppings
+        LinearLayout layoutToppings = view.findViewById(R.id.layout_toppings_container);
+        String[] mockToppings = {"Thêm trân châu đen", "Thêm phô mai", "Thêm thạch mảng cầu", "Không đá", "Ít đường"};
+        int[] mockPrices = {5000, 10000, 5000, 0, 0};
+
+        final java.util.List<com.example.uitpayapp.home.home_models.CartTopping> selectedToppings = new java.util.ArrayList<>();
+        if (item.getSelectedToppings() != null) {
+            selectedToppings.addAll(item.getSelectedToppings());
+            for (com.example.uitpayapp.home.home_models.CartTopping t : selectedToppings) {
+                toppingTotal[0] += t.getPrice();
+            }
+        }
+
+        for (int i = 0; i < 5; i++) {
+            View toppingView = android.view.LayoutInflater.from(this).inflate(R.layout.item_food_topping, layoutToppings, false);
+            android.widget.CheckBox cbTopping = toppingView.findViewById(R.id.cb_topping);
+            TextView tvToppingPrice = toppingView.findViewById(R.id.tv_topping_price);
+            cbTopping.setText(mockToppings[i]);
+            
+            if (mockPrices[i] > 0) {
+                tvToppingPrice.setText("+" + String.format("%,dđ", mockPrices[i]).replace(',', '.'));
+            } else {
+                tvToppingPrice.setText("0đ");
+            }
+            
+            final int price = mockPrices[i];
+            final String toppingName = mockToppings[i];
+            final String toppingId = "tp_" + i;
+            
+            boolean isPreSelected = false;
+            for (com.example.uitpayapp.home.home_models.CartTopping t : selectedToppings) {
+                if (t.getName().equals(toppingName)) {
+                    isPreSelected = true;
+                    break;
+                }
+            }
+            cbTopping.setChecked(isPreSelected);
+            
+            cbTopping.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    toppingTotal[0] += price;
+                    selectedToppings.add(new com.example.uitpayapp.home.home_models.CartTopping(toppingId, toppingName, price));
+                } else {
+                    toppingTotal[0] -= price;
+                    selectedToppings.remove(new com.example.uitpayapp.home.home_models.CartTopping(toppingId, toppingName, price));
+                }
+                updatePopupPrice(view, item.getMenuItem().getPrice(), toppingTotal[0]);
+            });
+            
+            layoutToppings.addView(toppingView);
+        }
+
+        updatePopupPrice(view, item.getMenuItem().getPrice(), toppingTotal[0]);
+
+        btnDecrease.setOnClickListener(v -> {
+            if (popupQty[0] > 1) {
+                popupQty[0]--;
+                tvQuantity.setText(String.valueOf(popupQty[0]));
+                updatePopupPrice(view, item.getMenuItem().getPrice(), toppingTotal[0]);
+            }
+        });
+
+        btnIncrease.setOnClickListener(v -> {
+            popupQty[0]++;
+            tvQuantity.setText(String.valueOf(popupQty[0]));
+            updatePopupPrice(view, item.getMenuItem().getPrice(), toppingTotal[0]);
+        });
+
+        btnAddToCart.setOnClickListener(v -> {
+            CartItem updatedItem = new CartItem(item.getMenuItem(), popupQty[0], new java.util.ArrayList<>(selectedToppings));
+            cartManager.updateItem(position, updatedItem);
+            cartAdapter.notifyDataSetChanged();
+            updateCartUI();
+            dialog.dismiss();
+            showCustomSnackbar("Cập nhật thành công");
+        });
+
+        dialog.show();
+    }
+
+    private void updatePopupPrice(View view, long itemPrice, int toppingTotal) {
+        TextView tvQuantity = view.findViewById(R.id.tv_quantity);
+        TextView btnAddToCart = view.findViewById(R.id.btn_add_to_cart);
+        int qty = Integer.parseInt(tvQuantity.getText().toString());
+        long total = (itemPrice + toppingTotal) * qty;
+        btnAddToCart.setText("Cập nhật - " + String.format("%,dđ", total).replace(',', '.'));
+    }
+
+    private void showCustomSnackbar(String message) {
+        View rootView = findViewById(android.R.id.content);
+        com.google.android.material.snackbar.Snackbar snackbar = com.google.android.material.snackbar.Snackbar.make(rootView, message, com.google.android.material.snackbar.Snackbar.LENGTH_SHORT);
+        
+        View snackbarView = snackbar.getView();
+        snackbarView.setBackgroundColor(android.graphics.Color.WHITE);
+        
+        TextView textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
+        if (textView != null) {
+            textView.setTextColor(android.graphics.Color.BLACK);
+        }
+        
+        snackbar.show();
     }
 }

@@ -4,17 +4,21 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 public class FoodMenuItem {
+    private String id;
     private String name;
     private long price;
     private int imageResId;
     private String description;
 
-    public FoodMenuItem(String name, long price, int imageResId, String description) {
+    public FoodMenuItem(String id, String name, long price, int imageResId, String description) {
+        this.id = id;
         this.name = name;
         this.price = price;
         this.imageResId = imageResId;
         this.description = description;
     }
+
+    public String getId() { return id; }
 
     public String getName() { return name; }
     public long getPrice() { return price; }

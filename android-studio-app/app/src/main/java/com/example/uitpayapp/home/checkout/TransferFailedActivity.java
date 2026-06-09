@@ -43,9 +43,18 @@ public class TransferFailedActivity extends AppCompatActivity {
         String currentTime = sdf.format(new Date());
         tvTransactionTime.setText("Thời gian: " + currentTime);
 
-        ivFailedAvatar.setImageResource(avatarId);
-        if (name != null) {
-            tvFailedName.setText(name.toUpperCase());
+        boolean isFoodOrder = getIntent().getBooleanExtra("KEY_IS_FOOD_ORDER", false);
+
+        if (isFoodOrder) {
+            ivFailedAvatar.setImageResource(R.drawable.ic_food);
+            ivFailedAvatar.setPadding(10, 10, 10, 10);
+            ivFailedAvatar.setColorFilter(android.graphics.Color.parseColor("#F57C00"));
+            tvFailedName.setText("UIT FOOD");
+        } else {
+            ivFailedAvatar.setImageResource(avatarId);
+            if (name != null) {
+                tvFailedName.setText(name.toUpperCase());
+            }
         }
 
         if (amount != null) {
@@ -79,7 +88,7 @@ public class TransferFailedActivity extends AppCompatActivity {
 
     private void returnToHome() {
         Intent intent = new Intent(TransferFailedActivity.this, HomeActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
         finish();
     }
