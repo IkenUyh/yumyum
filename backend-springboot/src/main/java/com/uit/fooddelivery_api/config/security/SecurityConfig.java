@@ -27,7 +27,7 @@ public class SecurityConfig {
                         // Chi cong khai API login va register
                         .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
                         // Cho phep xem danh sach nha hang va thuc don thoai mai khong can Token
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/restaurants/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/restaurants/**", "/api/v1/foods/**").permitAll()
                         // Tat ca API con lai deu phai xac thuc qua Token
                         .anyRequest().authenticated()
                 )
