@@ -58,4 +58,23 @@ public class UserController {
             throw new RuntimeException("Tai anh that bai: " + e.getMessage());
         }
     }
+
+    // API: Đổi mật khẩu
+    @PutMapping("/password")
+    public ApiResponse<String> changePassword(
+            Authentication authentication,
+            @RequestBody com.uit.fooddelivery_api.modules.user.dtos.ChangePasswordDTO dto) {
+
+        User currentUser = (User) authentication.getPrincipal();
+        userService.changePassword(dto, currentUser);
+        return ApiResponse.success("Đổi mật khẩu thành công!");
+    }
+
+    // API: Khách hàng tự xóa vĩnh viễn tài khoản
+    @DeleteMapping("/account")
+    public ApiResponse<String> deleteAccount(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        userService.deleteAccount(currentUser);
+        return ApiResponse.success("Tài khoản đã được xóa vĩnh viễn khỏi hệ thống!");
+    }
 }

@@ -68,6 +68,10 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        // Nếu bị Soft Delete (isActive = false) thì Spring Security sẽ chặn không cho Login luôn
+        return this.isActive == null || this.isActive;
     }
+
+    @Column(name = "is_active")
+    private Boolean isActive;
 }

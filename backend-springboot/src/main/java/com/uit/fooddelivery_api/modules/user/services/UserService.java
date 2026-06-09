@@ -73,4 +73,40 @@ public class UserService {
         user.setAvatarUrl(avatarUrl);
         userRepository.save(user);
     }
+
+    // ĐỔI MẬT KHẨU
+    @Transactional
+    public void changePassword(com.uit.fooddelivery_api.modules.user.dtos.ChangePasswordDTO dto, User user) {
+        // Kiểm tra mật khẩu cũ
+        if (!user.getPassword().equals(dto.getOldPassword())) {
+            throw new RuntimeException("Mật khẩu cũ không chính xác!");
+        }
+
+        // Kiểm tra xác nhận mật khẩu mới
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            throw new RuntimeException("Mật khẩu xác nhận không khớp!");
+        }
+
+        user.setPassword(dto.getNewPassword());
+        userRepository.save(user);
+    }
+
+    // XÓA TÀI KHOẢN (SOFT DELETE + ANONYMIZATION)
+    @Transactional
+    public void deleteAccount(User user) {
+        // 1. Khóa tài khoản
+        user.setIsActive(false);
+
+        // 2. Ẩn danh dữ liệu cá nhân (Chuẩn Privacy / GDPR)
+        user.setFullName("Người dùng đã xóa");
+        user.setAvatarUrl(null);
+
+        // Đổi mật khẩu thành rác để không ai dò được
+        user.setPassword("DELETED_" + System.currentTimeMillis());
+
+        // 3. Giải phóng số điện thoại (Giải quyết bài toán Unique Constraint)
+        user.setPhoneNumber("DEL_" + user.getId() + "_" + System.currentTimeMillis());
+
+        userRepository.save(user);
+    }
 }
