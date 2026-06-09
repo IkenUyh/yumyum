@@ -30,4 +30,7 @@ public class OrderItem {
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal price; // Luu gia tien tai thoi diem dat hang, de tranh viec gia thay doi sau do khong cap nhat
+
+    @Column(name = "selected_options", columnDefinition = "TEXT")
+    private String selectedOptions; // Lưu chuỗi JSON cấu hình Topping
 }

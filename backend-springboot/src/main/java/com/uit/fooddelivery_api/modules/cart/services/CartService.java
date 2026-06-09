@@ -19,6 +19,7 @@ public class CartService {
 
     private final CartItemRepository cartItemRepository;
     private final FoodRepository foodRepository;
+    private final com.uit.fooddelivery_api.modules.food.repositories.FoodOptionItemRepository optionItemRepository;
 
     // 1. Lấy danh sách món trong giỏ
     public List<CartItem> getMyCart(User user) {
@@ -35,24 +36,63 @@ public class CartService {
             throw new RuntimeException("Món ăn này hiện đang ngừng bán!");
         }
 
-        Optional<CartItem> existingItemOpt = cartItemRepository.findByUserIdAndFoodId(user.getId(), food.getId());
+        // TỰ KHỞI TẠO OBJECT MAPPER Ở ĐÂY ĐỂ TRÁNH LỖI BEAN
+        com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
 
-        if (existingItemOpt.isPresent()) {
-            CartItem existingItem = existingItemOpt.get();
-            int newQuantity = existingItem.getQuantity() + dto.getQuantity();
+        // 1. Quét danh sách Topping khách chọn và đóng gói thành JSON
+        String optionsJson = "[]";
+        if (dto.getSelectedOptionItemIds() != null && !dto.getSelectedOptionItemIds().isEmpty()) {
+            List<java.util.Map<String, Object>> optionsSnapshot = new java.util.ArrayList<>();
 
+            for (Long optId : dto.getSelectedOptionItemIds()) {
+                com.uit.fooddelivery_api.modules.food.entities.FoodOptionItem opt = optionItemRepository.findById(optId)
+                        .orElseThrow(() -> new RuntimeException("Có Topping không tồn tại!"));
+
+                // Lưu vết lại tên và giá
+                java.util.Map<String, Object> map = new java.util.HashMap<>();
+                map.put("name", opt.getName());
+                map.put("price", opt.getAdditionalPrice());
+                optionsSnapshot.add(map);
+            }
+            try {
+                optionsJson = objectMapper.writeValueAsString(optionsSnapshot);
+            } catch (Exception e) {
+                throw new RuntimeException("Lỗi xử lý Topping!");
+            }
+        }
+
+        // 2. Tìm xem có giỏ hàng nào TRÙNG MÓN và TRÙNG Y HỆT TOPPING không?
+        List<CartItem> existingItems = cartItemRepository.findByUserId(user.getId());
+        CartItem targetItem = null;
+
+        for (CartItem item : existingItems) {
+            if (item.getFood().getId().equals(food.getId())) {
+                String existingOptions = item.getSelectedOptions() == null ? "[]" : item.getSelectedOptions();
+                if (existingOptions.equals(optionsJson)) {
+                    targetItem = item; // Trùng y hệt, gộp vào!
+                    break;
+                }
+            }
+        }
+
+        // 3. Xử lý lưu
+        if (targetItem != null) {
+            // Cộng dồn số lượng
+            int newQuantity = targetItem.getQuantity() + dto.getQuantity();
             if (newQuantity <= 0) {
-                cartItemRepository.delete(existingItem);
+                cartItemRepository.delete(targetItem);
             } else {
-                existingItem.setQuantity(newQuantity);
-                cartItemRepository.save(existingItem);
+                targetItem.setQuantity(newQuantity);
+                cartItemRepository.save(targetItem);
             }
         } else {
+            // Tạo giỏ mới (vì món này có topping khác biệt)
             if (dto.getQuantity() > 0) {
                 CartItem newItem = CartItem.builder()
                         .user(user)
                         .food(food)
                         .quantity(dto.getQuantity())
+                        .selectedOptions(optionsJson) // Lưu JSON vào DB
                         .build();
                 cartItemRepository.save(newItem);
             }

@@ -28,4 +28,7 @@ public class CartItem {
 
     @Column(nullable = false)
     private Integer quantity;
+
+    @Column(name = "selected_options", columnDefinition = "TEXT")
+    private String selectedOptions; // Lưu chuỗi JSON cấu hình Topping
 }

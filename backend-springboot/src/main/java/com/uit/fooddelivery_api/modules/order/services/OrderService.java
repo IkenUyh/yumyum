@@ -74,10 +74,36 @@ public class OrderService {
             if (!item.getFood().getRestaurant().getId().equals(restaurant.getId())) {
                 throw new RuntimeException("Món " + item.getFood().getName() + " không thuộc nhà hàng đang đặt!");
             }
-            BigDecimal itemTotal = item.getFood().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+
+            // TÍNH TOÁN TIỀN TOPPING TỪ JSON TRONG CART
+            BigDecimal optionsPrice = BigDecimal.ZERO;
+            if (item.getSelectedOptions() != null && !item.getSelectedOptions().isEmpty() && !item.getSelectedOptions().equals("[]")) {
+                try {
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    List<java.util.Map<String, Object>> parsedOpts = mapper.readValue(item.getSelectedOptions(), new com.fasterxml.jackson.core.type.TypeReference<List<java.util.Map<String, Object>>>() {});
+                    for (java.util.Map<String, Object> opt : parsedOpts) {
+                        optionsPrice = optionsPrice.add(new BigDecimal(opt.get("price").toString()));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Lỗi đọc dữ liệu Topping!");
+                }
+            }
+
+            // Tiền 1 món = Giá gốc + Tiền Topping
+            BigDecimal pricePerItem = item.getFood().getPrice().add(optionsPrice);
+            BigDecimal itemTotal = pricePerItem.multiply(BigDecimal.valueOf(item.getQuantity()));
             foodTotal = foodTotal.add(itemTotal);
 
-            orderItems.add(OrderItem.builder().order(order).food(item.getFood()).quantity(item.getQuantity()).price(item.getFood().getPrice()).build());
+            // Lưu vào OrderItem kèm theo JSON topping
+            OrderItem orderItem = OrderItem.builder()
+                    .order(order)
+                    .food(item.getFood())
+                    .quantity(item.getQuantity())
+                    .price(pricePerItem) // Lưu tổng giá (đã có topping)
+                    .selectedOptions(item.getSelectedOptions()) // Copy cấu hình topping sang Order
+                    .build();
+
+            orderItems.add(orderItem);
         }
 
         // 6. XỬ LÝ VOUCHER (ISSUE #15)
