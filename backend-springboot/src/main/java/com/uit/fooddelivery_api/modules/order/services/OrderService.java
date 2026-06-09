@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class OrderService {
 
     @Transactional
     public Order createOrder(CreateOrderDTO dto, User customer) {
-        // 1 & 2 & 3. Lấy Giỏ hàng, Nhà hàng, Địa chỉ (Giữ nguyên logic cũ)
+        // 1 & 2 & 3. Lấy Giỏ hàng, Nhà hàng, Địa chỉ (Giữ nguyên)
         List<CartItem> cartItems = cartItemRepository.findByUserId(customer.getId());
         if (cartItems.isEmpty()) throw new RuntimeException("Giỏ hàng đang trống!");
 
@@ -51,7 +52,7 @@ public class OrderService {
         UserAddress address = addressRepository.findByIdAndUserId(dto.getAddressId(), customer.getId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ giao hàng!"));
 
-        // 4. Tính khoảng cách và phí ship (Giữ nguyên)
+        // 4. TÍNH KHOẢNG CÁCH (Giữ nguyên)
         if (restaurant.getLatitude() == null || restaurant.getLongitude() == null ||
                 address.getLatitude() == null || address.getLongitude() == null) {
             throw new RuntimeException("Hệ thống chưa cập nhật đủ tọa độ để tính phí ship!");
@@ -63,19 +64,56 @@ public class OrderService {
         if (distanceKm > MAX_DELIVERY_RADIUS_KM) {
             throw new RuntimeException("Quá xa (" + String.format("%.1f", distanceKm) + "km). Vượt quá bán kính giao hàng!");
         }
-        BigDecimal shippingFee = BigDecimal.valueOf(distanceKm).multiply(FEE_PER_KM).setScale(0, RoundingMode.HALF_UP);
 
-        // 5. Tính tiền đồ ăn
+        BigDecimal baseShippingFee = BigDecimal.valueOf(distanceKm).multiply(FEE_PER_KM).setScale(0, RoundingMode.HALF_UP);
+
+        // ==========================================
+        // 5. LOGIC LỰA CHỌN TỐC ĐỘ GIAO & ETA (ISSUE #9)
+        // ==========================================
+        String deliveryMode = (dto.getDeliveryMode() != null) ? dto.getDeliveryMode().toUpperCase() : "STANDARD";
+        BigDecimal extraShippingFee = BigDecimal.ZERO;
+        int prepTimeMinutes = 15; // Thời gian mặc định quán nấu món
+        double minutesPerKm = 3.0; // Tốc độ di chuyển: 3 phút/1km (Khoảng 20km/h trong thành phố)
+
+        if ("FAST".equals(deliveryMode)) {
+            extraShippingFee = BigDecimal.valueOf(10000); // Phụ phí 10k
+            prepTimeMinutes = 10; // Bếp ưu tiên làm nhanh hơn
+            minutesPerKm = 2.0; // Tài xế chạy 30km/h
+        } else if ("EXPRESS".equals(deliveryMode)) {
+            extraShippingFee = BigDecimal.valueOf(25000); // Phụ phí 25k (Giao hỏa tốc)
+            prepTimeMinutes = 5; // Bếp làm cực gấp
+            minutesPerKm = 1.5; // Tài xế chạy 40km/h
+        } else {
+            deliveryMode = "STANDARD";
+        }
+
+        // Chốt Phí Ship cuối cùng
+        BigDecimal shippingFee = baseShippingFee.add(extraShippingFee);
+
+        // Tính Thời gian dự kiến giao đến nơi (ETA)
+        int travelTimeMinutes = (int) Math.ceil(distanceKm * minutesPerKm);
+        int totalMinutes = prepTimeMinutes + travelTimeMinutes;
+        LocalDateTime expectedDeliveryTime = LocalDateTime.now().plusMinutes(totalMinutes);
+        // ==========================================
+
+
+        // 6. Quét đồ ăn và tính tiền Topping (Giữ nguyên)
         BigDecimal foodTotal = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
-        Order order = Order.builder().user(customer).restaurant(restaurant).status("PENDING").shippingFee(shippingFee).build();
+        Order order = Order.builder()
+                .user(customer)
+                .restaurant(restaurant)
+                .status("PENDING")
+                .shippingFee(shippingFee)
+                .deliveryMode(deliveryMode) // Lưu Mode vào DB
+                .expectedDeliveryTime(expectedDeliveryTime) // Lưu ETA vào DB
+                .build();
 
         for (CartItem item : cartItems) {
             if (!item.getFood().getRestaurant().getId().equals(restaurant.getId())) {
                 throw new RuntimeException("Món " + item.getFood().getName() + " không thuộc nhà hàng đang đặt!");
             }
 
-            // TÍNH TOÁN TIỀN TOPPING TỪ JSON TRONG CART
             BigDecimal optionsPrice = BigDecimal.ZERO;
             if (item.getSelectedOptions() != null && !item.getSelectedOptions().isEmpty() && !item.getSelectedOptions().equals("[]")) {
                 try {
@@ -89,24 +127,14 @@ public class OrderService {
                 }
             }
 
-            // Tiền 1 món = Giá gốc + Tiền Topping
             BigDecimal pricePerItem = item.getFood().getPrice().add(optionsPrice);
             BigDecimal itemTotal = pricePerItem.multiply(BigDecimal.valueOf(item.getQuantity()));
             foodTotal = foodTotal.add(itemTotal);
 
-            // Lưu vào OrderItem kèm theo JSON topping
-            OrderItem orderItem = OrderItem.builder()
-                    .order(order)
-                    .food(item.getFood())
-                    .quantity(item.getQuantity())
-                    .price(pricePerItem) // Lưu tổng giá (đã có topping)
-                    .selectedOptions(item.getSelectedOptions()) // Copy cấu hình topping sang Order
-                    .build();
-
-            orderItems.add(orderItem);
+            orderItems.add(OrderItem.builder().order(order).food(item.getFood()).quantity(item.getQuantity()).price(pricePerItem).selectedOptions(item.getSelectedOptions()).build());
         }
 
-        // 6. XỬ LÝ VOUCHER (ISSUE #15)
+        // 7. XỬ LÝ VOUCHER (Giữ nguyên)
         BigDecimal discountAmount = BigDecimal.ZERO;
         com.uit.fooddelivery_api.modules.voucher.entities.Voucher appliedVoucher = null;
 
@@ -114,43 +142,32 @@ public class OrderService {
             appliedVoucher = voucherRepository.findByCodeAndIsActiveTrue(dto.getVoucherCode())
                     .orElseThrow(() -> new RuntimeException("Mã giảm giá không tồn tại hoặc đã bị khóa!"));
 
-            // Kiểm tra thời hạn
             java.time.LocalDateTime now = java.time.LocalDateTime.now();
             if (now.isBefore(appliedVoucher.getStartDate()) || now.isAfter(appliedVoucher.getEndDate())) {
                 throw new RuntimeException("Mã giảm giá đã hết hạn hoặc chưa tới thời gian sử dụng!");
             }
-
-            // Kiểm tra số lượng
             if (appliedVoucher.getStockQuantity() <= 0) {
                 throw new RuntimeException("Mã giảm giá đã hết lượt sử dụng!");
             }
-
-            // Kiểm tra điều kiện đơn tối thiểu
             if (foodTotal.compareTo(appliedVoucher.getMinOrderValue()) < 0) {
                 throw new RuntimeException("Đơn hàng chưa đạt giá trị tối thiểu " + appliedVoucher.getMinOrderValue() + "đ để dùng mã này!");
             }
 
-            // Tính toán số tiền được giảm
             BigDecimal calculatedDiscount = BigDecimal.ZERO;
             if (appliedVoucher.getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.SHIPPING_DISCOUNT) {
                 calculatedDiscount = shippingFee.multiply(BigDecimal.valueOf(appliedVoucher.getDiscountPercent())).divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
-                // Tiền giảm không được vượt quá max_discount và không vượt quá tiền ship
                 discountAmount = calculatedDiscount.min(appliedVoucher.getMaxDiscount()).min(shippingFee);
             } else if (appliedVoucher.getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.ORDER_DISCOUNT) {
                 calculatedDiscount = foodTotal.multiply(BigDecimal.valueOf(appliedVoucher.getDiscountPercent())).divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
-                // Tiền giảm không được vượt quá max_discount và không vượt quá tiền đồ ăn
                 discountAmount = calculatedDiscount.min(appliedVoucher.getMaxDiscount()).min(foodTotal);
             }
 
-            // Trừ đi 1 lượt dùng
             appliedVoucher.setStockQuantity(appliedVoucher.getStockQuantity() - 1);
             voucherRepository.save(appliedVoucher);
         }
 
-        // 7. Tổng tiền = Tiền đồ ăn + Phí ship - Tiền giảm giá
+        // 8. Chốt Tổng Tiền và Trừ Ví (Giữ nguyên)
         BigDecimal finalTotal = foodTotal.add(shippingFee).subtract(discountAmount);
-
-        // Đảm bảo tổng tiền không bao giờ bị âm
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
             finalTotal = BigDecimal.ZERO;
         }
@@ -160,7 +177,6 @@ public class OrderService {
         order.setVoucher(appliedVoucher);
         order.setOrderItems(orderItems);
 
-        // 8. Trừ tiền Ví và Lưu Đơn hàng
         Wallet wallet = walletRepository.findByUserId(customer.getId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy ví của bạn!"));
 
