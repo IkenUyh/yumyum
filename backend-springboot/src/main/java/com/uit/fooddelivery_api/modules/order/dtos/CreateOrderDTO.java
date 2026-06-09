@@ -9,4 +9,5 @@ public class CreateOrderDTO {
     private Long restaurantId;
     private Long addressId; // Bổ sung ID địa chỉ giao hàng
     private String voucherCode;
+    private String deliveryMode; //Khách truyền STANDARD, FAST, hoặc EXPRESS
 }

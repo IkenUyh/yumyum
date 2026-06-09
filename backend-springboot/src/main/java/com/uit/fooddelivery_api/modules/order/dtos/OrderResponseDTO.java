@@ -14,6 +14,8 @@ public class OrderResponseDTO {
     private Long restaurantId;
     private BigDecimal totalAmount;
     private String status;
+    private String deliveryMode;
+    private java.time.LocalDateTime expectedDeliveryTime;
 
     public static OrderResponseDTO fromEntity(Order order) {
         return OrderResponseDTO.builder()
@@ -21,6 +23,8 @@ public class OrderResponseDTO {
                 .restaurantId(order.getRestaurant().getId())
                 .totalAmount(order.getTotalAmount())
                 .status(order.getStatus())
+                .deliveryMode(order.getDeliveryMode())
+                .expectedDeliveryTime(order.getExpectedDeliveryTime())
                 .build();
     }
 }

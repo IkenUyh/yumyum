@@ -53,4 +53,10 @@ public class Order {
 
     @Column(name = "discount_amount", precision = 19, scale = 2)
     private BigDecimal discountAmount;
+
+    @Column(name = "delivery_mode", length = 20)
+    private String deliveryMode;
+
+    @Column(name = "expected_delivery_time")
+    private LocalDateTime expectedDeliveryTime;
 }
