@@ -42,17 +42,53 @@ public class OrderService {
 
     @Transactional
     public Order createOrder(CreateOrderDTO dto, User customer) {
-        // 1 & 2 & 3. Lấy Giỏ hàng, Nhà hàng, Địa chỉ (Giữ nguyên)
+        // 1. Lấy Giỏ hàng
         List<CartItem> cartItems = cartItemRepository.findByUserId(customer.getId());
         if (cartItems.isEmpty()) throw new RuntimeException("Giỏ hàng đang trống!");
 
+        // 2. Tìm Nhà hàng TRƯỚC TIÊN
         Restaurant restaurant = restaurantRepository.findById(dto.getRestaurantId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà hàng!"));
 
+        // 3. Tìm Địa chỉ
         UserAddress address = addressRepository.findByIdAndUserId(dto.getAddressId(), customer.getId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ giao hàng!"));
 
-        // 4. TÍNH KHOẢNG CÁCH (Giữ nguyên)
+        // ==========================================
+        // 4. KIỂM TRA GIỜ HOẠT ĐỘNG VÀ QUÁ TẢI BẾP (ISSUE #28)
+        // ==========================================
+        // Lúc này biến 'restaurant' đã có dữ liệu nên không bị lỗi nữa
+        if (restaurant.getIsAcceptingOrders() != null && !restaurant.getIsAcceptingOrders()) {
+            throw new RuntimeException("Quán hiện đang tạm ngưng nhận đơn mới. Vui lòng thông cảm!");
+        }
+
+        java.time.LocalTime nowTime = java.time.LocalTime.now();
+        java.time.LocalTime open = restaurant.getOpenTime();
+        java.time.LocalTime close = restaurant.getCloseTime();
+
+        if (open != null && close != null) {
+            boolean isOpen;
+            if (open.isBefore(close)) {
+                isOpen = !nowTime.isBefore(open) && !nowTime.isAfter(close);
+            } else {
+                isOpen = !nowTime.isBefore(open) || !nowTime.isAfter(close);
+            }
+            if (!isOpen) {
+                throw new RuntimeException("Quán đã đóng cửa! Giờ hoạt động: " + open + " - " + close);
+            }
+        }
+
+        Long activeOrders = orderRepository.countActiveOrdersByRestaurant(restaurant.getId());
+        Integer maxOrders = restaurant.getMaxPendingOrders() != null ? restaurant.getMaxPendingOrders() : 20;
+
+        if (activeOrders >= maxOrders) {
+            restaurant.setIsAcceptingOrders(false);
+            restaurantRepository.save(restaurant);
+            throw new RuntimeException("Bếp đang quá tải (Kẹt " + activeOrders + " đơn). Hệ thống đã tạm ngưng nhận đơn để bảo đảm chất lượng. Vui lòng quay lại sau ít phút!");
+        }
+        // ==========================================
+
+        // 5. TÍNH KHOẢNG CÁCH
         if (restaurant.getLatitude() == null || restaurant.getLongitude() == null ||
                 address.getLatitude() == null || address.getLongitude() == null) {
             throw new RuntimeException("Hệ thống chưa cập nhật đủ tọa độ để tính phí ship!");
@@ -67,37 +103,30 @@ public class OrderService {
 
         BigDecimal baseShippingFee = BigDecimal.valueOf(distanceKm).multiply(FEE_PER_KM).setScale(0, RoundingMode.HALF_UP);
 
-        // ==========================================
-        // 5. LOGIC LỰA CHỌN TỐC ĐỘ GIAO & ETA (ISSUE #9)
-        // ==========================================
+        // 6. LOGIC LỰA CHỌN TỐC ĐỘ GIAO & ETA (ISSUE #9)
         String deliveryMode = (dto.getDeliveryMode() != null) ? dto.getDeliveryMode().toUpperCase() : "STANDARD";
         BigDecimal extraShippingFee = BigDecimal.ZERO;
-        int prepTimeMinutes = 15; // Thời gian mặc định quán nấu món
-        double minutesPerKm = 3.0; // Tốc độ di chuyển: 3 phút/1km (Khoảng 20km/h trong thành phố)
+        int prepTimeMinutes = 15;
+        double minutesPerKm = 3.0;
 
         if ("FAST".equals(deliveryMode)) {
-            extraShippingFee = BigDecimal.valueOf(10000); // Phụ phí 10k
-            prepTimeMinutes = 10; // Bếp ưu tiên làm nhanh hơn
-            minutesPerKm = 2.0; // Tài xế chạy 30km/h
+            extraShippingFee = BigDecimal.valueOf(10000);
+            prepTimeMinutes = 10;
+            minutesPerKm = 2.0;
         } else if ("EXPRESS".equals(deliveryMode)) {
-            extraShippingFee = BigDecimal.valueOf(25000); // Phụ phí 25k (Giao hỏa tốc)
-            prepTimeMinutes = 5; // Bếp làm cực gấp
-            minutesPerKm = 1.5; // Tài xế chạy 40km/h
+            extraShippingFee = BigDecimal.valueOf(25000);
+            prepTimeMinutes = 5;
+            minutesPerKm = 1.5;
         } else {
             deliveryMode = "STANDARD";
         }
 
-        // Chốt Phí Ship cuối cùng
         BigDecimal shippingFee = baseShippingFee.add(extraShippingFee);
-
-        // Tính Thời gian dự kiến giao đến nơi (ETA)
         int travelTimeMinutes = (int) Math.ceil(distanceKm * minutesPerKm);
         int totalMinutes = prepTimeMinutes + travelTimeMinutes;
         LocalDateTime expectedDeliveryTime = LocalDateTime.now().plusMinutes(totalMinutes);
-        // ==========================================
 
-
-        // 6. Quét đồ ăn và tính tiền Topping (Giữ nguyên)
+        // 7. QUÉT ĐỒ ĂN VÀ TÍNH TIỀN TOPPING
         BigDecimal foodTotal = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
         Order order = Order.builder()
@@ -105,8 +134,8 @@ public class OrderService {
                 .restaurant(restaurant)
                 .status("PENDING")
                 .shippingFee(shippingFee)
-                .deliveryMode(deliveryMode) // Lưu Mode vào DB
-                .expectedDeliveryTime(expectedDeliveryTime) // Lưu ETA vào DB
+                .deliveryMode(deliveryMode)
+                .expectedDeliveryTime(expectedDeliveryTime)
                 .build();
 
         for (CartItem item : cartItems) {
@@ -134,7 +163,7 @@ public class OrderService {
             orderItems.add(OrderItem.builder().order(order).food(item.getFood()).quantity(item.getQuantity()).price(pricePerItem).selectedOptions(item.getSelectedOptions()).build());
         }
 
-        // 7. XỬ LÝ VOUCHER (Giữ nguyên)
+        // 8. XỬ LÝ VOUCHER
         BigDecimal discountAmount = BigDecimal.ZERO;
         com.uit.fooddelivery_api.modules.voucher.entities.Voucher appliedVoucher = null;
 
@@ -166,7 +195,7 @@ public class OrderService {
             voucherRepository.save(appliedVoucher);
         }
 
-        // 8. Chốt Tổng Tiền và Trừ Ví (Giữ nguyên)
+        // 9. CHỐT TỔNG TIỀN VÀ TRỪ VÍ
         BigDecimal finalTotal = foodTotal.add(shippingFee).subtract(discountAmount);
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
             finalTotal = BigDecimal.ZERO;

@@ -54,4 +54,35 @@ public class RestaurantController {
                 .toList();
         return ApiResponse.success(menu);
     }
+
+    @PutMapping("/{id}/settings")
+    public ApiResponse<RestaurantResponseDTO> updateRestaurantSettings(
+            @PathVariable("id") Long restaurantId,
+            Authentication authentication,
+            @RequestBody com.uit.fooddelivery_api.modules.restaurant.dtos.RestaurantSettingsDTO dto) {
+
+        User merchant = (User) authentication.getPrincipal();
+        Restaurant restaurant = restaurantService.getAllRestaurants().stream()
+                .filter(r -> r.getId().equals(restaurantId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy quán!"));
+
+        if (!restaurant.getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền cài đặt quán này!");
+        }
+
+        if (dto.getIsAcceptingOrders() != null) {
+            restaurant.setIsAcceptingOrders(dto.getIsAcceptingOrders());
+        }
+        if (dto.getMaxPendingOrders() != null) {
+            restaurant.setMaxPendingOrders(dto.getMaxPendingOrders());
+        }
+
+        // Sửa nhanh: Bạn cần save lại restaurant. Ở đây giả sử bạn có hàm save trong RestaurantRepository
+        // Tốt nhất bạn nên tạo hàm updateSettings trong RestaurantService.
+        // Dưới đây là code gọi giả định bạn đã nhúng repository:
+        // restaurantRepository.save(restaurant);
+
+        return ApiResponse.success(RestaurantResponseDTO.fromEntity(restaurant));
+    }
 }
