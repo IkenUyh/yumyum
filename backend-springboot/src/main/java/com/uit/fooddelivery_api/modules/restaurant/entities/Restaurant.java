@@ -45,4 +45,10 @@ public class Restaurant {
 
     @Column(precision = 11, scale = 8)
     private java.math.BigDecimal longitude;
+
+    @Column(name = "is_accepting_orders")
+    private Boolean isAcceptingOrders;
+
+    @Column(name = "max_pending_orders")
+    private Integer maxPendingOrders;
 }
