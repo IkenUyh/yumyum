@@ -97,12 +97,17 @@
         </FrameLayout>
     </LinearLayout>
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/food_main_scroll"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_home"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/bottom_container"
         app:layout_constraintTop_toBottomOf="@+id/layout_header_bar">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/food_main_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <LinearLayout
             android:id="@+id/layout_header_content"
@@ -329,7 +334,8 @@
                     tools:itemCount="4" />
             </LinearLayout>
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_home_deals_sticky"

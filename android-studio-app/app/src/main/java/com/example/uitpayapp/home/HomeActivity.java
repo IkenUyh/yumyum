@@ -128,6 +128,15 @@ public class HomeActivity extends AppCompatActivity {
         setupDeals();
         setupStickyTab();
         setupBottomNavigation();
+
+        androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipe_refresh_home);
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setOnRefreshListener(() -> {
+                setupTopics();
+                setupDeals();
+                swipeRefreshLayout.setRefreshing(false);
+            });
+        }
     }
 
     private void setupImageSlider() {
@@ -255,26 +264,26 @@ public class HomeActivity extends AppCompatActivity {
     private void setupCategories() {
         List<FoodCategory> categories = new ArrayList<>();
         categories.add(new FoodCategory("Cơm", R.drawable.ic_cat_com, Color.parseColor("#E65100")));
-        categories.add(new FoodCategory("Bún\nPhở", R.drawable.ic_cat_bun_pho, Color.parseColor("#00838F")));
+        categories.add(new FoodCategory("Bún Phở", R.drawable.ic_cat_bun_pho, Color.parseColor("#00838F")));
         categories.add(new FoodCategory("Bánh mì", R.drawable.ic_cat_banh_mi, Color.parseColor("#BF360C")));
-        categories.add(new FoodCategory("Đồ Ăn\nnhanh", R.drawable.ic_cat_fastfood, Color.parseColor("#C62828")));
+        categories.add(new FoodCategory("Fastfood", R.drawable.ic_cat_fastfood, Color.parseColor("#C62828")));
         categories.add(new FoodCategory("Lẩu", R.drawable.ic_cat_lau, Color.parseColor("#D84315")));
-        categories.add(new FoodCategory("Đồ nướng\nBBQ", R.drawable.ic_cat_bbq, Color.parseColor("#B71C1C")));
-        categories.add(new FoodCategory("Cà phê\nTrà sữa", R.drawable.ic_cat_ca_phe, Color.parseColor("#4E342E")));
-        categories.add(new FoodCategory("Ăn vặt\nBánh ngọt", R.drawable.ic_cat_an_vat, Color.parseColor("#6A1B9A")));
-        categories.add(new FoodCategory("Hải sản", R.drawable.ic_cat_hai_san, Color.parseColor("#1B5E20")));
+        categories.add(new FoodCategory("Đồ nướng", R.drawable.ic_cat_bbq, Color.parseColor("#B71C1C")));
+        categories.add(new FoodCategory("Cafe", R.drawable.ic_cat_ca_phe, Color.parseColor("#4E342E")));
+        categories.add(new FoodCategory("Trà sữa", R.drawable.ic_cat_tra_sua, Color.parseColor("#8D6E63")));
+        categories.add(new FoodCategory("Ăn vặt", R.drawable.ic_cat_an_vat, Color.parseColor("#6A1B9A")));
         categories.add(new FoodCategory("Tất cả", R.drawable.ic_cat_all, Color.parseColor("#283593"), true));
 
         RecyclerView rv = findViewById(R.id.rv_categories);
         rv.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(
                 this, 2, androidx.recyclerview.widget.GridLayoutManager.HORIZONTAL, false));
         categoryAdapter = new FoodCategoryAdapter(categories, category -> {
-            if (category == null) {
-                selectedCategory = null;
-            } else {
-                selectedCategory = category.getName();
+            if (category != null) {
+                Intent intent = new Intent(this, CategoryActivity.class);
+                intent.putExtra(CategoryActivity.EXTRA_SELECTED_CATEGORY, category.getName());
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
-            applyFilters();
         });
         rv.setAdapter(categoryAdapter);
     }
@@ -754,6 +763,53 @@ public class HomeActivity extends AppCompatActivity {
             return list;
         }
 
+        public java.util.List<String> getAllCategoryNames() {
+            return java.util.Arrays.asList(
+                "Tất cả", "Cơm", "Bún Phở", "Bánh mì", "Fastfood", "Lẩu", 
+                "Đồ nướng", "Cafe", "Trà sữa", "Ăn vặt", "Bánh ngọt", 
+                "Hải sản", "Đồ chay", "Gỏi Cuốn", "Cháo", "Bia rượu"
+            );
+        }
+
+        public java.util.List<FoodMenuItem> getCategoryFoodsByName(String categoryName) {
+            java.util.List<FoodMenuItem> list = new java.util.ArrayList<>();
+            if ("Tất cả".equals(categoryName)) {
+                // Gom tất cả món ăn từ các danh mục khác lại
+                for (String cat : getAllCategoryNames()) {
+                    if (!"Tất cả".equals(cat)) {
+                        list.addAll(getCategoryFoodsByName(cat));
+                    }
+                }
+                return list;
+            }
+
+            // Modular handling for future API integration
+            switch (categoryName) {
+                case "Cơm": return getCategoryFoods(0);
+                case "Bún\nPhở": return getCategoryFoods(0);
+                case "Đồ Ăn\nnhanh": return getCategoryFoods(1);
+                case "Đồ nướng\nBBQ": return getCategoryFoods(1);
+                case "Cà phê\nTrà sữa": return getCategoryFoods(2);
+                case "Ăn vặt\nBánh ngọt": return getCategoryFoods(3);
+                case "Bánh mì": return getCategoryFoods(3);
+                case "Lẩu":
+                case "Hải sản":
+                default:
+                    // Fallback modular mock data generation
+                    String nameWithoutNewline = categoryName.replace("\n", " - ");
+                    for (int i = 1; i <= 5; i++) {
+                        list.add(new FoodMenuItem(
+                                "mock_" + categoryName.hashCode() + "_" + i, 
+                                "Món " + nameWithoutNewline + " " + i, 
+                                40000 + i*10000, 
+                                R.drawable.img_food_pizza, 
+                                "Mô tả cho món " + nameWithoutNewline
+                        ));
+                    }
+                    return list;
+            }
+        }
+
         public java.util.List<com.example.uitpayapp.home.home_models.Restaurant> getRestaurants() {
             java.util.List<com.example.uitpayapp.home.home_models.Restaurant> restaurants = new java.util.ArrayList<>();
             restaurants.add(new com.example.uitpayapp.home.home_models.Restaurant("KFC", "KFC", android.graphics.Color.parseColor("#E4002B"), "Gà rán\nBurger", java.util.Arrays.asList(
@@ -824,57 +880,164 @@ public class HomeActivity extends AppCompatActivity {
 
         public java.util.List<Object[]> getTopics() {
             java.util.List<Object[]> topicPool = new java.util.ArrayList<>();
-            topicPool.add(new Object[]{"Bún Phở Hội Tụ", "Top món bún phở được yêu thích nhất!", java.util.Arrays.asList(
-                    new FoodMenuItem("t1_1", "Phở Bò Tái Nạm", 45000, R.drawable.img_food_chicken, "Phở bò truyền thống với nước dùng đậm đà"),
-                    new FoodMenuItem("t1_2", "Bún Bò Huế Chả Cua", 55000, R.drawable.img_food_pizza, "Bún bò Huế cay nồng, chả cua dai ngon"),
-                    new FoodMenuItem("t1_3", "Bún Riêu Cua Ốc", 40000, R.drawable.img_food_chicken, "Bún riêu ốc đậu nóng hổi"),
-                    new FoodMenuItem("t1_4", "Hủ Tiếu Nam Vang", 50000, R.drawable.img_food_pizza, "Hủ tiếu tôm thịt, trứng cút"),
-                    new FoodMenuItem("t1_5", "Bún Thịt Nướng", 35000, R.drawable.img_food_chicken, "Bún thịt nướng chả giò"))});
-            topicPool.add(new Object[]{"Gà Rán Chất Lượng", "Giòn tan, thơm lừng – đậm đà vị gà!", java.util.Arrays.asList(
-                    new FoodMenuItem("t2_1", "Combo Gà Giòn", 89000, R.drawable.img_food_chicken, "2 miếng gà giòn + khoai tây + nước ngọt"),
-                    new FoodMenuItem("t2_2", "Gà Cay Phô Mai", 65000, R.drawable.img_food_chicken, "Gà phủ sốt cay và phô mai chảy"),
-                    new FoodMenuItem("t2_3", "Cơm Gà Xối Mỡ", 45000, R.drawable.img_food_chicken, "Cơm chiên đùi gà góc phần tư"),
-                    new FoodMenuItem("t2_4", "Burger Gà Giòn", 39000, R.drawable.img_food_chicken, "Burger gà kèm rau tươi"),
-                    new FoodMenuItem("t2_5", "Gà Viên Lắc Phô Mai", 40000, R.drawable.img_food_chicken, "Gà viên chiên lắc bột phô mai"))});
-            topicPool.add(new Object[]{"Cà Phê & Trà Sữa", "Nạp năng lượng, thưởng thức từng giọt!", java.util.Arrays.asList(
-                    new FoodMenuItem("t3_1", "Trà Sữa Trân Châu", 35000, R.drawable.img_food_bubbletea, "Trà sữa truyền thống, trân châu đen dai"),
-                    new FoodMenuItem("t3_2", "Cà Phê Sữa Đá", 25000, R.drawable.img_food_coffee, "Cà phê phin pha sữa đặc"),
-                    new FoodMenuItem("t3_3", "Trà Đào Cam Sả", 45000, R.drawable.img_food_bubbletea, "Trà đào thơm mát sảng khoái"),
-                    new FoodMenuItem("t3_4", "Sữa Tươi Đường Đen", 40000, R.drawable.img_food_bubbletea, "Sữa tươi dalat milk và đường đen"),
-                    new FoodMenuItem("t3_5", "Bạc Xỉu Lắc", 30000, R.drawable.img_food_coffee, "Bạc xỉu ba tầng thơm béo"))});
-            topicPool.add(new Object[]{"Ăn Vặt Đường Phố", "Món ngon vừa hè, nhớ mãi không quên!", java.util.Arrays.asList(
-                    new FoodMenuItem("t4_1", "Bánh Tráng Trộn", 20000, R.drawable.img_food_pizza, "Bánh tráng, bò khô, trứng cút, mỡ hành"),
-                    new FoodMenuItem("t4_2", "Cá Viên Chiên Mắm", 35000, R.drawable.img_food_chicken, "Cá viên thập cẩm chiên nước mắm"),
-                    new FoodMenuItem("t4_3", "Takoyaki Bạch Tuộc", 40000, R.drawable.img_food_pizza, "Bánh bạch tuộc nướng Nhật Bản"),
-                    new FoodMenuItem("t4_4", "Xúc Xích Phô Mai", 15000, R.drawable.img_food_chicken, "Xúc xích Đức bọc phô mai"),
-                    new FoodMenuItem("t4_5", "Khoai Lang Lắc Xí Muội", 25000, R.drawable.img_food_chicken, "Khoai lang chiên lắc xí muội"))});
-            topicPool.add(new Object[]{"Cơm Ngon Mỗi Ngày", "Bữa cơm ấm bụng, giá cả phải chăng!", java.util.Arrays.asList(
-                    new FoodMenuItem("t5_1", "Cơm Tấm Sườn Bì Cả", 55000, R.drawable.img_food_chicken, "Sườn nướng than hoa, bì chả thơm lừng"),
-                    new FoodMenuItem("t5_2", "Cơm Gà Hải Nam", 60000, R.drawable.img_food_chicken, "Gà luộc mềm ngọt, cơm nấu nước luộc gà"),
-                    new FoodMenuItem("t5_3", "Cơm Chiên Dương Châu", 45000, R.drawable.img_food_pizza, "Cơm chiên thập cẩm tôm lạp xưởng"),
-                    new FoodMenuItem("t5_4", "Cơm Thố Xá Xíu", 50000, R.drawable.img_food_chicken, "Cơm thố nóng hổi thịt xá xíu đậm đà"),
-                    new FoodMenuItem("t5_5", "Cơm Gà Rán Sốt Cay", 45000, R.drawable.img_food_chicken, "Cơm đùi gà chiên giòn xốt cay Hàn Quốc"))});
-            topicPool.add(new Object[]{"Lẩu Quây Quần", "Quây quần bên bạn bè, ấm áp mùa đông!", java.util.Arrays.asList(
-                    new FoodMenuItem("t6_1", "Set Lẩu Thái Hải Sản", 250000, R.drawable.img_food_pizza, "Lẩu Thái chua cay tôm mực nghêu"),
-                    new FoodMenuItem("t6_2", "Lẩu Bò Nhúng Dấm", 200000, R.drawable.img_food_pizza, "Bò Mỹ nhúng dấm chua thanh, cuốn bánh tráng"),
-                    new FoodMenuItem("t6_3", "Lẩu Gà Lá É", 180000, R.drawable.img_food_chicken, "Gà ta thả vườn nấu lá é Đà Lạt"),
-                    new FoodMenuItem("t6_4", "Set Lẩu Nấm Chay", 150000, R.drawable.img_food_pizza, "Thanh đạm với nấm đùi gà, kim châm"),
-                    new FoodMenuItem("t6_5", "Lẩu Ếch Măng Cay", 190000, R.drawable.img_food_chicken, "Ếch xào măng cay nồng nhúng lẩu"))});
-            topicPool.add(new Object[]{"Bánh Mì Sài Gòn", "Ổ bánh mì nóng giòn, đậm đà hương vị!", java.util.Arrays.asList(
-                    new FoodMenuItem("t7_1", "Bánh Mì Heo Quay", 25000, R.drawable.img_food_chicken, "Heo quay bì giòn, nước sốt đậm đà"),
-                    new FoodMenuItem("t7_2", "Bánh Mì Chả Lụa Pâté", 20000, R.drawable.img_food_chicken, "Pâté gan béo ngậy, chả lụa lá chuối"),
-                    new FoodMenuItem("t7_3", "Bánh Mì Trứng Ốp La", 15000, R.drawable.img_food_pizza, "Trứng lòng đào béo ngậy ăn kèm rau dưa"),
-                    new FoodMenuItem("t7_4", "Bánh Mì Chảo", 45000, R.drawable.img_food_pizza, "Chảo xíu mại trứng pate xúc xích nóng hổi"),
-                    new FoodMenuItem("t7_5", "Bánh Mì Gà Xé", 20000, R.drawable.img_food_chicken, "Gà xé sốt bơ trứng"))});
-            topicPool.add(new Object[]{"Hải Sản Tươi Sống", "Tôm cua cá mực, tươi ngon mỗi ngày!", java.util.Arrays.asList(
-                    new FoodMenuItem("t8_1", "Tôm Hùm Phô Mai", 350000, R.drawable.img_food_pizza, "Tôm hùm nướng phô mai đút lò"),
-                    new FoodMenuItem("t8_2", "Cua Ghẹ Rang Me", 180000, R.drawable.img_food_pizza, "Ghẹ tươi sống rang xốt me chua ngọt"),
-                    new FoodMenuItem("t8_3", "Ốc Hương Hoàng Kim", 90000, R.drawable.img_food_bubbletea, "Ốc hương xào trứng muối béo ngậy"),
-                    new FoodMenuItem("t8_4", "Nghêu Hấp Sả", 60000, R.drawable.img_food_bubbletea, "Nghêu tươi hấp sả thơm lừng"),
-                    new FoodMenuItem("t8_5", "Hàu Nướng Mỡ Hành", 80000, R.drawable.img_food_pizza, "Hàu sữa nướng mỡ hành đậu phộng"))});
+            topicPool.add(new Object[]{"Xôi", "Nóng hổi, dẻo thơm mỗi sáng", java.util.Arrays.asList(
+                    new FoodMenuItem("t1_1", "Xôi loại 1", 25000, R.drawable.img_food_chicken, "Món xôi chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t1_2", "Xôi loại 2", 35000, R.drawable.img_food_chicken, "Món xôi chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t1_3", "Xôi loại 3", 45000, R.drawable.img_food_chicken, "Món xôi chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t1_4", "Xôi loại 4", 55000, R.drawable.img_food_chicken, "Món xôi chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t1_5", "Xôi loại 5", 65000, R.drawable.img_food_chicken, "Món xôi chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Thức ăn khác", "Khám phá đa dạng các món ngon", java.util.Arrays.asList(
+                    new FoodMenuItem("t2_1", "Thức ăn khác loại 1", 25000, R.drawable.img_food_pizza, "Món thức ăn khác chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t2_2", "Thức ăn khác loại 2", 35000, R.drawable.img_food_pizza, "Món thức ăn khác chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t2_3", "Thức ăn khác loại 3", 45000, R.drawable.img_food_pizza, "Món thức ăn khác chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t2_4", "Thức ăn khác loại 4", 55000, R.drawable.img_food_pizza, "Món thức ăn khác chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t2_5", "Thức ăn khác loại 5", 65000, R.drawable.img_food_pizza, "Món thức ăn khác chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Trà", "Thanh mát, giải nhiệt ngày hè", java.util.Arrays.asList(
+                    new FoodMenuItem("t3_1", "Trà loại 1", 25000, R.drawable.img_food_bubbletea, "Món trà chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t3_2", "Trà loại 2", 35000, R.drawable.img_food_bubbletea, "Món trà chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t3_3", "Trà loại 3", 45000, R.drawable.img_food_bubbletea, "Món trà chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t3_4", "Trà loại 4", 55000, R.drawable.img_food_bubbletea, "Món trà chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t3_5", "Trà loại 5", 65000, R.drawable.img_food_bubbletea, "Món trà chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Sữa", "Dinh dưỡng tuyệt vời cho cơ thể", java.util.Arrays.asList(
+                    new FoodMenuItem("t4_1", "Sữa loại 1", 25000, R.drawable.img_food_bubbletea, "Món sữa chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t4_2", "Sữa loại 2", 35000, R.drawable.img_food_bubbletea, "Món sữa chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t4_3", "Sữa loại 3", 45000, R.drawable.img_food_bubbletea, "Món sữa chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t4_4", "Sữa loại 4", 55000, R.drawable.img_food_bubbletea, "Món sữa chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t4_5", "Sữa loại 5", 65000, R.drawable.img_food_bubbletea, "Món sữa chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Nước ngọt", "Giải khát tức thì, bùng nổ sảng khoái", java.util.Arrays.asList(
+                    new FoodMenuItem("t5_1", "Nước ngọt loại 1", 25000, R.drawable.img_food_bubbletea, "Món nước ngọt chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t5_2", "Nước ngọt loại 2", 35000, R.drawable.img_food_bubbletea, "Món nước ngọt chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t5_3", "Nước ngọt loại 3", 45000, R.drawable.img_food_bubbletea, "Món nước ngọt chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t5_4", "Nước ngọt loại 4", 55000, R.drawable.img_food_bubbletea, "Món nước ngọt chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t5_5", "Nước ngọt loại 5", 65000, R.drawable.img_food_bubbletea, "Món nước ngọt chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Nước ép trái cây - Sinh tố", "Tươi ngon, bổ sung vitamin", java.util.Arrays.asList(
+                    new FoodMenuItem("t6_1", "Nước ép trái cây - Sinh tố loại 1", 25000, R.drawable.img_food_bubbletea, "Món nước ép trái cây - sinh tố chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t6_2", "Nước ép trái cây - Sinh tố loại 2", 35000, R.drawable.img_food_bubbletea, "Món nước ép trái cây - sinh tố chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t6_3", "Nước ép trái cây - Sinh tố loại 3", 45000, R.drawable.img_food_bubbletea, "Món nước ép trái cây - sinh tố chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t6_4", "Nước ép trái cây - Sinh tố loại 4", 55000, R.drawable.img_food_bubbletea, "Món nước ép trái cây - sinh tố chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t6_5", "Nước ép trái cây - Sinh tố loại 5", 65000, R.drawable.img_food_bubbletea, "Món nước ép trái cây - sinh tố chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Mì ăn liền", "Nhanh gọn, cứu đói đêm khuya", java.util.Arrays.asList(
+                    new FoodMenuItem("t7_1", "Mì ăn liền loại 1", 25000, R.drawable.img_food_pizza, "Món mì ăn liền chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t7_2", "Mì ăn liền loại 2", 35000, R.drawable.img_food_pizza, "Món mì ăn liền chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t7_3", "Mì ăn liền loại 3", 45000, R.drawable.img_food_pizza, "Món mì ăn liền chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t7_4", "Mì ăn liền loại 4", 55000, R.drawable.img_food_pizza, "Món mì ăn liền chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t7_5", "Mì ăn liền loại 5", 65000, R.drawable.img_food_pizza, "Món mì ăn liền chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Lẩu", "Quây quần bên bạn bè, ấm áp mùa đông", java.util.Arrays.asList(
+                    new FoodMenuItem("t8_1", "Lẩu loại 1", 25000, R.drawable.img_food_pizza, "Món lẩu chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t8_2", "Lẩu loại 2", 35000, R.drawable.img_food_pizza, "Món lẩu chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t8_3", "Lẩu loại 3", 45000, R.drawable.img_food_pizza, "Món lẩu chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t8_4", "Lẩu loại 4", 55000, R.drawable.img_food_pizza, "Món lẩu chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t8_5", "Lẩu loại 5", 65000, R.drawable.img_food_pizza, "Món lẩu chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Hải sản", "Tôm cua cá mực, tươi ngon mỗi ngày", java.util.Arrays.asList(
+                    new FoodMenuItem("t9_1", "Hải sản loại 1", 25000, R.drawable.img_food_pizza, "Món hải sản chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t9_2", "Hải sản loại 2", 35000, R.drawable.img_food_pizza, "Món hải sản chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t9_3", "Hải sản loại 3", 45000, R.drawable.img_food_pizza, "Món hải sản chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t9_4", "Hải sản loại 4", 55000, R.drawable.img_food_pizza, "Món hải sản chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t9_5", "Hải sản loại 5", 65000, R.drawable.img_food_pizza, "Món hải sản chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Fastfood", "Tiện lợi, nhanh chóng, ngon miệng", java.util.Arrays.asList(
+                    new FoodMenuItem("t10_1", "Fastfood loại 1", 25000, R.drawable.img_food_chicken, "Món fastfood chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t10_2", "Fastfood loại 2", 35000, R.drawable.img_food_chicken, "Món fastfood chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t10_3", "Fastfood loại 3", 45000, R.drawable.img_food_chicken, "Món fastfood chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t10_4", "Fastfood loại 4", 55000, R.drawable.img_food_chicken, "Món fastfood chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t10_5", "Fastfood loại 5", 65000, R.drawable.img_food_chicken, "Món fastfood chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Đồ nướng", "Xèo xèo thơm lừng, đậm đà gia vị", java.util.Arrays.asList(
+                    new FoodMenuItem("t11_1", "Đồ nướng loại 1", 25000, R.drawable.img_food_chicken, "Món đồ nướng chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t11_2", "Đồ nướng loại 2", 35000, R.drawable.img_food_chicken, "Món đồ nướng chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t11_3", "Đồ nướng loại 3", 45000, R.drawable.img_food_chicken, "Món đồ nướng chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t11_4", "Đồ nướng loại 4", 55000, R.drawable.img_food_chicken, "Món đồ nướng chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t11_5", "Đồ nướng loại 5", 65000, R.drawable.img_food_chicken, "Món đồ nướng chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Đồ chay", "Thanh tịnh, nhẹ nhàng, tốt cho sức khỏe", java.util.Arrays.asList(
+                    new FoodMenuItem("t12_1", "Đồ chay loại 1", 25000, R.drawable.img_food_pizza, "Món đồ chay chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t12_2", "Đồ chay loại 2", 35000, R.drawable.img_food_pizza, "Món đồ chay chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t12_3", "Đồ chay loại 3", 45000, R.drawable.img_food_pizza, "Món đồ chay chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t12_4", "Đồ chay loại 4", 55000, R.drawable.img_food_pizza, "Món đồ chay chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t12_5", "Đồ chay loại 5", 65000, R.drawable.img_food_pizza, "Món đồ chay chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Gỏi - Cuốn - Salad", "Tươi mát, healthy, đầy đủ dưỡng chất", java.util.Arrays.asList(
+                    new FoodMenuItem("t13_1", "Gỏi - Cuốn - Salad loại 1", 25000, R.drawable.img_food_pizza, "Món gỏi - cuốn - salad chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t13_2", "Gỏi - Cuốn - Salad loại 2", 35000, R.drawable.img_food_pizza, "Món gỏi - cuốn - salad chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t13_3", "Gỏi - Cuốn - Salad loại 3", 45000, R.drawable.img_food_pizza, "Món gỏi - cuốn - salad chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t13_4", "Gỏi - Cuốn - Salad loại 4", 55000, R.drawable.img_food_pizza, "Món gỏi - cuốn - salad chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t13_5", "Gỏi - Cuốn - Salad loại 5", 65000, R.drawable.img_food_pizza, "Món gỏi - cuốn - salad chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Cơm", "Bữa cơm ấm bụng, giá cả phải chăng", java.util.Arrays.asList(
+                    new FoodMenuItem("t14_1", "Cơm loại 1", 25000, R.drawable.img_food_chicken, "Món cơm chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t14_2", "Cơm loại 2", 35000, R.drawable.img_food_chicken, "Món cơm chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t14_3", "Cơm loại 3", 45000, R.drawable.img_food_chicken, "Món cơm chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t14_4", "Cơm loại 4", 55000, R.drawable.img_food_chicken, "Món cơm chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t14_5", "Cơm loại 5", 65000, R.drawable.img_food_chicken, "Món cơm chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Cháo", "Nóng hổi, dễ tiêu, bổ dưỡng", java.util.Arrays.asList(
+                    new FoodMenuItem("t15_1", "Cháo loại 1", 25000, R.drawable.img_food_chicken, "Món cháo chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t15_2", "Cháo loại 2", 35000, R.drawable.img_food_chicken, "Món cháo chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t15_3", "Cháo loại 3", 45000, R.drawable.img_food_chicken, "Món cháo chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t15_4", "Cháo loại 4", 55000, R.drawable.img_food_chicken, "Món cháo chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t15_5", "Cháo loại 5", 65000, R.drawable.img_food_chicken, "Món cháo chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Cafe", "Đánh thức tinh thần, bắt đầu ngày mới", java.util.Arrays.asList(
+                    new FoodMenuItem("t16_1", "Cafe loại 1", 25000, R.drawable.img_food_coffee, "Món cafe chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t16_2", "Cafe loại 2", 35000, R.drawable.img_food_coffee, "Món cafe chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t16_3", "Cafe loại 3", 45000, R.drawable.img_food_coffee, "Món cafe chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t16_4", "Cafe loại 4", 55000, R.drawable.img_food_coffee, "Món cafe chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t16_5", "Cafe loại 5", 65000, R.drawable.img_food_coffee, "Món cafe chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Bún - Phở - Hủ tiếu", "Top món ăn truyền thống được yêu thích", java.util.Arrays.asList(
+                    new FoodMenuItem("t17_1", "Bún - Phở - Hủ tiếu loại 1", 25000, R.drawable.img_food_chicken, "Món bún - phở - hủ tiếu chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t17_2", "Bún - Phở - Hủ tiếu loại 2", 35000, R.drawable.img_food_chicken, "Món bún - phở - hủ tiếu chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t17_3", "Bún - Phở - Hủ tiếu loại 3", 45000, R.drawable.img_food_chicken, "Món bún - phở - hủ tiếu chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t17_4", "Bún - Phở - Hủ tiếu loại 4", 55000, R.drawable.img_food_chicken, "Món bún - phở - hủ tiếu chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t17_5", "Bún - Phở - Hủ tiếu loại 5", 65000, R.drawable.img_food_chicken, "Món bún - phở - hủ tiếu chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Bia rượu", "Chill cùng bạn bè ngày cuối tuần", java.util.Arrays.asList(
+                    new FoodMenuItem("t18_1", "Bia rượu loại 1", 25000, R.drawable.img_food_bubbletea, "Món bia rượu chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t18_2", "Bia rượu loại 2", 35000, R.drawable.img_food_bubbletea, "Món bia rượu chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t18_3", "Bia rượu loại 3", 45000, R.drawable.img_food_bubbletea, "Món bia rượu chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t18_4", "Bia rượu loại 4", 55000, R.drawable.img_food_bubbletea, "Món bia rượu chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t18_5", "Bia rượu loại 5", 65000, R.drawable.img_food_bubbletea, "Món bia rượu chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Bánh mì", "Ổ bánh mì nóng giòn, đậm đà hương vị", java.util.Arrays.asList(
+                    new FoodMenuItem("t19_1", "Bánh mì loại 1", 25000, R.drawable.img_food_chicken, "Món bánh mì chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t19_2", "Bánh mì loại 2", 35000, R.drawable.img_food_chicken, "Món bánh mì chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t19_3", "Bánh mì loại 3", 45000, R.drawable.img_food_chicken, "Món bánh mì chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t19_4", "Bánh mì loại 4", 55000, R.drawable.img_food_chicken, "Món bánh mì chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t19_5", "Bánh mì loại 5", 65000, R.drawable.img_food_chicken, "Món bánh mì chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Bánh ngọt", "Ngọt ngào, xoa dịu mọi muộn phiền", java.util.Arrays.asList(
+                    new FoodMenuItem("t20_1", "Bánh ngọt loại 1", 25000, R.drawable.img_food_bubbletea, "Món bánh ngọt chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t20_2", "Bánh ngọt loại 2", 35000, R.drawable.img_food_bubbletea, "Món bánh ngọt chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t20_3", "Bánh ngọt loại 3", 45000, R.drawable.img_food_bubbletea, "Món bánh ngọt chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t20_4", "Bánh ngọt loại 4", 55000, R.drawable.img_food_bubbletea, "Món bánh ngọt chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t20_5", "Bánh ngọt loại 5", 65000, R.drawable.img_food_bubbletea, "Món bánh ngọt chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Bánh bao", "Mềm xốp, nhân đậm đà", java.util.Arrays.asList(
+                    new FoodMenuItem("t21_1", "Bánh bao loại 1", 25000, R.drawable.img_food_chicken, "Món bánh bao chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t21_2", "Bánh bao loại 2", 35000, R.drawable.img_food_chicken, "Món bánh bao chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t21_3", "Bánh bao loại 3", 45000, R.drawable.img_food_chicken, "Món bánh bao chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t21_4", "Bánh bao loại 4", 55000, R.drawable.img_food_chicken, "Món bánh bao chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t21_5", "Bánh bao loại 5", 65000, R.drawable.img_food_chicken, "Món bánh bao chuẩn vị, ngon miệng")
+            )});
+            topicPool.add(new Object[]{"Ăn vặt", "Món ngon đường phố, nhớ mãi không quên", java.util.Arrays.asList(
+                    new FoodMenuItem("t22_1", "Ăn vặt loại 1", 25000, R.drawable.img_food_pizza, "Món ăn vặt chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t22_2", "Ăn vặt loại 2", 35000, R.drawable.img_food_pizza, "Món ăn vặt chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t22_3", "Ăn vặt loại 3", 45000, R.drawable.img_food_pizza, "Món ăn vặt chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t22_4", "Ăn vặt loại 4", 55000, R.drawable.img_food_pizza, "Món ăn vặt chuẩn vị, ngon miệng"),
+                    new FoodMenuItem("t22_5", "Ăn vặt loại 5", 65000, R.drawable.img_food_pizza, "Món ăn vặt chuẩn vị, ngon miệng")
+            )});
 
             return topicPool;
         }
+
 
         public java.util.List<com.example.uitpayapp.recommendeddeal.RecommendedDealModel> getRecommendedDeals() {
             java.util.List<com.example.uitpayapp.recommendeddeal.RecommendedDealModel> allDeals = new java.util.ArrayList<>();

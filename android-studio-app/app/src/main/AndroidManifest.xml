@@ -110,6 +110,10 @@
         <activity
             android:name=".home.checkout.TransferSuccessActivity"
             android:exported="false" />
+        <activity
+            android:name=".home.CategoryActivity"
+            android:exported="false" />
+
 
         <provider
             android:name="androidx.core.content.FileProvider"
