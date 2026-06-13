@@ -163,54 +163,89 @@ public class OrderService {
             orderItems.add(OrderItem.builder().order(order).food(item.getFood()).quantity(item.getQuantity()).price(pricePerItem).selectedOptions(item.getSelectedOptions()).build());
         }
 
-        // 8. XỬ LÝ VOUCHER
-        BigDecimal discountAmount = BigDecimal.ZERO;
-        com.uit.fooddelivery_api.modules.voucher.entities.Voucher appliedVoucher = null;
+        // ==========================================
+        // 8. XỬ LÝ XẾP CHỒNG VOUCHER
+        // ==========================================
+        BigDecimal totalOrderDiscount = BigDecimal.ZERO;     // Tổng tiền giảm của nhóm món ăn
+        BigDecimal totalShippingDiscount = BigDecimal.ZERO;  // Tổng tiền giảm của nhóm ship
 
-        if (dto.getVoucherCode() != null && !dto.getVoucherCode().trim().isEmpty()) {
-            appliedVoucher = voucherRepository.findByCodeAndIsActiveTrue(dto.getVoucherCode())
-                    .orElseThrow(() -> new RuntimeException("Mã giảm giá không tồn tại hoặc đã bị khóa!"));
+        List<com.uit.fooddelivery_api.modules.voucher.entities.Voucher> appliedVouchers = new ArrayList<>();
+        boolean hasShippingDiscountType = false;
+        boolean hasOrderDiscountType = false;
 
-            java.time.LocalDateTime now = java.time.LocalDateTime.now();
-            if (now.isBefore(appliedVoucher.getStartDate()) || now.isAfter(appliedVoucher.getEndDate())) {
-                throw new RuntimeException("Mã giảm giá đã hết hạn hoặc chưa tới thời gian sử dụng!");
-            }
-            if (appliedVoucher.getStockQuantity() <= 0) {
-                throw new RuntimeException("Mã giảm giá đã hết lượt sử dụng!");
-            }
-            if (foodTotal.compareTo(appliedVoucher.getMinOrderValue()) < 0) {
-                throw new RuntimeException("Đơn hàng chưa đạt giá trị tối thiểu " + appliedVoucher.getMinOrderValue() + "đ để dùng mã này!");
-            }
+        if (dto.getVoucherCodes() != null && !dto.getVoucherCodes().isEmpty()) {
+            for (String code : dto.getVoucherCodes()) {
+                if (code == null || code.trim().isEmpty()) continue;
 
-            BigDecimal calculatedDiscount = BigDecimal.ZERO;
-            if (appliedVoucher.getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.SHIPPING_DISCOUNT) {
-                calculatedDiscount = shippingFee.multiply(BigDecimal.valueOf(appliedVoucher.getDiscountPercent())).divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
-                discountAmount = calculatedDiscount.min(appliedVoucher.getMaxDiscount()).min(shippingFee);
-            } else if (appliedVoucher.getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.ORDER_DISCOUNT) {
-                calculatedDiscount = foodTotal.multiply(BigDecimal.valueOf(appliedVoucher.getDiscountPercent())).divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
-                discountAmount = calculatedDiscount.min(appliedVoucher.getMaxDiscount()).min(foodTotal);
-            }
+                com.uit.fooddelivery_api.modules.voucher.entities.Voucher voucher = voucherRepository.findByCodeAndIsActiveTrue(code)
+                        .orElseThrow(() -> new RuntimeException("Mã giảm giá [" + code + "] không tồn tại hoặc đã hết lượt kích hoạt!"));
 
-            appliedVoucher.setStockQuantity(appliedVoucher.getStockQuantity() - 1);
-            voucherRepository.save(appliedVoucher);
+                // Kiểm tra thời hạn hiệu lực của mã
+                LocalDateTime now = LocalDateTime.now();
+                if (now.isBefore(voucher.getStartDate()) || now.isAfter(voucher.getEndDate())) {
+                    throw new RuntimeException("Mã giảm giá [" + code + "] đã hết hạn hoặc chưa đến thời gian sử dụng!");
+                }
+
+                // Kiểm tra kho số lượng phát hành
+                if (voucher.getStockQuantity() <= 0) {
+                    throw new RuntimeException("Mã giảm giá [" + code + "] đã hết lượt sử dụng trên hệ thống!");
+                }
+
+                // Kiểm tra điều kiện giá trị đơn hàng tối thiểu
+                if (foodTotal.compareTo(voucher.getMinOrderValue()) < 0) {
+                    throw new RuntimeException("Mã [" + code + "] yêu cầu giá trị đơn hàng tối thiểu từ " + voucher.getMinOrderValue() + "đ!");
+                }
+
+                // Phân loại xử lý dựa trên loại Voucher
+                if (voucher.getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.SHIPPING_DISCOUNT) {
+                    // Chặn việc áp dụng từ 2 mã giảm ship trở lên
+                    if (hasShippingDiscountType) {
+                        throw new RuntimeException("Hệ thống chỉ cho phép áp dụng tối đa 1 mã giảm giá phí vận chuyển trên một đơn hàng!");
+                    }
+                    hasShippingDiscountType = true;
+
+                    BigDecimal calc = shippingFee.multiply(BigDecimal.valueOf(voucher.getDiscountPercent()))
+                            .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
+                    totalShippingDiscount = calc.min(voucher.getMaxDiscount()).min(shippingFee);
+
+                } else if (voucher.getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.ORDER_DISCOUNT) {
+                    // Chặn việc áp dụng từ 2 mã giảm đơn hàng trở lên
+                    if (hasOrderDiscountType) {
+                        throw new RuntimeException("Hệ thống chỉ cho phép áp dụng tối đa 1 mã giảm giá hóa đơn trên một đơn hàng!");
+                    }
+                    hasOrderDiscountType = true;
+
+                    BigDecimal calc = foodTotal.multiply(BigDecimal.valueOf(voucher.getDiscountPercent()))
+                            .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
+                    totalOrderDiscount = calc.min(voucher.getMaxDiscount()).min(foodTotal);
+                }
+
+                // Trừ đi một lượt sử dụng trong kho và đưa vào danh sách lưu vết đơn hàng
+                voucher.setStockQuantity(voucher.getStockQuantity() - 1);
+                voucherRepository.save(voucher);
+                appliedVouchers.add(voucher);
+            }
         }
 
+        // Tính toán tổng số tiền giảm cuối cùng của cả đơn hàng
+        BigDecimal totalDiscountAmount = totalOrderDiscount.add(totalShippingDiscount);
+
         // 9. CHỐT TỔNG TIỀN VÀ TRỪ VÍ
-        BigDecimal finalTotal = foodTotal.add(shippingFee).subtract(discountAmount);
+        BigDecimal finalTotal = foodTotal.add(shippingFee).subtract(totalDiscountAmount);
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
             finalTotal = BigDecimal.ZERO;
         }
 
         order.setTotalAmount(finalTotal);
-        order.setDiscountAmount(discountAmount);
-        order.setVoucher(appliedVoucher);
+        order.setDiscountAmount(totalDiscountAmount);
+        order.setVouchers(appliedVouchers); // Lưu danh sách các mã đã dùng vào bảng trung gian
         order.setOrderItems(orderItems);
 
         Wallet wallet = walletRepository.findByUserId(customer.getId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy ví của bạn!"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin ví điện tử cá nhân!"));
 
         if (wallet.getBalance().compareTo(finalTotal) < 0) {
-            throw new RuntimeException("Ví không đủ tiền! Tổng thanh toán: " + finalTotal + "đ.");
+            throw new RuntimeException("Số dư tài khoản ví không đủ để thực hiện thanh toán! Tổng tiền: " + finalTotal + "đ.");
         }
 
         wallet.setBalance(wallet.getBalance().subtract(finalTotal));
