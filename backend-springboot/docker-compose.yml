@@ -11,6 +11,13 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
+  redis-db:
+    image: redis:7-alpine
+    container_name: fooddelivery-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
   backend-app:
     image: ikenuyh/fooddelivery-backend:latest
     container_name: fooddelivery-backend-app
@@ -19,12 +26,15 @@ services:
       - "8083:8081"
     depends_on:
       - mysql-db
+      - redis-db
     environment:
       # Ket noi voi MySQL thong qua ten service
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/fooddelivery_db?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_REDIS_HOST=redis-db # Link tới Redis
+      - SPRING_REDIS_PORT=6379
 
   # Them Caddy de lo vu HTTPS
   reverse-proxy:
