@@ -80,8 +80,9 @@
                     android:text="Mã giảm 19%"
                     android:textColor="#EE4D2D"
                     android:textSize="11sp"
-                    android:background="@android:drawable/toast_frame"
-                    android:paddingHorizontal="4dp"/>
+                    android:background="#FFF0ED"
+                    android:paddingVertical="2dp"
+                    android:paddingHorizontal="6dp"/>
 
                 <TextView
                     android:id="@+id/tvFavoriteHeart"

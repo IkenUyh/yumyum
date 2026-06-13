@@ -22,6 +22,8 @@ import com.example.uitpayapp.R;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.util.ArrayList;
 import java.util.List;
+import com.example.uitpayapp.home.home_models.CartManager;
+import com.example.uitpayapp.home.home_models.CartItem;
 
 public class OrderDetailActivity extends AppCompatActivity {
 
@@ -64,6 +66,13 @@ public class OrderDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_detail);
+        
+        getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            int flags = getWindow().getDecorView().getSystemUiVisibility();
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            getWindow().getDecorView().setSystemUiVisibility(flags);
+        }
 
         // Ánh xạ toàn bộ hệ thống điều khiển
         mapContainer = findViewById(R.id.mapContainer);
@@ -105,43 +114,58 @@ public class OrderDetailActivity extends AppCompatActivity {
         if (intent != null) {
             String orderId = intent.getStringExtra("ORDER_ID");
             String orderStatus = intent.getStringExtra("ORDER_STATUS");
+            long deliveryFee = intent.getLongExtra("KEY_DELIVERY_FEE", 15000);
+            long discount = intent.getLongExtra("KEY_DISCOUNT", 0);
 
-            // Đã đổi tên class sang OrderDetail theo yêu cầu của ông
             OrderDetail mockData = new OrderDetail();
             mockData.setOrderId(orderId != null ? orderId : "05066-620675729");
             mockData.setCustomerPhone("+84987301126");
+            mockData.setMerchantName("UIT FOOD");
+            mockData.setDestAddress("Ký túc xá khu A, ĐHQG TP.HCM");
 
-            if ("Hoàn thành".equalsIgnoreCase(orderStatus)) {
+            if ("Hoàn thành".equalsIgnoreCase(orderStatus) || "COMPLETED".equalsIgnoreCase(orderStatus)) {
                 mockData.setStatus("COMPLETED");
-                mockData.setMerchantName("Hồng Trà Sữa Ba Cô Gái Tam Hảo");
-                mockData.setDestAddress("Quốc Lộ 1k, Khu Phố Đông Hòa, Dĩ An, Bình Dương");
-                mockData.setTotalPaid(21400);
-
-                List<OrderDetail.CartItem> items = new ArrayList<>();
-                OrderDetail.CartItem item1 = new OrderDetail.CartItem();
-                item1.itemName = "Hồng Trà Bí Đao Đặc Biệt L";
-                item1.note = "Ít đá, 50% đường, Thêm trân châu hoàng kim";
-                item1.price = 21400;
-                item1.quantity = 1;
-                items.add(item1);
-                mockData.setItems(items);
             } else {
                 mockData.setStatus("DELIVERING");
-                mockData.setMerchantName("Bun Burrito - Trần Quốc Toản");
-                mockData.setDestAddress("Quốc Lộ 1k, Khu Phố Đông Hòa, Dĩ An, Bình Dương");
-                mockData.setTotalPaid(61000);
+            }
 
-                List<OrderDetail.CartItem> items = new ArrayList<>();
+            List<CartItem> cartItems = CartManager.getInstance().getLastOrder();
+            List<OrderDetail.CartItem> items = new ArrayList<>();
+            long subtotal = 0;
+            
+            if (cartItems != null && !cartItems.isEmpty()) {
+                for (CartItem ci : cartItems) {
+                    OrderDetail.CartItem item = new OrderDetail.CartItem();
+                    item.itemName = ci.getMenuItem().getName();
+                    item.note = ci.getToppingsString() != null ? ci.getToppingsString() : "";
+                    item.price = ci.getTotalPrice() / ci.getQuantity(); // price per item
+                    item.quantity = ci.getQuantity();
+                    items.add(item);
+                    subtotal += ci.getTotalPrice();
+                }
+            } else {
                 OrderDetail.CartItem item1 = new OrderDetail.CartItem();
-                item1.itemName = "Burrito Thịt bò xào (ko phải tacos)";
-                item1.note = "Đầy đủ: hành tím + cà chua + xà lách, Sốt chính: Sốt Mayo tỏi (Shawarma Garlic)...";
+                item1.itemName = "Món ăn mặc định";
+                item1.note = "Không có";
                 item1.price = 58000;
                 item1.quantity = 1;
                 items.add(item1);
-                mockData.setItems(items);
+                subtotal = 58000;
             }
+            mockData.setItems(items);
+            mockData.setTotalPaid(subtotal + deliveryFee - discount + 3000); // 3000 is applying fee
 
             bindOrderData(mockData);
+            
+            // Format fee and discount on UI
+            tvShipFee.setText(String.format("%,.0fđ", (double) deliveryFee));
+            if (discount > 0) {
+                tvDiscount.setText(String.format("-%,.0fđ", (double) discount));
+                tvDiscount.setTextColor(android.graphics.Color.parseColor("#00B159"));
+            } else {
+                tvDiscount.setText("0đ");
+                tvDiscount.setTextColor(android.graphics.Color.parseColor("#777777"));
+            }
         }
 
         btnMapBack.setOnClickListener(v -> finish());
