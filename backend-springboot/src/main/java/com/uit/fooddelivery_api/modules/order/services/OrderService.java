@@ -34,6 +34,7 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final UserAddressRepository addressRepository;
     private final com.uit.fooddelivery_api.modules.voucher.repositories.VoucherRepository voucherRepository;
+    private final com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository;
 
     // Phí ship cơ bản: 5.000 VNĐ / 1 Km
     private static final BigDecimal FEE_PER_KM = BigDecimal.valueOf(5000);
@@ -143,6 +144,7 @@ public class OrderService {
                 throw new RuntimeException("Món " + item.getFood().getName() + " không thuộc nhà hàng đang đặt!");
             }
 
+            // TÍNH TOÁN TIỀN TOPPING (Giữ nguyên)
             BigDecimal optionsPrice = BigDecimal.ZERO;
             if (item.getSelectedOptions() != null && !item.getSelectedOptions().isEmpty() && !item.getSelectedOptions().equals("[]")) {
                 try {
@@ -156,11 +158,43 @@ public class OrderService {
                 }
             }
 
-            BigDecimal pricePerItem = item.getFood().getPrice().add(optionsPrice);
+            // ==========================================
+            // LOGIC FLASHSALE & ANTI-OVERSELLING (ISSUE #17)
+            // ==========================================
+            BigDecimal currentFoodPrice = item.getFood().getPrice(); // Lấy giá gốc làm mặc định
+            java.util.Optional<com.uit.fooddelivery_api.modules.flashsale.entities.FlashSaleItem> flashSaleOpt =
+                    flashSaleItemRepository.findActiveFlashSaleItemByFoodId(item.getFood().getId(), LocalDateTime.now());
+
+            if (flashSaleOpt.isPresent()) {
+                com.uit.fooddelivery_api.modules.flashsale.entities.FlashSaleItem fsItem = flashSaleOpt.get();
+
+                // Kiểm tra xem kho Sale còn đủ suất để bán không?
+                if (fsItem.getSoldQuantity() + item.getQuantity() > fsItem.getStockQuantity()) {
+                    throw new RuntimeException("Món [" + item.getFood().getName() + "] đã hết suất Flashsale! Vui lòng giảm số lượng hoặc đợi đợt sau.");
+                }
+
+                // Đổi sang giá Sale
+                currentFoodPrice = fsItem.getSalePrice();
+
+                // Tăng số lượng đã bán. NHỜ CÓ @Version, DATABASE SẼ TỰ ĐỘNG CHẶN NẾU CÓ 2 NGƯỜI CÙNG GHI ĐÈ LÊN SỐ LƯỢNG NÀY
+                fsItem.setSoldQuantity(fsItem.getSoldQuantity() + item.getQuantity());
+                flashSaleItemRepository.save(fsItem);
+            }
+            // ==========================================
+
+            // Tiền 1 món = Giá (Gốc hoặc Flashsale) + Tiền Topping
+            BigDecimal pricePerItem = currentFoodPrice.add(optionsPrice);
             BigDecimal itemTotal = pricePerItem.multiply(BigDecimal.valueOf(item.getQuantity()));
             foodTotal = foodTotal.add(itemTotal);
 
-            orderItems.add(OrderItem.builder().order(order).food(item.getFood()).quantity(item.getQuantity()).price(pricePerItem).selectedOptions(item.getSelectedOptions()).build());
+            // Lưu vào OrderItem kèm theo JSON topping
+            orderItems.add(OrderItem.builder()
+                    .order(order)
+                    .food(item.getFood())
+                    .quantity(item.getQuantity())
+                    .price(pricePerItem)
+                    .selectedOptions(item.getSelectedOptions())
+                    .build());
         }
 
         // ==========================================
