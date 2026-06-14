@@ -17,6 +17,8 @@ public class RestaurantResponseDTO {
     private LocalTime openTime;
     private LocalTime closeTime;
     private Long merchantId;
+    private Boolean isAcceptingOrders;
+    private Integer maxPendingOrders;
 
     // Ham tien ich de chuyen tu Entity sang DTO
     public static RestaurantResponseDTO fromEntity(Restaurant restaurant) {
@@ -27,6 +29,8 @@ public class RestaurantResponseDTO {
                 .openTime(restaurant.getOpenTime())
                 .closeTime(restaurant.getCloseTime())
                 .merchantId(restaurant.getMerchant().getId()) // Chi lay ID cua chu quan
+                .isAcceptingOrders(restaurant.getIsAcceptingOrders())
+                .maxPendingOrders(restaurant.getMaxPendingOrders())
                 .build();
     }
 }

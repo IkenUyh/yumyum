@@ -21,10 +21,10 @@ public class UserController {
     private final CloudinaryService cloudinaryService;
 
     @PostMapping("/register")
-    public ApiResponse<UserResponseDTO> register(@RequestBody User user) {
-        User savedUser = userService.registerUser(user);
-        UserResponseDTO dto = UserResponseDTO.fromEntity(savedUser);
-        return ApiResponse.success(dto);
+    public ApiResponse<UserResponseDTO> register(@RequestBody com.uit.fooddelivery_api.modules.user.dtos.RegisterRequestDTO dto) {
+        User savedUser = userService.registerUser(dto);
+        UserResponseDTO responseDto = UserResponseDTO.fromEntity(savedUser);
+        return ApiResponse.success(responseDto);
     }
 
     @PostMapping("/login")

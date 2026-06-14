@@ -22,6 +22,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Androidstudioapp">
         <activity
+            android:name=".history.OrderDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".notification.NotificationNewsActivity"
             android:exported="false" />
         <activity
@@ -38,14 +41,13 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".history.TransactionHistoryActivity"
-            android:exported="false">
-
-        </activity>
+            android:exported="false"></activity>
         <activity
             android:name=".gift.GiftActivity"
             android:exported="false" />
@@ -86,7 +88,7 @@
         <activity
             android:name=".profile.AccountDetailActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".deliveryaddressorder.AddressOrderActivity"
             android:exported="false" />
@@ -126,6 +128,10 @@
         <activity
             android:name=".merchant.shop.AddMerchantDishActivity"
             android:exported="false" />
+        <activity
+            android:name=".home.CategoryActivity"
+            android:exported="false" />
+
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -10,6 +10,7 @@ public class CartManager {
 
     private static CartManager instance;
     private final List<CartItem> cartItems = new ArrayList<>();
+    private final List<CartItem> lastOrder = new ArrayList<>();
 
     private CartManager() {}
 
@@ -80,7 +81,13 @@ public class CartManager {
     }
 
     public void clearCart() {
+        lastOrder.clear();
+        lastOrder.addAll(cartItems);
         cartItems.clear();
+    }
+
+    public List<CartItem> getLastOrder() {
+        return lastOrder;
     }
 
     public long getTotalPrice() {
@@ -112,9 +119,13 @@ public class CartManager {
         StringBuilder sb = new StringBuilder();
         for (CartItem ci : cartItems) {
             if (sb.length() > 0) {
-                sb.append(", ");
+                sb.append("<br>");
             }
-            sb.append(ci.getQuantity()).append("x ").append(ci.getMenuItem().getName());
+            sb.append("<b>").append(ci.getQuantity()).append("x ").append(ci.getMenuItem().getName()).append("</b>");
+            String toppings = ci.getToppingsString();
+            if (toppings != null && !toppings.isEmpty()) {
+                sb.append("<br>&nbsp;&nbsp;&nbsp;&nbsp;+ ").append(toppings);
+            }
         }
         return sb.toString();
     }

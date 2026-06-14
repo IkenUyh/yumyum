@@ -8,13 +8,11 @@
     android:background="#F5F5F5"
     tools:context=".history.TransactionHistoryActivity">
 
-    <!-- Header ShopeeFood tích hợp thanh tìm kiếm ẩn/hiện linh hoạt -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layoutHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:paddingTop="40dp"
         android:paddingBottom="8dp"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -26,6 +24,7 @@
             android:text="Đơn hàng"
             android:textColor="#212121"
             android:textSize="20sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -52,7 +51,7 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:layout_marginEnd="16dp"
-            android:src="@android:drawable/ic_menu_search"
+            android:src="@drawable/ic_search"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -98,7 +97,6 @@
             android:textSize="18sp" />
     </LinearLayout>
 
-    <!-- Thanh chứa các nút chức năng lọc dữ liệu -->
     <LinearLayout
         android:id="@+id/layoutFilters"
         android:layout_width="match_parent"
@@ -148,13 +146,50 @@
             android:background="?attr/selectableItemBackground" />
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/mainHistoryScroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="4dp"
         app:layout_constraintBottom_toTopOf="@+id/bottom_container"
-        app:layout_constraintTop_toBottomOf="@+id/layoutFilters" />
+        app:layout_constraintTop_toBottomOf="@+id/layoutFilters">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <LinearLayout
+                android:id="@+id/layoutRecommendations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Có thể bạn cũng thích"
+                    android:textColor="#666666"
+                    android:textSize="13sp"
+                    android:gravity="center"
+                    android:layout_marginVertical="16dp"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvRecommendations"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    tools:listitem="@layout/activity_favorite_item_vertical"/>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <LinearLayout
         android:id="@+id/layoutEmpty"
@@ -172,7 +207,8 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:src="@android:drawable/ic_menu_edit"
-            app:tint="#FFA000" />
+            app:tint="#FFA000"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/tvEmptyTitle"
@@ -224,13 +260,11 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:orientation="vertical">
-
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_home_24px"
                     app:tint="#757575" />
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -251,13 +285,11 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:orientation="vertical">
-
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/list_alt_24px"
                     app:tint="#EE4D2D" />
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -277,13 +309,11 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:orientation="vertical">
-
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/favorite_24px"
                     app:tint="#757575" />
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -303,13 +333,11 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:orientation="vertical">
-
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/notifications_24px"
                     app:tint="#757575" />
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -329,13 +357,11 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:orientation="vertical">
-
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_account_24px"
                     app:tint="#757575" />
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -344,10 +370,90 @@
                     android:textColor="#757575"
                     android:textSize="12sp" />
             </LinearLayout>
-
         </LinearLayout>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutCalendarOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"
+        android:elevation="99dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <RelativeLayout
+            android:id="@+id/layoutCalendarHeader"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="#FFFFFF"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chọn ngày"
+                android:textColor="#222222"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_centerInParent="true"/>
+
+            <ImageButton
+                android:id="@+id/btnDismissCalendar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                app:tint="#333333"
+                tools:ignore="ContentDescription" />
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvCalendarGrid"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="#FFFFFF"
+            app:layout_constraintTop_toBottomOf="@id/layoutCalendarHeader"
+            app:layout_constraintBottom_toTopOf="@id/layoutCalendarBottomBar"/>
+
+        <LinearLayout
+            android:id="@+id/layoutCalendarBottomBar"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:background="#FFFFFF"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:gravity="center_vertical"
+            android:elevation="8dp"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <Button
+                android:id="@+id/btnClearDateFilter"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="46dp"
+                android:layout_weight="1"
+                android:layout_marginRight="12dp"
+                android:layout_marginEnd="12dp"
+                android:text="Xóa"
+                android:textColor="#EE4D2D"
+                android:textSize="14sp"
+                app:strokeColor="#CCCCCC"
+                app:cornerRadius="4dp"/>
+
+            <Button
+                android:id="@+id/btnApplyDateFilter"
+                android:layout_width="0dp"
+                android:layout_height="46dp"
+                android:layout_weight="1"
+                android:backgroundTint="#EE4D2D"
+                android:text="Chọn"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                app:cornerRadius="4dp"/>
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

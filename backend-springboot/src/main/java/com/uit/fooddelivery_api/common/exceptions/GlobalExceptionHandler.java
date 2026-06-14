@@ -16,4 +16,11 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+
+    // Bắt lỗi khi 2 người cùng mua Flashsale tại 1 thời điểm (Người chậm hơn sẽ dính lỗi này)
+    @ExceptionHandler(org.springframework.orm.ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<Object>> handleOptimisticLocking(org.springframework.orm.ObjectOptimisticLockingFailureException ex) {
+        ApiResponse<Object> errorResponse = ApiResponse.error(409, "Hệ thống đang quá tải hoặc món ăn Flashsale bạn chọn vừa bị người khác nhanh tay mua mất! Vui lòng tải lại trang và đặt lại.");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
 }

@@ -58,43 +58,22 @@ public class FoodCategoryAdapter extends RecyclerView.Adapter<FoodCategoryAdapte
             holder.tvName.setTextColor(Color.parseColor("#5C6BC0"));
             holder.tvName.setTextSize(11f);
             holder.itemView.setAlpha(1.0f);
-            holder.itemView.setOnClickListener(null);
-            
-            // Thêm padding cho icon "Tất cả" để nó thu nhỏ lại cho đồng đều với các icon khác
+
             int padding = (int) (6 * holder.itemView.getContext().getResources().getDisplayMetrics().density);
             holder.ivIcon.setPadding(padding, padding, padding, padding);
-            return;
-        }
-
-        // Reset padding cho các mục bình thường
-        holder.ivIcon.setPadding(0, 0, 0, 0);
-
-        boolean isSelected = position == selectedPosition;
-
-        if (isSelected) {
-            holder.tvName.setTextColor(Color.parseColor("#0034c8"));
-            holder.tvName.setTextSize(12.5f);
-            holder.itemView.setAlpha(1.0f);
-            holder.ivIcon.setColorFilter(Color.parseColor("#0034c8"));
         } else {
+            // Reset padding cho các mục bình thường
+            holder.ivIcon.setPadding(0, 0, 0, 0);
             holder.tvName.setTextColor(Color.parseColor("#333333"));
             holder.tvName.setTextSize(12f);
-            holder.itemView.setAlpha(selectedPosition == -1 ? 1.0f : 0.6f);
-            // Use the category's own bold color for the icon
+            holder.itemView.setAlpha(1.0f);
             holder.ivIcon.setColorFilter(category.getBgColor());
         }
 
+        // Tất cả các category đều có thể click, không đổi màu
         holder.itemView.setOnClickListener(v -> {
-            int oldPos = selectedPosition;
-            if (selectedPosition == holder.getAdapterPosition()) {
-                selectedPosition = -1;
-            } else {
-                selectedPosition = holder.getAdapterPosition();
-            }
-            if (oldPos >= 0) notifyItemChanged(oldPos);
-            notifyItemChanged(holder.getAdapterPosition());
             if (listener != null) {
-                listener.onCategoryClick(selectedPosition == -1 ? null : category);
+                listener.onCategoryClick(category);
             }
         });
     }

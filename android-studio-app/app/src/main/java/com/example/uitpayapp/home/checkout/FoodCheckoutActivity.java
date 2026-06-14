@@ -5,6 +5,7 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,9 +19,12 @@ import com.example.uitpayapp.R;
 import com.example.uitpayapp.home.home_models.CartItem;
 import com.example.uitpayapp.home.home_models.CartManager;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 public class FoodCheckoutActivity extends AppCompatActivity {
 
@@ -29,8 +33,18 @@ public class FoodCheckoutActivity extends AppCompatActivity {
     private long totalAmount;
     private VoucherModel selectedVoucher = null;
 
-    private TextView tvSubtotal, tvTotalAmount, tvOriginalAmount, tvSelectedVoucher, tvDiscountAmount;
+    private TextView tvSubtotal, tvSelectedVoucher, tvDiscountAmount;
     private View layoutDiscount;
+    
+    private SwitchMaterial switchCoins;
+    private SwitchMaterial switchUtensils;
+    private EditText etNote;
+    private TextView tvDeliveryFee;
+    private View layoutCoinsDiscount;
+    private TextView tvCoinsDiscountAmount;
+    private Button btnConfirmCheckout;
+    private long deliveryFee = 15000;
+    private long coinsDiscount = 10000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,19 +65,34 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         tvSubtotal = findViewById(R.id.tv_subtotal);
-        tvTotalAmount = findViewById(R.id.tv_total_amount);
-        tvOriginalAmount = findViewById(R.id.tv_original_amount);
         tvSelectedVoucher = findViewById(R.id.tv_selected_voucher);
         tvDiscountAmount = findViewById(R.id.tv_discount_amount);
         layoutDiscount = findViewById(R.id.layout_discount);
 
-        tvOriginalAmount.setPaintFlags(tvOriginalAmount.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        tvDeliveryFee = findViewById(R.id.tv_delivery_fee);
+        layoutCoinsDiscount = findViewById(R.id.layout_coins_discount);
+        tvCoinsDiscountAmount = findViewById(R.id.tv_coins_discount_amount);
+
+        switchCoins = findViewById(R.id.switch_coins);
+        switchCoins.setOnCheckedChangeListener((buttonView, isChecked) -> updateTotals());
+
+        switchUtensils = findViewById(R.id.switch_utensils);
+        etNote = findViewById(R.id.et_note);
 
         CardView cardVoucher = findViewById(R.id.card_voucher);
         cardVoucher.setOnClickListener(v -> showVoucherBottomSheet());
 
-        Button btnConfirmCheckout = findViewById(R.id.btn_confirm_checkout);
+        btnConfirmCheckout = findViewById(R.id.btn_confirm_checkout);
         btnConfirmCheckout.setOnClickListener(v -> processCheckout());
+
+        // Init suggested items
+        RecyclerView rvSuggested = findViewById(R.id.rv_suggested_items);
+        rvSuggested.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        List<SuggestedItemAdapter.SuggestedItem> suggestedItems = new ArrayList<>();
+        suggestedItems.add(new SuggestedItemAdapter.SuggestedItem("Trà sữa trân châu", 25000, R.drawable.img_food_bubbletea));
+        suggestedItems.add(new SuggestedItemAdapter.SuggestedItem("Gà rán giòn", 35000, R.drawable.img_food_chicken));
+        suggestedItems.add(new SuggestedItemAdapter.SuggestedItem("Pizza phô mai", 45000, R.drawable.img_food_pizza));
+        rvSuggested.setAdapter(new SuggestedItemAdapter(suggestedItems));
     }
 
     private void loadCartData() {
@@ -81,27 +110,34 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         long discount = 0;
         if (selectedVoucher != null) {
             discount = selectedVoucher.getDiscountAmount();
-            // Ensure total doesn't go below 0
-            if (discount > subtotalAmount) {
-                discount = subtotalAmount;
-            }
         }
 
-        totalAmount = subtotalAmount - discount;
+        long totalCoinsDiscount = 0;
+        if (switchCoins.isChecked()) {
+            totalCoinsDiscount = coinsDiscount;
+            layoutCoinsDiscount.setVisibility(View.VISIBLE);
+        } else {
+            layoutCoinsDiscount.setVisibility(View.GONE);
+        }
+
+        long totalDiscount = discount + totalCoinsDiscount;
+        // Ensure total doesn't go below 0
+        if (totalDiscount > subtotalAmount + deliveryFee) {
+            totalDiscount = subtotalAmount + deliveryFee;
+        }
+
+        totalAmount = subtotalAmount + deliveryFee - totalDiscount;
 
         tvSubtotal.setText(String.format("%,dđ", subtotalAmount).replace(',', '.'));
-        tvTotalAmount.setText(String.format("%,dđ", totalAmount).replace(',', '.'));
+        btnConfirmCheckout.setText("Đặt đơn - " + String.format("%,dđ", totalAmount).replace(',', '.'));
 
         if (discount > 0) {
             layoutDiscount.setVisibility(View.VISIBLE);
             tvDiscountAmount.setText("-" + String.format("%,dđ", discount).replace(',', '.'));
-            tvOriginalAmount.setVisibility(View.VISIBLE);
-            tvOriginalAmount.setText(String.format("%,dđ", subtotalAmount).replace(',', '.'));
             tvSelectedVoucher.setText(selectedVoucher.getTitle());
             tvSelectedVoucher.setTextColor(android.graphics.Color.parseColor("#388E3C"));
         } else {
             layoutDiscount.setVisibility(View.GONE);
-            tvOriginalAmount.setVisibility(View.GONE);
             tvSelectedVoucher.setText("Chọn hoặc nhập mã ưu đãi");
             tvSelectedVoucher.setTextColor(android.graphics.Color.parseColor("#757575"));
         }
@@ -150,6 +186,11 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
         intent.putExtra("KEY_IS_FOOD_ORDER", true);
         intent.putExtra("KEY_FOOD_PRODUCTS", productNames);
+        intent.putExtra("KEY_DELIVERY_FEE", deliveryFee);
+        
+        long discountAmount = selectedVoucher != null ? selectedVoucher.getDiscountAmount() : 0;
+        intent.putExtra("KEY_DISCOUNT", discountAmount);
+        
         startActivity(intent);
 
         cartManager.clearCart();

@@ -37,4 +37,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "FROM Order o " +
             "WHERE o.status = 'PENDING' AND o.createdAt <= :cutoffTime")
     java.util.List<Order> findStalePendingOrders(@org.springframework.data.repository.query.Param("cutoffTime") java.time.LocalDateTime cutoffTime);
+
+    // Đếm xem quán này đang có bao nhiêu đơn ở trạng thái CHỜ XỬ LÝ hoặc ĐANG NẤU
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(o) " +
+            "FROM Order o " +
+            "WHERE o.restaurant.id = :restaurantId " +
+            "AND o.status IN ('PENDING', 'PREPARING')")
+    Long countActiveOrdersByRestaurant(@org.springframework.data.repository.query.Param("restaurantId") Long restaurantId);
 }
