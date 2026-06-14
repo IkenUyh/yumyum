@@ -31,6 +31,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final RestaurantRepository restaurantRepository;
     private final WalletRepository walletRepository;
+    private final com.uit.fooddelivery_api.modules.notification.services.NotificationService notificationService;
     private final CartItemRepository cartItemRepository;
     private final UserAddressRepository addressRepository;
     private final com.uit.fooddelivery_api.modules.voucher.repositories.VoucherRepository voucherRepository;
@@ -288,6 +289,13 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
         cartItemRepository.deleteByUserId(customer.getId());
 
+        notificationService.pushNotification(
+                restaurant.getMerchant().getId(),
+                "Đơn hàng mới",
+                "Bạn có đơn hàng mới từ " + customer.getFullName() + ". Mã đơn: #" + savedOrder.getId(),
+                "ORDER_UPDATE"
+        );
+
         return savedOrder;
     }
 
@@ -330,6 +338,13 @@ public class OrderService {
 
         merchantWallet.setBalance(merchantWallet.getBalance().add(order.getTotalAmount()));
         walletRepository.save(merchantWallet);
+
+        notificationService.pushNotification(
+                order.getUser().getId(),
+                "Giao hàng thành công",
+                "Đơn hàng #" + order.getId() + " đã được giao đến bạn. Chúc bạn ngon miệng!",
+                "ORDER_UPDATE"
+        );
 
         return orderRepository.save(order);
     }
