@@ -1,5 +1,6 @@
 package com.uit.fooddelivery_api.modules.user.repositories;
 
+import com.uit.fooddelivery_api.modules.user.entities.User;
 import com.uit.fooddelivery_api.modules.user.entities.UserAddress;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

@@ -23,30 +23,67 @@ public class UserService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final WalletRepository walletRepository;
+    private final com.uit.fooddelivery_api.modules.notification.services.NotificationService notificationService;
 
     @Transactional
-    public User registerUser(User user) {
-        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
+    public User registerUser(com.uit.fooddelivery_api.modules.user.dtos.RegisterRequestDTO dto) {
+        if (userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
             throw new RuntimeException("Số điện thoại này đã được đăng ký!");
         }
 
-        if (user.getRole() == null) {
-            user.setRole(Role.CUSTOMER);
-        }
+        // 1. Tạo User mới và sinh mã giới thiệu ngẫu nhiên
+        String myReferralCode = "FD" + java.util.UUID.randomUUID().toString().substring(0, 6).toUpperCase();
 
-        // 1. Lưu User vào database trước để lấy ID
+        User user = User.builder()
+                .phoneNumber(dto.getPhoneNumber())
+                .fullName(dto.getFullName())
+                .password(dto.getPassword()) // Trong thực tế nhớ mã hóa Bcrypt nhé
+                .role(Role.CUSTOMER)
+                .isActive(true)
+                .referralCode(myReferralCode)
+                .build();
+
         User savedUser = userRepository.save(user);
 
-        // 2. Tạo một cái ví rỗng cho User vừa tạo
+        // 2. Tạo Ví (Wallet) rỗng cho User mới
         Wallet newWallet = Wallet.builder()
                 .user(savedUser)
                 .balance(BigDecimal.ZERO)
                 .build();
 
-        // 3. Lưu ví vào database
-        walletRepository.save(newWallet);
+        // ==========================================
+        // 3. LOGIC TẶNG THƯỞNG REFERRAL (ISSUE #19)
+        // ==========================================
+        if (dto.getReferredByCode() != null && !dto.getReferredByCode().trim().isEmpty()) {
+            java.util.Optional<User> referrerOpt = userRepository.findByReferralCode(dto.getReferredByCode());
 
-        return savedUser;
+            if (referrerOpt.isPresent()) {
+                User referrer = referrerOpt.get();
+                savedUser.setReferredById(referrer.getId()); // Lưu vết người giới thiệu
+
+                // A. Thưởng cho người đi mời (Cộng 20k)
+                Wallet referrerWallet = walletRepository.findByUserId(referrer.getId())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy ví người giới thiệu"));
+                referrerWallet.setBalance(referrerWallet.getBalance().add(BigDecimal.valueOf(20000)));
+                walletRepository.save(referrerWallet);
+
+                // Bắn thông báo Real-time cho người mời
+                notificationService.pushNotification(
+                        referrer.getId(),
+                        "Thưởng giới thiệu bạn bè \uD83C\uDF89",
+                        "Bạn vừa nhận được 20.000đ vào ví vì đã giới thiệu thành công bạn: " + savedUser.getFullName(),
+                        "PROMOTION"
+                );
+
+                // B. Thưởng cho người mới tải app (Cộng 10k làm vốn)
+                newWallet.setBalance(BigDecimal.valueOf(10000));
+            } else {
+                throw new RuntimeException("Mã giới thiệu không hợp lệ hoặc không tồn tại!");
+            }
+        }
+
+        walletRepository.save(newWallet);
+        return userRepository.save(savedUser); // Cập nhật lại referredById
     }
 
     public AuthResponseDTO loginUser(String phoneNumber, String password) {
