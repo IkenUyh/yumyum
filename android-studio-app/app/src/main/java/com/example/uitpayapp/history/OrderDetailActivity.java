@@ -212,12 +212,15 @@ public class OrderDetailActivity extends AppCompatActivity {
         });
 
         btnChatDriver.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_SENDTO);
-            intent.setData(Uri.parse("smsto:+84987301126"));
-            intent.putExtra("sms_body", "Xin chào shipper, đơn hàng " + data.getOrderId() + " của tôi thế nào rồi ạ?");
-            startActivity(intent);
-        });
+            // Chuyển màn hình trực tiếp sang Activity phòng chat mới lập
+            Intent chatIntent = new Intent(OrderDetailActivity.this, ChatActivity.class);
 
+            // Truyền đính kèm mã đơn và tên quán sang để hiển thị linh hoạt trên Toolbar
+            chatIntent.putExtra("ORDER_ID", data.getOrderId());
+            chatIntent.putExtra("MERCHANT_NAME", data.getMerchantName());
+
+            startActivity(chatIntent);
+        });
         if ("COMPLETED".equalsIgnoreCase(data.getStatus())) {
             tvOrderStatusTitle.setText("Hoàn thành");
             tvOrderTimeHeader.setVisibility(View.GONE);

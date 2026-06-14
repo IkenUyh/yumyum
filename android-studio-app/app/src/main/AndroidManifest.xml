@@ -22,6 +22,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Androidstudioapp">
         <activity
+            android:name=".history.ChatActivity"
+            android:exported="false" />
+        <activity
             android:name=".history.OrderDetailActivity"
             android:exported="false" />
         <activity
@@ -50,7 +53,7 @@
             android:exported="false"></activity>
         <activity
             android:name=".history.TransactionHistoryActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".gift.GiftActivity"
             android:exported="false" />
@@ -140,7 +143,6 @@
         <activity
             android:name=".home.AllCategoriesActivity"
             android:exported="false" />
-
 
         <provider
             android:name="androidx.core.content.FileProvider"
