@@ -1,34 +1,66 @@
 package com.uit.fooddelivery_api.modules.wallet.services;
 
-import com.uit.fooddelivery_api.modules.wallet.dtos.TopUpRequestDTO;
-import com.uit.fooddelivery_api.modules.wallet.entities.Wallet;
-import com.uit.fooddelivery_api.modules.wallet.repositories.WalletRepository;
 import com.uit.fooddelivery_api.modules.user.entities.User;
+import com.uit.fooddelivery_api.modules.wallet.entities.Wallet;
+import com.uit.fooddelivery_api.modules.wallet.entities.WalletTransaction;
+import com.uit.fooddelivery_api.modules.wallet.repositories.WalletRepository;
+import com.uit.fooddelivery_api.modules.wallet.repositories.WalletTransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class WalletService {
 
     private final WalletRepository walletRepository;
+    private final WalletTransactionRepository transactionRepository;
 
+    // Lấy thông tin ví
+    public Wallet getMyWallet(User user) {
+        return walletRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy ví của người dùng!"));
+    }
+
+    // Lấy sao kê
+    public List<WalletTransaction> getTransactionHistory(User user) {
+        Wallet wallet = getMyWallet(user);
+        return transactionRepository.findByWalletIdOrderByCreatedAtDesc(wallet.getId());
+    }
+
+    // Hàm chuẩn để biến động số dư (Nạp, Trừ, Chuyển)
     @Transactional
-    public Wallet topUp(TopUpRequestDTO dto, User user) {
-        if (dto.getAmount() == null || dto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("So tien nap phai lon hon 0!");
+    public Wallet processTransaction(Long userId, BigDecimal amount, String type, String referenceId, String description) {
+        Wallet wallet = walletRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy ví để giao dịch!"));
+
+        // Kiểm tra số dư nếu là lệnh trừ tiền
+        if (amount.compareTo(BigDecimal.ZERO) < 0) {
+            if (wallet.getBalance().compareTo(amount.abs()) < 0) {
+                throw new RuntimeException("Số dư trong ví không đủ để thực hiện giao dịch!");
+            }
         }
 
-        // Tim vi cua chinh user dang dang nhap
-        Wallet wallet = walletRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Khong tim thay vi cua nguoi dung!"));
-
-        // Tien hanh cong don tien vao balance
-        BigDecimal newBalance = wallet.getBalance().add(dto.getAmount());
+        // Cập nhật số dư
+        BigDecimal newBalance = wallet.getBalance().add(amount);
         wallet.setBalance(newBalance);
+        Wallet savedWallet = walletRepository.save(wallet);
 
-        return walletRepository.save(wallet);
+        // Lưu vào sổ cái (Ledger)
+        WalletTransaction tx = WalletTransaction.builder()
+                .wallet(savedWallet)
+                .amount(amount)
+                .balanceAfter(newBalance)
+                .type(type)
+                .referenceId(referenceId)
+                .description(description)
+                .build();
+
+        transactionRepository.save(tx);
+
+        return savedWallet;
     }
 }
