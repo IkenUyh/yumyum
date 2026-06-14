@@ -33,6 +33,20 @@ public class TransferSuccessActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_close_action).setOnClickListener(v -> returnToHome());
 
+        findViewById(R.id.btn_transaction_details).setOnClickListener(v -> {
+            boolean isFoodOrderLocal = getIntent().getBooleanExtra("KEY_IS_FOOD_ORDER", false);
+            if (isFoodOrderLocal) {
+                Intent detailsIntent = new Intent(this, com.example.uitpayapp.history.OrderDetailActivity.class);
+                detailsIntent.putExtra("ORDER_STATUS", "DELIVERING");
+                detailsIntent.putExtra("KEY_AMOUNT", getIntent().getStringExtra("KEY_AMOUNT"));
+                detailsIntent.putExtra("KEY_DELIVERY_FEE", getIntent().getLongExtra("KEY_DELIVERY_FEE", 15000));
+                detailsIntent.putExtra("KEY_DISCOUNT", getIntent().getLongExtra("KEY_DISCOUNT", 0));
+                startActivity(detailsIntent);
+            } else {
+                Toast.makeText(this, "Tính năng xem chi tiết đang phát triển", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         int avatarId = getIntent().getIntExtra("KEY_AVATAR", R.drawable.img_usagi);
         String name = getIntent().getStringExtra("KEY_NAME");
         String amount = getIntent().getStringExtra("KEY_AMOUNT");
@@ -102,10 +116,10 @@ public class TransferSuccessActivity extends AppCompatActivity {
                 ((View) ivSuccessAvatar.getParent()).setVisibility(View.GONE);
             }
 
-            if (tvTransactionNote != null) {
-                tvTransactionNote.setVisibility(View.GONE);
+            View layoutTransactionNote = findViewById(R.id.layout_transaction_note);
+            if (layoutTransactionNote != null) {
+                layoutTransactionNote.setVisibility(View.GONE);
             }
-
         } else {
             if (ivCopySeri != null) ivCopySeri.setVisibility(View.GONE);
             if (ivCopyPin != null) ivCopyPin.setVisibility(View.GONE);
@@ -145,26 +159,48 @@ public class TransferSuccessActivity extends AppCompatActivity {
                     ivSuccessAvatar.setImageResource(avatarId);
                 }
             }
-            if (tvTransactionNote != null) {
+            View layoutRecipientInfo = findViewById(R.id.layout_recipient_info);
+            if (layoutRecipientInfo != null) {
+                if (isFoodOrder) {
+                    layoutRecipientInfo.setVisibility(View.GONE);
+                } else {
+                    layoutRecipientInfo.setVisibility(View.VISIBLE);
+                }
+            }
+
+            View layoutTransactionNote = findViewById(R.id.layout_transaction_note);
+            TextView tvTransactionNoteLabel = findViewById(R.id.tv_transaction_note_label);
+
+            if (layoutTransactionNote != null && tvTransactionNote != null && tvTransactionNoteLabel != null) {
                 String destination = getIntent().getStringExtra("KEY_DESTINATION");
                 if (isFoodOrder) {
-                    tvTransactionNote.setVisibility(View.VISIBLE);
-                    tvTransactionNote.setText("Sản phẩm: " + (foodProducts != null ? foodProducts : ""));
+                    layoutTransactionNote.setVisibility(View.VISIBLE);
+                    tvTransactionNoteLabel.setText("Sản phẩm");
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        tvTransactionNote.setText(android.text.Html.fromHtml((foodProducts != null ? foodProducts : ""), android.text.Html.FROM_HTML_MODE_COMPACT));
+                    } else {
+                        tvTransactionNote.setText(android.text.Html.fromHtml((foodProducts != null ? foodProducts : "")));
+                    }
                 } else if ("DEPOSIT".equals(type)) {
                     if (destination != null && !destination.isEmpty()) {
-                        tvTransactionNote.setText("Nạp vào: " + destination);
+                        layoutTransactionNote.setVisibility(View.VISIBLE);
+                        tvTransactionNoteLabel.setText("Nạp vào");
+                        tvTransactionNote.setText(destination);
                     } else {
-                        tvTransactionNote.setVisibility(View.GONE);
+                        layoutTransactionNote.setVisibility(View.GONE);
                     }
                 } else if ("WITHDRAW".equals(type)) {
                     if (destination != null && !destination.isEmpty()) {
-                        tvTransactionNote.setText("Rút từ: " + destination);
+                        layoutTransactionNote.setVisibility(View.VISIBLE);
+                        tvTransactionNoteLabel.setText("Rút từ");
+                        tvTransactionNote.setText(destination);
                     } else {
-                        tvTransactionNote.setVisibility(View.GONE);
+                        layoutTransactionNote.setVisibility(View.GONE);
                     }
                 } else {
-                    tvTransactionNote.setVisibility(View.VISIBLE);
-                    tvTransactionNote.setText("Ghi chú:");
+                    layoutTransactionNote.setVisibility(View.VISIBLE);
+                    tvTransactionNoteLabel.setText("Ghi chú");
+                    tvTransactionNote.setText("Chuyển tiền thành công");
                 }
             }
         }
@@ -172,22 +208,13 @@ public class TransferSuccessActivity extends AppCompatActivity {
         SimpleDateFormat idFormat = new SimpleDateFormat("yyMMddHHmmss", Locale.getDefault());
         String timePrefix = idFormat.format(new Date());
         int randomSuffix = random.nextInt(900) + 100;
-        String prefixText = "Mã giao dịch: ";
         String codeText = "#" + timePrefix + randomSuffix;
-        String fullTransactionText = prefixText + codeText;
 
-        SpannableString spannableTransactionId = new SpannableString(fullTransactionText);
-        spannableTransactionId.setSpan(
-                new ForegroundColorSpan(Color.parseColor("#000000")),
-                prefixText.length(),
-                fullTransactionText.length(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        if (tvTransactionId != null) tvTransactionId.setText(spannableTransactionId);
+        if (tvTransactionId != null) tvTransactionId.setText(codeText);
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault());
         String currentTime = sdf.format(new Date());
-        if (tvTransactionTime != null) tvTransactionTime.setText("Thời gian: " + currentTime);
+        if (tvTransactionTime != null) tvTransactionTime.setText(currentTime);
 
         if (amount != null && tvSuccessAmount != null) {
             try {
@@ -205,6 +232,20 @@ public class TransferSuccessActivity extends AppCompatActivity {
                 tvSuccessAmount.setText(spannableString);
             } catch (Exception e) {
                 tvSuccessAmount.setText(amount + "đ");
+            }
+        }
+        
+        setupDeliveryProgress();
+    }
+
+    private void setupDeliveryProgress() {
+        View layoutDeliveryProgress = findViewById(R.id.layout_delivery_progress);
+        if (layoutDeliveryProgress != null) {
+            boolean isFoodOrder = getIntent().getBooleanExtra("KEY_IS_FOOD_ORDER", false);
+            if (isFoodOrder) {
+                layoutDeliveryProgress.setVisibility(View.VISIBLE);
+            } else {
+                layoutDeliveryProgress.setVisibility(View.GONE);
             }
         }
     }

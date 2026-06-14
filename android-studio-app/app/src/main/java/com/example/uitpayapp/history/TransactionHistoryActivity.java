@@ -18,6 +18,9 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets;
 import com.example.uitpayapp.R;
 import com.google.android.material.tabs.TabLayout;
 import java.text.SimpleDateFormat;
@@ -67,6 +70,18 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_transaction_history);
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.layoutHeader), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), systemBars.top, v.getPaddingRight(), v.getPaddingBottom());
+            return insets;
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.bottom_container), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
+            return insets;
+        });
 
         // Ánh xạ hệ thống cũ
         tabLayout = findViewById(R.id.layoutTabs);
@@ -288,39 +303,40 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     private void setupRecommendations() {
         rvRecommendations.setLayoutManager(new LinearLayoutManager(this));
         List<RecommendedShop> recList = new ArrayList<>();
-        recList.add(new RecommendedShop("Ăn Vặt Minh Mập - Mì Xào &amp; Nuôi Xào - Quốc Lộ 1k", 4.4, 0.2, 22, "Mã giảm 18%", android.R.drawable.ic_menu_gallery));
-        recList.add(new RecommendedShop("Bánh Mì Uyên Thư - Quốc Lộ 1K", 4.6, 0.3, 25, "Mã giảm 18%", android.R.drawable.ic_menu_gallery));
-        recList.add(new RecommendedShop("GS25 - Nguyễn Bĩnh Khiêm - Bình Dương", 4.2, 0.5, 18, "Mã giảm 10%", android.R.drawable.ic_menu_gallery));
+        List<com.example.uitpayapp.home.home_models.Restaurant> restaurants = com.example.uitpayapp.home.HomeActivity.HomeRepository.getInstance().getRestaurants();
+        
+        if (restaurants != null && restaurants.size() >= 3) {
+            recList.add(new RecommendedShop(restaurants.get(0).getName(), 4.8, 1.2, 15, "Mã giảm 20%", restaurants.get(0).getMenu().get(0).getImageResId()));
+            recList.add(new RecommendedShop(restaurants.get(1).getName(), 4.6, 2.5, 25, "Mã giảm 15%", restaurants.get(1).getMenu().get(0).getImageResId()));
+            recList.add(new RecommendedShop(restaurants.get(2).getName(), 4.5, 3.1, 30, "Mã giảm 10%", restaurants.get(2).getMenu().get(0).getImageResId()));
+        } else {
+            recList.add(new RecommendedShop("Ăn Vặt Minh Mập - Mì Xào & Nuôi Xào - Quốc Lộ 1k", 4.4, 0.2, 22, "Mã giảm 18%", android.R.drawable.ic_menu_gallery));
+            recList.add(new RecommendedShop("Bánh Mì Uyên Thư - Quốc Lộ 1K", 4.6, 0.3, 25, "Mã giảm 18%", android.R.drawable.ic_menu_gallery));
+            recList.add(new RecommendedShop("GS25 - Nguyễn Bĩnh Khiêm - Bình Dương", 4.2, 0.5, 18, "Mã giảm 10%", android.R.drawable.ic_menu_gallery));
+        }
         rvRecommendations.setAdapter(new RecommendedShopAdapter(recList));
     }
 
     private void createDummyFoodOrders() {
+        List<com.example.uitpayapp.home.home_models.FoodMenuItem> popularFoods = com.example.uitpayapp.home.HomeActivity.HomeRepository.getInstance().getPopularFoods();
+        
         List<FoodOrder.SubItem> subItems1 = new ArrayList<>();
-        subItems1.add(new FoodOrder.SubItem("Burrito Thịt bò\nxào (ko phải t...", android.R.drawable.ic_menu_report_image));
+        subItems1.add(new FoodOrder.SubItem(popularFoods.get(0).getName(), popularFoods.get(0).getImageResId()));
+        subItems1.add(new FoodOrder.SubItem(popularFoods.get(1).getName(), popularFoods.get(1).getImageResId()));
         allOrders.add(new FoodOrder("05066-620675729", "Bun Burrito - Trần Quốc Toản", 61000, 1, "Hôm nay 17:14", "Đang giao", "Đồ ăn", true, "Đang đến", subItems1));
 
         List<FoodOrder.SubItem> subItems2 = new ArrayList<>();
-        subItems2.add(new FoodOrder.SubItem("Hồng Trà - ly\nchà bá bự", android.R.drawable.ic_menu_report_image));
-        subItems2.add(new FoodOrder.SubItem("Cơm thêm + 1/2\ntrứng", android.R.drawable.ic_menu_report_image));
-        subItems2.add(new FoodOrder.SubItem("Cơm tấm\nXuyên đà", android.R.drawable.ic_menu_report_image));
+        subItems2.add(new FoodOrder.SubItem(popularFoods.get(2).getName(), popularFoods.get(2).getImageResId()));
+        subItems2.add(new FoodOrder.SubItem(popularFoods.get(3).getName(), popularFoods.get(3).getImageResId()));
         allOrders.add(new FoodOrder("04066-570542539", "MêBee - Cơm Tấm Long Xuyên &amp; Trà Sữa", 64000, 3, "04/06/2026", "Hoàn thành", "Đồ ăn", true, "Lịch sử", subItems2));
 
         List<FoodOrder.SubItem> subItemsSingle = new ArrayList<>();
-        subItemsSingle.add(new FoodOrder.SubItem("Cơm Sườn Bì Chả Đặc Biệt", android.R.drawable.ic_menu_report_image));
+        subItemsSingle.add(new FoodOrder.SubItem(popularFoods.get(4).getName(), popularFoods.get(4).getImageResId()));
         allOrders.add(new FoodOrder("21099-112233445", "Cơm Tấm Ngô Quyền - Linh Trung", 45000, 1, "15/05/2026", "Hoàn thành", "Đồ ăn", false, "Lịch sử", subItemsSingle));
 
         List<FoodOrder.SubItem> subItemsFour = new ArrayList<>();
-        subItemsFour.add(new FoodOrder.SubItem("Gà Giòn Cay\n(2 miếng)", android.R.drawable.ic_menu_report_image));
-        subItemsFour.add(new FoodOrder.SubItem("Khoai Tây Chiên\nCỡ Vừa", android.R.drawable.ic_menu_report_image));
-        subItemsFour.add(new FoodOrder.SubItem("Nước Ngọt\nPepsi Ly Big", android.R.drawable.ic_menu_report_image));
-        subItemsFour.add(new FoodOrder.SubItem("Bánh Pie\nPhô Mai Béo", android.R.drawable.ic_menu_report_image));
+        subItemsFour.add(new FoodOrder.SubItem(popularFoods.get(5).getName(), popularFoods.get(5).getImageResId()));
         allOrders.add(new FoodOrder("12044-998877665", "Gà Rán Popeyes - Võ Văn Ngân", 145000, 4, "12/05/2026", "Hoàn thành", "Đồ ăn", true, "Lịch sử", subItemsFour));
-
-        List<FoodOrder.SubItem> subItems3 = new ArrayList<>();
-        subItems3.add(new FoodOrder.SubItem("Cơm Chiên\nDương Châu", android.R.drawable.ic_menu_report_image));
-        subItems3.add(new FoodOrder.SubItem("Mì Trộn Xá Xíu\nSốt Đặc Biệt", android.R.drawable.ic_menu_report_image));
-        subItems3.add(new FoodOrder.SubItem("Canh Rong Biển\nThịt Bằm", android.R.drawable.ic_menu_report_image));
-        allOrders.add(new FoodOrder("02066-398566041", "Cơm Chiên Dương Châu &amp; Mì Trộn...", 107100, 3, "02/06/2026", "Hoàn thành", "Đồ ăn", false, "Lịch sử", subItems3));
     }
 
     private void setupTabs() {

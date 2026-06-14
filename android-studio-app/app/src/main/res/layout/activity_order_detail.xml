@@ -24,20 +24,23 @@
             android:id="@+id/btnMapBack"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_margin="16dp"
-            android:background="@android:drawable/btn_default_small"
-            android:src="@android:drawable/ic_menu_revert"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_arrow_back"
             app:tint="#333333"/>
     </FrameLayout>
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:paddingTop="32dp"
         android:background="#FFFFFF"
         android:elevation="4dp"
         android:visibility="gone"
-        app:navigationIcon="@android:drawable/ic_menu_revert"
+        app:navigationIcon="@drawable/ic_arrow_back"
         app:title="Chi tiết đơn hàng"
         app:titleCentered="true" />
 
@@ -107,33 +110,65 @@
                                 android:textStyle="bold"
                                 android:textSize="21sp" />
                         </LinearLayout>
-                        <com.google.android.material.imageview.ShapeableImageView
+                        <ImageView
                             android:id="@+id/ivStatusIllustration"
-                            android:layout_width="52dp"
-                            android:layout_height="52dp"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:src="@android:drawable/ic_dialog_info"
-                            android:background="#FFF0ED"
-                            android:padding="12dp"
-                            app:shapeAppearanceOverlay="@xml/rounded_corners_small"
-                            app:tint="#E84A26" />
+                            android:src="@drawable/ic_shipper" />
                     </RelativeLayout>
 
+                    <!-- Horizontal Progress -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginVertical="16dp"
-                        android:gravity="center_vertical"
                         android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginVertical="16dp"
                         android:paddingHorizontal="4dp">
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/ic_menu_recent_history" app:tint="#E84A26"/>
-                        <View android:layout_width="0dp" android:layout_height="3dp" android:layout_weight="1" android:background="#E84A26"/>
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/ic_menu_compass" app:tint="#E84A26"/>
-                        <View android:layout_width="0dp" android:layout_height="3dp" android:layout_weight="1" android:background="#E84A26"/>
-                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_media_play" app:tint="#E84A26"/>
-                        <View android:layout_width="0dp" android:layout_height="3dp" android:layout_weight="1" android:background="#E5E5E5"/>
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/ic_menu_mylocation" app:tint="#CCCCCC"/>
+                        
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_circle_check"
+                            app:tint="#FF5722" />
+                            
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="2dp"
+                            android:background="#FF5722" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_circle_check"
+                            app:tint="#FF5722" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="2dp"
+                            android:background="#FF5722" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_circle_check"
+                            app:tint="#FF5722" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="2dp"
+                            android:background="#FF5722" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_home"
+                            app:tint="#FF5722" />
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#EFEFEF"/>
