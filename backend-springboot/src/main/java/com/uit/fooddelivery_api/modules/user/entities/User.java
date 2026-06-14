@@ -74,4 +74,10 @@ public class User implements UserDetails {
 
     @Column(name = "is_active")
     private Boolean isActive;
+
+    @Column(name = "referral_code", unique = true, length = 20)
+    private String referralCode;
+
+    @Column(name = "referred_by_id")
+    private Long referredById;
 }

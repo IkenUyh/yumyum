@@ -10,4 +10,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByPhoneNumber(String phoneNumber);
     Optional<User> findByPhoneNumber(String phoneNumber);
+
+    // Thêm hàm này để tìm người giới thiệu
+    java.util.Optional<User> findByReferralCode(String referralCode);
 }
