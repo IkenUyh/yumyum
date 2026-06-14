@@ -56,26 +56,25 @@ public class CategoryActivity extends AppCompatActivity {
         TabLayout tabLayout = findViewById(R.id.tab_categories);
         ViewPager2 viewPager = findViewById(R.id.view_pager_categories);
 
-        List<String> rawCategories = HomeActivity.HomeRepository.getInstance().getAllCategoryNames();
+        String selectedCategory = getIntent().getStringExtra(EXTRA_SELECTED_CATEGORY);
+        if (selectedCategory != null) {
+            TextView tvTitle = findViewById(R.id.tv_category_title);
+            tvTitle.setText(selectedCategory);
+        } else {
+            selectedCategory = "Tất cả";
+        }
 
-        CategoryPagerAdapter adapter = new CategoryPagerAdapter(this, rawCategories);
+        List<String> filters = java.util.Arrays.asList("Gần tôi", "Bán chạy", "Đánh giá");
+
+        CategoryPagerAdapter adapter = new CategoryPagerAdapter(this, selectedCategory, filters);
         viewPager.setAdapter(adapter);
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
-            String rawName = rawCategories.get(position);
-            tab.setText(rawName.replace("\n", " - "));
+            tab.setText(filters.get(position));
         }).attach();
 
         // Add vertical dividers between tabs
         addTabDividers(tabLayout);
-
-        String selectedCategory = getIntent().getStringExtra(EXTRA_SELECTED_CATEGORY);
-        if (selectedCategory != null) {
-            int index = rawCategories.indexOf(selectedCategory);
-            if (index != -1) {
-                viewPager.setCurrentItem(index, false);
-            }
-        }
     }
 
     private void addTabDividers(TabLayout tabLayout) {

@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.home.StoreDetailActivity;
 import com.example.uitpayapp.recommendeddeal.RecommendedDealDetailActivity;
 import com.example.uitpayapp.recommendeddeal.RecommendedDealModel;
 
@@ -97,6 +98,16 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         holder.tvDiscountPrice.setText(currencyFormatter.format(deal.getDiscountPrice()));
 
+        View.OnClickListener storeClickListener = v -> {
+            Intent intent = new Intent(v.getContext(), StoreDetailActivity.class);
+            intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, deal.getStoreName());
+            v.getContext().startActivity(intent);
+        };
+
+        if (holder.layoutStoreInfo != null) {
+            holder.layoutStoreInfo.setOnClickListener(storeClickListener);
+        }
+
         View.OnClickListener clickListener = v -> {
             Intent intent = new Intent(v.getContext(), RecommendedDealDetailActivity.class);
             intent.putExtra("food_title", deal.getFoodTitle());
@@ -109,6 +120,7 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             v.getContext().startActivity(intent);
         };
 
+        // If user clicks the card outside the store info, or clicks Buy Now, it goes to Deal Detail
         holder.itemView.setOnClickListener(clickListener);
         holder.btnBuyNow.setOnClickListener(clickListener);
     }
@@ -124,9 +136,11 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         TextView tvStoreName, tvDistance, tvDeliveryTime, tvDiscountTag,
                 tvFoodTitle, tvSoldCount, tvOriginalPrice, tvDiscountPrice, btnBuyNow;
         ImageView ivFoodImage;
+        View layoutStoreInfo;
 
         public DealViewHolder(@NonNull View itemView) {
             super(itemView);
+            layoutStoreInfo = itemView.findViewById(R.id.layout_store_info);
             tvStoreName = itemView.findViewById(R.id.tv_store_name);
             tvDistance = itemView.findViewById(R.id.tv_distance);
             tvDeliveryTime = itemView.findViewById(R.id.tv_delivery_time);

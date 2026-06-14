@@ -52,7 +52,7 @@ public class FoodCategoryAdapter extends RecyclerView.Adapter<FoodCategoryAdapte
         // Always show icon
         holder.ivIcon.setImageResource(category.getIconResId());
 
-        // Xử lý item "Tất cả"
+        // Xử lý item "Danh mục"
         if (category.isSelectAll()) {
             holder.ivIcon.setColorFilter(Color.parseColor("#5C6BC0"));
             holder.tvName.setTextColor(Color.parseColor("#5C6BC0"));
