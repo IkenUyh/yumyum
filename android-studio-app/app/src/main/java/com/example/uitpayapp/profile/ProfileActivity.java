@@ -24,6 +24,7 @@ import com.example.uitpayapp.R;
 import com.example.uitpayapp.YumYumPriority.PriorityYumYumActivity;
 import com.example.uitpayapp.auth.SignInActivity;
 import com.example.uitpayapp.giftexchange.GiftExchangeActivity;
+import com.example.uitpayapp.merchant.home.SellerHomeActivity;
 import com.example.uitpayapp.profile.accountPaymentManage.AccountManagementActivity;
 import com.example.uitpayapp.voucher.VoucherActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -212,7 +213,7 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(intentLocation);
                 break;
             case "Cửa hàng của bạn":
-                Intent intentStore=new Intent(this, com.example.uitpayapp.registerstore.RegisterStoreActivity.class);
+                Intent intentStore=new Intent(this, SellerHomeActivity.class);
                 startActivity(intentStore);
                 break;
         }

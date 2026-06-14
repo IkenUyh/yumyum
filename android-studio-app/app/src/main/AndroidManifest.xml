@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.uitpayapp">
 
     <uses-feature
@@ -109,6 +110,21 @@
             android:exported="false" />
         <activity
             android:name=".home.checkout.TransferSuccessActivity"
+            android:exported="false" />
+        <activity
+            android:name=".merchant.home.SellerHomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".merchant.shop.SellerShopActivity"
+            android:exported="false" />
+        <activity
+            android:name=".merchant.shop.SellerReviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".merchant.shop.MerchantMenuActivity"
+            android:exported="false" />
+        <activity
+            android:name=".merchant.shop.AddMerchantDishActivity"
             android:exported="false" />
 
         <provider

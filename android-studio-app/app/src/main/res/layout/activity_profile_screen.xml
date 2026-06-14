@@ -185,7 +185,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true">
-
             <LinearLayout
                 android:id="@+id/layoutBottomNav"
                 android:layout_width="match_parent"
@@ -195,7 +194,6 @@
                 android:orientation="horizontal"
                 android:weightSum="5"
                 app:layout_constraintBottom_toBottomOf="parent">
-
                 <LinearLayout
                     android:id="@+id/navHome"
                     android:layout_width="0dp"
@@ -206,13 +204,11 @@
                     android:focusable="true"
                     android:gravity="center"
                     android:orientation="vertical">
-
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_home_24px"
                         app:tint="#757575" />
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -232,7 +228,6 @@
                     android:focusable="true"
                     android:gravity="center"
                     android:orientation="vertical">
-
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
@@ -247,7 +242,6 @@
                         android:textColor="#757575"
                         android:textSize="12sp" />
                 </LinearLayout>
-
                 <LinearLayout
                     android:id="@+id/navFavorite"
                     android:layout_width="0dp"
@@ -273,7 +267,6 @@
                         android:textColor="#757575"
                         android:textSize="12sp" />
                 </LinearLayout>
-
                 <LinearLayout
                     android:id="@+id/navNotification"
                     android:layout_width="0dp"
@@ -284,7 +277,6 @@
                     android:focusable="true"
                     android:gravity="center"
                     android:orientation="vertical">
-
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
@@ -299,7 +291,6 @@
                         android:textColor="#757575"
                         android:textSize="12sp" />
                 </LinearLayout>
-
                 <LinearLayout
                     android:id="@+id/navAccount"
                     android:layout_width="0dp"
