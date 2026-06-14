@@ -228,6 +228,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:background="#FFFFFF"
                 android:paddingHorizontal="8dp"
                 android:paddingBottom="12dp"
@@ -244,7 +245,31 @@
                     tools:spanCount="2"
                     tools:orientation="horizontal"
                     tools:itemCount="10" />
+
+                <!-- Custom Indicator -->
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="4dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_scrollbar_track">
+                    
+                    <View
+                        android:id="@+id/indicator_thumb"
+                        android:layout_width="20dp"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_scrollbar_thumb"/>
+                </FrameLayout>
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="#F0F0F0" />
+
+            <include
+                android:id="@+id/topic_brand_section"
+                layout="@layout/layout_topic_section" />
 
             <View
                 android:layout_width="match_parent"
@@ -262,24 +287,6 @@
 
             <include
                 android:id="@+id/topic_section_2"
-                layout="@layout/layout_topic_section" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:background="#F0F0F0" />
-
-            <include
-                android:id="@+id/topic_section_3"
-                layout="@layout/layout_topic_section" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:background="#F0F0F0" />
-
-            <include
-                android:id="@+id/topic_section_4"
                 layout="@layout/layout_topic_section" />
 
             <View
@@ -307,7 +314,7 @@
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tất cả" />
+                        android:text="Gần tôi" />
 
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
@@ -317,7 +324,7 @@
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Gần tôi" />
+                        android:text="Đánh giá" />
                 </com.google.android.material.tabs.TabLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -354,7 +361,7 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tất cả" />
+            android:text="Gần tôi" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
@@ -364,7 +371,7 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Gần tôi" />
+            android:text="Đánh giá" />
     </com.google.android.material.tabs.TabLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

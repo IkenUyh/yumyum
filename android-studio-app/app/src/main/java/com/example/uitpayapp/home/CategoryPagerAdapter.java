@@ -9,21 +9,23 @@ import java.util.List;
 
 public class CategoryPagerAdapter extends FragmentStateAdapter {
 
-    private final List<String> categories;
+    private final String categoryName;
+    private final List<String> filters;
 
-    public CategoryPagerAdapter(@NonNull FragmentActivity fragmentActivity, List<String> categories) {
+    public CategoryPagerAdapter(@NonNull FragmentActivity fragmentActivity, String categoryName, List<String> filters) {
         super(fragmentActivity);
-        this.categories = categories;
+        this.categoryName = categoryName;
+        this.filters = filters;
     }
 
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        return CategoryTabFragment.newInstance(categories.get(position));
+        return CategoryTabFragment.newInstance(categoryName, filters.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return categories.size();
+        return filters.size();
     }
 }

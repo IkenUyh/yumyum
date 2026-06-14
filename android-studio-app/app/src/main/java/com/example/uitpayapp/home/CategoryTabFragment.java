@@ -30,11 +30,13 @@ import java.util.List;
 public class CategoryTabFragment extends Fragment {
 
     private static final String ARG_CATEGORY_NAME = "category_name";
+    private static final String ARG_FILTER_TYPE = "filter_type";
 
-    public static CategoryTabFragment newInstance(String categoryName) {
+    public static CategoryTabFragment newInstance(String categoryName, String filterType) {
         CategoryTabFragment fragment = new CategoryTabFragment();
         Bundle args = new Bundle();
         args.putString(ARG_CATEGORY_NAME, categoryName);
+        args.putString(ARG_FILTER_TYPE, filterType);
         fragment.setArguments(args);
         return fragment;
     }
@@ -47,7 +49,14 @@ public class CategoryTabFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         String categoryName = getArguments() != null ? getArguments().getString(ARG_CATEGORY_NAME) : "";
+        String filterType = getArguments() != null ? getArguments().getString(ARG_FILTER_TYPE) : "";
+        
         List<FoodMenuItem> foods = HomeActivity.HomeRepository.getInstance().getCategoryFoodsByName(categoryName);
+        
+        // Mock filter logic
+        if ("Bán chạy".equals(filterType) || "Đánh giá".equals(filterType)) {
+            java.util.Collections.shuffle(foods);
+        }
 
         CategoryFoodAdapter adapter = new CategoryFoodAdapter(foods, (item, imageView) -> {
             showFoodItemDetailPopup(item, imageView);
@@ -58,6 +67,9 @@ public class CategoryTabFragment extends Fragment {
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setOnRefreshListener(() -> {
                 List<FoodMenuItem> refreshedFoods = HomeActivity.HomeRepository.getInstance().getCategoryFoodsByName(categoryName);
+                if ("Bán chạy".equals(filterType) || "Đánh giá".equals(filterType)) {
+                    java.util.Collections.shuffle(refreshedFoods);
+                }
                 CategoryFoodAdapter newAdapter = new CategoryFoodAdapter(refreshedFoods, (item, imageView) -> {
                     showFoodItemDetailPopup(item, imageView);
                 });

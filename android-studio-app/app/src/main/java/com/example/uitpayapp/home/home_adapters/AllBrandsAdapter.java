@@ -4,6 +4,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,7 +16,7 @@ import com.example.uitpayapp.home.home_models.Restaurant;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BrandAdapter extends RecyclerView.Adapter<BrandAdapter.ViewHolder> {
+public class AllBrandsAdapter extends RecyclerView.Adapter<AllBrandsAdapter.ViewHolder> {
 
     public interface OnBrandClickListener {
         void onBrandClick(Restaurant restaurant);
@@ -24,21 +25,16 @@ public class BrandAdapter extends RecyclerView.Adapter<BrandAdapter.ViewHolder> 
     private List<Restaurant> restaurants;
     private final OnBrandClickListener listener;
 
-    public BrandAdapter(List<Restaurant> restaurants, OnBrandClickListener listener) {
+    public AllBrandsAdapter(List<Restaurant> restaurants, OnBrandClickListener listener) {
         this.restaurants = new ArrayList<>(restaurants);
         this.listener = listener;
-    }
-
-    public void updateData(List<Restaurant> newData) {
-        this.restaurants = new ArrayList<>(newData);
-        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_food_brand, parent, false);
+                .inflate(R.layout.item_all_brand, parent, false);
         return new ViewHolder(view);
     }
 
@@ -47,6 +43,8 @@ public class BrandAdapter extends RecyclerView.Adapter<BrandAdapter.ViewHolder> 
         Restaurant restaurant = restaurants.get(position);
         holder.tvInitial.setText(restaurant.getShortName());
         holder.tvName.setText(restaurant.getName());
+        holder.tvRating.setText(String.valueOf(restaurant.getRating()));
+        holder.tvCategory.setText(restaurant.getCategory());
 
         // Set brand color as circle background
         GradientDrawable bg = new GradientDrawable();
@@ -54,11 +52,6 @@ public class BrandAdapter extends RecyclerView.Adapter<BrandAdapter.ViewHolder> 
         bg.setCornerRadius(16 * holder.itemView.getContext().getResources().getDisplayMetrics().density);
         bg.setColor(restaurant.getBgColor());
         holder.viewBg.setBackground(bg);
-
-        // Bind star rating
-        if (holder.tvRating != null) {
-            holder.tvRating.setText(String.valueOf(restaurant.getRating()));
-        }
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -74,6 +67,7 @@ public class BrandAdapter extends RecyclerView.Adapter<BrandAdapter.ViewHolder> 
         TextView tvInitial;
         TextView tvName;
         TextView tvRating;
+        TextView tvCategory;
         View viewBg;
 
         ViewHolder(View itemView) {
@@ -81,6 +75,7 @@ public class BrandAdapter extends RecyclerView.Adapter<BrandAdapter.ViewHolder> 
             tvInitial = itemView.findViewById(R.id.tv_brand_initial);
             tvName = itemView.findViewById(R.id.tv_brand_name);
             tvRating = itemView.findViewById(R.id.tv_brand_rating);
+            tvCategory = itemView.findViewById(R.id.tv_brand_category);
             viewBg = itemView.findViewById(R.id.view_brand_bg);
         }
     }

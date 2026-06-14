@@ -46,6 +46,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".home.AllBrandsActivity"
+            android:exported="false"></activity>
+        <activity
             android:name=".history.TransactionHistoryActivity"
             android:exported="false"></activity>
         <activity
@@ -130,6 +133,12 @@
             android:exported="false" />
         <activity
             android:name=".home.CategoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".home.StoreDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".home.AllCategoriesActivity"
             android:exported="false" />
 
 

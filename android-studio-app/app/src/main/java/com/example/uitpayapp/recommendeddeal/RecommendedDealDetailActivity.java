@@ -132,6 +132,15 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
 
             FoodMenuItem item = new FoodMenuItem("deal_" + System.currentTimeMillis(), foodTitle, (long) discountPrice, foodImage, "Khuyến mãi từ " + storeName);
             btnBuyNow.setOnClickListener(v -> showFoodItemDetailPopup(item));
+
+            View cvStoreInfo = findViewById(R.id.cv_store_info);
+            if (cvStoreInfo != null) {
+                cvStoreInfo.setOnClickListener(v -> {
+                    android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.home.StoreDetailActivity.class);
+                    intent.putExtra(com.example.uitpayapp.home.StoreDetailActivity.EXTRA_RESTAURANT_NAME, storeName);
+                    startActivity(intent);
+                });
+            }
         }
     }
 
