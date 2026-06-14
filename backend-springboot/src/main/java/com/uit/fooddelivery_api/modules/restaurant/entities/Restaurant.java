@@ -51,4 +51,10 @@ public class Restaurant {
 
     @Column(name = "max_pending_orders")
     private Integer maxPendingOrders;
+
+    @Column(name = "rating_average", precision = 3, scale = 1)
+    private java.math.BigDecimal ratingAverage;
+
+    @Column(name = "review_count")
+    private Integer reviewCount;
 }
