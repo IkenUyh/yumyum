@@ -36,6 +36,7 @@ public class OrderService {
     private final UserAddressRepository addressRepository;
     private final com.uit.fooddelivery_api.modules.voucher.repositories.VoucherRepository voucherRepository;
     private final com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository;
+    private final com.uit.fooddelivery_api.modules.wallet.services.WalletService walletService;
 
     // Phí ship cơ bản: 5.000 VNĐ / 1 Km
     private static final BigDecimal FEE_PER_KM = BigDecimal.valueOf(5000);
@@ -283,8 +284,7 @@ public class OrderService {
             throw new RuntimeException("Số dư tài khoản ví không đủ để thực hiện thanh toán! Tổng tiền: " + finalTotal + "đ.");
         }
 
-        wallet.setBalance(wallet.getBalance().subtract(finalTotal));
-        walletRepository.save(wallet);
+        walletService.processTransaction(customer.getId(), finalTotal.negate(), "PAYMENT", "ORDER_" + order.getId(), "Thanh toán đơn hàng đồ ăn");
 
         Order savedOrder = orderRepository.save(order);
         cartItemRepository.deleteByUserId(customer.getId());

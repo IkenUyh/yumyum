@@ -1,13 +1,21 @@
 package com.uit.fooddelivery_api.modules.wallet.controllers;
 
 import com.uit.fooddelivery_api.common.responses.ApiResponse;
-import com.uit.fooddelivery_api.modules.wallet.dtos.TopUpRequestDTO;
+import com.uit.fooddelivery_api.modules.user.entities.User;
+import com.uit.fooddelivery_api.modules.wallet.dtos.TransactionResponseDTO;
 import com.uit.fooddelivery_api.modules.wallet.entities.Wallet;
 import com.uit.fooddelivery_api.modules.wallet.services.WalletService;
-import com.uit.fooddelivery_api.modules.user.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/wallets")
@@ -16,17 +24,24 @@ public class WalletController {
 
     private final WalletService walletService;
 
-    @PostMapping("/topup")
-    public ApiResponse<Wallet> topUp(
-            Authentication authentication,
-            @RequestBody TopUpRequestDTO dto) {
-
-        // Lay thong tin User dang nhap tu Token gac cong
+    // Lấy số dư ví hiện tại
+    @GetMapping("/balance")
+    public ApiResponse<Map<String, BigDecimal>> getBalance(Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
+        Wallet wallet = walletService.getMyWallet(currentUser);
 
-        // Goi service nap tien
-        Wallet updatedWallet = walletService.topUp(dto, currentUser);
+        Map<String, BigDecimal> response = new HashMap<>();
+        response.put("balance", wallet.getBalance());
+        return ApiResponse.success(response);
+    }
 
-        return ApiResponse.success(updatedWallet);
+    // Lấy lịch sử biến động số dư (Sao kê)
+    @GetMapping("/transactions")
+    public ApiResponse<List<TransactionResponseDTO>> getTransactions(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        List<TransactionResponseDTO> history = walletService.getTransactionHistory(currentUser).stream()
+                .map(TransactionResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+        return ApiResponse.success(history);
     }
 }
