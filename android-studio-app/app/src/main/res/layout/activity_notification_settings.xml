@@ -151,7 +151,7 @@
                         android:id="@+id/ic_remind"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@drawable/ic_reliable_score"
+                        android:src="@drawable/ic_history_24px"
                         app:tint="#00C853"
                         android:layout_centerVertical="true"/>
                     <TextView
