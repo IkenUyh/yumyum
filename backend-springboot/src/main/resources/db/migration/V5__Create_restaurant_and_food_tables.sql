@@ -1,4 +1,4 @@
--- 1. Bảng Danh mục món ăn (Trà sữa, Cơm tấm, Đồ ăn vặt...)
+ -- 1. Bảng Danh mục món ăn (Trà sữa, Cơm tấm, Đồ ăn vặt...)
 CREATE TABLE categories (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
