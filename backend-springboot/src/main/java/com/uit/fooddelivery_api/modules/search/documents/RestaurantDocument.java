@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import lombok.*;
 
 @Document(indexName = "restaurants")
@@ -23,5 +24,5 @@ public class RestaurantDocument {
     private String address;
 
     @Field(type = FieldType.Geo_Point)
-    private String location;
+    private GeoPoint location;
 }
