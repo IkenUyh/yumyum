@@ -1,6 +1,7 @@
 package com.uit.fooddelivery_api.modules.order.controllers;
 
 import com.uit.fooddelivery_api.common.responses.ApiResponse;
+import com.uit.fooddelivery_api.modules.order.dtos.CancelOrderDTO;
 import com.uit.fooddelivery_api.modules.order.dtos.CreateOrderDTO;
 import com.uit.fooddelivery_api.modules.order.dtos.OrderResponseDTO;
 import com.uit.fooddelivery_api.modules.order.entities.Order;
@@ -26,6 +27,25 @@ public class OrderController {
         Order savedOrder = orderService.createOrder(dto, customer);
 
         return ApiResponse.success(OrderResponseDTO.fromEntity(savedOrder));
+    }
+
+    // API Hủy Đơn Hàng
+    @PutMapping("/{orderId}/cancel")
+    public ApiResponse<OrderResponseDTO> cancelOrder(
+            @PathVariable Long orderId,
+            @RequestBody CancelOrderDTO dto,
+            Authentication authentication) {
+
+        User actionUser = (User) authentication.getPrincipal();
+
+        // Truyền lý do vào (nếu khách không nhập thì để mặc định)
+        String reason = (dto.getReason() != null && !dto.getReason().trim().isEmpty())
+                ? dto.getReason()
+                : "Không có lý do";
+
+        Order cancelledOrder = orderService.cancelOrder(orderId, actionUser, reason);
+
+        return ApiResponse.success(OrderResponseDTO.fromEntity(cancelledOrder));
     }
 
     // API Lấy danh sách đơn chờ nhận
@@ -80,5 +100,37 @@ public class OrderController {
                 .map(OrderResponseDTO::fromEntity)
                 .toList();
         return ApiResponse.success(list);
+    }
+
+    // 1. API: Chủ quán xác nhận đã chuẩn bị xong đồ ăn
+    @PutMapping("/{orderId}/merchant-ready")
+    public ApiResponse<OrderResponseDTO> merchantReady(
+            @PathVariable Long orderId,
+            Authentication authentication) {
+        User merchant = (User) authentication.getPrincipal();
+        Order order = orderService.merchantCompletePreparation(orderId, merchant);
+        return ApiResponse.success(OrderResponseDTO.fromEntity(order));
+    }
+
+    // 2. API: Tài xế nhập mã lấy đồ tại quán để đi giao
+    @PutMapping("/{orderId}/driver-pickup")
+    public ApiResponse<OrderResponseDTO> driverPickup(
+            @PathVariable Long orderId,
+            @RequestBody com.uit.fooddelivery_api.modules.order.dtos.ConfirmPickupDTO dto,
+            Authentication authentication) {
+        User driver = (User) authentication.getPrincipal();
+        Order order = orderService.driverConfirmPickup(orderId, driver, dto.getPickupCode());
+        return ApiResponse.success(OrderResponseDTO.fromEntity(order));
+    }
+
+    // 3. API: Tài xế nhập mã PIN của khách để hoàn thành đơn hàng
+    @PutMapping("/{orderId}/driver-complete")
+    public ApiResponse<OrderResponseDTO> driverComplete(
+            @PathVariable Long orderId,
+            @RequestBody com.uit.fooddelivery_api.modules.order.dtos.ConfirmDeliveryDTO dto,
+            Authentication authentication) {
+        User driver = (User) authentication.getPrincipal();
+        Order order = orderService.completeOrderSecure(orderId, driver, dto.getDeliveryPin());
+        return ApiResponse.success(OrderResponseDTO.fromEntity(order));
     }
 }
