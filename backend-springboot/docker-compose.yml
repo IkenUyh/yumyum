@@ -49,6 +49,15 @@ services:
       - caddy_data:/data
       - caddy_config:/config
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: fooddelivery-es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+
 volumes:
   mysql_data:
   caddy_data:

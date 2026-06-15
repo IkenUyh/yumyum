@@ -32,4 +32,8 @@ public class DriverProfile {
 
     @Column(name = "current_order_id")
     private Long currentOrderId;
+
+    // THUỘC TÍNH NÀY LÀ CÁI ĐANG BỊ THIẾU ĐỂ GHÉP ĐƠN
+    @Column(name = "current_order_count")
+    private Integer currentOrderCount;
 }
