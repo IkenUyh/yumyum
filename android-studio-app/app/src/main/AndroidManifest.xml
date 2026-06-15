@@ -146,6 +146,9 @@
         <activity
             android:name=".home.AllCategoriesActivity"
             android:exported="false" />
+        <activity
+            android:name=".admin.AdminApprovalActivity"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
