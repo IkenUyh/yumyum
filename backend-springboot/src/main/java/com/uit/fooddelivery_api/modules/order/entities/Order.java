@@ -63,4 +63,13 @@ public class Order {
 
     @Column(name = "expected_delivery_time")
     private LocalDateTime expectedDeliveryTime;
+
+    @Column(name = "cancel_reason")
+    private String cancelReason;
+
+    @Column(name = "pickup_code", length = 10)
+    private String pickupCode;
+
+    @Column(name = "delivery_pin", length = 10)
+    private String deliveryPin;
 }

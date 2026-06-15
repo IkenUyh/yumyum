@@ -299,6 +299,88 @@ public class OrderService {
         return savedOrder;
     }
 
+    @Transactional
+    public Order cancelOrder(Long orderId, User actionUser, String reason) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+
+        boolean isCustomer = order.getUser().getId().equals(actionUser.getId());
+        boolean isMerchant = order.getRestaurant().getMerchant().getId().equals(actionUser.getId());
+
+        if (!isCustomer && !isMerchant) {
+            throw new RuntimeException("Bạn không có quyền hủy đơn hàng này!");
+        }
+
+        // 1. RÀNG BUỘC TRẠNG THÁI (State Machine)
+        if (order.getStatus().equals("COMPLETED") || order.getStatus().equals("CANCELLED")) {
+            throw new RuntimeException("Đơn hàng này đã kết thúc, không thể hủy!");
+        }
+
+        if (isCustomer && !order.getStatus().equals("PENDING")) {
+            throw new RuntimeException("Quán đã bắt đầu chuẩn bị món, bạn không thể hủy đơn lúc này! Vui lòng liên hệ trực tiếp quán.");
+        }
+
+        // 2. ĐỔI TRẠNG THÁI & LƯU LÝ DO
+        order.setStatus("CANCELLED");
+        order.setCancelReason(reason);
+
+        // ==========================================
+        // 3. LOGIC HOÀN TIỀN VÀ TRẢ LẠI VOUCHER
+        // ==========================================
+
+        // A. Hoàn tiền tự động vào Ví (Issue #27)
+        // Số tiền đưa vào là số DƯƠNG vì ta muốn CỘNG tiền lại cho Khách
+        walletService.processTransaction(
+                order.getUser().getId(),
+                order.getTotalAmount(),
+                "REFUND",
+                "ORDER_" + order.getId(),
+                "Hoàn tiền do hủy đơn hàng: " + reason
+        );
+
+        // B. Trả lại lượt sử dụng Voucher vào kho (Issue #16)
+        if (order.getVouchers() != null && !order.getVouchers().isEmpty()) {
+            for (com.uit.fooddelivery_api.modules.voucher.entities.Voucher v : order.getVouchers()) {
+                v.setStockQuantity(v.getStockQuantity() + 1); // Trả lại 1 lượt
+                voucherRepository.save(v);
+            }
+        }
+
+        // ==========================================
+        // 4. BẮN THÔNG BÁO REAL-TIME (Issue #11)
+        // ==========================================
+        if (isCustomer) {
+            // Khách tự hủy -> Báo cho Chủ quán biết để ngưng nấu
+            notificationService.pushNotification(
+                    order.getRestaurant().getMerchant().getId(),
+                    "Đơn hàng bị hủy",
+                    "Khách hàng đã hủy đơn #" + order.getId() + ". Lý do: " + reason,
+                    "ORDER_UPDATE"
+            );
+        } else if (isMerchant) {
+            // Quán hủy (do hết món) -> Xin lỗi khách
+            notificationService.pushNotification(
+                    order.getUser().getId(),
+                    "Đơn hàng bị hủy",
+                    "Rất tiếc, Quán đã hủy đơn #" + order.getId() + " của bạn. Lý do: " + reason + ". Tiền đã được hoàn lại vào Ví.",
+                    "ORDER_UPDATE"
+            );
+        }
+
+        // Xóa liên kết tài xế (nếu có tài xế đang nhận) để giải phóng tài xế
+        if (order.getDriver() != null) {
+            notificationService.pushNotification(
+                    order.getDriver().getId(),
+                    "Hủy chuyến",
+                    "Đơn hàng #" + order.getId() + " đã bị hủy. Bạn có thể tiếp tục nhận đơn mới.",
+                    "SYSTEM"
+            );
+            // Có thể thêm logic gọi DriverDispatchService để set tài xế về ONLINE ở đây.
+        }
+
+        return orderRepository.save(order);
+    }
+
     // 1. Lấy danh sách đơn đang chờ tài xế
     public List<Order> getAvailableOrders() {
         return orderRepository.findByStatus("PENDING");
@@ -343,6 +425,117 @@ public class OrderService {
                 order.getUser().getId(),
                 "Giao hàng thành công",
                 "Đơn hàng #" + order.getId() + " đã được giao đến bạn. Chúc bạn ngon miệng!",
+                "ORDER_UPDATE"
+        );
+
+        return orderRepository.save(order);
+    }
+
+    // 1. QUÁN ĂN: Bấm xác nhận nấu xong món ăn -> Sinh mã Pickup Code
+    @Transactional
+    public Order merchantCompletePreparation(Long orderId, User merchant) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+
+        if (!order.getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền xử lý đơn hàng của quán khác!");
+        }
+
+        if (!"PENDING".equals(order.getStatus())) {
+            throw new RuntimeException("Đơn hàng phải ở trạng thái CHỜ XỬ LÝ mới có thể xác nhận nấu xong!");
+        }
+
+        // Sinh mã lấy đồ ngẫu nhiên gồm 4 chữ số (Ví dụ: 8439)
+        String generatedPickupCode = String.format("%04d", new java.util.Random().nextInt(10000));
+
+        order.setStatus("PREPARING"); // Hoặc đặt trạng thái READY_FOR_PICKUP tùy thiết kế của bạn
+        order.setPickupCode(generatedPickupCode);
+        Order savedOrder = orderRepository.save(order);
+
+        // Bắn thông báo Real-time cho khách biết quán đang chuẩn bị đồ ăn
+        notificationService.pushNotification(
+                order.getUser().getId(),
+                "Quán đang chuẩn bị món \uD83C\uDF73",
+                "Đơn hàng từ " + order.getRestaurant().getName() + " đang được chuẩn bị. Mã lấy hàng của tài xế: " + generatedPickupCode,
+                "ORDER_UPDATE"
+        );
+
+        return savedOrder;
+    }
+
+    // 2. TÀI XẾ: Nhập mã Pickup Code từ chủ quán để lấy đồ đi giao
+    @Transactional
+    public Order driverConfirmPickup(Long orderId, User driver, String inputCode) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+
+        if (order.getDriver() == null || !order.getDriver().getId().equals(driver.getId())) {
+            throw new RuntimeException("Bạn không phải là tài xế được điều phối cho đơn hàng này!");
+        }
+
+        // XÁC THỰC MÃ LẤY ĐỒ CHỐNG GIAN LẬN
+        if (order.getPickupCode() == null || !order.getPickupCode().equals(inputCode)) {
+            throw new RuntimeException("Mã lấy hàng không chính xác! Vui lòng kiểm tra lại với chủ quán.");
+        }
+
+        // Sinh tiếp mã PIN 4 số gửi cho khách hàng cầm, tài xế không được biết trước
+        String generatedDeliveryPin = String.format("%04d", new java.util.Random().nextInt(10000));
+
+        order.setStatus("DELIVERING");
+        order.setDeliveryPin(generatedDeliveryPin);
+        Order savedOrder = orderRepository.save(order);
+
+        // Bắn thông báo chứa mã PIN cho Khách hàng bảo mật
+        notificationService.pushNotification(
+                order.getUser().getId(),
+                "Tài xế đang giao hàng \uD83D\uDEB4",
+                "Tài xế " + driver.getFullName() + " đang mang món ăn đến cho bạn. Hãy đưa mã PIN này cho tài xế khi nhận đồ: " + generatedDeliveryPin,
+                "ORDER_UPDATE"
+        );
+
+        return savedOrder;
+    }
+
+    // 3. TÀI XẾ: Đến nơi, xin mã PIN của khách gõ vào để hoàn thành đơn & Nhận tiền
+    @Transactional
+    public Order completeOrderSecure(Long orderId, User driver, String inputPin) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+
+        if (!"DELIVERING".equals(order.getStatus()) || !order.getDriver().getId().equals(driver.getId())) {
+            throw new RuntimeException("Bạn không có quyền hoàn thành đơn hàng này!");
+        }
+
+        // XÁC THỰC MÃ PIN CHỐNG QUỴT ĐƠN / GIAO NHẦM NHÀ
+        if (order.getDeliveryPin() == null || !order.getDeliveryPin().equals(inputPin)) {
+            throw new RuntimeException("Mã PIN nhận hàng từ khách hàng không chính xác!");
+        }
+
+        order.setStatus("COMPLETED");
+
+        // Bắn tiền thu nhập về ví của chủ quán (Merchant) qua Sổ cái kế toán
+        walletService.processTransaction(
+                order.getRestaurant().getMerchant().getId(),
+                order.getTotalAmount().subtract(order.getShippingFee()), // Tiền đồ ăn về quán
+                "REVENUE",
+                "ORDER_" + order.getId(),
+                "Doanh thu bán hàng đơn #" + order.getId()
+        );
+
+        // Bắn tiền ship về cho Ví của Tài xế (Driver)
+        walletService.processTransaction(
+                driver.getId(),
+                order.getShippingFee(), // Tiền ship về tài xế
+                "REVENUE",
+                "ORDER_" + order.getId(),
+                "Thù lao giao hàng đơn #" + order.getId()
+        );
+
+        // Bắn thông báo chúc mừng cả 2 bên
+        notificationService.pushNotification(
+                order.getUser().getId(),
+                "Đơn hàng hoàn tất \uD83C\uDF89",
+                "Cảm ơn bạn đã đặt hàng tại FoodDelivery! Đơn hàng #" + order.getId() + " đã giao thành công.",
                 "ORDER_UPDATE"
         );
 
