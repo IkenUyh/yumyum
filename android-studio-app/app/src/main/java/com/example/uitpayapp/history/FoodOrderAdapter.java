@@ -18,13 +18,35 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
 
     private List<FoodOrder> orderList;
     private OnItemClickListener listener;
+    private OnRateClickListener rateClickListener;
+    private OnReorderClickListener reorderClickListener; // Thêm listener cho nút Đặt lại
 
+    // Interface click vào toàn bộ item
     public interface OnItemClickListener {
         void onItemClick(FoodOrder order);
     }
 
+    // Interface click nút Đánh giá
+    public interface OnRateClickListener {
+        void onRateClick(FoodOrder order);
+    }
+
+    // Interface click nút Đặt lại
+    public interface OnReorderClickListener {
+        void onReorderClick(FoodOrder order);
+    }
+
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
+    }
+
+    public void setOnRateClickListener(OnRateClickListener rateClickListener) {
+        this.rateClickListener = rateClickListener;
+    }
+
+    // Setter cho nút Đặt lại từ bên ngoài Activity
+    public void setOnReorderClickListener(OnReorderClickListener reorderClickListener) {
+        this.reorderClickListener = reorderClickListener;
     }
 
     public FoodOrderAdapter(List<FoodOrder> orderList) {
@@ -61,16 +83,14 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
             holder.tvFavoriteTag.setVisibility(View.GONE);
         }
 
-        // FIX LỖI: Kiểm tra số lượng món để bật tắt giao diện thông minh
+        // Kiểm tra số lượng món để bật tắt giao diện thông minh
         if (order.getSubItems() != null && order.getSubItems().size() > 1) {
-            // Trường hợp nhiều món: Ẩn cụm món đơn, bật RecyclerView ngang lên
             holder.layoutSingleItem.setVisibility(View.GONE);
             holder.rvSubItemsList.setVisibility(View.VISIBLE);
 
             holder.rvSubItemsList.setLayoutManager(new LinearLayoutManager(holder.itemView.getContext(), LinearLayoutManager.HORIZONTAL, false));
             holder.rvSubItemsList.setAdapter(new SubItemAdapter(order.getSubItems()));
         } else {
-            // Trường hợp chỉ có 1 món: Bật cụm món đơn, ẩn RecyclerView ngang
             holder.layoutSingleItem.setVisibility(View.VISIBLE);
             holder.rvSubItemsList.setVisibility(View.GONE);
 
@@ -108,6 +128,38 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
             holder.layoutButtons.setVisibility(View.VISIBLE);
         }
 
+        // Xử lý sự kiện nút Đánh giá
+        // 1. CLICK NÚT ĐÁNH GIÁ -> Nhảy thẳng sang màn hình Đánh giá tài xế
+        holder.btnRate.setOnClickListener(v -> {
+            if (position != RecyclerView.NO_POSITION) {
+                // Lấy context trực tiếp từ view của item
+                android.content.Context context = holder.itemView.getContext();
+
+                // Khởi tạo và gắn thẳng Intent vào đây
+                android.content.Intent intent = new android.content.Intent(context, RatingDriverActivity.class);
+                intent.putExtra("DRIVER_ID", "DRV_" + order.getOrderId());
+                intent.putExtra("DRIVER_NAME", "Võ Tấn Đạt");
+
+                // Kích hoạt chuyển màn hình
+                context.startActivity(intent);
+            }
+        });
+
+// 2. CLICK NÚT ĐẶT LẠI -> Bạn có thể chuyển sang CartActivity hoặc xử lý tùy ý
+        holder.btnReorder.setOnClickListener(v -> {
+            if (position != RecyclerView.NO_POSITION) {
+                android.content.Context context = holder.itemView.getContext();
+
+                // Ví dụ: Bắn Toast thông báo hoặc chuyển màn hình Giỏ hàng tùy bạn cấu hình
+                android.widget.Toast.makeText(context, "Đang đặt lại đơn hàng #" + order.getOrderId(), android.widget.Toast.LENGTH_SHORT).show();
+
+        /* android.content.Intent cartIntent = new android.content.Intent(context, CartActivity.class);
+        context.startActivity(cartIntent);
+        */
+            }
+        });
+
+        // Xử lý sự kiện click vào toàn bộ item
         holder.itemView.setOnClickListener(v -> {
             if (listener != null && position != RecyclerView.NO_POSITION) {
                 listener.onItemClick(order);
@@ -144,7 +196,6 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
             btnReorder = itemView.findViewById(R.id.btnReorder);
             layoutWarningBanner = itemView.findViewById(R.id.layoutWarningBanner);
 
-            // Ánh xạ chính xác các cụm Hybrid mới thêm
             layoutSingleItem = itemView.findViewById(R.id.layoutSingleItem);
             rvSubItemsList = itemView.findViewById(R.id.rvSubItemsList);
             tvFoodItemName = itemView.findViewById(R.id.tvFoodItemName);

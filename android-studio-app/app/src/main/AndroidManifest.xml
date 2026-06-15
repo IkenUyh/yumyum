@@ -22,6 +22,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Androidstudioapp">
         <activity
+            android:name=".history.RatingDriverActivity"
+            android:exported="false" />
+        <activity
             android:name=".history.ChatActivity"
             android:exported="false" />
         <activity
@@ -50,7 +53,7 @@
         </activity>
         <activity
             android:name=".home.AllBrandsActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".history.TransactionHistoryActivity"
             android:exported="false" />
