@@ -3,26 +3,21 @@ package com.example.uitpayapp.auth;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.uitpayapp.modules.user.models.responses.AuthResponseDTO;
+import com.example.uitpayapp.network.ApiCallback;
 import com.example.uitpayapp.profile.ContactSupportActivity;
 import com.example.uitpayapp.home.HomeActivity;
 import com.example.uitpayapp.R;
 
 // Thêm các thư viện import của DTO và Retrofit
-import com.example.uitpayapp.models.ApiResponse;
-import com.example.uitpayapp.models.LoginRequestDTO;
-import com.example.uitpayapp.models.UserResponseDTO;
-import com.example.uitpayapp.network.RetrofitClient;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.example.uitpayapp.modules.user.models.responses.UserResponseDTO;
+import com.example.uitpayapp.modules.user.UserRepository;
 
 public class PasscodeActivity extends AppCompatActivity {
 
@@ -172,51 +167,46 @@ public class PasscodeActivity extends AppCompatActivity {
     }
 
     // Xử lý gọi API khi nhập đủ 6 số
+// Khai báo UserRepository ở cấp độ Class của Activity để tái sử dụng
+    private final UserRepository userRepository = new UserRepository();
+
     private void handlePasscodeComplete() {
         isChecking = true;
 
-        // Tạo gói dữ liệu chuẩn bị gửi đi
-        LoginRequestDTO request = new LoginRequestDTO(phoneNumber, passcode);
-
-        RetrofitClient.getApiService().login(request).enqueue(new Callback<ApiResponse<UserResponseDTO>>() {
+        // Gọi hàm qua lớp cầu nối UserRepository theo cấu trúc mới
+        userRepository.login(phoneNumber, passcode, new ApiCallback<AuthResponseDTO>() {
             @Override
-            public void onResponse(Call<ApiResponse<UserResponseDTO>> call, Response<ApiResponse<UserResponseDTO>> response) {
-                isChecking = false; // Mở khóa cho nhập tiếp nếu lỡ sai
+            public void onSuccess(AuthResponseDTO result) {
+                isChecking = false; // Mở khóa trạng thái
 
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<UserResponseDTO> apiResponse = response.body();
+                // Nhận dữ liệu user từ gói AuthResponseDTO do backend trả về
+                UserResponseDTO user = result.getUser();
+                String token = result.getToken(); // Bạn nên lưu lại token này để dùng cho các API sau (/me, /upload-avatar,...)
 
-                    if (apiResponse.getCode() == 200) {
-                        UserResponseDTO user = apiResponse.getData();
-                        android.content.SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-                        android.content.SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString("FULL_NAME", user.getFullName());
-                        editor.putString("PHONE_NUMBER", user.getPhoneNumber());
-                        editor.putString("AVATAR_URL", user.getAvatarUrl());
-                        editor.apply(); // Lưu lại
+                // Lưu thông tin vào SharedPreferences
+                android.content.SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                android.content.SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("TOKEN", token); // Lưu token bảo mật
+                editor.putString("FULL_NAME", user.getFullName());
+                editor.putString("PHONE_NUMBER", user.getPhoneNumber());
+                editor.putString("AVATAR_URL", user.getAvatarUrl());
+                editor.apply();
 
-                        // Thành công: Chuyển sang HomeActivity
-                        Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        showLoginError("Mã Pin không đúng. Vui lòng thử lại");
-                    }
-                } else {
-                    showLoginError("Mã Pin không đúng. Vui lòng thử lại");
-                }
+                // Chuyển màn hình sang HomeActivity
+                Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
+                startActivity(intent);
+                finish();
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<UserResponseDTO>> call, Throwable t) {
+            public void onError(String errorMessage) {
                 isChecking = false;
-                Log.e("API_ERROR", "Lỗi: " + t.getMessage());
-                showLoginError("Mất kết nối máy chủ!");
+                // errorMessage ở đây đã được Repository xử lý sạch (Ví dụ: "Mã Pin không đúng" hoặc "Lỗi kết nối máy chủ")
+                showLoginError(errorMessage);
             }
         });
     }
-
     // Hàm phụ trợ để báo lỗi và reset bàn phím
     private void showLoginError(String message) {
         tvErrorMessage.setText(message);
