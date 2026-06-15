@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -126,6 +127,7 @@ public class HomeActivity extends AppCompatActivity {
         setupCategories();
         setupSearch();
         setupTopics();
+        setupFlashsale();
         setupBrands();
         setupDeals();
         setupStickyTab();
@@ -135,6 +137,7 @@ public class HomeActivity extends AppCompatActivity {
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setOnRefreshListener(() -> {
                 setupTopics();
+                setupFlashsale();
                 setupBrands();
                 setupDeals();
                 swipeRefreshLayout.setRefreshing(false);
@@ -252,16 +255,19 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setupSearch() {
-        EditText etSearch = findViewById(R.id.et_search);
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override
-            public void afterTextChanged(Editable s) {
-                currentSearchQuery = s.toString().trim().toLowerCase();
-                applyFilters();
-            }
-        });
+        View etSearch = findViewById(R.id.et_search);
+        View searchContainer = findViewById(R.id.layout_search_container);
+        if (etSearch != null && searchContainer != null) {
+            etSearch.setOnClickListener(v -> {
+                Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        HomeActivity.this,
+                        searchContainer,
+                        "search_bar_transition"
+                );
+                startActivity(intent, options.toBundle());
+            });
+        }
     }
 
     private void setupCategories() {
@@ -389,6 +395,52 @@ public class HomeActivity extends AppCompatActivity {
             Intent intent = new Intent(this, AllBrandsActivity.class);
             startActivity(intent);
         });
+    }
+
+    private void setupFlashsale() {
+        List<FoodMenuItem> flashsaleFoods = HomeRepository.getInstance().getDealFoods();
+        if (flashsaleFoods.size() < 3) return;
+        
+        java.util.Collections.shuffle(flashsaleFoods);
+
+        int[] cardIds = {R.id.card_flashsale_1, R.id.card_flashsale_2, R.id.card_flashsale_3};
+        int[] ivIds = {R.id.iv_flashsale_1, R.id.iv_flashsale_2, R.id.iv_flashsale_3};
+        int[] nameIds = {R.id.tv_name_1, R.id.tv_name_2, R.id.tv_name_3};
+        int[] origPriceIds = {R.id.tv_orig_price_1, R.id.tv_orig_price_2, R.id.tv_orig_price_3};
+        int[] discPriceIds = {R.id.tv_disc_price_1, R.id.tv_disc_price_2, R.id.tv_disc_price_3};
+
+        for (int i = 0; i < 3; i++) {
+            FoodMenuItem item = flashsaleFoods.get(i);
+            View card = findViewById(cardIds[i]);
+            if (card == null) continue;
+
+            ImageView iv = card.findViewById(ivIds[i]);
+            TextView tvName = card.findViewById(nameIds[i]);
+            TextView tvOrigPrice = card.findViewById(origPriceIds[i]);
+            TextView tvDiscPrice = card.findViewById(discPriceIds[i]);
+
+            iv.setImageResource(item.getImageResId());
+            tvName.setText(item.getName());
+
+            long originalPrice = item.getPrice();
+            long discountedPrice = originalPrice / 2;
+
+            tvOrigPrice.setText(String.format("%,dđ", originalPrice).replace(',', '.'));
+            tvOrigPrice.setPaintFlags(tvOrigPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+
+            tvDiscPrice.setText(String.format("%,dđ", discountedPrice).replace(',', '.'));
+
+            card.setOnClickListener(v -> {
+                FoodMenuItem discountedItem = new FoodMenuItem(
+                        item.getId(),
+                        item.getName(),
+                        discountedPrice,
+                        item.getImageResId(),
+                        item.getDescription()
+                );
+                showFoodItemDetailPopup(discountedItem, iv);
+            });
+        }
     }
 
     private void setupTopicSection(View sectionView, String title, String subtitle, List<FoodMenuItem> foods) {
