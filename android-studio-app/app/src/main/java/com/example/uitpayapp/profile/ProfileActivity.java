@@ -139,6 +139,7 @@ public class ProfileActivity extends AppCompatActivity {
         List<MenuItemData> ListItems_tienich = new ArrayList<>();
         ListItems_tienich.add(new MenuItemData("Mời bạn bè", "", R.drawable.ic_invite_friend,false));
         ListItems_tienich.add(new MenuItemData("Cửa hàng của bạn", "", R.drawable.ic_my_store,false));
+        ListItems_tienich.add(new MenuItemData("Quản lý duyệt", "5 chờ duyệt", R.drawable.list_alt_24px,false));
         ListGroupItem.add(new GroupItemData("Tiện ích", ListItems_tienich));
         //Nhóm 4: Hỗ trợ
         List<MenuItemData> ListItems_support = new ArrayList<>();
@@ -152,6 +153,13 @@ public class ProfileActivity extends AppCompatActivity {
     }
     public void HanleItemClick(MenuItemData item) {
         if (item == null) return;
+        
+        if (item.getTitle().equals("Quản lý duyệt")) {
+            Intent intentAdmin = new Intent(this, com.example.uitpayapp.admin.AdminApprovalActivity.class);
+            startActivity(intentAdmin);
+            return;
+        }
+
         if (!isLogin)
         {
             Toast.makeText(this, "Vui lòng đăng nhập", Toast.LENGTH_SHORT).show();
