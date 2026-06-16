@@ -44,7 +44,7 @@ public class FoodRepository {
 
             @Override
             public void onFailure(Call<ApiResponse<T>> call, Throwable t) {
-                callback.onError(t.toString());
+                callback.onError(t.getMessage());
             }
         });
     }

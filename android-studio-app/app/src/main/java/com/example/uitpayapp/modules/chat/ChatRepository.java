@@ -37,7 +37,7 @@ public class ChatRepository {
 
             @Override
             public void onFailure(Call<ApiResponse<List<ChatMessageResponse>>> call, Throwable t) {
-                callback.onError(t.toString());
+                callback.onError(t.getMessage());
             }
         });
     }
