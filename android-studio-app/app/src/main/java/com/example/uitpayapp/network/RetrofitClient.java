@@ -3,8 +3,13 @@ package com.example.uitpayapp.network;
 import com.example.uitpayapp.modules.cart.CartService;
 import com.example.uitpayapp.modules.chat.ChatService;
 import com.example.uitpayapp.modules.food.FoodService;
+import com.example.uitpayapp.modules.loyalty.LoyaltyService;
 import com.example.uitpayapp.modules.merchant.MerchantService;
+import com.example.uitpayapp.modules.news.NewsService;
+import com.example.uitpayapp.modules.notification.NotificationService;
 import com.example.uitpayapp.modules.order.OrderService;
+import com.example.uitpayapp.modules.restaurant.RestaurantSearchService;
+import com.example.uitpayapp.modules.restaurant.RestaurantService;
 import com.example.uitpayapp.modules.review.ReviewService;
 import com.example.uitpayapp.modules.statistic.StatisticService;
 import com.example.uitpayapp.modules.system.SystemParameterService;
@@ -12,6 +17,7 @@ import com.example.uitpayapp.modules.user.AddressService;
 import com.example.uitpayapp.modules.user.DriverService; // Thêm import này
 import com.example.uitpayapp.modules.user.UserService;
 import com.example.uitpayapp.modules.wallet.WalletService;
+import com.example.uitpayapp.modules.grouporder.GroupOrderService;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -78,5 +84,29 @@ public class RetrofitClient {
 
     public static ChatService getChatService() {
         return getClient().create(ChatService.class);
+    }
+
+    public static LoyaltyService getLoyaltyService() {
+        return getClient().create(LoyaltyService.class);
+    }
+
+    public static GroupOrderService getGroupOrderService() {
+        return getClient().create(GroupOrderService.class);
+    }
+
+    public static NewsService getNewsService() {
+        return getClient().create(NewsService.class);
+    }
+
+    public static NotificationService getNotificationService() {
+        return getClient().create(NotificationService.class);
+    }
+
+    public static RestaurantService getRestaurantService() {
+        return getClient().create(RestaurantService.class);
+    }
+
+    public static RestaurantSearchService getRestaurantSearchService() {
+        return getClient().create(RestaurantSearchService.class);
     }
 }
