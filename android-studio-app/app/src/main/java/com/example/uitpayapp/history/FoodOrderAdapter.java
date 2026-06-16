@@ -130,7 +130,7 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
 
         // Xử lý sự kiện nút Đánh giá
         // 1. CLICK NÚT ĐÁNH GIÁ -> Nhảy thẳng sang màn hình Đánh giá tài xế
-        holder.btnRate.setOnClickListener(v -> {
+       /* holder.btnRate.setOnClickListener(v -> {
             if (position != RecyclerView.NO_POSITION) {
                 // Lấy context trực tiếp từ view của item
                 android.content.Context context = holder.itemView.getContext();
@@ -141,6 +141,19 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
                 intent.putExtra("DRIVER_NAME", "Võ Tấn Đạt");
 
                 // Kích hoạt chuyển màn hình
+                context.startActivity(intent);
+            }
+        });*/
+        holder.btnRate.setOnClickListener(v -> {
+            if (position != RecyclerView.NO_POSITION) {
+                android.content.Context context = holder.itemView.getContext();
+
+                // Tạo intent liên kết màn hình RatingMerchantActivity
+                android.content.Intent intent = new android.content.Intent(context, RatingMerchantActivity.class);
+
+                // Truyền mã ID đơn hàng để phục vụ việc submit dữ liệu lên endpoint API của Spring Boot
+                intent.putExtra("ORDER_ID", order.getOrderId());
+
                 context.startActivity(intent);
             }
         });

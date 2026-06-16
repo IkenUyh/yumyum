@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.uitpayapp.modules.user.models.responses.AuthResponseDTO;
 import com.example.uitpayapp.network.ApiCallback;
+import com.example.uitpayapp.network.SessionManager;
 import com.example.uitpayapp.profile.ContactSupportActivity;
 import com.example.uitpayapp.home.HomeActivity;
 import com.example.uitpayapp.R;
@@ -181,16 +182,17 @@ public class PasscodeActivity extends AppCompatActivity {
 
                 // Nhận dữ liệu user từ gói AuthResponseDTO do backend trả về
                 UserResponseDTO user = result.getUser();
-                String token = result.getToken(); // Bạn nên lưu lại token này để dùng cho các API sau (/me, /upload-avatar,...)
+                String token = result.getToken();
 
-                // Lưu thông tin vào SharedPreferences
-                android.content.SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-                android.content.SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("TOKEN", token); // Lưu token bảo mật
-                editor.putString("FULL_NAME", user.getFullName());
-                editor.putString("PHONE_NUMBER", user.getPhoneNumber());
-                editor.putString("AVATAR_URL", user.getAvatarUrl());
-                editor.apply();
+                // === THAY ĐỔI Ở ĐÂY: Sử dụng SessionManager ===
+                SessionManager sessionManager = SessionManager.getInstance(PasscodeActivity.this);
+
+                // Cách 1: Nếu bạn giữ nguyên SessionManager cũ (chỉ lưu token và tên)
+                // sessionManager.createLoginSession(token, user.getFullName());
+
+                // Cách 2: Sử dụng SessionManager đã nâng cấp (Khuyên dùng - xem cấu hình ở Bước 2)
+                sessionManager.createLoginSession(token, user.getFullName(), user.getPhoneNumber(), user.getAvatarUrl());
+                // =============================================
 
                 // Chuyển màn hình sang HomeActivity
                 Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
@@ -202,7 +204,7 @@ public class PasscodeActivity extends AppCompatActivity {
             @Override
             public void onError(String errorMessage) {
                 isChecking = false;
-                // errorMessage ở đây đã được Repository xử lý sạch (Ví dụ: "Mã Pin không đúng" hoặc "Lỗi kết nối máy chủ")
+                // errorMessage ở đây đã được Repository xử lý sạch
                 showLoginError(errorMessage);
             }
         });

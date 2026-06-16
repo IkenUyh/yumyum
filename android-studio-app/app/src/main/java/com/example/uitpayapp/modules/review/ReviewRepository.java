@@ -18,16 +18,16 @@ public class ReviewRepository {
         this.reviewService = reviewService;
     }
 
-    public void submitReview(String token, CreateReviewRequest request, final ApiCallback<ReviewResponse> callback) {
-        // Đảm bảo định dạng Bearer Token nếu backend yêu cầu
-        String authToken = token.startsWith("Bearer ") ? token : "Bearer " + token;
+    // THAY ĐỔI: Bỏ tham số 'String token' vì Interceptor đã tự động chèn vào Header ngầm
+    public void submitReview(CreateReviewRequest request, final ApiCallback<ReviewResponse> callback) {
 
-        reviewService.submitReview(authToken, request).enqueue(new Callback<ApiResponse<ReviewResponse>>() {
+        // Gọi thẳng Service và truyền một mình 'request', không cần bận tâm về Token nữa
+        reviewService.submitReview(request).enqueue(new Callback<ApiResponse<ReviewResponse>>() {
             @Override
             public void onResponse(Call<ApiResponse<ReviewResponse>> call, Response<ApiResponse<ReviewResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<ReviewResponse> apiResponse = response.body();
-                    // Bạn có thể tùy biến kiểm tra apiResponse.getCode() tùy logic dự án
+                    // Callback trả dữ liệu sạch (ReviewResponse) về cho Activity hiển thị
                     callback.onSuccess(apiResponse.getData());
                 } else {
                     callback.onError("Gửi đánh giá thất bại: " + response.code());
@@ -41,6 +41,7 @@ public class ReviewRepository {
         });
     }
 
+    // API này không dùng token nên giữ nguyên cấu trúc chuẩn của bạn
     public void getReviewsByRestaurant(Long restaurantId, final ApiCallback<List<ReviewResponse>> callback) {
         reviewService.getReviewsByRestaurant(restaurantId).enqueue(new Callback<ApiResponse<List<ReviewResponse>>>() {
             @Override
