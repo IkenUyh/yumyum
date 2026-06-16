@@ -77,12 +77,16 @@
                 </LinearLayout>
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/cv_call_customer"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     app:cardCornerRadius="25dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:backgroundTint="#f24405">
+                    android:backgroundTint="#f24405"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
@@ -130,6 +134,7 @@
                 android:textStyle="bold" />
 
             <CheckBox
+                android:id="@+id/cb_wrong_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -137,6 +142,7 @@
                 android:textColor="#333" />
 
             <CheckBox
+                android:id="@+id/cb_out_of_stock"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Món đã hết"
@@ -156,6 +162,8 @@
         android:textAllCaps="false"
         android:textColor="#FFF"
         android:textSize="16sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:enabled="false"
+        android:alpha="0.5"/>
 
 </LinearLayout>

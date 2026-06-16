@@ -19,18 +19,18 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
-            <androidx.cardview.widget.CardView
+
+            <TextView
+                android:id="@+id/tv_order_short_id"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                app:cardElevation="0dp"
-                app:cardCornerRadius="12dp">
-                <ImageView
-                    android:id="@+id/iv_guest_avatar"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/yumyum_demo_logo"
-                    android:scaleType="centerCrop"/>
-            </androidx.cardview.widget.CardView>
+                android:background="@drawable/bg_button_red"
+                android:gravity="center"
+                android:text="#01"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -104,7 +104,8 @@
                 android:layout_weight="1"
                 android:text="Xem thêm"
                 android:textColor="#f24405"
-                android:layout_marginRight="5dp"/>
+                android:layout_marginRight="5dp"
+                android:textAllCaps="false"/>
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_accept_order"
                 android:background="@drawable/bg_tab_unselected"
@@ -115,7 +116,8 @@
                 android:text="Xác nhận"
                 android:textColor="#ffffff"
                 android:layout_marginRight="5dp"
-                android:backgroundTint="#f24405"/>
+                android:backgroundTint="#f24405"
+                android:textAllCaps="false"/>
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

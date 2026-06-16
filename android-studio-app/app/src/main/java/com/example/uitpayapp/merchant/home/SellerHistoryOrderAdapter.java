@@ -1,6 +1,7 @@
 package com.example.uitpayapp.merchant.home;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,11 @@ public class SellerHistoryOrderAdapter extends RecyclerView.Adapter<SellerHistor
     public SellerHistoryOrderAdapter(Context context, List<SellerHistoryOrder> historyList) {
         this.context = context;
         this.historyList = historyList;
+    }
+
+    public void updateData(List<SellerHistoryOrder> newList) {
+        this.historyList = newList;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -44,8 +50,11 @@ public class SellerHistoryOrderAdapter extends RecyclerView.Adapter<SellerHistor
         holder.tvTotalPrice.setText(history.getTotalPrice());
 
         if ("Đã hủy".equalsIgnoreCase(history.getStatus())) {
-            holder.tvStatusBadge.getBackground().setTint(context.getResources().getColor(R.color.black, null));
-            holder.tvStatusBadge.setTextColor(context.getResources().getColor(R.color.black, null));
+            holder.tvStatusBadge.getBackground().setTint(Color.parseColor("#FFCAC7"));
+            holder.tvStatusBadge.setTextColor(Color.parseColor("#FF6961"));
+        } else {
+             holder.tvStatusBadge.getBackground().setTint(Color.parseColor("#E8F5E9"));
+             holder.tvStatusBadge.setTextColor(Color.parseColor("#4CAF50"));
         }
     }
 

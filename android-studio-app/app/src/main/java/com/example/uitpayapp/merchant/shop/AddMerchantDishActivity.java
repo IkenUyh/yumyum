@@ -1,6 +1,5 @@
 package com.example.uitpayapp.merchant.shop;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -19,12 +18,16 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.merchant.shop.shop_model.MerchantMenuItem;
 
 public class AddMerchantDishActivity extends AppCompatActivity {
 
     private ImageView ivDishImage;
     private EditText etDishName, etDishPrice, etDishDescription;
-    private TextView tvCategory, tvSalesTime, tvToppingGroup;
+    private TextView tvCategory, tvSalesTime, tvToppingGroup, tvTitle;
+    private boolean isEditMode = false;
+    private MerchantMenuItem dishData;
+    private String categoryName;
 
     private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
@@ -44,12 +47,21 @@ public class AddMerchantDishActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_merchant_dish);
 
+        isEditMode = getIntent().getBooleanExtra("is_edit_mode", false);
+        dishData = (MerchantMenuItem) getIntent().getSerializableExtra("dish_data");
+        categoryName = getIntent().getStringExtra("category_name");
+
         initViews();
+        
+        if (isEditMode && dishData != null) {
+            populateData();
+        }
     }
 
     private void initViews() {
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
         
+        tvTitle = findViewById(R.id.tv_title);
         ivDishImage = findViewById(R.id.iv_dish_image);
         etDishName = findViewById(R.id.et_dish_name);
         etDishPrice = findViewById(R.id.et_dish_price);
@@ -57,6 +69,13 @@ public class AddMerchantDishActivity extends AppCompatActivity {
         tvCategory = findViewById(R.id.tv_category_selector);
         tvSalesTime = findViewById(R.id.tv_sales_time_selector);
         tvToppingGroup = findViewById(R.id.tv_topping_group_selector);
+        
+        if (isEditMode) {
+            tvTitle.setText("Chỉnh sửa món ăn");
+        } else {
+            tvTitle.setText("Thêm món mới");
+        }
+
         View mainView = findViewById(R.id.add_merchant_dish_container);
         if (mainView != null) {
             ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
@@ -75,7 +94,8 @@ public class AddMerchantDishActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_save).setOnClickListener(v -> {
             if (validateInput()) {
-                Toast.makeText(this, "Đã lưu món ăn thành công!", Toast.LENGTH_SHORT).show();
+                String message = isEditMode ? "Đã cập nhật món ăn thành công!" : "Đã lưu món ăn thành công!";
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
@@ -83,6 +103,18 @@ public class AddMerchantDishActivity extends AppCompatActivity {
         tvCategory.setOnClickListener(v -> showCategoryPopup());
         tvSalesTime.setOnClickListener(v -> showSalesTimePopup());
         tvToppingGroup.setOnClickListener(v -> showToppingGroupPopup());
+    }
+
+    private void populateData() {
+        etDishName.setText(dishData.getName());
+        etDishPrice.setText(String.valueOf((int) dishData.getPrice()));
+        if (categoryName != null) {
+            tvCategory.setText(categoryName);
+        }
+        if (dishData.getImageRes() != 0) {
+            ivDishImage.setImageTintList(null);
+            ivDishImage.setImageResource(dishData.getImageRes());
+        }
     }
 
     private void showCategoryPopup() {

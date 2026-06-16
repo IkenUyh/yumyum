@@ -16,7 +16,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_uitpay_demo"
+        android:icon="@drawable/yumyum_demo_logo"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -132,6 +132,12 @@
             android:name=".merchant.home.SellerHomeActivity"
             android:exported="false" />
         <activity
+            android:name=".merchant.home.SellerStatusActivity"
+            android:exported="false" />
+        <activity
+            android:name=".merchant.home.SellerScheduleActivity"
+            android:exported="false" />
+        <activity
             android:name=".merchant.shop.SellerShopActivity"
             android:exported="false" />
         <activity
@@ -144,6 +150,12 @@
             android:name=".merchant.shop.AddMerchantDishActivity"
             android:exported="false" />
         <activity
+            android:name=".merchant.shop.AddMerchantCategoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".merchant.shop.AddMerchantToppingActivity"
+            android:exported="false" />
+        <activity
             android:name=".home.CategoryActivity"
             android:exported="false" />
         <activity
@@ -154,6 +166,20 @@
             android:exported="false" />
         <activity
             android:name=".admin.AdminApprovalActivity"
+            android:exported="false" />
+        <activity android:name=".merchant.shop.ToppingGroupDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".merchant.marketing.SellerMarketingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".merchant.marketing.SellerStatisticsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".merchant.marketing.SellerShopInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".merchant.notification.SellerNotificationActivity"
             android:exported="false" />
         <activity
             android:name=".home.SearchActivity"

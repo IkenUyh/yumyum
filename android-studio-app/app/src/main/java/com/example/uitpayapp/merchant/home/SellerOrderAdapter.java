@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -33,6 +32,11 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
         this.listener = listener;
     }
 
+    public void updateData(List<SellerOrder> newList) {
+        this.orderList = newList;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -44,6 +48,7 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         SellerOrder order = orderList.get(position);
         
+        holder.tvOrderShortId.setText(order.getId());
         holder.tvCustomerName.setText(order.getCustomerName());
         holder.tvNumberOfDishes.setText(order.getNumberOfDishes() + " Món");
         holder.tvTotalPrice.setText(order.getTotalPrice());
@@ -56,7 +61,7 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
             TextView tvPrice = dishView.findViewById(R.id.tv_sub_item_price);
             
             tvDish.setText(item.getQuantity() + " x " + item.getDishName());
-            tvPrice.setVisibility(View.GONE); // Ẩn giá ở danh sách đơn hàng ngoài home
+            tvPrice.setVisibility(View.GONE);
 
             holder.llDishesContainer.addView(dishView);
         }
@@ -78,19 +83,18 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
     }
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView tvCustomerName, tvNumberOfDishes, tvTotalPrice, tvGuestNote;
+        TextView tvOrderShortId, tvCustomerName, tvNumberOfDishes, tvTotalPrice, tvGuestNote;
         LinearLayout llDishesContainer;
-        ImageView ivAvatar;
         Button btnSeeMore, btnAccept;
 
         public OrderViewHolder(@NonNull View itemView) {
             super(itemView);
+            tvOrderShortId = itemView.findViewById(R.id.tv_order_short_id);
             tvCustomerName = itemView.findViewById(R.id.tv_customer_name);
             tvNumberOfDishes = itemView.findViewById(R.id.tv_numberof_dishes);
             tvTotalPrice = itemView.findViewById(R.id.tv_total_price);
             tvGuestNote = itemView.findViewById(R.id.tv_guest_note);
             llDishesContainer = itemView.findViewById(R.id.ll_dishes_container);
-            ivAvatar = itemView.findViewById(R.id.iv_guest_avatar);
             btnSeeMore = itemView.findViewById(R.id.btn_see_more);
             btnAccept = itemView.findViewById(R.id.btn_accept_order);
         }

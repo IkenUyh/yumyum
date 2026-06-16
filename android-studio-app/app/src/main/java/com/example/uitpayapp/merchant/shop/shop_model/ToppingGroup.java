@@ -1,8 +1,9 @@
-package com.example.uitpayapp.merchant.shop;
+package com.example.uitpayapp.merchant.shop.shop_model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ToppingGroup {
+public class ToppingGroup implements Serializable {
     private String name;
     private List<MerchantMenuItem> toppings;
 

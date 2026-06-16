@@ -48,4 +48,13 @@
         app:useMaterialThemeColors="false"
         app:thumbTint="@color/white"
         app:trackTint="#F24405" />
+
+    <TextView
+        android:id="@+id/tv_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sửa"
+        android:textColor="#F24405"
+        android:textSize="14sp"
+        android:visibility="gone" />
 </LinearLayout>
