@@ -1,22 +1,37 @@
 package com.example.uitpayapp.merchant.shop;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.merchant.shop.shop_model.MerchantMenuCategory;
+import com.example.uitpayapp.merchant.shop.shop_model.MerchantMenuItem;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import java.util.List;
 
 public class MerchantMenuAdapter extends RecyclerView.Adapter<MerchantMenuAdapter.CategoryViewHolder> {
 
     private List<MerchantMenuCategory> categories;
+    private boolean isToppingMode = false;
 
     public MerchantMenuAdapter(List<MerchantMenuCategory> categories) {
         this.categories = categories;
+    }
+
+    public MerchantMenuAdapter(List<MerchantMenuCategory> categories, boolean isToppingMode) {
+        this.categories = categories;
+        this.isToppingMode = isToppingMode;
+    }
+
+    public void updateList(List<MerchantMenuCategory> newList) {
+        this.categories = newList;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -31,19 +46,68 @@ public class MerchantMenuAdapter extends RecyclerView.Adapter<MerchantMenuAdapte
         MerchantMenuCategory category = categories.get(position);
         holder.tvTitle.setText(category.getCategoryName());
         holder.tvTitle.setAllCaps(true);
+
+        holder.tvTitle.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), AddMerchantCategoryActivity.class);
+            intent.putExtra("is_edit_mode", true);
+            intent.putExtra("category_name", category.getCategoryName());
+            intent.putExtra("is_topping_group", isToppingMode); // Nếu đang ở chế độ topping thì là nhóm topping
+            v.getContext().startActivity(intent);
+        });
+
         holder.container.removeAllViews();
 
         for (MerchantMenuItem item : category.getItems()) {
             View itemView = LayoutInflater.from(holder.itemView.getContext()).inflate(R.layout.item_merchant_menu_dish, holder.container, false);
+            ImageView ivImage = itemView.findViewById(R.id.iv_food_image);
             TextView tvName = itemView.findViewById(R.id.tv_food_name);
             TextView tvPrice = itemView.findViewById(R.id.tv_food_price);
             SwitchMaterial swEnabled = itemView.findViewById(R.id.sw_enabled);
-            
+            TextView tvEdit = itemView.findViewById(R.id.tv_edit);
+
+            itemView.setOnClickListener(v -> {
+                if (isToppingMode) {
+                    Intent intent = new Intent(v.getContext(), AddMerchantToppingActivity.class);
+                    intent.putExtra("is_edit_mode", true);
+                    intent.putExtra("topping_data", item);
+                    intent.putExtra("category_name", category.getCategoryName());
+                    v.getContext().startActivity(intent);
+                } else {
+                    Intent intent = new Intent(v.getContext(), AddMerchantDishActivity.class);
+                    intent.putExtra("is_edit_mode", true);
+                    intent.putExtra("dish_data", item);
+                    intent.putExtra("category_name", category.getCategoryName());
+                    v.getContext().startActivity(intent);
+                }
+            });
+
+            // Hide image if not provided
+            if (item.getImageRes() == 0) {
+                ivImage.setVisibility(View.GONE);
+            } else {
+                ivImage.setVisibility(View.VISIBLE);
+                ivImage.setImageResource(item.getImageRes());
+            }
+
             tvName.setText(item.getName());
             tvPrice.setText(String.format("%,.0fđ", item.getPrice()));
-            swEnabled.setChecked(item.isEnabled());
-            
-            swEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> item.setEnabled(isChecked));
+
+            if (isToppingMode) {
+                swEnabled.setVisibility(View.GONE);
+                tvEdit.setVisibility(View.VISIBLE);
+                tvEdit.setOnClickListener(v -> {
+                    Intent intent = new Intent(v.getContext(), AddMerchantToppingActivity.class);
+                    intent.putExtra("is_edit_mode", true);
+                    intent.putExtra("topping_data", item);
+                    intent.putExtra("category_name", category.getCategoryName());
+                    v.getContext().startActivity(intent);
+                });
+            } else {
+                swEnabled.setVisibility(View.VISIBLE);
+                tvEdit.setVisibility(View.GONE);
+                swEnabled.setChecked(item.isEnabled());
+                swEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> item.setEnabled(isChecked));
+            }
             
             holder.container.addView(itemView);
         }

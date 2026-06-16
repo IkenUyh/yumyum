@@ -17,7 +17,8 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_less_than" />
+            android:src="@drawable/ic_less_than"
+            app:tint="#333333" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -50,7 +51,8 @@
                 android:layout_height="wrap_content"
                 app:tabIndicatorColor="#F24405"
                 app:tabSelectedTextColor="#F24405"
-                app:tabTextColor="#555555">
+                app:tabTextColor="#555555"
+                app:tabIndicatorFullWidth="false">
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
@@ -63,6 +65,7 @@
                     android:text="Món" />
             </com.google.android.material.tabs.TabLayout>
 
+            <!-- Rating Summary Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -70,7 +73,7 @@
                 android:orientation="horizontal"
                 android:paddingVertical="16dp">
 
-                <!-- Overall Rating -->
+                <!-- Overall Rating (Tất cả) -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -79,47 +82,101 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/tv_overall_rating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="4"
-                        android:textColor="#333333"
-                        android:textSize="32sp"
+                        android:text="0.0"
+                        android:textColor="#000000"
+                        android:textSize="28sp"
                         android:textStyle="bold" />
 
                     <RatingBar
+                        android:id="@+id/rb_overall"
                         style="?android:attr/ratingBarStyleSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:numStars="5"
-                        android:rating="4"
-                        android:progressTint="#FFD700"
-                        android:secondaryProgressTint="#FFD700" />
+                        android:stepSize="0.1"
+                        android:progressTint="#FFB800"
+                        android:secondaryProgressTint="#FFB800" />
+
+                    <TextView
+                        android:id="@+id/tv_overall_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="0 Bình luận"
+                        android:textColor="#333333"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="2"
+                        android:text="Tất cả đánh giá"
                         android:textColor="#999999"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tất cả"
-                        android:textColor="#999999"
-                        android:textSize="12sp" />
+                        android:textSize="13sp" />
                 </LinearLayout>
 
                 <View
                     android:layout_width="1dp"
                     android:layout_height="match_parent"
+                    android:layout_marginVertical="8dp"
                     android:background="#EEEEEE" />
+
+                <!-- Filtered Rating (Theo bộ lọc) -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_filtered_rating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.0"
+                        android:textColor="#000000"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+
+                    <RatingBar
+                        android:id="@+id/rb_filtered"
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:numStars="5"
+                        android:stepSize="0.1"
+                        android:progressTint="#FFB800"
+                        android:secondaryProgressTint="#FFB800" />
+
+                    <TextView
+                        android:id="@+id/tv_filtered_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="0 Bình luận"
+                        android:textColor="#333333"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_filter_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tất cả"
+                        android:textColor="#999999"
+                        android:textSize="13sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="8dp"
                 android:background="#F5F5F5" />
+
+            <!-- Filter Buttons Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -195,10 +252,12 @@
                         app:tint="#f24405"/>
                 </LinearLayout>
             </LinearLayout>
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#EEEEEE" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_reviews"
                 android:layout_width="match_parent"

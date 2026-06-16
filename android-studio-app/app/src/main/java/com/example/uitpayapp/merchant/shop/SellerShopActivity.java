@@ -15,6 +15,10 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.merchant.home.SellerHomeActivity;
+import com.example.uitpayapp.merchant.marketing.SellerMarketingActivity;
+import com.example.uitpayapp.merchant.notification.SellerNotificationActivity;
+import com.example.uitpayapp.profile.ProfileActivity;
+import com.example.uitpayapp.profile.ProfileWebView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -73,6 +77,16 @@ public class SellerShopActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+        findViewById(R.id.btn_support).setOnClickListener(v -> {
+            Intent intent = new Intent(this, ProfileWebView.class);
+            intent.putExtra("URL_KEY","https://merchant.shopeefood.vn/edu/collection/trung-cap");
+            startActivity(intent);
+        });
+        findViewById(R.id.ll_account_selector).setOnClickListener(v -> {
+            Intent intentAccount = new Intent(this, ProfileActivity.class);
+            intentAccount.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intentAccount);
+        });
     }
 
     private void setupBottomNavigation() {
@@ -89,10 +103,22 @@ public class SellerShopActivity extends AppCompatActivity {
             finish();
         });
 
-        navNotification.setOnClickListener(v -> Toast.makeText(this, "Tính năng Thông báo", Toast.LENGTH_SHORT).show());
+        navNotification.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SellerNotificationActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+            finish();
+        });
         
         navShop.setOnClickListener(v -> {
         });
-        navMarketing.setOnClickListener(v -> Toast.makeText(this, "Tính năng Marketing", Toast.LENGTH_SHORT).show());
+        navMarketing.setOnClickListener(v ->{
+            Intent intent = new Intent(this, SellerMarketingActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+            finish();
+        });
     }
 }

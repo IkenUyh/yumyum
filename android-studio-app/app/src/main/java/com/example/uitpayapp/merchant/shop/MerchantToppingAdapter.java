@@ -1,5 +1,6 @@
 package com.example.uitpayapp.merchant.shop;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +8,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.merchant.shop.shop_model.MerchantMenuItem;
+import com.example.uitpayapp.merchant.shop.shop_model.ToppingGroup;
+
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +21,11 @@ public class MerchantToppingAdapter extends RecyclerView.Adapter<MerchantTopping
 
     public MerchantToppingAdapter(List<ToppingGroup> groups) {
         this.groups = groups;
+    }
+
+    public void updateList(List<ToppingGroup> newList) {
+        this.groups = newList;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -35,6 +45,13 @@ public class MerchantToppingAdapter extends RecyclerView.Adapter<MerchantTopping
                 .map(MerchantMenuItem::getName)
                 .collect(Collectors.joining(", "));
         holder.tvToppingList.setText(toppingsText);
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), ToppingGroupDetailActivity.class);
+            intent.putExtra("group_name", group.getName());
+            intent.putExtra("toppings", (Serializable) group.getToppings());
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override

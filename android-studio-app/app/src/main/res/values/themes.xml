@@ -5,6 +5,7 @@
         <item name="colorAccent">@color/teal_200</item>
         <item name="android:fontFamily">@font/svn_gotham_regular</item>
     </style>
+
     <style name="CustomTabTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="android:textAllCaps">false</item>
         <item name="textAllCaps">false</item>
@@ -14,5 +15,15 @@
     <style name="CircleImage" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="CustomMaterialCalendar" parent="Widget.MaterialComponents.MaterialCalendar">
+        <item name="colorPrimary">#f24405</item>
+    </style>
+
+    <style name="CustomMaterialDatePicker" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="colorPrimary">#f24405</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="materialCalendarStyle">@style/CustomMaterialCalendar</item>
     </style>
 </resources>

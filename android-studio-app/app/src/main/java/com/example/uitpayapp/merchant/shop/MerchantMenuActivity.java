@@ -2,10 +2,14 @@ package com.example.uitpayapp.merchant.shop;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -13,6 +17,9 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.merchant.shop.shop_model.MerchantMenuCategory;
+import com.example.uitpayapp.merchant.shop.shop_model.MerchantMenuItem;
+import com.example.uitpayapp.merchant.shop.shop_model.ToppingGroup;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
@@ -25,6 +32,7 @@ public class MerchantMenuActivity extends AppCompatActivity {
     private MerchantToppingAdapter toppingAdapter;
     private TabLayout tabLayout;
     private View btnAdd;
+    private EditText etSearch;
 
     private List<MerchantMenuCategory> dishCategories = new ArrayList<>();
     private List<ToppingGroup> toppingGroups = new ArrayList<>();
@@ -52,10 +60,21 @@ public class MerchantMenuActivity extends AppCompatActivity {
         
         tabLayout = findViewById(R.id.tab_layout);
         btnAdd = findViewById(R.id.btn_add_dish_and_topping);
+        etSearch = findViewById(R.id.et_seller_search_dish_and_topping);
 
         if (btnAdd != null) {
             btnAdd.setOnClickListener(v -> showAddBottomSheet());
         }
+
+        etSearch.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
+                    (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                TabLayout tabLayout = findViewById(R.id.tab_vouchers);
+                filterSearch(etSearch.getText().toString());
+                return true;
+            }
+            return false;
+        });
 
         View mainView = findViewById(R.id.merchant_menu_container);
         if (mainView != null) {
@@ -67,6 +86,45 @@ public class MerchantMenuActivity extends AppCompatActivity {
         }
     }
 
+    private void filterSearch(String query) {
+        if (query.isEmpty()) {
+            dishAdapter.updateList(dishCategories);
+            toppingAdapter.updateList(toppingGroups);
+            return;
+        }
+
+        String lowerCaseQuery = query.toLowerCase().trim();
+
+        List<MerchantMenuCategory> filteredDishes = new ArrayList<>();
+        for (MerchantMenuCategory category : dishCategories) {
+            List<MerchantMenuItem> filteredItems = new ArrayList<>();
+            for (MerchantMenuItem item : category.getItems()) {
+                if (item.getName().toLowerCase().contains(lowerCaseQuery)) {
+                    filteredItems.add(item);
+                }
+            }
+            if (!filteredItems.isEmpty()) {
+                filteredDishes.add(new MerchantMenuCategory(category.getCategoryName(), filteredItems));
+            }
+        }
+        dishAdapter.updateList(filteredDishes);
+
+        //loc topping
+        List<ToppingGroup> filteredToppings = new ArrayList<>();
+        for (ToppingGroup group : toppingGroups) {
+            List<MerchantMenuItem> filteredItems = new ArrayList<>();
+            for (MerchantMenuItem item : group.getToppings()) {
+                if (item.getName().toLowerCase().contains(lowerCaseQuery)) {
+                    filteredItems.add(item);
+                }
+            }
+            if (!filteredItems.isEmpty() || group.getName().toLowerCase().contains(lowerCaseQuery)) {
+                filteredToppings.add(new ToppingGroup(group.getName(), filteredItems.isEmpty() ? group.getToppings() : filteredItems));
+            }
+        }
+        toppingAdapter.updateList(filteredToppings);
+    }
+
     private void setupTabLayout() {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -76,6 +134,8 @@ public class MerchantMenuActivity extends AppCompatActivity {
                 } else {
                     rvMenu.setAdapter(toppingAdapter);
                 }
+                // Khi chuyển tab, thực hiện lọc lại theo query hiện tại
+                filterSearch(etSearch.getText().toString());
             }
 
             @Override
@@ -122,7 +182,9 @@ public class MerchantMenuActivity extends AppCompatActivity {
         TextView btnAddItem = view.findViewById(R.id.btn_add_item);
         TextView btnCancel = view.findViewById(R.id.btn_cancel_sheet);
 
-        if (tabLayout.getSelectedTabPosition() == 0) {
+        boolean isToppingTab = tabLayout.getSelectedTabPosition() == 1;
+
+        if (!isToppingTab) {
             tvTitle.setText("Thêm món");
             btnAddCategory.setText("Thêm danh mục món");
             btnAddItem.setText("Thêm món ăn");
@@ -133,12 +195,22 @@ public class MerchantMenuActivity extends AppCompatActivity {
         }
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
-        btnAddCategory.setOnClickListener(v ->dialog.dismiss());
-        btnAddItem.setOnClickListener(v -> {
+        
+        btnAddCategory.setOnClickListener(v -> {
             dialog.dismiss();
-            startActivity(new Intent(this, AddMerchantDishActivity.class));
+            Intent intent = new Intent(this, AddMerchantCategoryActivity.class);
+            intent.putExtra("is_topping_group", isToppingTab);
+            startActivity(intent);
         });
 
+        btnAddItem.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (!isToppingTab) {
+                startActivity(new Intent(this, AddMerchantDishActivity.class));
+            } else {
+                startActivity(new Intent(this, AddMerchantToppingActivity.class));
+            }
+        });
         dialog.setContentView(view);
         dialog.show();
     }

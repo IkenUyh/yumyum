@@ -69,11 +69,11 @@
                         android:src="@drawable/ic_search"
                         app:tint="#757575"/>
                     <EditText
-                        android:id="@+id/et_seller_search_order"
+                        android:id="@+id/et_seller_search_dish_and_topping"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:hint="Tìm kiếm món ăn"
+                        android:hint="Tìm kiếm món ăn hoặc topping"
                         android:background="@null"
                         android:textSize="14sp"
                         android:textColor="#000000"

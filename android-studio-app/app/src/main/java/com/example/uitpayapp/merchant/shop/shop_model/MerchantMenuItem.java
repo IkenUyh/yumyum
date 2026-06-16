@@ -1,6 +1,8 @@
-package com.example.uitpayapp.merchant.shop;
+package com.example.uitpayapp.merchant.shop.shop_model;
 
-public class MerchantMenuItem {
+import java.io.Serializable;
+
+public class MerchantMenuItem implements Serializable {
     private String name;
     private double price;
     private int imageRes;

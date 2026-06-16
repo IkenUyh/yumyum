@@ -1,4 +1,4 @@
-package com.example.uitpayapp.merchant.shop;
+package com.example.uitpayapp.merchant.shop.shop_model;
 
 public class ReviewModel {
     private String userName;

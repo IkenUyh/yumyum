@@ -51,28 +51,13 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-                <ImageView
-                    android:id="@+id/iv_nav_notification"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_notification"
-                    app:tint="#757575" />
-                <TextView
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:background="@drawable/bg_badge_light_red"
-                    android:text="3"
-                    android:textColor="#FFF"
-                    android:textSize="9sp"
-                    android:gravity="center"
-                    android:layout_alignTop="@id/iv_nav_notification"
-                    android:layout_alignEnd="@id/iv_nav_notification"
-                    android:layout_marginTop="-2dp"
-                    android:layout_marginEnd="-2dp"/>
-            </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/iv_nav_notification"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_notification"
+                app:tint="#757575" />
 
             <TextView
                 android:id="@+id/tv_nav_notification"
