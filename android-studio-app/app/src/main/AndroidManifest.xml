@@ -22,6 +22,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Androidstudioapp">
         <activity
+            android:name=".history.RatingMerchantActivity"
+            android:exported="false" />
+        <activity
             android:name=".history.RatingDriverActivity"
             android:exported="false" />
         <activity
@@ -175,6 +178,10 @@
         <activity
             android:name=".merchant.notification.SellerNotificationActivity"
             android:exported="false" />
+        <activity
+            android:name=".home.SearchActivity"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

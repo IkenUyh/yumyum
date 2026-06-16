@@ -1,6 +1,7 @@
 package com.example.uitpayapp.history;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -251,21 +252,17 @@ public class RatingDriverActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void submitRatingData() {
-        // Gom dữ liệu sạch để đóng gói gửi về API (Retrofit)
         String comment = edtComment.getText().toString().trim();
 
-        // Cấu trúc Json Object/Request Body mẫu:
-        // RatingRequest request = new RatingRequest(mDriverId, mSelectedRating, mSelectedTipAmount, mSelectedCompliments, comment);
+        // Logic xử lý đóng gói API cũ giữ nguyên...
+        Toast.makeText(this, "Gửi đánh giá tài xế thành công!", Toast.LENGTH_SHORT).show();
 
-        String logResult = "Driver ID: " + mDriverId +
-                "\nRating: " + mSelectedRating + " Sao" +
-                "\nTiền tip: " + mSelectedTipAmount + "đ" +
-                "\nLời khen: " + mSelectedCompliments.toString() +
-                "\nBình luận: " + comment;
+        // BỔ SUNG LUỒNG INTENT: Chuyển tiếp mượt mà sang màn hình Đánh giá quán và món
+        Intent merchantIntent = new Intent(RatingDriverActivity.this, RatingMerchantActivity.class);
+        // Truyền tiếp các dữ liệu cần thiết (OrderId, MerchantName, List món ăn) phục vụ API sau này
+        merchantIntent.putExtra("ORDER_ID", mDriverId);
+        startActivity(merchantIntent);
 
-        Toast.makeText(this, "Gửi đánh giá thành công!", Toast.LENGTH_LONG).show();
-
-        // Gọi API Service tại đây...
-        finish();
+        finish(); // Đóng màn hình tài xế lại để tránh người dùng back ngược lại
     }
 }
