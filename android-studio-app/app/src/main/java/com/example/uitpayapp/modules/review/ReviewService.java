@@ -18,7 +18,6 @@ public interface ReviewService {
     // API Khách hàng gửi đánh giá (Yêu cầu Authentication Token ở Header)
     @POST("api/v1/reviews")
     Call<ApiResponse<ReviewResponse>> submitReview(
-            @Header("Authorization") String token,
             @Body CreateReviewRequest request
     );
 

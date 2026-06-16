@@ -64,6 +64,10 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     // Lưu trữ bộ lọc khoảng thời gian đang active (Mặc định null là không lọc)
     private Date filterStartDate = null;
     private Date filterEndDate = null;
+    // Thêm vào cùng các biến toàn cục hiện tại của bạn
+    private RecyclerView rvDeals;
+    private DealHistoryAdapter dealAdapter;
+    private List<DealHistory> allDealsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +123,27 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             intent.putExtra("ORDER_STATUS", order.getStatus());
             startActivity(intent);
         });
+
+        // Tìm đến cuối hàm onCreate() và bổ sung đoạn này:
+        rvDeals = findViewById(R.id.rvDeals);
+        rvDeals.setLayoutManager(new LinearLayoutManager(this));
+
+        allDealsList = new ArrayList<>();
+        // Khởi tạo dữ liệu mock kiểm thử (Mã hóa khớp 100% dữ liệu ảnh mẫu của bạn)
+        allDealsList.add(new DealHistory(
+                "DEAL_01",
+                "Trà Sữa An Viên - Đường 30 Tháng 4",
+                "15 Th01 2026",
+                "LỤC TRÀ CHANH DÂY",
+                "12.600đ",
+                "HSD: 15.01.2026 16:24-21.01.2026 23:59",
+                "1 Món ›",
+                "Đã sử dụng",
+                "15016-594977098" // ID đơn hàng thực tế để liên kết ngược
+        ));
+
+        dealAdapter = new DealHistoryAdapter(allDealsList);
+        rvDeals.setAdapter(dealAdapter);
 
         // Khởi chạy cài đặt thành phần
         setupRecommendations();
@@ -255,10 +280,30 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             layoutCoinsBanner.setVisibility(View.GONE);
             layoutFilters.setVisibility(View.GONE);
             layoutRecommendations.setVisibility(View.VISIBLE);
-        } else {
+
+            recyclerView.setVisibility(View.VISIBLE);
+            rvDeals.setVisibility(View.GONE); // Ẩn danh sách Deal
+            layoutEmpty.setVisibility(View.GONE);
+        }
+        else if ("Deal đã mua".equalsIgnoreCase(currentTab)) {
+            // Đúng theo ảnh mẫu 1: Tab Deal chỉ hiện xu thưởng, ẩn hoàn toàn bộ lọc Dịch vụ/Trạng thái/Ngày
+            layoutCoinsBanner.setVisibility(View.VISIBLE);
+            layoutFilters.setVisibility(View.GONE);
+            layoutRecommendations.setVisibility(View.GONE);
+
+            recyclerView.setVisibility(View.GONE); // Ẩn danh sách đơn hàng lịch sử
+            rvDeals.setVisibility(View.VISIBLE);  // BẬT DANH SÁCH DEAL LÊN
+            layoutEmpty.setVisibility(View.GONE);
+            return; // Ngắt hàm luôn để không chạy vòng lặp lọc đơn hàng phía dưới
+        }
+        else {
+            // Các tab Lịch sử, Đánh giá, Đơn nhóm thông thường
             layoutCoinsBanner.setVisibility(View.VISIBLE);
             layoutFilters.setVisibility(View.VISIBLE);
             layoutRecommendations.setVisibility(View.GONE);
+
+            recyclerView.setVisibility(View.VISIBLE);
+            rvDeals.setVisibility(View.GONE);
         }
 
         for (FoodOrder order : allOrders) {
@@ -333,6 +378,24 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         List<FoodOrder.SubItem> subItemsSingle = new ArrayList<>();
         subItemsSingle.add(new FoodOrder.SubItem(popularFoods.get(4).getName(), popularFoods.get(4).getImageResId()));
         allOrders.add(new FoodOrder("21099-112233445", "Cơm Tấm Ngô Quyền - Linh Trung", 45000, 1, "15/05/2026", "Hoàn thành", "Đồ ăn", false, "Lịch sử", subItemsSingle));
+
+        List<FoodOrder.SubItem> subItemsAnVien = new ArrayList<>();
+        // Đổ món ăn "Lục Trà Chanh Dây" vào danh sách sub-item
+        subItemsAnVien.add(new FoodOrder.SubItem("Lục Trà Chanh Dây", popularFoods.get(0).getImageResId()));
+
+        allOrders.add(new FoodOrder(
+                "15016-594977098",                        // Mã hóa đơn (Khớp mã liên kết từ tab Deal)
+                "Trà Sữa An Viên - Đường 30 Tháng 4",      // Tên quán
+                11000,                                     // Tổng thanh toán sau giảm giá (11.000đ)
+                1,                                         // Số lượng: 1 món
+                "15/01/2026",                              // Ngày đặt hàng trùng khớp
+                "Hoàn thành",                              // Trạng thái đơn
+                "Đồ ăn",                                   // Loại dịch vụ
+                false,                                     // Yêu thích
+                "Lịch sử",                                 // CATEGORY LÀ LỊCH SỬ ĐỂ HIỂN THỊ TRONG TAB LỊCH SỬ
+                subItemsAnVien                             // Mảng món ăn bên trong
+        ));
+
 
         List<FoodOrder.SubItem> subItemsFour = new ArrayList<>();
         subItemsFour.add(new FoodOrder.SubItem(popularFoods.get(5).getName(), popularFoods.get(5).getImageResId()));
