@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface RestaurantSearchRepository extends ElasticsearchRepository<RestaurantDocument, String> {
-    List<RestaurantDocument> findByNameFuzzy(String keyword);
+    List<RestaurantDocument> findByNameContaining(String keyword);
 }
