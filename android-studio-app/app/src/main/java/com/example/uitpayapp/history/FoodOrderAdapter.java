@@ -97,7 +97,14 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
             if (order.getSubItems() != null && !order.getSubItems().isEmpty()) {
                 FoodOrder.SubItem singleItem = order.getSubItems().get(0);
                 holder.tvFoodItemName.setText(singleItem.getName());
-                holder.ivFoodImage.setImageResource(singleItem.getImageResId());
+                if (singleItem.getImageUrl() != null && !singleItem.getImageUrl().isEmpty()) {
+                    com.bumptech.glide.Glide.with(holder.itemView.getContext())
+                            .load(singleItem.getImageUrl())
+                            .placeholder(R.drawable.yumyum_demo_logo)
+                            .into(holder.ivFoodImage);
+                } else {
+                    holder.ivFoodImage.setImageResource(singleItem.getImageResId() != 0 ? singleItem.getImageResId() : R.drawable.yumyum_demo_logo);
+                }
             }
         }
 
@@ -234,7 +241,14 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
         public void onBindViewHolder(@NonNull SubViewHolder holder, int position) {
             FoodOrder.SubItem item = subItemsList.get(position);
             holder.tvSubName.setText(item.getName());
-            holder.ivSubThumb.setImageResource(item.getImageResId());
+            if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
+                com.bumptech.glide.Glide.with(holder.itemView.getContext())
+                        .load(item.getImageUrl())
+                        .placeholder(R.drawable.yumyum_demo_logo)
+                        .into(holder.ivSubThumb);
+            } else {
+                holder.ivSubThumb.setImageResource(item.getImageResId() != 0 ? item.getImageResId() : R.drawable.yumyum_demo_logo);
+            }
         }
 
         @Override

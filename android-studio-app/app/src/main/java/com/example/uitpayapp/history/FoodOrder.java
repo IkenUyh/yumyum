@@ -18,14 +18,22 @@ public class FoodOrder {
     public static class SubItem {
         private String name;
         private int imageResId;
-
+        private String imageUrl;
+ 
         public SubItem(String name, int imageResId) {
             this.name = name;
             this.imageResId = imageResId;
         }
 
+        public SubItem(String name, String imageUrl) {
+            this.name = name;
+            this.imageUrl = imageUrl;
+            this.imageResId = 0;
+        }
+
         public String getName() { return name; }
         public int getImageResId() { return imageResId; }
+        public String getImageUrl() { return imageUrl; }
     }
 
     public FoodOrder(String orderId, String merchantName, long totalPrice, int itemCount, String date, String status, String service, boolean isFavorite, String category, List<SubItem> subItems) {

@@ -22,6 +22,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.graphics.Insets;
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.modules.order.OrderRepository;
+import com.example.uitpayapp.modules.order.models.responses.OrderResponse;
+import com.example.uitpayapp.network.ApiCallback;
 import com.google.android.material.tabs.TabLayout;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -68,6 +71,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     private RecyclerView rvDeals;
     private DealHistoryAdapter dealAdapter;
     private List<DealHistory> allDealsList;
+    private OrderRepository orderRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,7 +153,8 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         setupRecommendations();
         setupCalendarSystem(); // Khởi tạo lưới lịch
 
-        createDummyFoodOrders();
+        orderRepository = new OrderRepository();
+        fetchOrdersFromBackend();
         setupTabs();
         setupFilterMenus();
         setupSearchLogic();
@@ -400,6 +405,82 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         List<FoodOrder.SubItem> subItemsFour = new ArrayList<>();
         subItemsFour.add(new FoodOrder.SubItem(popularFoods.get(5).getName(), popularFoods.get(5).getImageResId()));
         allOrders.add(new FoodOrder("12044-998877665", "Gà Rán Popeyes - Võ Văn Ngân", 145000, 4, "12/05/2026", "Hoàn thành", "Đồ ăn", true, "Lịch sử", subItemsFour));
+    }
+
+    private void fetchOrdersFromBackend() {
+        if (orderRepository == null) {
+            orderRepository = new OrderRepository();
+        }
+        orderRepository.getCustomerHistory(new ApiCallback<List<OrderResponse>>() {
+            @Override
+            public void onSuccess(List<OrderResponse> orders) {
+                allOrders.clear();
+                for (OrderResponse order : orders) {
+                    String category = "Lịch sử";
+                    String statusText = "Hoàn thành";
+                    String status = order.getStatus();
+                    
+                    if ("PENDING".equalsIgnoreCase(status) || "PREPARING".equalsIgnoreCase(status) || "DELIVERING".equalsIgnoreCase(status)) {
+                        category = "Đang đến";
+                        statusText = "Đang chuẩn bị";
+                        if ("DELIVERING".equalsIgnoreCase(status)) {
+                            statusText = "Đang giao";
+                        }
+                    } else if ("CANCELLED".equalsIgnoreCase(status)) {
+                        statusText = "Đã hủy";
+                    }
+                    
+                    List<FoodOrder.SubItem> subItems = new ArrayList<>();
+                    if (order.getItems() != null) {
+                        for (OrderResponse.OrderItemResponse item : order.getItems()) {
+                            subItems.add(new FoodOrder.SubItem(item.getName(), item.getImageUrl()));
+                        }
+                    }
+                    
+                    String dateStr = order.getCreatedAt();
+                    if (dateStr == null || dateStr.isEmpty()) {
+                        dateStr = "Hôm nay";
+                    } else {
+                        try {
+                            if (dateStr.contains("T")) {
+                                String[] parts = dateStr.split("T");
+                                String[] dateParts = parts[0].split("-");
+                                dateStr = dateParts[2] + "/" + dateParts[1] + "/" + dateParts[0];
+                            }
+                        } catch (Exception e) {
+                            // ignore
+                        }
+                    }
+                    
+                    String orderIdStr = String.valueOf(order.getId());
+                    String merchantName = order.getRestaurantName() != null ? order.getRestaurantName() : "Cửa hàng";
+                    long totalPrice = order.getTotalAmount() != null ? order.getTotalAmount().longValue() : 0;
+                    int itemCount = order.getItemCount() != null ? order.getItemCount() : 0;
+                    
+                    allOrders.add(new FoodOrder(
+                        orderIdStr,
+                        merchantName,
+                        totalPrice,
+                        itemCount,
+                        dateStr,
+                        statusText,
+                        "Đồ ăn",
+                        false,
+                        category,
+                        subItems
+                    ));
+                }
+                applyFilter();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(TransactionHistoryActivity.this, "Không thể tải lịch sử đơn hàng: " + errorMessage, Toast.LENGTH_SHORT).show();
+                // Fallback to dummy data
+                createDummyFoodOrders();
+                applyFilter();
+            }
+        });
     }
 
     private void setupTabs() {

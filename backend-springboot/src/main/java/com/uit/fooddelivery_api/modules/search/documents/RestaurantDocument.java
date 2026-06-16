@@ -23,6 +23,6 @@ public class RestaurantDocument {
     @Field(type = FieldType.Text)
     private String address;
 
-    @Field(type = FieldType.Geo_Point)
+    @Field(type = FieldType.Auto)
     private GeoPoint location;
 }
