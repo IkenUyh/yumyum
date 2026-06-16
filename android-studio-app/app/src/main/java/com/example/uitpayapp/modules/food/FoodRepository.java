@@ -35,16 +35,16 @@ public class FoodRepository {
                     if (apiResponse != null) {
                         callback.onSuccess(apiResponse.getData());
                     } else {
-                        callback.onError(new Exception("Phản hồi hệ thống trống"));
+                        callback.onError("Phản hồi hệ thống trống");
                     }
                 } else {
-                    callback.onError(new Exception("Lỗi hệ thống: Mã HTTP " + response.code()));
+                    callback.onError("Lỗi hệ thống: Mã HTTP " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<T>> call, Throwable t) {
-                callback.onError(t);
+                callback.onError(t.toString());
             }
         });
     }

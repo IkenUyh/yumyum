@@ -28,16 +28,16 @@ public class ChatRepository {
                     if (apiResponse.getData() != null) {
                         callback.onSuccess(apiResponse.getData());
                     } else {
-                        callback.onError(new Exception("Không có dữ liệu lịch sử đoạn chat."));
+                        callback.onError("Không có dữ liệu lịch sử đoạn chat.");
                     }
                 } else {
-                    callback.onError(new Exception("Lỗi kết nối hệ thống: " + response.code()));
+                    callback.onError("Lỗi kết nối hệ thống: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<List<ChatMessageResponse>>> call, Throwable t) {
-                callback.onError(t);
+                callback.onError(t.toString());
             }
         });
     }
