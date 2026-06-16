@@ -85,11 +85,10 @@ public class HomeActivity extends AppCompatActivity {
     private Runnable sliderRunnable;
 
     private static final String[] ADDRESSES = {
-            "Nhà C, Thủ Đức, Hồ Chí Minh",
-            "KTX Khu B, ĐHQG, Thủ Đức",
-            "Phòng Lab, Tòa E, ĐH CNTT",
-            "Căn tin ĐH CNTT, Thủ Đức",
-            "Số 1 Võ Văn Ngân, Thủ Đức"
+            "48 Phó Cơ Điều, Phường Chợ Lớn, TP. Hồ Chí Minh",
+            "268 Lý Thường Kiệt, Phường Diên Hồng, TP. Hồ Chí Minh",
+            "803 Kha Vạn Cân, Phường Linh Xuân, TP. Hồ Chí Minh",
+            "215 Điện Biên Phủ, Phường Gia Định, TP. Hồ Chí Minh"
     };
 
     @Override
@@ -123,6 +122,10 @@ public class HomeActivity extends AppCompatActivity {
 
         tvDeliveryAddress = findViewById(R.id.tv_delivery_address);
         findViewById(R.id.layout_address_bar).setOnClickListener(v -> showAddressSelection());
+        View dummyAddressBar = findViewById(R.id.layout_address_bar_dummy);
+        if (dummyAddressBar != null) {
+            dummyAddressBar.setOnClickListener(v -> showAddressSelection());
+        }
 
         setupRestaurants();
         setupCategories();
@@ -234,23 +237,52 @@ public class HomeActivity extends AppCompatActivity {
 
         view.findViewById(R.id.btn_close_destination).setOnClickListener(v -> dialog.dismiss());
 
-        LinearLayout llWallet = view.findViewById(R.id.btn_dest_wallet);
-        LinearLayout llSaving = view.findViewById(R.id.btn_dest_saving);
+        LinearLayout rootLayout = (LinearLayout) view;
+        View destWallet = view.findViewById(R.id.btn_dest_wallet);
+        View destSaving = view.findViewById(R.id.btn_dest_saving);
+        if (destWallet != null) rootLayout.removeView(destWallet);
+        if (destSaving != null) rootLayout.removeView(destSaving);
 
-        ((TextView) llWallet.getChildAt(1)).setText(ADDRESSES[0]);
-        ((TextView) llSaving.getChildAt(1)).setText(ADDRESSES[1]);
+        for (String address : ADDRESSES) {
+            LinearLayout itemLayout = new LinearLayout(this);
+            itemLayout.setOrientation(LinearLayout.HORIZONTAL);
+            itemLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            int paddingVertical = (int)(16 * getResources().getDisplayMetrics().density);
+            itemLayout.setPadding(0, paddingVertical, 0, paddingVertical);
+            
+            android.util.TypedValue outValue = new android.util.TypedValue();
+            getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+            itemLayout.setBackgroundResource(outValue.resourceId);
 
-        llWallet.setOnClickListener(v -> {
-            tvDeliveryAddress.setText(ADDRESSES[0]);
-            dialog.dismiss();
-            Toast.makeText(this, "Giao tới: " + ADDRESSES[0], Toast.LENGTH_SHORT).show();
-        });
+            ImageView iv = new ImageView(this);
+            int iconSize = (int)(24 * getResources().getDisplayMetrics().density);
+            iv.setLayoutParams(new LinearLayout.LayoutParams(iconSize, iconSize));
+            iv.setImageResource(R.drawable.ic_location);
+            iv.setColorFilter(Color.parseColor("#f24405"));
 
-        llSaving.setOnClickListener(v -> {
-            tvDeliveryAddress.setText(ADDRESSES[1]);
-            dialog.dismiss();
-            Toast.makeText(this, "Giao tới: " + ADDRESSES[1], Toast.LENGTH_SHORT).show();
-        });
+            TextView tv = new TextView(this);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins((int)(16 * getResources().getDisplayMetrics().density), 0, 0, 0);
+            tv.setLayoutParams(params);
+            tv.setText(address);
+            tv.setTextSize(15f);
+            tv.setTextColor(Color.parseColor("#000000"));
+            tv.setMaxLines(2);
+            tv.setEllipsize(android.text.TextUtils.TruncateAt.END);
+
+            itemLayout.addView(iv);
+            itemLayout.addView(tv);
+
+            itemLayout.setOnClickListener(v -> {
+                tvDeliveryAddress.setText(address);
+                TextView tvDummy = findViewById(R.id.tv_delivery_address_dummy);
+                if (tvDummy != null) tvDummy.setText(address);
+                dialog.dismiss();
+            });
+
+            rootLayout.addView(itemLayout);
+        }
 
         dialog.show();
     }
@@ -584,6 +616,11 @@ public class HomeActivity extends AppCompatActivity {
         rvDeals.setLayoutManager(new LinearLayoutManager(this));
         rvDeals.setAdapter(homeDealAdapter);
 
+        // Prevent RecyclerView from grabbing focus and scrolling
+        rvDeals.setFocusable(false);
+        rvDeals.setFocusableInTouchMode(false);
+        rvDeals.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+
         // Initial load
         resetAndLoadDeals();
 
@@ -628,32 +665,53 @@ public class HomeActivity extends AppCompatActivity {
 
     @android.annotation.SuppressLint("NotifyDataSetChanged")
     private void resetAndLoadDeals() {
+        RecyclerView rvDeals = findViewById(R.id.rv_home_deals);
+        if (rvDeals != null && rvDeals.getHeight() > 0) {
+            rvDeals.setMinimumHeight(rvDeals.getHeight());
+        }
+
         dealItems.clear();
         dealItemCount = 0;
         nextBannerAt = 5 + bannerRandom.nextInt(3); // 5-7
         homeDealAdapter.notifyDataSetChanged();
         isLoadingMore = false;
-        loadMoreDeals();
+        
+        boolean isStickyVisible = stickyTabLayout != null && stickyTabLayout.getVisibility() == View.VISIBLE;
+        loadMoreDeals(isStickyVisible);
     }
 
     @android.annotation.SuppressLint("NotifyDataSetChanged")
-    private void loadMoreDeals() {
+    private void loadMoreDeals(boolean useFloatingOverlay) {
         if (isLoadingMore) return;
         isLoadingMore = true;
 
-        // Add loading indicator
-        dealItems.add(null);
-        homeDealAdapter.notifyItemInserted(dealItems.size() - 1);
+        if (useFloatingOverlay) {
+            View loadingOverlay = findViewById(R.id.layout_loading_overlay);
+            if (loadingOverlay != null) {
+                loadingOverlay.setVisibility(View.VISIBLE);
+            }
+        } else {
+            // Add loading indicator to bottom
+            dealItems.add(null);
+            homeDealAdapter.notifyItemInserted(dealItems.size() - 1);
+        }
 
         int tabIndex = tabHomeDeals.getSelectedTabPosition();
         int delay = 800 + bannerRandom.nextInt(700); // 800-1500ms
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            // Remove loading indicator
-            int loadingPos = dealItems.indexOf(null);
-            if (loadingPos >= 0) {
-                dealItems.remove(loadingPos);
-                homeDealAdapter.notifyItemRemoved(loadingPos);
+            if (useFloatingOverlay) {
+                View loadingOverlay = findViewById(R.id.layout_loading_overlay);
+                if (loadingOverlay != null) {
+                    loadingOverlay.setVisibility(View.GONE);
+                }
+            } else {
+                // Remove loading indicator from bottom
+                int loadingPos = dealItems.indexOf(null);
+                if (loadingPos >= 0) {
+                    dealItems.remove(loadingPos);
+                    homeDealAdapter.notifyItemRemoved(loadingPos);
+                }
             }
 
             // Generate 5 fake deals
@@ -672,6 +730,12 @@ public class HomeActivity extends AppCompatActivity {
 
             homeDealAdapter.notifyDataSetChanged();
             isLoadingMore = false;
+            
+            // Reset minHeight so it can grow or shrink properly on subsequent loads
+            RecyclerView rv = findViewById(R.id.rv_home_deals);
+            if (rv != null) {
+                rv.setMinimumHeight(0);
+            }
         }, delay);
     }
 
@@ -704,7 +768,7 @@ public class HomeActivity extends AppCompatActivity {
             if (child != null) {
                 int scrollRange = child.getHeight() - v.getHeight();
                 if (scrollY >= scrollRange - 500 && !isLoadingMore) {
-                    loadMoreDeals();
+                    loadMoreDeals(false);
                 }
             }
         });

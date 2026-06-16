@@ -51,8 +51,8 @@ public class AddressOrderActivity extends AppCompatActivity {
         topBar.findViewById(R.id.top_bar_back_btn).setOnClickListener(v -> finish());
         View bottomPanel = findViewById(R.id.bottom_panel);
         ViewCompat.setOnApplyWindowInsetsListener(topBar, (v, insets) -> {
-            Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
-            int safeTopPadding = cutout.top + 10;
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            int safeTopPadding = systemBars.top + 10;
             v.setPadding(v.getPaddingLeft(), safeTopPadding, v.getPaddingRight(), v.getPaddingBottom());
             //thanh duoi
             Insets navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());

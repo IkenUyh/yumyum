@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.graphics.Insets;
+import androidx.activity.OnBackPressedCallback;
+import android.view.MotionEvent;
 import com.example.uitpayapp.R;
 import com.google.android.material.tabs.TabLayout;
 import java.text.SimpleDateFormat;
@@ -154,6 +156,28 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         setupFilterMenus();
         setupSearchLogic();
         setupBottomNavigation();
+        applyFilter();
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (etSearch.getVisibility() == View.VISIBLE) {
+                    closeSearch();
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
+    }
+
+    private void closeSearch() {
+        TextView tvTitle = findViewById(R.id.tvTitle);
+        etSearch.setText("");
+        currentQuery = "";
+        etSearch.setVisibility(View.GONE);
+        tvTitle.setVisibility(View.VISIBLE);
+        ivSearch.setImageResource(R.drawable.ic_search);
         applyFilter();
     }
 
@@ -297,7 +321,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             return; // Ngắt hàm luôn để không chạy vòng lặp lọc đơn hàng phía dưới
         }
         else {
-            // Các tab Lịch sử, Đánh giá, Đơn nhóm thông thường
+            // Các tab Lịch sử, Đánh giá thông thường
             layoutCoinsBanner.setVisibility(View.VISIBLE);
             layoutFilters.setVisibility(View.VISIBLE);
             layoutRecommendations.setVisibility(View.GONE);
@@ -407,7 +431,6 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         tabLayout.addTab(tabLayout.newTab().setText("Deal đã mua"));
         tabLayout.addTab(tabLayout.newTab().setText("Lịch sử"));
         tabLayout.addTab(tabLayout.newTab().setText("Đánh giá"));
-        tabLayout.addTab(tabLayout.newTab().setText("Đơn nhóm"));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -463,12 +486,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
                 etSearch.requestFocus();
                 ivSearch.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
             } else {
-                etSearch.setText("");
-                currentQuery = "";
-                etSearch.setVisibility(View.GONE);
-                tvTitle.setVisibility(View.VISIBLE);
-                ivSearch.setImageResource(android.R.drawable.ic_menu_search);
-                applyFilter();
+                closeSearch();
             }
         });
 
@@ -478,10 +496,27 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 currentQuery = s.toString().trim();
+                if (currentQuery.length() > 0) {
+                    etSearch.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_close_clear_cancel, 0);
+                } else {
+                    etSearch.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                }
                 applyFilter();
             }
             @Override
             public void afterTextChanged(Editable s) {}
+        });
+
+        etSearch.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (etSearch.getCompoundDrawables()[2] != null) {
+                    if (event.getRawX() >= (etSearch.getRight() - etSearch.getCompoundPaddingRight())) {
+                        etSearch.setText("");
+                        return true;
+                    }
+                }
+            }
+            return false;
         });
     }
 
