@@ -14,15 +14,11 @@ public class DriverRepository {
         this.driverService = RetrofitClient.getDriverService();
     }
 
-    private String formatToken(String token) {
-        return token.startsWith("Bearer ") ? token : "Bearer " + token;
-    }
-
     /**
      * Gửi tọa độ GPS lên Server ngầm (Chạy mỗi 10s bên UI bằng Handler hoặc WorkManager)
      */
-    public void updateLocation(String token, double lat, double lng, ApiCallback<String> callback) {
-        driverService.updateLocation(formatToken(token), lat, lng).enqueue(new Callback<ApiResponse<String>>() {
+    public void updateLocation(double lat, double lng, ApiCallback<String> callback) {
+        driverService.updateLocation(lat, lng).enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 handleResponse(response, callback);
@@ -38,8 +34,8 @@ public class DriverRepository {
     /**
      * Tắt trạng thái nhận chuyến, đưa tài xế về trạng thái ngoại tuyến
      */
-    public void goOffline(String token, ApiCallback<String> callback) {
-        driverService.goOffline(formatToken(token)).enqueue(new Callback<ApiResponse<String>>() {
+    public void goOffline(ApiCallback<String> callback) {
+        driverService.goOffline().enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 handleResponse(response, callback);

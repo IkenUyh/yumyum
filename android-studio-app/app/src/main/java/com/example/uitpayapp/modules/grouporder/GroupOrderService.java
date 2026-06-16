@@ -14,8 +14,7 @@ public interface GroupOrderService {
 
     @POST("api/v1/group-orders/create")
     Call<ApiResponse<String>> createRoom(
-            @Query("restaurantId") Long restaurantId,
-            @Header("Authorization") String token
+            @Query("restaurantId") Long restaurantId
     );
 
     @POST("api/v1/group-orders/{roomCode}/add-item")
@@ -23,14 +22,12 @@ public interface GroupOrderService {
             @Path("roomCode") String roomCode,
             @Query("foodId") Long foodId,
             @Query("quantity") Integer quantity,
-            @Query("optionsJson") String optionsJson,
-            @Header("Authorization") String token
+            @Query("optionsJson") String optionsJson
     );
 
     @POST("api/v1/group-orders/{roomCode}/checkout")
     Call<ApiResponse<Map<String, Object>>> checkoutAndSplitBill(
             @Path("roomCode") String roomCode,
-            @Query("totalShippingFee") Double totalShippingFee,
-            @Header("Authorization") String token
+            @Query("totalShippingFee") Double totalShippingFee
     );
 }

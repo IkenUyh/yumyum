@@ -19,8 +19,8 @@ public class CartRepository {
     }
 
     // Lấy danh sách giỏ hàng
-    public void getCart(String token, final ApiCallback<List<CartItemResponseDTO>> callback) {
-        cartService.getCart(token).enqueue(new Callback<ApiResponse<List<CartItemResponseDTO>>>() {
+    public void getCart(final ApiCallback<List<CartItemResponseDTO>> callback) {
+        cartService.getCart().enqueue(new Callback<ApiResponse<List<CartItemResponseDTO>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<CartItemResponseDTO>>> call, Response<ApiResponse<List<CartItemResponseDTO>>> response) {
                 handleResponse(response, callback);
@@ -34,8 +34,8 @@ public class CartRepository {
     }
 
     // Thêm hoặc Cập nhật số lượng món ăn
-    public void addOrUpdateItem(String token, CartItemRequestDTO dto, final ApiCallback<String> callback) {
-        cartService.addOrUpdateItem(token, dto).enqueue(new Callback<ApiResponse<String>>() {
+    public void addOrUpdateItem(CartItemRequestDTO dto, final ApiCallback<String> callback) {
+        cartService.addOrUpdateItem(dto).enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 handleResponse(response, callback);
@@ -49,8 +49,8 @@ public class CartRepository {
     }
 
     // Xóa một item khỏi giỏ hàng
-    public void removeItem(Long itemId, String token, final ApiCallback<String> callback) {
-        cartService.removeItem(itemId, token).enqueue(new Callback<ApiResponse<String>>() {
+    public void removeItem(Long itemId, final ApiCallback<String> callback) {
+        cartService.removeItem(itemId).enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 handleResponse(response, callback);
@@ -64,8 +64,8 @@ public class CartRepository {
     }
 
     // Xóa toàn bộ giỏ hàng
-    public void clearCart(String token, final ApiCallback<String> callback) {
-        cartService.clearCart(token).enqueue(new Callback<ApiResponse<String>>() {
+    public void clearCart(final ApiCallback<String> callback) {
+        cartService.clearCart().enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 handleResponse(response, callback);

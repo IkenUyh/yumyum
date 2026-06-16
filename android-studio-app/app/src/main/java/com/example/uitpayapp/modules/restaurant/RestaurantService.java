@@ -21,7 +21,6 @@ public interface RestaurantService {
 
     @POST("api/v1/restaurants")
     Call<ApiResponse<RestaurantResponseDTO>> createRestaurant(
-            @Header("Authorization") String token,
             @Body CreateRestaurantDTO dto
     );
 
@@ -36,12 +35,9 @@ public interface RestaurantService {
     @PUT("api/v1/restaurants/{id}/settings")
     Call<ApiResponse<RestaurantResponseDTO>> updateRestaurantSettings(
             @Path("id") Long restaurantId,
-            @Header("Authorization") String token,
             @Body RestaurantSettingsDTO dto
     );
 
     @GET("api/v1/dashboard/merchant")
-    Call<ApiResponse<DashboardResponseDTO>> getMerchantDashboard(
-            @Header("Authorization") String token
-    );
+    Call<ApiResponse<DashboardResponseDTO>> getMerchantDashboard();
 }

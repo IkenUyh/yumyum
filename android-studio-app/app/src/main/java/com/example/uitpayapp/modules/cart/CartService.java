@@ -16,24 +16,18 @@ import retrofit2.http.Path;
 public interface CartService {
 
     @GET("api/v1/carts")
-    Call<ApiResponse<List<CartItemResponseDTO>>> getCart(
-            @Header("Authorization") String token
-    );
+    Call<ApiResponse<List<CartItemResponseDTO>>> getCart();
 
     @POST("api/v1/carts")
     Call<ApiResponse<String>> addOrUpdateItem(
-            @Header("Authorization") String token,
             @Body CartItemRequestDTO dto
     );
 
     @DELETE("api/v1/carts/{itemId}")
     Call<ApiResponse<String>> removeItem(
-            @Path("itemId") Long itemId,
-            @Header("Authorization") String token
+            @Path("itemId") Long itemId
     );
 
     @DELETE("api/v1/carts/clear")
-    Call<ApiResponse<String>> clearCart(
-            @Header("Authorization") String token
-    );
+    Call<ApiResponse<String>> clearCart();
 }

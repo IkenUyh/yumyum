@@ -12,7 +12,5 @@ import retrofit2.http.Header;
 public interface NotificationService {
 
     @GET("api/v1/notifications/history")
-    Call<ApiResponse<List<NotificationResponseDTO>>> getHistory(
-            @Header("Authorization") String token
-    );
+    Call<ApiResponse<List<NotificationResponseDTO>>> getHistory();
 }

@@ -11,12 +11,8 @@ import retrofit2.http.POST;
 public interface LoyaltyService {
 
     @GET("api/v1/loyalty/me")
-    Call<ApiResponse<LoyaltyResponseDTO>> getMyLoyaltyInfo(
-            @Header("Authorization") String token
-    );
+    Call<ApiResponse<LoyaltyResponseDTO>> getMyLoyaltyInfo();
 
     @POST("api/v1/loyalty/checkin")
-    Call<ApiResponse<LoyaltyResponseDTO>> dailyCheckIn(
-            @Header("Authorization") String token
-    );
+    Call<ApiResponse<LoyaltyResponseDTO>> dailyCheckIn();
 }

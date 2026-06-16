@@ -18,13 +18,9 @@ public class AddressRepository {
         this.addressService = RetrofitClient.getAddressService();
     }
 
-    private String formatToken(String token) {
-        return token.startsWith("Bearer ") ? token : "Bearer " + token;
-    }
-
     // 1. Lấy danh sách địa chỉ cá nhân
-    public void getMyAddresses(String token, ApiCallback<List<AddressResponseDTO>> callback) {
-        addressService.getMyAddresses(formatToken(token)).enqueue(new Callback<ApiResponse<List<AddressResponseDTO>>>() {
+    public void getMyAddresses(ApiCallback<List<AddressResponseDTO>> callback) {
+        addressService.getMyAddresses().enqueue(new Callback<ApiResponse<List<AddressResponseDTO>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<AddressResponseDTO>>> call, Response<ApiResponse<List<AddressResponseDTO>>> response) {
                 handleResponse(response, callback);
@@ -38,8 +34,8 @@ public class AddressRepository {
     }
 
     // 2. Thêm mới một địa chỉ
-    public void createAddress(String token, CreateAddressDTO dto, ApiCallback<AddressResponseDTO> callback) {
-        addressService.createAddress(formatToken(token), dto).enqueue(new Callback<ApiResponse<AddressResponseDTO>>() {
+    public void createAddress(CreateAddressDTO dto, ApiCallback<AddressResponseDTO> callback) {
+        addressService.createAddress(dto).enqueue(new Callback<ApiResponse<AddressResponseDTO>>() {
             @Override
             public void onResponse(Call<ApiResponse<AddressResponseDTO>> call, Response<ApiResponse<AddressResponseDTO>> response) {
                 handleResponse(response, callback);
@@ -53,8 +49,8 @@ public class AddressRepository {
     }
 
     // 3. Đặt địa chỉ mặc định
-    public void setDefaultAddress(String token, Long addressId, ApiCallback<AddressResponseDTO> callback) {
-        addressService.setDefaultAddress(formatToken(token), addressId).enqueue(new Callback<ApiResponse<AddressResponseDTO>>() {
+    public void setDefaultAddress(Long addressId, ApiCallback<AddressResponseDTO> callback) {
+        addressService.setDefaultAddress(addressId).enqueue(new Callback<ApiResponse<AddressResponseDTO>>() {
             @Override
             public void onResponse(Call<ApiResponse<AddressResponseDTO>> call, Response<ApiResponse<AddressResponseDTO>> response) {
                 handleResponse(response, callback);
@@ -68,8 +64,8 @@ public class AddressRepository {
     }
 
     // 4. Xóa địa chỉ
-    public void deleteAddress(String token, Long addressId, ApiCallback<String> callback) {
-        addressService.deleteAddress(formatToken(token), addressId).enqueue(new Callback<ApiResponse<String>>() {
+    public void deleteAddress(Long addressId, ApiCallback<String> callback) {
+        addressService.deleteAddress(addressId).enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 handleResponse(response, callback);

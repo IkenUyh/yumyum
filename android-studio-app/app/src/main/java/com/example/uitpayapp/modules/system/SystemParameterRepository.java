@@ -37,8 +37,8 @@ public class SystemParameterRepository {
     }
 
     // Cập nhật một tham số hệ thống cấu hình bất kỳ
-    public void updateParameter(String token, String paramKey, String newValue, final ApiCallback<SystemParameterResponse> callback) {
-        systemParameterService.updateParameter("Bearer " + token, paramKey, newValue).enqueue(new Callback<ApiResponse<SystemParameterResponse>>() {
+    public void updateParameter(String paramKey, String newValue, final ApiCallback<SystemParameterResponse> callback) {
+        systemParameterService.updateParameter(paramKey, newValue).enqueue(new Callback<ApiResponse<SystemParameterResponse>>() {
             @Override
             public void onResponse(Call<ApiResponse<SystemParameterResponse>> call, Response<ApiResponse<SystemParameterResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {

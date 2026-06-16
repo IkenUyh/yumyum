@@ -20,7 +20,6 @@ public interface SystemParameterService {
     // Cập nhật cấu hình hệ thống (Yêu cầu quyền ADMIN nên cấu hình thêm Header Authorization)
     @PUT("api/v1/system-parameters/{paramKey}")
     Call<ApiResponse<SystemParameterResponse>> updateParameter(
-            @Header("Authorization") String token,
             @Path("paramKey") String paramKey,
             @Query("newValue") String newValue
     );
