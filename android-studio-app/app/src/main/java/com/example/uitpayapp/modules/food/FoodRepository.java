@@ -49,24 +49,24 @@ public class FoodRepository {
         });
     }
 
-    public void createFood(String token, CreateFoodRequest request, ApiCallback<FoodResponse> callback) {
-        handleCall(foodService.createFood(token, request), callback);
+    public void createFood(CreateFoodRequest request, ApiCallback<FoodResponse> callback) {
+        handleCall(foodService.createFood(request), callback);
     }
 
-    public void uploadFoodImage(String token, Long foodId, MultipartBody.Part file, ApiCallback<String> callback) {
-        handleCall(foodService.uploadFoodImage(token, foodId, file), callback);
+    public void uploadFoodImage(Long foodId, MultipartBody.Part file, ApiCallback<String> callback) {
+        handleCall(foodService.uploadFoodImage(foodId, file), callback);
     }
 
-    public void updateFood(String token, Long foodId, CreateFoodRequest request, ApiCallback<FoodResponse> callback) {
-        handleCall(foodService.updateFood(token, foodId, request), callback);
+    public void updateFood(Long foodId, CreateFoodRequest request, ApiCallback<FoodResponse> callback) {
+        handleCall(foodService.updateFood(foodId, request), callback);
     }
 
-    public void deleteFood(String token, Long foodId, ApiCallback<String> callback) {
-        handleCall(foodService.deleteFood(token, foodId), callback);
+    public void deleteFood(Long foodId, ApiCallback<String> callback) {
+        handleCall(foodService.deleteFood(foodId), callback);
     }
 
-    public void addOptionGroup(String token, Long foodId, CreateOptionGroupRequest request, ApiCallback<OptionGroupResponse> callback) {
-        handleCall(foodService.addOptionGroup(token, foodId, request), callback);
+    public void addOptionGroup(Long foodId, CreateOptionGroupRequest request, ApiCallback<OptionGroupResponse> callback) {
+        handleCall(foodService.addOptionGroup(foodId, request), callback);
     }
 
     public void getFoodOptions(Long foodId, ApiCallback<List<OptionGroupResponse>> callback) {

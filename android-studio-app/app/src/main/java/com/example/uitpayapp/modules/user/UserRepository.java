@@ -20,10 +20,6 @@ public class UserRepository {
         this.userService = RetrofitClient.getUserService();
     }
 
-    private String formatToken(String token) {
-        return token.startsWith("Bearer ") ? token : "Bearer " + token;
-    }
-
     // 1. Đăng nhập
     public void login(String phoneNumber, String password, ApiCallback<AuthResponseDTO> callback) {
         LoginRequestDTO dto = new LoginRequestDTO(phoneNumber, password);
@@ -41,8 +37,8 @@ public class UserRepository {
     }
 
     // 2. Lấy thông tin cá nhân
-    public void getProfile(String token, ApiCallback<UserResponseDTO> callback) {
-        userService.getProfile(formatToken(token)).enqueue(new Callback<ApiResponse<UserResponseDTO>>() {
+    public void getProfile(ApiCallback<UserResponseDTO> callback) {
+        userService.getProfile().enqueue(new Callback<ApiResponse<UserResponseDTO>>() {
             @Override
             public void onResponse(Call<ApiResponse<UserResponseDTO>> call, Response<ApiResponse<UserResponseDTO>> response) {
                 handleResponse(response, callback);
@@ -56,12 +52,12 @@ public class UserRepository {
     }
 
     // 3. Thêm địa chỉ mới (Mới gom vào)
-    public void createAddress(String token, String addressName, String recipientName, String phoneNumber,
+    public void createAddress(String addressName, String recipientName, String phoneNumber,
                               String detailedAddress, BigDecimal latitude, BigDecimal longitude, Boolean isDefault,
                               ApiCallback<AddressResponseDTO> callback) {
 
         CreateAddressDTO dto = new CreateAddressDTO(addressName, recipientName, phoneNumber, detailedAddress, latitude, longitude, isDefault);
-        userService.createAddress(formatToken(token), dto).enqueue(new Callback<ApiResponse<AddressResponseDTO>>() {
+        userService.createAddress(dto).enqueue(new Callback<ApiResponse<AddressResponseDTO>>() {
             @Override
             public void onResponse(Call<ApiResponse<AddressResponseDTO>> call, Response<ApiResponse<AddressResponseDTO>> response) {
                 handleResponse(response, callback);
@@ -75,8 +71,8 @@ public class UserRepository {
     }
 
     // 4. Lấy danh sách địa chỉ (Mới gom vào)
-    public void getAddresses(String token, ApiCallback<List<AddressResponseDTO>> callback) {
-        userService.getAddresses(formatToken(token)).enqueue(new Callback<ApiResponse<List<AddressResponseDTO>>>() {
+    public void getAddresses(ApiCallback<List<AddressResponseDTO>> callback) {
+        userService.getAddresses().enqueue(new Callback<ApiResponse<List<AddressResponseDTO>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<AddressResponseDTO>>> call, Response<ApiResponse<List<AddressResponseDTO>>> response) {
                 handleResponse(response, callback);

@@ -19,8 +19,8 @@ public class WalletRepository {
     }
 
     // Hàm gọi lấy số dư
-    public void getBalance(String token, final ApiCallback<BalanceResponse> callback) {
-        walletService.getBalance("Bearer " + token).enqueue(new Callback<ApiResponse<BalanceResponse>>() {
+    public void getBalance(final ApiCallback<BalanceResponse> callback) {
+        walletService.getBalance().enqueue(new Callback<ApiResponse<BalanceResponse>>() {
             @Override
             public void onResponse(Call<ApiResponse<BalanceResponse>> call, Response<ApiResponse<BalanceResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -38,8 +38,8 @@ public class WalletRepository {
     }
 
     // Hàm gọi lấy lịch sử giao dịch
-    public void getTransactionHistory(String token, final ApiCallback<List<TransactionResponse>> callback) {
-        walletService.getTransactions("Bearer " + token).enqueue(new Callback<ApiResponse<List<TransactionResponse>>>() {
+    public void getTransactionHistory(final ApiCallback<List<TransactionResponse>> callback) {
+        walletService.getTransactions().enqueue(new Callback<ApiResponse<List<TransactionResponse>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<TransactionResponse>>> call, Response<ApiResponse<List<TransactionResponse>>> response) {
                 if (response.isSuccessful() && response.body() != null) {

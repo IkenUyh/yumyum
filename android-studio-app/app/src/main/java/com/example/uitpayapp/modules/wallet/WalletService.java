@@ -16,13 +16,13 @@ public interface WalletService {
 
     // Lấy số dư ví hiện tại
     @GET("api/v1/wallets/balance")
-    Call<ApiResponse<BalanceResponse>> getBalance(@Header("Authorization") String token);
+    Call<ApiResponse<BalanceResponse>> getBalance();
 
     // Lấy lịch sử biến động số dư
     @GET("api/v1/wallets/transactions")
-    Call<ApiResponse<List<TransactionResponse>>> getTransactions(@Header("Authorization") String token);
+    Call<ApiResponse<List<TransactionResponse>>> getTransactions();
 
     // Dự phóng thêm API nạp tiền (vì backend đã cung cấp TopUpRequestDTO)
     @POST("api/v1/wallets/topup")
-    Call<ApiResponse<Void>> topUp(@Header("Authorization") String token, @Body TopUpRequest request);
+    Call<ApiResponse<Void>> topUp(@Body TopUpRequest request);
 }

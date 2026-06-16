@@ -17,8 +17,8 @@ public class GroupOrderRepository {
         this.groupOrderService = RetrofitClient.getGroupOrderService();
     }
 
-    public void createRoom(Long restaurantId, String token, final ApiCallback<String> callback) {
-        groupOrderService.createRoom(restaurantId, token).enqueue(new Callback<ApiResponse<String>>() {
+    public void createRoom(Long restaurantId, final ApiCallback<String> callback) {
+        groupOrderService.createRoom(restaurantId).enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 handleResponse(response, callback);
@@ -31,8 +31,8 @@ public class GroupOrderRepository {
         });
     }
 
-    public void addItem(String roomCode, Long foodId, Integer quantity, String optionsJson, String token, final ApiCallback<String> callback) {
-        groupOrderService.addItem(roomCode, foodId, quantity, optionsJson, token).enqueue(new Callback<ApiResponse<String>>() {
+    public void addItem(String roomCode, Long foodId, Integer quantity, String optionsJson, final ApiCallback<String> callback) {
+        groupOrderService.addItem(roomCode, foodId, quantity, optionsJson).enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 handleResponse(response, callback);
@@ -45,8 +45,8 @@ public class GroupOrderRepository {
         });
     }
 
-    public void checkoutAndSplitBill(String roomCode, Double totalShippingFee, String token, final ApiCallback<Map<String, Object>> callback) {
-        groupOrderService.checkoutAndSplitBill(roomCode, totalShippingFee, token).enqueue(new Callback<ApiResponse<Map<String, Object>>>() {
+    public void checkoutAndSplitBill(String roomCode, Double totalShippingFee, final ApiCallback<Map<String, Object>> callback) {
+        groupOrderService.checkoutAndSplitBill(roomCode, totalShippingFee).enqueue(new Callback<ApiResponse<Map<String, Object>>>() {
             @Override
             public void onResponse(Call<ApiResponse<Map<String, Object>>> call, Response<ApiResponse<Map<String, Object>>> response) {
                 handleResponse(response, callback);

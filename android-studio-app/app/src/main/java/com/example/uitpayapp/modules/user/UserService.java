@@ -26,22 +26,22 @@ public interface UserService {
     Call<ApiResponse<AuthResponseDTO>> login(@Body LoginRequestDTO request);
 
     @GET("api/v1/users/me")
-    Call<ApiResponse<UserResponseDTO>> getProfile(@Header("Authorization") String token);
+    Call<ApiResponse<UserResponseDTO>> getProfile();
 
     @Multipart
     @POST("api/v1/users/upload-avatar")
-    Call<ApiResponse<String>> uploadAvatar(@Header("Authorization") String token, @Part MultipartBody.Part file);
+    Call<ApiResponse<String>> uploadAvatar(@Part MultipartBody.Part file);
 
     @PUT("api/v1/users/password")
-    Call<ApiResponse<String>> changePassword(@Header("Authorization") String token, @Body ChangePasswordDTO request);
+    Call<ApiResponse<String>> changePassword(@Body ChangePasswordDTO request);
 
     @DELETE("api/v1/users/account")
-    Call<ApiResponse<String>> deleteAccount(@Header("Authorization") String token);
+    Call<ApiResponse<String>> deleteAccount();
 
     // --- Các API địa chỉ con (Nằm trong UserController) ---
     @POST("api/v1/users/addresses")
-    Call<ApiResponse<AddressResponseDTO>> createAddress(@Header("Authorization") String token, @Body CreateAddressDTO request);
+    Call<ApiResponse<AddressResponseDTO>> createAddress(@Body CreateAddressDTO request);
 
     @GET("api/v1/users/addresses")
-    Call<ApiResponse<List<AddressResponseDTO>>> getAddresses(@Header("Authorization") String token);
+    Call<ApiResponse<List<AddressResponseDTO>>> getAddresses();
 }

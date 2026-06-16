@@ -26,8 +26,8 @@ public class RestaurantRepository {
     }
 
     // CRUD & Dashboard
-    public void createRestaurant(String token, CreateRestaurantDTO dto, final ApiCallback<RestaurantResponseDTO> callback) {
-        restaurantService.createRestaurant(token, dto).enqueue(new Callback<ApiResponse<RestaurantResponseDTO>>() {
+    public void createRestaurant(CreateRestaurantDTO dto, final ApiCallback<RestaurantResponseDTO> callback) {
+        restaurantService.createRestaurant(dto).enqueue(new Callback<ApiResponse<RestaurantResponseDTO>>() {
             @Override
             public void onResponse(Call<ApiResponse<RestaurantResponseDTO>> call, Response<ApiResponse<RestaurantResponseDTO>> response) {
                 handleResponse(response, callback);
@@ -65,8 +65,8 @@ public class RestaurantRepository {
         });
     }
 
-    public void updateRestaurantSettings(Long restaurantId, String token, RestaurantSettingsDTO dto, final ApiCallback<RestaurantResponseDTO> callback) {
-        restaurantService.updateRestaurantSettings(restaurantId, token, dto).enqueue(new Callback<ApiResponse<RestaurantResponseDTO>>() {
+    public void updateRestaurantSettings(Long restaurantId, RestaurantSettingsDTO dto, final ApiCallback<RestaurantResponseDTO> callback) {
+        restaurantService.updateRestaurantSettings(restaurantId, dto).enqueue(new Callback<ApiResponse<RestaurantResponseDTO>>() {
             @Override
             public void onResponse(Call<ApiResponse<RestaurantResponseDTO>> call, Response<ApiResponse<RestaurantResponseDTO>> response) {
                 handleResponse(response, callback);
@@ -78,8 +78,8 @@ public class RestaurantRepository {
         });
     }
 
-    public void getMerchantDashboard(String token, final ApiCallback<DashboardResponseDTO> callback) {
-        restaurantService.getMerchantDashboard(token).enqueue(new Callback<ApiResponse<DashboardResponseDTO>>() {
+    public void getMerchantDashboard(final ApiCallback<DashboardResponseDTO> callback) {
+        restaurantService.getMerchantDashboard().enqueue(new Callback<ApiResponse<DashboardResponseDTO>>() {
             @Override
             public void onResponse(Call<ApiResponse<DashboardResponseDTO>> call, Response<ApiResponse<DashboardResponseDTO>> response) {
                 handleResponse(response, callback);

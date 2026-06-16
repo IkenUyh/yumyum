@@ -16,8 +16,8 @@ public class LoyaltyRepository {
         this.loyaltyService = RetrofitClient.getLoyaltyService();
     }
 
-    public void getMyLoyaltyInfo(String token, final ApiCallback<LoyaltyResponseDTO> callback) {
-        loyaltyService.getMyLoyaltyInfo(token).enqueue(new Callback<ApiResponse<LoyaltyResponseDTO>>() {
+    public void getMyLoyaltyInfo(final ApiCallback<LoyaltyResponseDTO> callback) {
+        loyaltyService.getMyLoyaltyInfo().enqueue(new Callback<ApiResponse<LoyaltyResponseDTO>>() {
             @Override
             public void onResponse(Call<ApiResponse<LoyaltyResponseDTO>> call, Response<ApiResponse<LoyaltyResponseDTO>> response) {
                 handleResponse(response, callback);
@@ -30,8 +30,8 @@ public class LoyaltyRepository {
         });
     }
 
-    public void dailyCheckIn(String token, final ApiCallback<LoyaltyResponseDTO> callback) {
-        loyaltyService.dailyCheckIn(token).enqueue(new Callback<ApiResponse<LoyaltyResponseDTO>>() {
+    public void dailyCheckIn(final ApiCallback<LoyaltyResponseDTO> callback) {
+        loyaltyService.dailyCheckIn().enqueue(new Callback<ApiResponse<LoyaltyResponseDTO>>() {
             @Override
             public void onResponse(Call<ApiResponse<LoyaltyResponseDTO>> call, Response<ApiResponse<LoyaltyResponseDTO>> response) {
                 handleResponse(response, callback);

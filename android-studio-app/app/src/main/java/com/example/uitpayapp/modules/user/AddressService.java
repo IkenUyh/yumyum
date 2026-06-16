@@ -17,25 +17,20 @@ import retrofit2.http.Path;
 public interface AddressService {
 
     @GET("api/v1/addresses")
-    Call<ApiResponse<List<AddressResponseDTO>>> getMyAddresses(
-            @Header("Authorization") String token
-    );
+    Call<ApiResponse<List<AddressResponseDTO>>> getMyAddresses();
 
     @POST("api/v1/addresses")
     Call<ApiResponse<AddressResponseDTO>> createAddress(
-            @Header("Authorization") String token,
             @Body CreateAddressDTO dto
     );
 
     @PUT("api/v1/addresses/{id}/set-default")
     Call<ApiResponse<AddressResponseDTO>> setDefaultAddress(
-            @Header("Authorization") String token,
             @Path("id") Long addressId
     );
 
     @DELETE("api/v1/addresses/{id}")
     Call<ApiResponse<String>> deleteAddress(
-            @Header("Authorization") String token,
             @Path("id") Long addressId
     );
 }

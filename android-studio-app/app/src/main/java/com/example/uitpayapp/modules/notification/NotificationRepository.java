@@ -18,8 +18,8 @@ public class NotificationRepository {
         this.notificationService = RetrofitClient.getNotificationService();
     }
 
-    public void getHistory(String token, final ApiCallback<List<NotificationResponseDTO>> callback) {
-        notificationService.getHistory(token).enqueue(new Callback<ApiResponse<List<NotificationResponseDTO>>>() {
+    public void getHistory(final ApiCallback<List<NotificationResponseDTO>> callback) {
+        notificationService.getHistory().enqueue(new Callback<ApiResponse<List<NotificationResponseDTO>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<NotificationResponseDTO>>> call, Response<ApiResponse<List<NotificationResponseDTO>>> response) {
                 handleResponse(response, callback);

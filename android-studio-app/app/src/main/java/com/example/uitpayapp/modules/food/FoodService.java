@@ -15,34 +15,29 @@ public interface FoodService {
 
     @POST("api/v1/foods")
     Call<ApiResponse<FoodResponse>> createFood(
-            @Header("Authorization") String token,
             @Body CreateFoodRequest request
     );
 
     @Multipart
     @POST("api/v1/foods/{id}/upload-image")
     Call<ApiResponse<String>> uploadFoodImage(
-            @Header("Authorization") String token,
             @Path("id") Long foodId,
             @Part MultipartBody.Part file
     );
 
     @PUT("api/v1/foods/{id}")
     Call<ApiResponse<FoodResponse>> updateFood(
-            @Header("Authorization") String token,
             @Path("id") Long foodId,
             @Body CreateFoodRequest request
     );
 
     @DELETE("api/v1/foods/{id}")
     Call<ApiResponse<String>> deleteFood(
-            @Header("Authorization") String token,
             @Path("id") Long foodId
     );
 
     @POST("api/v1/foods/{foodId}/options")
     Call<ApiResponse<OptionGroupResponse>> addOptionGroup(
-            @Header("Authorization") String token,
             @Path("foodId") Long foodId,
             @Body CreateOptionGroupRequest request
     );
