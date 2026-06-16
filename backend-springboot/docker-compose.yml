@@ -19,6 +19,7 @@ services:
       - "6379:6379"
 
   backend-app:
+    build: .
     image: ikenuyh/fooddelivery-backend:latest
     container_name: fooddelivery-backend-app
     restart: always
@@ -27,6 +28,7 @@ services:
     depends_on:
       - mysql-db
       - redis-db
+      - elasticsearch
     environment:
       # Ket noi voi MySQL thong qua ten service
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/fooddelivery_db?useSSL=false&allowPublicKeyRetrieval=true
@@ -35,6 +37,7 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
       - SPRING_REDIS_HOST=redis-db # Link tới Redis
       - SPRING_REDIS_PORT=6379
+      - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200
 
   # Them Caddy de lo vu HTTPS
   reverse-proxy:
@@ -50,15 +53,19 @@ services:
       - caddy_config:/config
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
     container_name: fooddelivery-es
+    restart: always
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
     ports:
       - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
 
 volumes:
   mysql_data:
   caddy_data:
   caddy_config:
+  es_data:
