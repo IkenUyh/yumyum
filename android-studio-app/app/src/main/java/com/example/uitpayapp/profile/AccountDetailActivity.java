@@ -26,6 +26,10 @@ import com.bumptech.glide.Glide;
 import com.example.uitpayapp.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
+import com.example.uitpayapp.modules.user.UserRepository;
+import com.example.uitpayapp.modules.user.models.responses.UserResponseDTO;
+import com.example.uitpayapp.network.SessionManager;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -36,14 +40,55 @@ public class AccountDetailActivity extends AppCompatActivity {
     ImageView ivAvatar;
     TextView tvFullName,tvPhone;
     List<String> MainInfo;
+    private java.io.File getFileFromUri(android.net.Uri uri) {
+        try {
+            java.io.File tempFile = new java.io.File(getCacheDir(), "temp_avatar.jpg");
+            java.io.InputStream inputStream = getContentResolver().openInputStream(uri);
+            java.io.FileOutputStream outputStream = new java.io.FileOutputStream(tempFile);
+            byte[] buffer = new byte[4096];
+            int read;
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            outputStream.flush();
+            outputStream.close();
+            inputStream.close();
+            return tempFile;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
                 if (uri != null) {
-                    updateAvatar(uri.toString());
-                    // Lưu vào SharedPreferences để đồng bộ với ProfileActivity
-                    SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-                    sharedPreferences.edit().putString("AVATAR_URL", uri.toString()).apply();
-                    Toast.makeText(this, "Đã cập nhật ảnh đại diện", Toast.LENGTH_SHORT).show();
+                    java.io.File file = getFileFromUri(uri);
+                    if (file != null) {
+                        new UserRepository().uploadAvatar(file, new com.example.uitpayapp.network.ApiCallback<String>() {
+                            @Override
+                            public void onSuccess(String avatarUrl) {
+                                updateAvatar(avatarUrl);
+                                SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                                sharedPreferences.edit().putString("AVATAR_URL", avatarUrl).apply();
+
+                                SessionManager sessionManager = SessionManager.getInstance(AccountDetailActivity.this);
+                                sessionManager.updateProfileSession(
+                                        sessionManager.getUserName(),
+                                        avatarUrl,
+                                        sessionManager.getUserEmail()
+                                );
+                                Toast.makeText(AccountDetailActivity.this, "Đã cập nhật ảnh đại diện", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                Toast.makeText(AccountDetailActivity.this, "Cập nhật ảnh đại diện thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        Toast.makeText(this, "Không thể mở tệp ảnh đại diện", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
@@ -54,8 +99,7 @@ public class AccountDetailActivity extends AppCompatActivity {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         setContentView(R.layout.activity_account_detail);
         initView();
-        loadUserData();
-        setNoVerifyData();
+        fetchUserProfile();
         findViewById(R.id.update_secondary_info).setOnClickListener(v -> HanleUpdateSecondaryInfo());
 
         findViewById(R.id.btn_change_avatar).setOnClickListener(v -> {
@@ -88,21 +132,77 @@ public class AccountDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void loadUserData() {
+    private void fetchUserProfile() {
+        new UserRepository().getProfile(new com.example.uitpayapp.network.ApiCallback<UserResponseDTO>() {
+            @Override
+            public void onSuccess(UserResponseDTO data) {
+                if (data != null) {
+                    SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("FULL_NAME", data.getFullName());
+                    editor.putString("PHONE_NUMBER", data.getPhoneNumber());
+                    editor.putString("AVATAR_URL", data.getAvatarUrl() != null ? data.getAvatarUrl() : "");
+                    if (data.getEmail() != null) {
+                        editor.putString("EMAIL", data.getEmail());
+                    }
+                    editor.apply();
+
+                    SessionManager sessionManager = SessionManager.getInstance(AccountDetailActivity.this);
+                    sessionManager.updateProfileSession(
+                            data.getFullName(),
+                            data.getAvatarUrl(),
+                            data.getEmail()
+                    );
+
+                    if (tvFullName != null) tvFullName.setText(data.getFullName());
+                    if (tvPhone != null) tvPhone.setText(data.getPhoneNumber());
+                    if (data.getAvatarUrl() != null && !data.getAvatarUrl().isEmpty()) {
+                        updateAvatar(data.getAvatarUrl());
+                    }
+
+                    setRowData(R.id.inforow_username, "Tên", data.getFullName());
+                    setRowData(R.id.inforow_email, "Email", data.getEmail() != null && !data.getEmail().isEmpty() ? data.getEmail() : "Chưa cập nhật");
+
+                    String birthday = sharedPreferences.getString("BIRTHDAY", "Chưa cập nhật");
+                    String gender = sharedPreferences.getString("GENDER", "Chưa cập nhật");
+                    String job = sharedPreferences.getString("JOB", "Chưa cập nhật");
+                    setRowData(R.id.inforow_birthday, "Ngày sinh", birthday);
+                    setRowData(R.id.inforow_gender, "Giới tính", gender);
+                    setRowData(R.id.inforow_job, "Nghề nghiệp", job);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                loadUserDataLocal();
+            }
+        });
+    }
+
+    private void loadUserDataLocal() {
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         String savedName = sharedPreferences.getString("FULL_NAME", "Người dùng ZaloPay");
         String savedPhone = sharedPreferences.getString("PHONE_NUMBER", "Chưa cập nhật");
         String savedAvatar = sharedPreferences.getString("AVATAR_URL", "");
+        String email = sharedPreferences.getString("EMAIL", "Chưa cập nhật");
+        String birthday = sharedPreferences.getString("BIRTHDAY", "Chưa cập nhật");
+        String gender = sharedPreferences.getString("GENDER", "Chưa cập nhật");
+        String job = sharedPreferences.getString("JOB", "Chưa cập nhật");
 
         tvFullName = findViewById(R.id.tv_full_name);
         tvPhone = findViewById(R.id.tv_phone_number);
 
         if (tvFullName != null) tvFullName.setText(savedName);
         if (tvPhone != null) tvPhone.setText(savedPhone);
-        
         if (!savedAvatar.isEmpty()) {
             updateAvatar(savedAvatar);
         }
+
+        setRowData(R.id.inforow_username, "Tên", savedName);
+        setRowData(R.id.inforow_email, "Email", email);
+        setRowData(R.id.inforow_birthday, "Ngày sinh", birthday);
+        setRowData(R.id.inforow_gender, "Giới tính", gender);
+        setRowData(R.id.inforow_job, "Nghề nghiệp", job);
     }
 
     private void updateAvatar(String url) {
@@ -113,14 +213,6 @@ public class AccountDetailActivity extends AppCompatActivity {
                     .placeholder(R.drawable.yumyum_demo_logo)
                     .into(ivAvatar);
         }
-    }
-
-    private void setNoVerifyData() {
-        setRowData(R.id.inforow_username, "Tên", "Chưa cập nhật");
-        setRowData(R.id.inforow_gender, "Giới tính", "Chưa cập nhật");
-        setRowData(R.id.inforow_birthday, "Ngày sinh", "Chưa cập nhật");
-        setRowData(R.id.inforow_email, "Email", "Chưa cập nhật");
-        setRowData(R.id.inforow_job, "Nghề nghiệp", "Chưa cập nhật");
     }
 
     private void setRowData(int viewId, String label, String value) {
@@ -212,18 +304,43 @@ public class AccountDetailActivity extends AppCompatActivity {
             String gender = spGender.getSelectedItem().toString();
             String job = spJob.getSelectedItem().toString();
 
-            if (!email.isEmpty()) setRowData(R.id.inforow_email, "Email", email);
-            if (!fullName.isEmpty()) {
-                setRowData(R.id.inforow_username, "Tên", fullName);
-                SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-                sharedPreferences.edit().putString("FULL_NAME", fullName).apply();
-                tvFullName.setText(fullName);
-            }
-            if (!birthday.isEmpty()) setRowData(R.id.inforow_birthday, "Ngày sinh", birthday);
-            setRowData(R.id.inforow_gender, "Giới tính", gender);
-            setRowData(R.id.inforow_job, "Nghề nghiệp", job);
+            // Gọi API cập nhật lên backend
+            new UserRepository().updateProfile(fullName, email, new com.example.uitpayapp.network.ApiCallback<UserResponseDTO>() {
+                @Override
+                public void onSuccess(UserResponseDTO userResponse) {
+                    if (userResponse != null) {
+                        if (!email.isEmpty()) setRowData(R.id.inforow_email, "Email", email);
+                        if (!fullName.isEmpty()) {
+                            setRowData(R.id.inforow_username, "Tên", fullName);
+                            tvFullName.setText(fullName);
+                        }
 
-            bottomSheetDialog.dismiss();
+                        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("FULL_NAME", fullName);
+                        editor.putString("EMAIL", email);
+                        editor.putString("BIRTHDAY", birthday);
+                        editor.putString("GENDER", gender);
+                        editor.putString("JOB", job);
+                        editor.apply();
+
+                        if (!birthday.isEmpty()) setRowData(R.id.inforow_birthday, "Ngày sinh", birthday);
+                        setRowData(R.id.inforow_gender, "Giới tính", gender);
+                        setRowData(R.id.inforow_job, "Nghề nghiệp", job);
+
+                        SessionManager sessionManager = SessionManager.getInstance(AccountDetailActivity.this);
+                        sessionManager.updateProfileSession(fullName, userResponse.getAvatarUrl(), email);
+
+                        Toast.makeText(AccountDetailActivity.this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
+                        bottomSheetDialog.dismiss();
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    Toast.makeText(AccountDetailActivity.this, "Cập nhật thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
         bottomSheetDialog.show();

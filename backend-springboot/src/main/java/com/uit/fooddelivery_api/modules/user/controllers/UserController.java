@@ -4,6 +4,7 @@ import com.uit.fooddelivery_api.common.responses.ApiResponse;
 import com.uit.fooddelivery_api.modules.user.dtos.AuthResponseDTO;
 import com.uit.fooddelivery_api.modules.user.dtos.LoginRequestDTO;
 import com.uit.fooddelivery_api.modules.user.dtos.UserResponseDTO;
+import com.uit.fooddelivery_api.modules.user.dtos.UpdateProfileDTO;
 import com.uit.fooddelivery_api.modules.user.entities.User;
 import com.uit.fooddelivery_api.modules.user.services.UserService;
 import com.uit.fooddelivery_api.modules.user.services.CloudinaryService;
@@ -57,6 +58,16 @@ public class UserController {
         } catch (Exception e) {
             throw new RuntimeException("Tai anh that bai: " + e.getMessage());
         }
+    }
+
+    // API: Cập nhật thông tin cá nhân
+    @PutMapping("/profile")
+    public ApiResponse<UserResponseDTO> updateProfile(
+            Authentication authentication,
+            @RequestBody UpdateProfileDTO dto) {
+        String phoneNumber = authentication.getName();
+        User updatedUser = userService.updateProfile(phoneNumber, dto);
+        return ApiResponse.success(UserResponseDTO.fromEntity(updatedUser));
     }
 
     // API: Đổi mật khẩu

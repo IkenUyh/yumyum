@@ -168,7 +168,8 @@ public class PasscodeActivity extends AppCompatActivity {
                             data.getToken(),
                             data.getUser().getFullName(),
                             data.getUser().getPhoneNumber(),
-                            data.getUser().getAvatarUrl()
+                            data.getUser().getAvatarUrl(),
+                            data.getUser().getEmail()
                     );
 
                     Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();

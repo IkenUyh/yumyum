@@ -31,6 +31,10 @@ import com.example.uitpayapp.profile.accountPaymentManage.AccountManagementActiv
 import com.example.uitpayapp.voucher.VoucherActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
+import com.example.uitpayapp.network.SessionManager;
+import com.example.uitpayapp.modules.user.UserRepository;
+import com.example.uitpayapp.modules.user.models.responses.UserResponseDTO;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,9 +74,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
     void checkLoginStatus()
     {
-        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        String savedPhone=sharedPreferences.getString("PHONE_NUMBER","");
-        if (!savedPhone.isEmpty())
+        SessionManager sessionManager = SessionManager.getInstance(this);
+        if (sessionManager.isLoggedIn())
         {
             isLogin=true;
             rlLoginProfile.setVisibility(View.GONE);
@@ -81,25 +84,79 @@ public class ProfileActivity extends AppCompatActivity {
             TextView tvPhone = findViewById(R.id.tv_account_phone);
             ImageView ivAvatar = findViewById(R.id.iv_account_avatar);
 
-            String savedName = sharedPreferences.getString("FULL_NAME", "Người dùng ZaloPay");
-            String savedAvatar = sharedPreferences.getString("AVATAR_URL", "");
+            String savedName = sessionManager.getUserName();
+            String savedPhone = sessionManager.getUserPhone();
+            String savedAvatar = sessionManager.getUserAvatar();
 
             if (tvName != null) tvName.setText(savedName);
             if (tvPhone != null) tvPhone.setText(savedPhone);
 
             // Load ảnh và bo tròn tự động
-            if (ivAvatar != null && !savedAvatar.isEmpty()) {
-                Glide.with(this)
-                        .load(savedAvatar)
-                        .circleCrop()
-                        .into(ivAvatar);
+            if (ivAvatar != null) {
+                if (!savedAvatar.isEmpty()) {
+                    Glide.with(this)
+                            .load(savedAvatar)
+                            .circleCrop()
+                            .into(ivAvatar);
+                } else {
+                    Glide.with(this)
+                            .load(R.drawable.yumyum_demo_logo)
+                            .circleCrop()
+                            .into(ivAvatar);
+                }
             }
+
+            // Gọi API lấy dữ liệu mới nhất
+            fetchUserProfileApi();
         } else
         {
             isLogin=false;
             rlLoginProfile.setVisibility(View.VISIBLE);
             llUserInfo.setVisibility(View.GONE);
         }
+    }
+    void fetchUserProfileApi() {
+        UserRepository repo = new UserRepository();
+        repo.getProfile(new com.example.uitpayapp.network.ApiCallback<UserResponseDTO>() {
+            @Override
+            public void onSuccess(UserResponseDTO data) {
+                if (data != null && isLogin) {
+                    TextView tvName = findViewById(R.id.tv_account_name);
+                    TextView tvPhone = findViewById(R.id.tv_account_phone);
+                    ImageView ivAvatar = findViewById(R.id.iv_account_avatar);
+
+                    if (tvName != null) tvName.setText(data.getFullName());
+                    if (tvPhone != null) tvPhone.setText(data.getPhoneNumber());
+
+                    if (ivAvatar != null && data.getAvatarUrl() != null && !data.getAvatarUrl().isEmpty()) {
+                        Glide.with(ProfileActivity.this)
+                                .load(data.getAvatarUrl())
+                                .circleCrop()
+                                .into(ivAvatar);
+                    }
+
+                    // Đồng bộ với local cache
+                    SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                    sharedPreferences.edit()
+                            .putString("FULL_NAME", data.getFullName())
+                            .putString("PHONE_NUMBER", data.getPhoneNumber())
+                            .putString("AVATAR_URL", data.getAvatarUrl() != null ? data.getAvatarUrl() : "")
+                            .apply();
+
+                    SessionManager sessionManager = SessionManager.getInstance(ProfileActivity.this);
+                    sessionManager.updateProfileSession(
+                            data.getFullName(),
+                            data.getAvatarUrl(),
+                            data.getEmail()
+                    );
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Fail silently
+            }
+        });
     }
     void setListener()
     {
@@ -109,6 +166,7 @@ public class ProfileActivity extends AppCompatActivity {
             startActivity(intentAccount);
         });
         findViewById(R.id.btn_logout).setOnClickListener(v->{
+            SessionManager.getInstance(this).clearSession();
             SharedPreferences.Editor editor = getSharedPreferences("UserPrefs", MODE_PRIVATE).edit();
             editor.clear();
             editor.apply();

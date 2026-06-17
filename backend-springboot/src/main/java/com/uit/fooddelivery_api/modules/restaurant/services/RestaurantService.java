@@ -34,4 +34,10 @@ public class RestaurantService {
         // Lay het nha hang ra de khach hang chon lua
         return restaurantRepository.findAll();
     }
+
+    // Lấy chi tiết 1 nhà hàng theo ID (public - không cần đăng nhập)
+    public Restaurant getRestaurantById(Long restaurantId) {
+        return restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà hàng với id: " + restaurantId));
+    }
 }

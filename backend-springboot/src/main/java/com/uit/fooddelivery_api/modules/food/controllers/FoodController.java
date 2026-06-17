@@ -17,6 +17,30 @@ public class FoodController {
 
     private final FoodService foodService;
 
+    // =====================================================
+    // PUBLIC ENDPOINTS - Không cần đăng nhập
+    // =====================================================
+
+    // Lấy tất cả món ăn đang bán (hiển thị trang Home cho khách chưa đăng nhập)
+    @GetMapping
+    public ApiResponse<java.util.List<FoodResponseDTO>> getAllAvailableFoods() {
+        java.util.List<FoodResponseDTO> list = foodService.getAllAvailableFoods()
+                .stream()
+                .map(FoodResponseDTO::fromEntity)
+                .toList();
+        return ApiResponse.success(list);
+    }
+
+    // Lấy chi tiết 1 món ăn (public - không cần đăng nhập)
+    @GetMapping("/{id}")
+    public ApiResponse<FoodResponseDTO> getFoodById(@PathVariable("id") Long foodId) {
+        return ApiResponse.success(FoodResponseDTO.fromEntity(foodService.getFoodById(foodId)));
+    }
+
+    // =====================================================
+    // PROTECTED ENDPOINTS - Yêu cầu đăng nhập (Chủ quán)
+    // =====================================================
+
     @PostMapping
     public ApiResponse<FoodResponseDTO> createFood(
             Authentication authentication,

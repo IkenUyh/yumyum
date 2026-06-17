@@ -14,6 +14,7 @@ public class SessionManager {
     private static final String KEY_USER_PHONE = "user_phone_number";
     private static final String KEY_USER_AVATAR = "user_avatar_url";
     private static final String KEY_USER_ID = "user_id";
+    private static final String KEY_USER_EMAIL = "user_email";
     private static SessionManager instance;
     private final SharedPreferences sharedPreferences;
     private final SharedPreferences.Editor editor;
@@ -36,13 +37,14 @@ public class SessionManager {
     /**
      * LƯU TRỮ THÔNG TIN KHI ĐĂNG NHẬP THÀNH CÔNG
      */
-    public void createLoginSession(Long id, String token, String fullName, String phone, String avatarUrl) {
+    public void createLoginSession(Long id, String token, String fullName, String phone, String avatarUrl, String email) {
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
         editor.putLong(KEY_USER_ID, id != null ? id : -1L);
         editor.putString(KEY_TOKEN, token);
         editor.putString(KEY_USER_NAME, fullName);
         editor.putString(KEY_USER_PHONE, phone);
         editor.putString(KEY_USER_AVATAR, avatarUrl);
+        editor.putString(KEY_USER_EMAIL, email);
         editor.apply();
     }
     /**
@@ -77,6 +79,7 @@ public class SessionManager {
         editor.remove(KEY_USER_NAME);
         editor.remove(KEY_USER_PHONE);
         editor.remove(KEY_USER_AVATAR);
+        editor.remove(KEY_USER_EMAIL);
         editor.remove(KEY_USER_ID);
         editor.putBoolean(KEY_IS_LOGGED_IN, false);
         editor.apply();
@@ -93,5 +96,16 @@ public class SessionManager {
 
     public Long getUserId() {
         return sharedPreferences.getLong(KEY_USER_ID, -1L);
+    }
+
+    public void updateProfileSession(String fullName, String avatarUrl, String email) {
+        editor.putString(KEY_USER_NAME, fullName);
+        editor.putString(KEY_USER_AVATAR, avatarUrl);
+        editor.putString(KEY_USER_EMAIL, email);
+        editor.apply();
+    }
+
+    public String getUserEmail() {
+        return sharedPreferences.getString(KEY_USER_EMAIL, "");
     }
 }

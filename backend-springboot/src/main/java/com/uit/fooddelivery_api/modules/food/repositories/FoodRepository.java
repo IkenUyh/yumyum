@@ -8,5 +8,8 @@ import java.util.List;
 
 @Repository
 public interface FoodRepository extends JpaRepository<Food, Long> {
+    @org.springframework.data.jpa.repository.Query("SELECT f FROM Food f JOIN FETCH f.restaurant")
+    List<Food> findAllWithRestaurant();
+
     List<Food> findByRestaurantId(Long restaurantId);
 }

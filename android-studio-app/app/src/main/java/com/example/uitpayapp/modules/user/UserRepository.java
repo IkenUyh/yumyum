@@ -67,6 +67,42 @@ public class UserRepository {
         });
     }
 
+    // 2.1 Cập nhật thông tin cá nhân
+    public void updateProfile(String fullName, String email, ApiCallback<UserResponseDTO> callback) {
+        UpdateProfileDTO dto = new UpdateProfileDTO(fullName, email);
+        userService.updateProfile(dto).enqueue(new Callback<ApiResponse<UserResponseDTO>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<UserResponseDTO>> call, Response<ApiResponse<UserResponseDTO>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<UserResponseDTO>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
+    // 2.2 Tải ảnh đại diện lên
+    public void uploadAvatar(java.io.File file, ApiCallback<String> callback) {
+        MultipartBody.Part filePart = null;
+        if (file != null && file.exists()) {
+            okhttp3.RequestBody fileBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("image/*"), file);
+            filePart = MultipartBody.Part.createFormData("avatarFile", file.getName(), fileBody);
+        }
+        userService.uploadAvatar(filePart).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
     // 3. Thêm địa chỉ mới (Mới gom vào)
     public void createAddress(String addressName, String recipientName, String phoneNumber,
                               String detailedAddress, BigDecimal latitude, BigDecimal longitude, Boolean isDefault,
