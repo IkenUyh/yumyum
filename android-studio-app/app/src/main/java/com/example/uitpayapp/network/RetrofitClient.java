@@ -53,6 +53,12 @@ public class RetrofitClient {
                         @Override
                         public Response intercept(Chain chain) throws IOException {
                             Request originalRequest = chain.request();
+                            String path = originalRequest.url().encodedPath();
+
+                            // Bỏ qua đính kèm Token cho các API public như login, register, forgot-password
+                            if (path.contains("/users/login") || path.contains("/users/register") || path.contains("/users/forgot-password")) {
+                                return chain.proceed(originalRequest);
+                            }
 
                             // Lấy token thông qua appContext đã được khởi tạo trước đó
                             String token = SessionManager.getInstance(appContext).getAuthToken();

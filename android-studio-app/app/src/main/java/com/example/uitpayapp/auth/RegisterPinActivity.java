@@ -124,19 +124,32 @@ public class RegisterPinActivity extends AppCompatActivity implements KeypadMana
         if (loadingDialog != null && !isFinishing()) loadingDialog.show();
         keypadManager.lock();
 
-        new android.os.Handler().postDelayed(() -> {
-            if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
-            new androidx.appcompat.app.AlertDialog.Builder(RegisterPinActivity.this)
-                    .setTitle("Đăng ký thành công")
-                    .setMessage("Tài khoản của bạn đã được tạo thành công. Vui lòng đăng nhập để tiếp tục.")
-                    .setPositiveButton("Đăng nhập ngay", (dialog, which) -> {
-                        Intent intent = new Intent(RegisterPinActivity.this, SignInActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
-                    })
-                    .setCancelable(false)
-                    .show();
-        }, 1000);
+        userRepository.register(phoneNumber, fullName, "", pin, referralCode, new ApiCallback<UserResponseDTO>() {
+            @Override
+            public void onSuccess(UserResponseDTO data) {
+                if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
+                new androidx.appcompat.app.AlertDialog.Builder(RegisterPinActivity.this)
+                        .setTitle("Đăng ký thành công")
+                        .setMessage("Tài khoản của bạn đã được tạo thành công. Vui lòng đăng nhập để tiếp tục.")
+                        .setPositiveButton("Đăng nhập ngay", (dialog, which) -> {
+                            Intent intent = new Intent(RegisterPinActivity.this, SignInActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finish();
+                        })
+                        .setCancelable(false)
+                        .show();
+            }
+
+            @Override
+            public void onError(String error) {
+                if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
+                keypadManager.unlock();
+                keypadManager.clear();
+                firstPin = null;
+                tvInstruction.setText("Thiết lập mã PIN");
+                Toast.makeText(RegisterPinActivity.this, error != null ? error : "Đăng ký thất bại!", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }
