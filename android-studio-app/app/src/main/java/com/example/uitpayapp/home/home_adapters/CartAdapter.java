@@ -20,7 +20,7 @@ import java.util.Locale;
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
 
     public interface CartActionListener {
-        void onQuantityChanged();
+        void onQuantityChanged(int position, int newQuantity);
         void onRequestRemoveItem(int position, CartItem item);
         void onEditItemClick(int position, CartItem item);
     }
@@ -47,7 +47,15 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
         CartItem item = cartItems.get(position);
 
-        holder.imgItem.setImageResource(item.getMenuItem().getImageResId());
+        String url = item.getMenuItem().getImageUrl();
+        if (url != null && !url.isEmpty() && url.startsWith("http")) {
+            com.bumptech.glide.Glide.with(holder.imgItem.getContext())
+                    .load(url)
+                    .placeholder(R.drawable.img_food_chicken)
+                    .into(holder.imgItem);
+        } else {
+            holder.imgItem.setImageResource(item.getMenuItem().getImageResId());
+        }
         holder.tvName.setText(item.getMenuItem().getName());
         
         // Show total price of one single item including toppings (or wait, the price per item including toppings, or just base price?)
@@ -84,9 +92,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             int pos = holder.getAdapterPosition();
             if (pos == RecyclerView.NO_POSITION) return;
             CartItem ci = cartItems.get(pos);
-            ci.setQuantity(ci.getQuantity() + 1);
-            notifyItemChanged(pos);
-            listener.onQuantityChanged();
+            listener.onQuantityChanged(pos, ci.getQuantity() + 1);
         });
 
         holder.btnDecrease.setOnClickListener(v -> {
@@ -94,9 +100,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             if (pos == RecyclerView.NO_POSITION) return;
             CartItem ci = cartItems.get(pos);
             if (ci.getQuantity() > 1) {
-                ci.setQuantity(ci.getQuantity() - 1);
-                notifyItemChanged(pos);
-                listener.onQuantityChanged();
+                listener.onQuantityChanged(pos, ci.getQuantity() - 1);
             } else {
                 // Số lượng sẽ về 0 → yêu cầu xác nhận xóa
                 listener.onRequestRemoveItem(pos, ci);

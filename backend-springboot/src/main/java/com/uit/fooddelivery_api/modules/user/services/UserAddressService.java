@@ -91,4 +91,13 @@ public class UserAddressService {
         }
         addressRepository.saveAll(defaultAddresses);
     }
+
+    // 5. Lấy địa chỉ mặc định của User hiện tại
+    public UserAddress getDefaultAddress(User user) {
+        List<UserAddress> defaultAddresses = addressRepository.findByUserIdAndIsDefaultTrue(user.getId());
+        if (defaultAddresses.isEmpty()) {
+            return null;
+        }
+        return defaultAddresses.get(0);
+    }
 }
