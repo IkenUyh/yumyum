@@ -103,7 +103,7 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             // Đổ dữ liệu thật vào giao diện hàng dọc
             vsh.tvName.setText(shop.getName());
             vsh.tvInfo.setText("⭐ " + shop.getRating() + "  |  " + shop.getDistance() + "km  |  " + shop.getDeliveryTime() + "phút");
-            vsh.tvDiscount.setText(shop.getDiscountTag());
+            vsh.tvDiscount.setVisibility(View.GONE);
             vsh.ivImage.setImageResource(shop.getImageResId());
 
             if (shop.isFavorited()) {
