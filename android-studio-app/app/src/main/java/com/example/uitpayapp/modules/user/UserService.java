@@ -32,6 +32,9 @@ public interface UserService {
     @POST("api/v1/users/upload-avatar")
     Call<ApiResponse<String>> uploadAvatar(@Part MultipartBody.Part file);
 
+    @PUT("api/v1/users/profile")
+    Call<ApiResponse<UserResponseDTO>> updateProfile(@Body UpdateProfileDTO request);
+
     @PUT("api/v1/users/password")
     Call<ApiResponse<String>> changePassword(@Body ChangePasswordDTO request);
 
