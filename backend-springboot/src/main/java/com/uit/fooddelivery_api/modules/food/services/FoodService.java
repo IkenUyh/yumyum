@@ -73,9 +73,22 @@ public class FoodService {
         return foodRepository.save(food);
     }
 
-    // Nho import java.util.List;
+    // Lấy danh sách món ăn theo nhà hàng (public - không cần đăng nhập)
     public List<Food> getFoodsByRestaurant(Long restaurantId) {
         return foodRepository.findByRestaurantId(restaurantId);
+    }
+
+    // Lấy chi tiết 1 món ăn theo ID (public - không cần đăng nhập)
+    public Food getFoodById(Long foodId) {
+        return foodRepository.findById(foodId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy món ăn với id: " + foodId));
+    }
+
+    // Lấy tất cả món ăn đang bán (public - không cần đăng nhập)
+    public List<Food> getAllAvailableFoods() {
+        return foodRepository.findAll().stream()
+                .filter(food -> Boolean.TRUE.equals(food.getIsAvailable()))
+                .toList();
     }
 
     // API Cập nhật thông tin món ăn
