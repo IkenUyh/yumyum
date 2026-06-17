@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CartItem {
-    private Long dbId;
     private FoodMenuItem menuItem;
     private int quantity;
     private List<CartTopping> selectedToppings;
@@ -20,16 +19,6 @@ public class CartItem {
         this.quantity = quantity;
         this.selectedToppings = selectedToppings != null ? selectedToppings : new ArrayList<>();
     }
-
-    public CartItem(Long dbId, FoodMenuItem menuItem, int quantity, List<CartTopping> selectedToppings) {
-        this.dbId = dbId;
-        this.menuItem = menuItem;
-        this.quantity = quantity;
-        this.selectedToppings = selectedToppings != null ? selectedToppings : new ArrayList<>();
-    }
-
-    public Long getDbId() { return dbId; }
-    public void setDbId(Long dbId) { this.dbId = dbId; }
 
     public FoodMenuItem getMenuItem() { return menuItem; }
     public int getQuantity() { return quantity; }

@@ -161,120 +161,56 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setupObservers() {
         viewModel.getCoreData().observe(this, state -> {
-            View fsLoading = findViewById(R.id.layout_flashsale_loading);
-            View fsError = findViewById(R.id.layout_flashsale_error);
             View fsSection = findViewById(R.id.flashsale_section);
-            
-            View t1Loading = findViewById(R.id.layout_topic1_loading);
-            View t1Error = findViewById(R.id.layout_topic1_error);
             View t1Section = findViewById(R.id.topic_section_1);
-            
-            View t2Loading = findViewById(R.id.layout_topic2_loading);
-            View t2Error = findViewById(R.id.layout_topic2_error);
             View t2Section = findViewById(R.id.topic_section_2);
 
-            if (state.isLoading()) {
-                if (fsLoading != null) fsLoading.setVisibility(View.VISIBLE);
-                if (fsError != null) fsError.setVisibility(View.GONE);
-                if (fsSection != null) fsSection.setVisibility(View.GONE);
-                
-                if (t1Loading != null) t1Loading.setVisibility(View.VISIBLE);
-                if (t1Error != null) t1Error.setVisibility(View.GONE);
-                if (t1Section != null) t1Section.setVisibility(View.GONE);
-                
-                if (t2Loading != null) t2Loading.setVisibility(View.VISIBLE);
-                if (t2Error != null) t2Error.setVisibility(View.GONE);
-                if (t2Section != null) t2Section.setVisibility(View.GONE);
-            } else if (state.isSuccess()) {
-                if (fsLoading != null) fsLoading.setVisibility(View.GONE);
-                if (fsError != null) fsError.setVisibility(View.GONE);
+            if (state.isError()) {
+                if (t1Section != null) {
+                    t1Section.setVisibility(View.VISIBLE);
+                    showTopicError(t1Section, state.getMessage());
+                }
+                if (t2Section != null) {
+                    t2Section.setVisibility(View.VISIBLE);
+                    showTopicError(t2Section, state.getMessage());
+                }
+            } else if (state.isSuccess() || state.isLoading()) {
                 if (fsSection != null) fsSection.setVisibility(View.VISIBLE);
-                
-                if (t1Loading != null) t1Loading.setVisibility(View.GONE);
-                if (t1Error != null) t1Error.setVisibility(View.GONE);
                 if (t1Section != null) t1Section.setVisibility(View.VISIBLE);
-                
-                if (t2Loading != null) t2Loading.setVisibility(View.GONE);
-                if (t2Error != null) t2Error.setVisibility(View.GONE);
                 if (t2Section != null) t2Section.setVisibility(View.VISIBLE);
                 
                 HomeCoreResponse data = state.getData();
                 if (data != null) {
-                    if (data.getFlashSales() != null && !data.getFlashSales().isEmpty()) {
-                        updateFlashsaleUI(data.getFlashSales());
-                    } else if (fsSection != null) {
-                        fsSection.setVisibility(View.GONE);
-                    }
+                    updateFlashsaleUI(data.getFlashSales());
                     if (data.getTopics() != null && data.getTopics().size() >= 2) {
-                        updateTopicUI(findViewById(R.id.topic_section_1), data.getTopics().get(0));
-                        updateTopicUI(findViewById(R.id.topic_section_2), data.getTopics().get(1));
-                    } else {
-                        if (t1Section != null) t1Section.setVisibility(View.GONE);
-                        if (t2Section != null) t2Section.setVisibility(View.GONE);
+                        updateTopicUI(t1Section, data.getTopics().get(0));
+                        updateTopicUI(t2Section, data.getTopics().get(1));
                     }
-                }
-            } else if (state.isError() || state.isEmpty()) {
-                if (fsLoading != null) fsLoading.setVisibility(View.GONE);
-                if (fsSection != null) fsSection.setVisibility(View.GONE);
-                if (fsError != null) {
-                    fsError.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvFsError = findViewById(R.id.tv_flashsale_error);
-                    if (tvFsError != null) tvFsError.setText(state.getMessage());
-                }
-                
-                if (t1Loading != null) t1Loading.setVisibility(View.GONE);
-                if (t1Section != null) t1Section.setVisibility(View.GONE);
-                if (t1Error != null) {
-                    t1Error.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvT1Error = findViewById(R.id.tv_topic1_error);
-                    if (tvT1Error != null) tvT1Error.setText(state.getMessage());
-                }
-                
-                if (t2Loading != null) t2Loading.setVisibility(View.GONE);
-                if (t2Section != null) t2Section.setVisibility(View.GONE);
-                if (t2Error != null) {
-                    t2Error.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvT2Error = findViewById(R.id.tv_topic2_error);
-                    if (tvT2Error != null) tvT2Error.setText(state.getMessage());
+                } else if (state.isLoading()) {
+                    updateTopicUI(t1Section, new TopicResponse());
+                    updateTopicUI(t2Section, new TopicResponse());
+                    updateFlashsaleUI(new java.util.ArrayList<>());
                 }
             }
         });
 
         viewModel.getBrandsData().observe(this, state -> {
-            View loadingView = findViewById(R.id.layout_brands_loading);
             View sectionView = findViewById(R.id.topic_brand_section);
-            View errorView = findViewById(R.id.layout_brands_error);
             View divider = findViewById(R.id.divider_brands);
             
-            if (state.isLoading()) {
-                if (loadingView != null) loadingView.setVisibility(View.VISIBLE);
-                if (sectionView != null) sectionView.setVisibility(View.GONE);
-                if (errorView != null) errorView.setVisibility(View.GONE);
-            } else if (state.isSuccess()) {
-                if (loadingView != null) loadingView.setVisibility(View.GONE);
-                if (errorView != null) errorView.setVisibility(View.GONE);
+            if (state.isSuccess() || state.isLoading()) {
                 if (sectionView != null) sectionView.setVisibility(View.VISIBLE);
                 if (divider != null) divider.setVisibility(View.VISIBLE);
                 BrandResponse data = state.getData();
-                if (data != null && data.getBrands() != null) {
+                if (data != null) {
                     updateBrandsUI(data.getBrands());
-                }
-            } else if (state.isError() || state.isEmpty()) {
-                if (loadingView != null) loadingView.setVisibility(View.GONE);
-                if (sectionView != null) sectionView.setVisibility(View.GONE);
-                if (divider != null) divider.setVisibility(View.VISIBLE);
-                if (errorView != null) {
-                    errorView.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvBrandsError = findViewById(R.id.tv_brands_error);
-                    if (tvBrandsError != null) tvBrandsError.setText(state.getMessage());
                 }
             }
         });
 
         viewModel.getDealsData().observe(this, state -> {
-            View emptyView = findViewById(R.id.layout_deals_empty);
-            View errorView = findViewById(R.id.layout_deals_error);
             androidx.recyclerview.widget.RecyclerView rvDeals = findViewById(R.id.rv_home_deals);
+            View skeleton = findViewById(R.id.layout_deals_skeleton);
             View loadingOverlay = findViewById(R.id.layout_loading_overlay);
             boolean isStickyVisible = stickyTabLayout != null && stickyTabLayout.getVisibility() == View.VISIBLE;
             
@@ -282,46 +218,72 @@ public class HomeActivity extends AppCompatActivity {
                 if (isStickyVisible && loadingOverlay != null) {
                     loadingOverlay.setVisibility(View.VISIBLE);
                 } else {
-                    if (emptyView != null) emptyView.setVisibility(View.GONE);
-                    if (errorView != null) errorView.setVisibility(View.GONE);
-                    if (rvDeals != null) rvDeals.setVisibility(View.VISIBLE);
-                    if (dealItems.isEmpty() || dealItems.get(dealItems.size() - 1) != null) {
-                        dealItems.add(null);
-                        if (homeDealAdapter != null) homeDealAdapter.notifyItemInserted(dealItems.size() - 1);
+                    if (rvDeals != null) rvDeals.setVisibility(View.GONE);
+                    if (skeleton != null) {
+                        skeleton.setVisibility(View.VISIBLE);
+                        startPulseAnimation(skeleton);
                     }
                 }
                 isLoadingMore = true;
             } else {
                 if (loadingOverlay != null) loadingOverlay.setVisibility(View.GONE);
-                int loadingPos = dealItems.indexOf(null);
-                if (loadingPos >= 0) {
-                    dealItems.remove(loadingPos);
-                    if (homeDealAdapter != null) homeDealAdapter.notifyItemRemoved(loadingPos);
-                }
                 isLoadingMore = false;
                 
-                if (state.isSuccess()) {
-                    if (emptyView != null) emptyView.setVisibility(View.GONE);
-                    if (errorView != null) errorView.setVisibility(View.GONE);
-                    if (rvDeals != null) rvDeals.setVisibility(View.VISIBLE);
-                    updateDealsUI(state.getData());
-                } else if (state.isEmpty()) {
-                    if (rvDeals != null) rvDeals.setVisibility(View.GONE);
-                    if (errorView != null) errorView.setVisibility(View.GONE);
-                    if (emptyView != null) emptyView.setVisibility(View.VISIBLE);
-                } else if (state.isError()) {
-                    if (rvDeals != null) rvDeals.setVisibility(View.GONE);
-                    if (emptyView != null) emptyView.setVisibility(View.GONE);
-                    if (errorView != null) errorView.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvError = findViewById(R.id.tv_deals_error);
-                    if (tvError != null) tvError.setText(state.getMessage());
+                if (state.isSuccess() || state.isEmpty() || state.isError()) {
+                    java.util.List<RecommendedDealModel> deals = state.getData();
+                    if (deals == null || deals.isEmpty()) {
+                        if (rvDeals != null) rvDeals.setVisibility(View.GONE);
+                        if (skeleton != null) {
+                            skeleton.setVisibility(View.VISIBLE);
+                            startPulseAnimation(skeleton);
+                        }
+                    } else {
+                        if (rvDeals != null) rvDeals.setVisibility(View.VISIBLE);
+                        if (skeleton != null) {
+                            skeleton.setVisibility(View.GONE);
+                            Object anim = skeleton.getTag();
+                            if (anim instanceof android.animation.ObjectAnimator) ((android.animation.ObjectAnimator) anim).cancel();
+                        }
+                        updateDealsUI(deals);
+                    }
                 }
             }
         });
 
     }
 
+    private void startPulseAnimation(View view) {
+        if (view.getAnimation() != null) return;
+        android.animation.ObjectAnimator animator = android.animation.ObjectAnimator.ofFloat(view, "alpha", 1f, 0.4f);
+        animator.setDuration(800);
+        animator.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+        animator.setRepeatMode(android.animation.ValueAnimator.REVERSE);
+        animator.start();
+        view.setTag(animator);
+    }
+
     private void updateFlashsaleUI(List<FoodMenuItem> flashsaleFoods) {
+        View section = findViewById(R.id.flashsale_section);
+        if (section == null) return;
+        View content = section.findViewById(R.id.layout_flashsale_content);
+        View skeleton = section.findViewById(R.id.layout_flashsale_skeleton);
+
+        if (flashsaleFoods == null || flashsaleFoods.isEmpty()) {
+            if (content != null) content.setVisibility(View.GONE);
+            if (skeleton != null) {
+                skeleton.setVisibility(View.VISIBLE);
+                startPulseAnimation(skeleton);
+            }
+            return;
+        }
+
+        if (content != null) content.setVisibility(View.VISIBLE);
+        if (skeleton != null) {
+            skeleton.setVisibility(View.GONE);
+            Object anim = skeleton.getTag();
+            if (anim instanceof android.animation.ObjectAnimator) ((android.animation.ObjectAnimator) anim).cancel();
+        }
+
         if (flashsaleFoods.size() < 3) return;
         int[] cardIds = {R.id.card_flashsale_1, R.id.card_flashsale_2, R.id.card_flashsale_3};
         int[] ivIds = {R.id.iv_flashsale_1, R.id.iv_flashsale_2, R.id.iv_flashsale_3};
@@ -368,26 +330,102 @@ public class HomeActivity extends AppCompatActivity {
         android.widget.TextView tvTitle = sectionView.findViewById(R.id.tv_topic_title);
         android.widget.TextView tvSubtitle = sectionView.findViewById(R.id.tv_topic_subtitle);
         androidx.recyclerview.widget.RecyclerView rvStores = sectionView.findViewById(R.id.rv_topic_stores);
+        View skeleton = sectionView.findViewById(R.id.layout_topic_skeleton);
+        View textContent = sectionView.findViewById(R.id.layout_topic_text_content);
+        View textSkeleton = sectionView.findViewById(R.id.layout_topic_text_skeleton);
+        View errorView = sectionView.findViewById(R.id.layout_topic_error);
+
+        if (errorView != null) errorView.setVisibility(View.GONE);
 
         tvTitle.setText(topic.getTitle());
-        tvSubtitle.setText(topic.getSubtitle());
+        tvSubtitle.setText(topic.getSubtitle() != null ? topic.getSubtitle() : "Khám phá ngay");
 
-        TopicStoreAdapter adapter = new TopicStoreAdapter(topic.getFoods(), (item, holder) -> {
-            showFoodItemDetailPopup(item, holder.ivImage);
-        });
-        rvStores.setAdapter(adapter);
+        if (topic.getFoods() == null || topic.getFoods().isEmpty()) {
+            if (rvStores != null) rvStores.setVisibility(View.GONE);
+            if (textContent != null) textContent.setVisibility(View.GONE);
+            if (textSkeleton != null) {
+                textSkeleton.setVisibility(View.VISIBLE);
+                startPulseAnimation(textSkeleton);
+            }
+            if (skeleton != null) {
+                skeleton.setVisibility(View.VISIBLE);
+                startPulseAnimation(skeleton);
+            }
+        } else {
+            if (rvStores != null) rvStores.setVisibility(View.VISIBLE);
+            if (textContent != null) textContent.setVisibility(View.VISIBLE);
+            
+            if (textSkeleton != null) {
+                textSkeleton.setVisibility(View.GONE);
+                Object anim = textSkeleton.getTag();
+                if (anim instanceof android.animation.ObjectAnimator) ((android.animation.ObjectAnimator) anim).cancel();
+            }
+            if (skeleton != null) {
+                skeleton.setVisibility(View.GONE);
+                Object anim = skeleton.getTag();
+                if (anim instanceof android.animation.ObjectAnimator) ((android.animation.ObjectAnimator) anim).cancel();
+            }
+            TopicStoreAdapter adapter = new TopicStoreAdapter(topic.getFoods(), (item, holder) -> {
+                showFoodItemDetailPopup(item, holder.ivImage);
+            });
+            rvStores.setAdapter(adapter);
+        }
+    }
+
+    private void showTopicError(View sectionView, String message) {
+        if (sectionView == null) return;
+        View textContent = sectionView.findViewById(R.id.layout_topic_text_content);
+        View textSkeleton = sectionView.findViewById(R.id.layout_topic_text_skeleton);
+        View skeleton = sectionView.findViewById(R.id.layout_topic_skeleton);
+        androidx.recyclerview.widget.RecyclerView rvStores = sectionView.findViewById(R.id.rv_topic_stores);
+        View errorView = sectionView.findViewById(R.id.layout_topic_error);
+        android.widget.TextView tvError = sectionView.findViewById(R.id.tv_topic_error);
+
+        if (textContent != null) textContent.setVisibility(View.GONE);
+        if (textSkeleton != null) textSkeleton.setVisibility(View.GONE);
+        if (skeleton != null) skeleton.setVisibility(View.GONE);
+        if (rvStores != null) rvStores.setVisibility(View.GONE);
+
+        if (errorView != null) {
+            errorView.setVisibility(View.VISIBLE);
+            if (tvError != null && message != null) {
+                tvError.setText(message);
+            }
+        }
     }
 
     private void updateBrandsUI(List<Restaurant> brands) {
         View sectionView = findViewById(R.id.topic_brand_section);
         if (sectionView == null) return;
+        
+        android.widget.TextView tvTitle = sectionView.findViewById(R.id.tv_topic_title);
+        android.widget.TextView tvSubtitle = sectionView.findViewById(R.id.tv_topic_subtitle);
+        tvTitle.setText("Cửa hàng nổi bật");
+        tvSubtitle.setText("Thương hiệu được yêu thích");
+        
         androidx.recyclerview.widget.RecyclerView rvStores = sectionView.findViewById(R.id.rv_topic_stores);
-        BrandAdapter brandAdapter = new BrandAdapter(brands, restaurant -> {
-            Intent intent = new Intent(this, StoreDetailActivity.class);
-            intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, restaurant.getName());
-            startActivity(intent);
-        });
-        rvStores.setAdapter(brandAdapter);
+        View skeleton = sectionView.findViewById(R.id.layout_topic_skeleton);
+
+        if (brands == null || brands.isEmpty()) {
+            if (rvStores != null) rvStores.setVisibility(View.GONE);
+            if (skeleton != null) {
+                skeleton.setVisibility(View.VISIBLE);
+                startPulseAnimation(skeleton);
+            }
+        } else {
+            if (rvStores != null) rvStores.setVisibility(View.VISIBLE);
+            if (skeleton != null) {
+                skeleton.setVisibility(View.GONE);
+                Object anim = skeleton.getTag();
+                if (anim instanceof android.animation.ObjectAnimator) ((android.animation.ObjectAnimator) anim).cancel();
+            }
+            BrandAdapter brandAdapter = new BrandAdapter(brands, restaurant -> {
+                Intent intent = new Intent(this, StoreDetailActivity.class);
+                intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, restaurant.getName());
+                startActivity(intent);
+            });
+            rvStores.setAdapter(brandAdapter);
+        }
     }
 
     @android.annotation.SuppressLint("NotifyDataSetChanged")
@@ -848,24 +886,10 @@ public class HomeActivity extends AppCompatActivity {
 
         btnAddToCart.setOnClickListener(v -> {
             CartItem newItem = new CartItem(item, popupQty[0], new java.util.ArrayList<>(selectedToppings));
-            CartManager.getInstance().addItemSync(newItem, new com.example.uitpayapp.network.ApiCallback<String>() {
-                @Override
-                public void onSuccess(String data) {
-                    CartManager.getInstance().addItem(newItem);
-                    runOnUiThread(() -> {
-                        View btnCart = findViewById(R.id.btn_cart);
-                        CartAnimationHelper.animateFlyToCart(HomeActivity.this, ivFoodImage, btnCart, () -> {
-                            updateGlobalCartBadge();
-                        });
-                    });
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    runOnUiThread(() -> {
-                        android.widget.Toast.makeText(HomeActivity.this, "Không thể thêm vào giỏ hàng: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
-                    });
-                }
+            CartManager.getInstance().addItem(newItem);
+            View btnCart = findViewById(R.id.btn_cart);
+            CartAnimationHelper.animateFlyToCart(HomeActivity.this, ivFoodImage, btnCart, () -> {
+                updateGlobalCartBadge();
             });
             dialog.dismiss();
         });
@@ -1003,32 +1027,14 @@ public class HomeActivity extends AppCompatActivity {
     private void updateGlobalCartBadge() {
         final TextView tvBadge = findViewById(R.id.tv_global_cart_badge);
         if (tvBadge == null) return;
-        CartManager.getInstance().getCartCountSync(new com.example.uitpayapp.network.ApiCallback<Integer>() {
-            @Override
-            public void onSuccess(Integer count) {
-                runOnUiThread(() -> {
-                    if (count != null && count > 0) {
-                        tvBadge.setVisibility(View.VISIBLE);
-                        tvBadge.setText(String.valueOf(count));
-                    } else {
-                        tvBadge.setVisibility(View.GONE);
-                    }
-                });
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                runOnUiThread(() -> {
-                    int count = CartManager.getInstance().getTotalItemCount();
-                    if (count > 0) {
-                        tvBadge.setVisibility(View.VISIBLE);
-                        tvBadge.setText(String.valueOf(count));
-                    } else {
-                        tvBadge.setVisibility(View.GONE);
-                    }
-                });
-            }
-        });
+        
+        int count = CartManager.getInstance().getTotalItemCount();
+        if (count > 0) {
+            tvBadge.setVisibility(View.VISIBLE);
+            tvBadge.setText(String.valueOf(count));
+        } else {
+            tvBadge.setVisibility(View.GONE);
+        }
     }
 
     private void updateNotificationBadge() {

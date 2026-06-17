@@ -86,45 +86,57 @@ public class HomeService {
                     .collect(Collectors.toList());
         }
 
-        // 4. Topics
+        // 4. Topics (Randomly pick 2 categories and show their foods)
         List<Food> allFoods = foodRepository.findAll();
-        List<FoodMenuItemDTO> topic1Items = allFoods.stream()
-                .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
-                .map(f -> FoodMenuItemDTO.builder()
-                        .id("t1_" + f.getId())
-                        .name(f.getName())
-                        .price(f.getPrice().longValue())
-                        .imageResId(0)
-                        .description(f.getDescription())
-                        .build())
-                .limit(4)
-                .collect(Collectors.toList());
+        List<Category> randomCategories = new ArrayList<>(dbCategories);
+        java.util.Collections.shuffle(randomCategories);
+        
+        List<TopicResponseDTO> topics = new ArrayList<>();
+        
+        for (Category category : randomCategories) {
+            if (topics.size() >= 2) break;
+            
+            List<FoodMenuItemDTO> items = allFoods.stream()
+                    .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
+                    .filter(f -> f.getCategory() != null && f.getCategory().getId().equals(category.getId()))
+                    .map(f -> FoodMenuItemDTO.builder()
+                            .id("t" + topics.size() + "_" + f.getId())
+                            .name(f.getName())
+                            .price(f.getPrice().longValue())
+                            .imageResId(0)
+                            .description(f.getDescription())
+                            .build())
+                    .limit(4)
+                    .collect(Collectors.toList());
+                    
+            if (!items.isEmpty()) {
+                String rawName = category.getName();
+                String niceName = getNiceCategoryName(rawName);
+                String subtitle = getCategorySubtitle(niceName);
 
-        List<FoodMenuItemDTO> topic2Items = allFoods.stream()
-                .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
-                .skip(4)
-                .map(f -> FoodMenuItemDTO.builder()
-                        .id("t2_" + f.getId())
-                        .name(f.getName())
-                        .price(f.getPrice().longValue())
-                        .imageResId(0)
-                        .description(f.getDescription())
-                        .build())
-                .limit(4)
-                .collect(Collectors.toList());
-
-        List<TopicResponseDTO> topics = List.of(
-                TopicResponseDTO.builder()
-                        .title("Món Ngon Gần Bạn")
-                        .subtitle("Khám phá ẩm thực xung quanh bạn")
-                        .items(topic1Items)
-                        .build(),
-                TopicResponseDTO.builder()
-                        .title("Ưu Đãi Hôm Nay")
-                        .subtitle("Khuyến mãi cực hot dành riêng cho bạn")
-                        .items(topic2Items)
-                        .build()
-        );
+                topics.add(TopicResponseDTO.builder()
+                        .title(niceName)
+                        .subtitle(subtitle)
+                        .items(items)
+                        .build());
+            }
+        }
+        
+        // Fallback if we don't have enough categories with foods
+        if (topics.isEmpty()) {
+            topics.add(TopicResponseDTO.builder()
+                    .title("Món Ngon Gần Bạn")
+                    .subtitle("Khám phá ẩm thực xung quanh bạn")
+                    .items(new ArrayList<>())
+                    .build());
+        }
+        if (topics.size() == 1) {
+            topics.add(TopicResponseDTO.builder()
+                    .title("Ưu Đãi Hôm Nay")
+                    .subtitle("Khuyến mãi cực hot dành riêng cho bạn")
+                    .items(new ArrayList<>())
+                    .build());
+        }
 
         return HomeCoreResponseDTO.builder()
                 .banners(banners)
@@ -219,5 +231,51 @@ public class HomeService {
                 .totalPages((int) Math.ceil((double) deals.size() / size))
                 .currentPage(page)
                 .build();
+    }
+
+    private String getNiceCategoryName(String rawName) {
+        if (rawName == null) return "Món Ngon";
+        String lower = rawName.toLowerCase();
+        if (lower.contains("bun") || lower.contains("pho") || lower.contains("hutieu")) return "Bún - Phở - Hủ Tiếu";
+        if (lower.contains("banhmi") || lower.contains("banh mi")) return "Bánh Mì";
+        if (lower.contains("dochay")) return "Đồ Chay";
+        if (lower.contains("mianlien")) return "Mì Ăn Liền";
+        if (lower.contains("nuoc ngot")) return "Nước Giải Khát";
+        if (lower.contains("fastfood")) return "Thức Ăn Nhanh";
+        if (lower.contains("bia")) return "Bia - Rượu";
+        if (lower.contains("tea")) return "Trà";
+        if (lower.contains("sua")) return "Sữa";
+        if (lower.contains("cafe")) return "Cà Phê";
+        if (lower.contains("thuc an khac")) return "Món Ngon Khác";
+        if (lower.contains("cuon") || lower.contains("salad") || lower.contains("goi")) return "Cuốn - Gỏi - Salad";
+        if (lower.contains("nuoc ep") || lower.contains("sinh to")) return "Nước Ép - Sinh Tố";
+        return rawName;
+    }
+
+    private String getCategorySubtitle(String niceName) {
+        switch (niceName) {
+            case "Bún - Phở - Hủ Tiếu": return "Tinh hoa ẩm thực Việt Nam";
+            case "Bánh Mì": return "Giòn rụm, nhân đầy ắp";
+            case "Đồ Chay": return "Thanh đạm, tốt cho sức khỏe";
+            case "Mì Ăn Liền": return "Nhanh gọn, tiện lợi";
+            case "Nước Giải Khát": return "Sảng khoái tức thì";
+            case "Thức Ăn Nhanh": return "Giòn rụm, ngon mê ly";
+            case "Bia - Rượu": return "Thức uống cho những dịp đặc biệt";
+            case "Trà": return "Đậm vị trà, thơm hương tự nhiên";
+            case "Cà Phê": return "Khởi đầu ngày mới đầy năng lượng";
+            case "Sữa": return "Bổ sung năng lượng mỗi ngày";
+            case "Cuốn - Gỏi - Salad": return "Tươi xanh, nhẹ bụng";
+            case "Nước Ép - Sinh Tố": return "Tươi mát, nạp vitamin mỗi ngày";
+            case "Cơm": return "Chắc bụng, đậm đà hương vị";
+            case "Lẩu": return "Nước lẩu đậm đà, đồ nhúng thả ga";
+            case "Hải sản": return "Hương vị biển cả mang đến tận bàn";
+            case "Đồ nướng": return "Thịt nướng xèo xèo, thơm nức mũi";
+            case "Cháo": return "Dễ tiêu, bổ dưỡng, thơm ngon";
+            case "Bánh ngọt": return "Ngọt ngào từng khoảnh khắc";
+            case "Bánh bao": return "Vỏ mềm xốp, nhân đậm đà";
+            case "Ăn vặt": return "Nhai vui miệng, lai rai cả ngày";
+            case "Xôi": return "Hạt xôi dẻo thơm, ấm lòng ngày mới";
+            default: return "Khám phá các món ngon nhất hôm nay";
+        }
     }
 }

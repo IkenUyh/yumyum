@@ -273,25 +273,6 @@
                 android:background="#F0F0F0" />
 
             <!-- Flash Sale States -->
-            <FrameLayout
-                android:id="@+id/layout_flashsale_loading"
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:background="#FFFFFF"
-                android:visibility="visible">
-                <ProgressBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminateTint="#F24405" />
-            </FrameLayout>
-            <LinearLayout
-                android:id="@+id/layout_flashsale_error"
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:background="#FFFFFF"
-                android:visibility="gone">
-                <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@android:drawable/ic_dialog_alert" app:tint="#F44336" />
-                <TextView android:id="@+id/tv_flashsale_error" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Không kết nối được server" android:textColor="#757575" />
-            </LinearLayout>
             <include
                 android:id="@+id/flashsale_section"
                 layout="@layout/layout_flashsale_section"
@@ -304,38 +285,6 @@
                 android:background="#F0F0F0" />
 
             <!-- Brands States -->
-            <FrameLayout
-                android:id="@+id/layout_brands_loading"
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:background="#FFFFFF"
-                android:visibility="visible">
-                <ProgressBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminateTint="#F24405" />
-            </FrameLayout>
-            <!-- Error State cho Brands -->
-            <LinearLayout
-                android:id="@+id/layout_brands_error"
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:background="#FFFFFF"
-                android:visibility="gone">
-                
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@android:drawable/ic_dialog_alert"
-                    app:tint="#F44336" />
-                    
-                <TextView
-                    android:id="@+id/tv_brands_error"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Không kết nối được server"
-                    android:textColor="#757575" />
-            </LinearLayout>
 
             <include
                 android:id="@+id/topic_brand_section"
@@ -348,25 +297,6 @@
                 android:background="#F0F0F0" />
 
             <!-- Topic 1 States -->
-            <FrameLayout
-                android:id="@+id/layout_topic1_loading"
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:background="#FFFFFF"
-                android:visibility="visible">
-                <ProgressBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminateTint="#F24405" />
-            </FrameLayout>
-            <LinearLayout
-                android:id="@+id/layout_topic1_error"
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:background="#FFFFFF"
-                android:visibility="gone">
-                <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@android:drawable/ic_dialog_alert" app:tint="#F44336" />
-                <TextView android:id="@+id/tv_topic1_error" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Không kết nối được server" android:textColor="#757575" />
-            </LinearLayout>
             <include
                 android:id="@+id/topic_section_1"
                 layout="@layout/layout_topic_section"
@@ -378,25 +308,6 @@
                 android:background="#F0F0F0" />
 
             <!-- Topic 2 States -->
-            <FrameLayout
-                android:id="@+id/layout_topic2_loading"
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:background="#FFFFFF"
-                android:visibility="visible">
-                <ProgressBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminateTint="#F24405" />
-            </FrameLayout>
-            <LinearLayout
-                android:id="@+id/layout_topic2_error"
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:background="#FFFFFF"
-                android:visibility="gone">
-                <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@android:drawable/ic_dialog_alert" app:tint="#F44336" />
-                <TextView android:id="@+id/tv_topic2_error" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Không kết nối được server" android:textColor="#757575" />
-            </LinearLayout>
             <include
                 android:id="@+id/topic_section_2"
                 layout="@layout/layout_topic_section"
@@ -453,57 +364,17 @@
                     tools:listitem="@layout/item_food_recommend_deal"
                     tools:itemCount="4" />
 
-                <!-- Empty State cho Deals -->
+                <!-- Skeleton layout for Deals -->
                 <LinearLayout
-                    android:id="@+id/layout_deals_empty"
+                    android:id="@+id/layout_deals_skeleton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="32dp"
-                    android:background="#FFFFFF"
+                    android:padding="16dp"
                     android:visibility="gone">
-                    
-                    <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:src="@android:drawable/ic_menu_info_details"
-                        app:tint="#BDBDBD" />
-                        
-                    <TextView
-                        android:id="@+id/tv_deals_empty"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Không có dữ liệu cho mục này."
-                        android:textColor="#757575"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-                <!-- Error State cho Deals -->
-                <LinearLayout
-                    android:id="@+id/layout_deals_error"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="32dp"
-                    android:background="#FFFFFF"
-                    android:visibility="gone">
-                    
-                    <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:src="@android:drawable/ic_dialog_alert"
-                        app:tint="#F44336" />
-                        
-                    <TextView
-                        android:id="@+id/tv_deals_error"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Không kết nối được server"
-                        android:textColor="#757575" />
+                    <View android:layout_width="match_parent" android:layout_height="120dp" android:background="#E0E0E0" android:layout_marginBottom="12dp" />
+                    <View android:layout_width="match_parent" android:layout_height="120dp" android:background="#E0E0E0" android:layout_marginBottom="12dp" />
+                    <View android:layout_width="match_parent" android:layout_height="120dp" android:background="#E0E0E0" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

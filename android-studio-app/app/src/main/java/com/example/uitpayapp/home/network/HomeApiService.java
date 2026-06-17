@@ -4,9 +4,11 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
+import com.example.uitpayapp.models.ApiResponse;
+
 public interface HomeApiService {
     @GET("api/v1/home/core")
-    Call<HomeCoreResponse> getHomeCore(@Query("addressId") String addressId);
+    Call<ApiResponse<HomeCoreResponse>> getHomeCore(@Query("addressId") String addressId);
 
     @GET("api/v1/home/brands")
     Call<BrandResponse> getPopularBrands(@Query("addressId") String addressId);

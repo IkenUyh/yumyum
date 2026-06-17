@@ -193,20 +193,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         
         startActivity(intent);
 
-        cartManager.clearCartSync(new com.example.uitpayapp.network.ApiCallback<String>() {
-            @Override
-            public void onSuccess(String data) {
-                runOnUiThread(() -> {
-                    finish();
-                });
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                runOnUiThread(() -> {
-                    finish();
-                });
-            }
-        });
+        cartManager.clearCart();
+        finish();
     }
 }

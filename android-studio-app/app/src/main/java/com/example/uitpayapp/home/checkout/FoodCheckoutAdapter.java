@@ -34,15 +34,7 @@ public class FoodCheckoutAdapter extends RecyclerView.Adapter<FoodCheckoutAdapte
         CartItem item = cartItems.get(position);
         
         holder.tvFoodName.setText(item.getMenuItem().getName());
-        String url = item.getMenuItem().getImageUrl();
-        if (url != null && !url.isEmpty() && url.startsWith("http")) {
-            com.bumptech.glide.Glide.with(holder.ivFoodImage.getContext())
-                    .load(url)
-                    .placeholder(R.drawable.img_food_chicken)
-                    .into(holder.ivFoodImage);
-        } else {
-            holder.ivFoodImage.setImageResource(item.getMenuItem().getImageResId());
-        }
+        holder.ivFoodImage.setImageResource(item.getMenuItem().getImageResId());
         
         holder.tvFoodQuantity.setText("Số lượng: " + item.getQuantity());
         

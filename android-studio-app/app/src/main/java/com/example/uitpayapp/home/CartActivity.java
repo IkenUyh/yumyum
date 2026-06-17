@@ -68,33 +68,12 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
 
         rvCartItems.setLayoutManager(new LinearLayoutManager(this));
-        cartAdapter = new CartAdapter(new java.util.ArrayList<>(), this);
+        cartAdapter = new CartAdapter(cartManager.getCart(), this);
         rvCartItems.setAdapter(cartAdapter);
 
         findViewById(R.id.btn_checkout).setOnClickListener(v -> checkout());
 
-        loadCartData();
-    }
-
-    private void loadCartData() {
-        cartManager.fetchCartFromServer(new com.example.uitpayapp.network.ApiCallback<java.util.List<CartItem>>() {
-            @Override
-            public void onSuccess(java.util.List<CartItem> items) {
-                runOnUiThread(() -> {
-                    cartAdapter = new CartAdapter(items, CartActivity.this);
-                    rvCartItems.setAdapter(cartAdapter);
-                    updateCartUI();
-                });
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                runOnUiThread(() -> {
-                    Toast.makeText(CartActivity.this, "Không thể tải giỏ hàng: " + errorMessage, Toast.LENGTH_SHORT).show();
-                    updateCartUI();
-                });
-            }
-        });
+        updateCartUI();
     }
 
     private void updateCartUI() {
@@ -111,24 +90,8 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
     }
 
     @Override
-    public void onQuantityChanged(int position, int newQuantity) {
-        cartManager.updateQuantitySync(position, newQuantity, new com.example.uitpayapp.network.ApiCallback<String>() {
-            @Override
-            public void onSuccess(String data) {
-                runOnUiThread(() -> {
-                    cartAdapter.notifyItemChanged(position);
-                    updateCartUI();
-                });
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                runOnUiThread(() -> {
-                    Toast.makeText(CartActivity.this, "Lỗi cập nhật số lượng: " + errorMessage, Toast.LENGTH_SHORT).show();
-                    loadCartData();
-                });
-            }
-        });
+    public void onQuantityChanged() {
+        updateCartUI();
     }
 
     @Override
@@ -154,25 +117,11 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnDelete.setOnClickListener(v -> {
-            cartManager.removeItemSync(position, new com.example.uitpayapp.network.ApiCallback<String>() {
-                @Override
-                public void onSuccess(String data) {
-                    runOnUiThread(() -> {
-                        cartAdapter.removeItem(position);
-                        updateCartUI();
-                        showCustomSnackbar("Đã xóa khỏi giỏ hàng");
-                        dialog.dismiss();
-                    });
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(CartActivity.this, "Lỗi khi xóa món: " + errorMessage, Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
-                    });
-                }
-            });
+            cartManager.removeItem(position);
+            cartAdapter.removeItem(position);
+            updateCartUI();
+            showCustomSnackbar("Đã xóa khỏi giỏ hàng");
+            dialog.dismiss();
         });
 
         dialog.show();
@@ -302,28 +251,12 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
         });
 
         btnAddToCart.setOnClickListener(v -> {
-            int newQty = popupQty[0];
-            cartManager.updateQuantitySync(position, newQty, new com.example.uitpayapp.network.ApiCallback<String>() {
-                @Override
-                public void onSuccess(String data) {
-                    runOnUiThread(() -> {
-                        CartItem updatedItem = new CartItem(item.getDbId(), item.getMenuItem(), newQty, new java.util.ArrayList<>(selectedToppings));
-                        cartManager.updateItem(position, updatedItem);
-                        cartAdapter.notifyDataSetChanged();
-                        updateCartUI();
-                        dialog.dismiss();
-                        showCustomSnackbar("Cập nhật thành công");
-                    });
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(CartActivity.this, "Lỗi cập nhật: " + errorMessage, Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
-                    });
-                }
-            });
+            CartItem updatedItem = new CartItem(item.getMenuItem(), popupQty[0], new java.util.ArrayList<>(selectedToppings));
+            cartManager.updateItem(position, updatedItem);
+            cartAdapter.notifyDataSetChanged();
+            updateCartUI();
+            dialog.dismiss();
+            showCustomSnackbar("Cập nhật thành công");
         });
 
         dialog.show();

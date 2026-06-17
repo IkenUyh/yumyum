@@ -50,21 +50,7 @@ public class FoodCategoryAdapter extends RecyclerView.Adapter<FoodCategoryAdapte
         holder.tvName.setText(category.getName());
 
         // Always show icon
-        int resId = category.getIconResId();
-        if (resId == 0) {
-            String name = category.getName() != null ? category.getName().trim() : "";
-            if (name.contains("Cơm")) resId = R.drawable.ic_cat_com;
-            else if (name.contains("Bún") || name.contains("Phở")) resId = R.drawable.ic_cat_bun_pho;
-            else if (name.contains("Bánh mì")) resId = R.drawable.ic_cat_banh_mi;
-            else if (name.contains("Fastfood") || name.contains("nhanh")) resId = R.drawable.ic_cat_fastfood;
-            else if (name.contains("Lẩu")) resId = R.drawable.ic_cat_lau;
-            else if (name.contains("nướng")) resId = R.drawable.ic_cat_bbq;
-            else if (name.contains("Cafe") || name.contains("Cà phê")) resId = R.drawable.ic_cat_ca_phe;
-            else if (name.contains("Trà sữa")) resId = R.drawable.ic_cat_tra_sua;
-            else if (name.contains("Ăn vặt") || name.contains("bánh ngọt")) resId = R.drawable.ic_cat_an_vat;
-            else resId = R.drawable.ic_cat_all;
-        }
-        holder.ivIcon.setImageResource(resId);
+        holder.ivIcon.setImageResource(category.getIconResId());
 
         // Xử lý item "Danh mục"
         if (category.isSelectAll()) {
