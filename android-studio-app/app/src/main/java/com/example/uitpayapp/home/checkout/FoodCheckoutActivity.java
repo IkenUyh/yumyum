@@ -104,6 +104,28 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         rvItems.setAdapter(adapter);
 
         subtotalAmount = cartManager.getTotalPrice();
+
+        // Fetch wallet balance
+        TextView tvWalletBalance = findViewById(R.id.tv_wallet_balance);
+        if (tvWalletBalance != null) {
+            com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
+            walletRepo.getBalance(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse>() {
+                @Override
+                public void onSuccess(com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse data) {
+                    runOnUiThread(() -> {
+                        java.text.NumberFormat format = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+                        tvWalletBalance.setText(format.format(data.getBalance()) + "đ");
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    runOnUiThread(() -> {
+                        tvWalletBalance.setText("Lỗi lấy số dư");
+                    });
+                }
+            });
+        }
     }
 
     private void updateTotals() {
@@ -182,29 +204,46 @@ public class FoodCheckoutActivity extends AppCompatActivity {
 
         String productNames = cartManager.getProductSummary();
 
-        Intent intent = new Intent(this, TransferSuccessActivity.class);
-        intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
-        intent.putExtra("KEY_IS_FOOD_ORDER", true);
-        intent.putExtra("KEY_FOOD_PRODUCTS", productNames);
-        intent.putExtra("KEY_DELIVERY_FEE", deliveryFee);
-        
-        long discountAmount = selectedVoucher != null ? selectedVoucher.getDiscountAmount() : 0;
-        intent.putExtra("KEY_DISCOUNT", discountAmount);
-        
-        startActivity(intent);
+        // TÍCH HỢP API THANH TOÁN
+        com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest request = 
+                new com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest(
+                1L, 1L, "STANDARD", new ArrayList<>() // hardcoded cho demo
+        );
 
-        cartManager.clearCartSync(new com.example.uitpayapp.network.ApiCallback<String>() {
+        com.example.uitpayapp.modules.order.OrderRepository orderRepo = new com.example.uitpayapp.modules.order.OrderRepository();
+        orderRepo.createOrder(request, new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderResponse>() {
             @Override
-            public void onSuccess(String data) {
+            public void onSuccess(com.example.uitpayapp.modules.order.models.responses.OrderResponse data) {
                 runOnUiThread(() -> {
-                    finish();
+                    Intent intent = new Intent(FoodCheckoutActivity.this, TransferSuccessActivity.class);
+                    intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
+                    intent.putExtra("KEY_IS_FOOD_ORDER", true);
+                    intent.putExtra("KEY_FOOD_PRODUCTS", productNames);
+                    intent.putExtra("KEY_DELIVERY_FEE", deliveryFee);
+                    
+                    long discountAmount = selectedVoucher != null ? selectedVoucher.getDiscountAmount() : 0;
+                    intent.putExtra("KEY_DISCOUNT", discountAmount);
+                    
+                    startActivity(intent);
+
+                    cartManager.clearCartSync(new com.example.uitpayapp.network.ApiCallback<String>() {
+                        @Override
+                        public void onSuccess(String data) {
+                            runOnUiThread(() -> finish());
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            runOnUiThread(() -> finish());
+                        }
+                    });
                 });
             }
 
             @Override
             public void onError(String errorMessage) {
                 runOnUiThread(() -> {
-                    finish();
+                    Toast.makeText(FoodCheckoutActivity.this, "Lỗi thanh toán: " + errorMessage + ". Vui lòng nạp thêm tiền!", Toast.LENGTH_LONG).show();
                 });
             }
         });

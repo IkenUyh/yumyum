@@ -59,3 +59,6 @@ zalopay:
   key1: "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL"
   key2: "kLtgPl8YESD1XcgX5IZz2eOMEs7A2e1O"
   endpoint-create: "https://sb-openapi.zalopay.vn/v2/create"
+  endpoint-query: "https://sb-openapi.zalopay.vn/v2/query"
+  endpoint-refund: "https://sb-openapi.zalopay.vn/v2/refund"
+  endpoint-query-refund: "https://sb-openapi.zalopay.vn/v2/query_refund"

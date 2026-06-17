@@ -64,8 +64,35 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
                 ProfileActivity.SetDetailMenuItem(title_balace,MenuItem.getTitle(),MenuItem.getSubtitle(),MenuItem.getIcon());
                 TextView wallet_balance=itemView.findViewById(R.id.wallet_balance);
                 ImageView hide_show_amount=itemView.findViewById(R.id.hide_show_amount);
-                //sau nay goi api thi co kha nang goi o day
-                wallet_balance.setText("0đ");
+                
+                // Fetch balance via API
+                com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
+                walletRepo.getBalance(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse>() {
+                    @Override
+                    public void onSuccess(com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse data) {
+                        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                            java.text.NumberFormat format = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+                            wallet_balance.setText(format.format(data.getBalance()) + "đ");
+                        });
+                    }
+                    @Override
+                    public void onError(String errorMessage) {
+                        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                            wallet_balance.setText("Lỗi tải");
+                        });
+                    }
+                });
+
+                TextView btn_topup = itemView.findViewById(R.id.btn_topup);
+                if (btn_topup != null) {
+                    btn_topup.setOnClickListener(v -> {
+                        android.content.Context ctx = holder.itemView.getContext();
+                        if (ctx instanceof ProfileActivity) {
+                            ((ProfileActivity) ctx).showTopUpDialog();
+                        }
+                    });
+                }
+
                 hide_show_amount.setOnClickListener(v->
                 {
                     IsAmountHiden=!IsAmountHiden;
