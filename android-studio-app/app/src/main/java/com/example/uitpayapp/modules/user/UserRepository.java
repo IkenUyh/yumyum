@@ -36,6 +36,22 @@ public class UserRepository {
         });
     }
 
+    // Đăng ký
+    public void register(String phoneNumber, String fullName, String password, String referredByCode, ApiCallback<UserResponseDTO> callback) {
+        RegisterRequestDTO dto = new RegisterRequestDTO(phoneNumber, fullName, password, referredByCode);
+        userService.register(dto).enqueue(new Callback<ApiResponse<UserResponseDTO>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<UserResponseDTO>> call, Response<ApiResponse<UserResponseDTO>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<UserResponseDTO>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
     // 2. Lấy thông tin cá nhân
     public void getProfile(ApiCallback<UserResponseDTO> callback) {
         userService.getProfile().enqueue(new Callback<ApiResponse<UserResponseDTO>>() {

@@ -268,21 +268,7 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
         });
-        
-        View btnRetryDeals = findViewById(R.id.btn_retry_deals);
-        if (btnRetryDeals != null) {
-            btnRetryDeals.setOnClickListener(v -> viewModel.resetAndFetchDeals(tabHomeDeals.getSelectedTabPosition()));
-        }
 
-        View btnRetryCore = findViewById(R.id.btn_retry_core);
-        if (btnRetryCore != null) {
-            btnRetryCore.setOnClickListener(v -> viewModel.refreshAll());
-        }
-
-        View btnRetryBrands = findViewById(R.id.btn_retry_brands);
-        if (btnRetryBrands != null) {
-            btnRetryBrands.setOnClickListener(v -> viewModel.refreshAll());
-        }
     }
 
     private void updateFlashsaleUI(List<FoodMenuItem> flashsaleFoods) {

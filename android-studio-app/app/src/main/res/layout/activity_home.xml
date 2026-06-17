@@ -298,14 +298,6 @@
                     android:textColor="#757575"
                     android:textSize="14sp" />
                     
-                <Button
-                    android:id="@+id/btn_retry_core"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:backgroundTint="#F24405"
-                    android:textColor="#FFFFFF"
-                    android:text="Thử lại" />
             </LinearLayout>
 
             <include
@@ -344,14 +336,6 @@
                     android:textColor="#757575"
                     android:textSize="14sp" />
                     
-                <Button
-                    android:id="@+id/btn_retry_brands"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:backgroundTint="#F24405"
-                    android:textColor="#FFFFFF"
-                    android:text="Thử lại" />
             </LinearLayout>
 
             <include
@@ -477,17 +461,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="Không kết nối được server"
-                        android:textColor="#757575"
-                        android:textSize="14sp" />
-                        
-                    <Button
-                        android:id="@+id/btn_retry_deals"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:backgroundTint="#F24405"
-                        android:textColor="#FFFFFF"
-                        android:text="Thử lại" />
+                        android:textColor="#757575" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
