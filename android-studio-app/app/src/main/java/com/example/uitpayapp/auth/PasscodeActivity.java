@@ -191,7 +191,7 @@ public class PasscodeActivity extends AppCompatActivity {
                 // sessionManager.createLoginSession(token, user.getFullName());
 
                 // Cách 2: Sử dụng SessionManager đã nâng cấp (Khuyên dùng - xem cấu hình ở Bước 2)
-                sessionManager.createLoginSession(token, user.getFullName(), user.getPhoneNumber(), user.getAvatarUrl());
+                sessionManager.createLoginSession(user.getId(), token, user.getFullName(), user.getPhoneNumber(), user.getAvatarUrl());
                 // =============================================
 
                 // Chuyển màn hình sang HomeActivity
