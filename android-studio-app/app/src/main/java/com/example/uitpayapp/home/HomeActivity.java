@@ -805,98 +805,15 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void showFoodItemDetailPopup(FoodMenuItem item, ImageView sourceImage) {
-        BottomSheetDialog dialog = new BottomSheetDialog(this);
-        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_food_detail, null);
-        dialog.setContentView(view);
-
-        View bottomSheet = (View) view.getParent();
-        if (bottomSheet != null) {
-            bottomSheet.setBackgroundResource(android.R.color.transparent);
-        }
-
-        ImageView btnClose = view.findViewById(R.id.btn_close);
-        btnClose.setOnClickListener(v -> dialog.dismiss());
-
-        ImageView ivFoodImage = view.findViewById(R.id.iv_food_image);
-        TextView tvFoodName = view.findViewById(R.id.tv_food_name);
-        TextView tvFoodDesc = view.findViewById(R.id.tv_food_desc);
-        TextView tvFoodPrice = view.findViewById(R.id.tv_food_price);
-
-        ivFoodImage.setImageResource(item.getImageResId());
-        tvFoodName.setText(item.getName());
-        tvFoodDesc.setText(item.getDescription());
-        tvFoodPrice.setText(item.getFormattedPrice());
-
-        final int[] popupQty = {1};
-        TextView tvQuantity = view.findViewById(R.id.tv_quantity);
-        View btnDecrease = view.findViewById(R.id.btn_decrease);
-        View btnIncrease = view.findViewById(R.id.btn_increase);
-        TextView btnAddToCart = view.findViewById(R.id.btn_add_to_cart);
-        
-        final int[] toppingTotal = {0};
-
-        // Initial total
-        updatePopupPrice(view, item.getPrice(), toppingTotal[0]);
-
-        btnDecrease.setOnClickListener(v -> {
-            if (popupQty[0] > 1) {
-                popupQty[0]--;
-                tvQuantity.setText(String.valueOf(popupQty[0]));
-                updatePopupPrice(view, item.getPrice(), toppingTotal[0]);
-            }
-        });
-
-        btnIncrease.setOnClickListener(v -> {
-            popupQty[0]++;
-            tvQuantity.setText(String.valueOf(popupQty[0]));
-            updatePopupPrice(view, item.getPrice(), toppingTotal[0]);
-        });
-
-        // Add mock toppings
-        LinearLayout layoutToppings = view.findViewById(R.id.layout_toppings_container);
-        String[] mockToppings = {"Thêm trân châu đen", "Thêm phô mai", "Thêm thạch mảng cầu"};
-        int[] mockPrices = {5000, 10000, 5000};
-        
-        final java.util.List<com.example.uitpayapp.home.home_models.CartTopping> selectedToppings = new java.util.ArrayList<>();
-
-        for (int i = 0; i < 3; i++) {
-            View toppingView = android.view.LayoutInflater.from(this).inflate(R.layout.item_food_topping, layoutToppings, false);
-            android.widget.CheckBox cbTopping = toppingView.findViewById(R.id.cb_topping);
-            TextView tvToppingPrice = toppingView.findViewById(R.id.tv_topping_price);
-            cbTopping.setText(mockToppings[i]);
-            
-            if (mockPrices[i] > 0) {
-                tvToppingPrice.setText("+" + String.format("%,dđ", mockPrices[i]).replace(',', '.'));
-            } else {
-                tvToppingPrice.setText("0đ");
-            }
-            
-            final int price = mockPrices[i];
-            final String toppingName = mockToppings[i];
-            final String toppingId = "tp_" + i;
-            cbTopping.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) {
-                    toppingTotal[0] += price;
-                    selectedToppings.add(new com.example.uitpayapp.home.home_models.CartTopping(toppingId, toppingName, price));
-                } else {
-                    toppingTotal[0] -= price;
-                    selectedToppings.remove(new com.example.uitpayapp.home.home_models.CartTopping(toppingId, toppingName, price));
-                }
-                updatePopupPrice(view, item.getPrice(), toppingTotal[0]);
-            });
-            
-            layoutToppings.addView(toppingView);
-        }
-
-        btnAddToCart.setOnClickListener(v -> {
-            CartItem newItem = new CartItem(item, popupQty[0], new java.util.ArrayList<>(selectedToppings));
+        com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(this, item, null, (selectedItem, quantity, selectedToppings) -> {
+            CartItem newItem = new CartItem(selectedItem, quantity, selectedToppings);
             CartManager.getInstance().addItemSync(newItem, new com.example.uitpayapp.network.ApiCallback<String>() {
                 @Override
                 public void onSuccess(String data) {
                     CartManager.getInstance().addItem(newItem);
                     runOnUiThread(() -> {
                         View btnCart = findViewById(R.id.btn_cart);
-                        CartAnimationHelper.animateFlyToCart(HomeActivity.this, ivFoodImage, btnCart, () -> {
+                        CartAnimationHelper.animateFlyToCart(HomeActivity.this, sourceImage != null ? sourceImage : findViewById(android.R.id.content), btnCart, () -> {
                             updateGlobalCartBadge();
                         });
                     });
@@ -909,18 +826,7 @@ public class HomeActivity extends AppCompatActivity {
                     });
                 }
             });
-            dialog.dismiss();
         });
-
-        dialog.show();
-    }
-
-    private void updatePopupPrice(View view, long itemPrice, int toppingTotal) {
-        TextView tvQuantity = view.findViewById(R.id.tv_quantity);
-        TextView btnAddToCart = view.findViewById(R.id.btn_add_to_cart);
-        int qty = Integer.parseInt(tvQuantity.getText().toString());
-        long total = (itemPrice + toppingTotal) * qty;
-        btnAddToCart.setText("Thêm vào giỏ - " + String.format("%,dđ", total).replace(',', '.'));
     }
 
     @android.annotation.SuppressLint("NotifyDataSetChanged")
