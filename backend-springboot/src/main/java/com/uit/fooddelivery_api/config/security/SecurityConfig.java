@@ -28,6 +28,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/users/login", "/api/v1/users/register", "/api/v1/users/forgot-password/**").permitAll()
                         // Cho phep xem danh sach nha hang va thuc don thoai mai khong can Token
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/restaurants/**", "/api/v1/foods/**", "/api/v1/payments/zalopay/callback").permitAll()
+                        // Yeu cau xac thuc cho cac endpoint home
+                        .requestMatchers("/api/v1/home/**").authenticated()
                         // Tat ca API con lai deu phai xac thuc qua Token
                         .anyRequest().authenticated()
                 )
