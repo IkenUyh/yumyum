@@ -157,17 +157,35 @@ public class PasscodeActivity extends AppCompatActivity {
     private void handlePasscodeComplete() {
         isChecking = true;
 
-        // Gọi hàm qua lớp cầu nối UserRepository theo cấu trúc mới
-        new android.os.Handler().postDelayed(() -> {
-            isChecking = false; // Mở khóa trạng thái
-            SessionManager sessionManager = SessionManager.getInstance(PasscodeActivity.this);
-            sessionManager.createLoginSession(1L, "mock_token", "Mock User", phoneNumber, "");
+        userRepository.login(phoneNumber, passcode, new ApiCallback<AuthResponseDTO>() {
+            @Override
+            public void onSuccess(AuthResponseDTO data) {
+                isChecking = false;
+                if (data != null && data.getUser() != null) {
+                    SessionManager sessionManager = SessionManager.getInstance(PasscodeActivity.this);
+                    sessionManager.createLoginSession(
+                            data.getUser().getId(),
+                            data.getToken(),
+                            data.getUser().getFullName(),
+                            data.getUser().getPhoneNumber(),
+                            data.getUser().getAvatarUrl()
+                    );
 
-            Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
-            startActivity(intent);
-            finish();
-        }, 500);
+                    Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    showLoginError("Dữ liệu đăng nhập phản hồi không hợp lệ!");
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                isChecking = false;
+                showLoginError(error != null ? error : "Mật khẩu không chính xác!");
+            }
+        });
     }
     // Hàm phụ trợ để báo lỗi và reset bàn phím
     private void showLoginError(String message) {

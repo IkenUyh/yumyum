@@ -117,4 +117,9 @@ public class CartService {
     public void clearCart(User user) {
         cartItemRepository.deleteByUserId(user.getId());
     }
+
+    // 5. Lấy tổng số lượng các món trong giỏ hàng
+    public Integer getCartItemCount(User user) {
+        return cartItemRepository.countTotalQuantityByUserId(user.getId());
+    }
 }

@@ -79,4 +79,9 @@ public class NotificationService {
     public List<Notification> getMyHistory(Long userId) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
+
+    // Lấy số lượng thông báo chưa đọc
+    public long getUnreadCount(Long userId) {
+        return notificationRepository.countByUserIdAndIsReadFalse(userId);
+    }
 }

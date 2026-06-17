@@ -30,4 +30,7 @@ public interface CartService {
 
     @DELETE("api/v1/carts/clear")
     Call<ApiResponse<String>> clearCart();
+
+    @GET("api/v1/carts/count")
+    Call<ApiResponse<Integer>> getCartCount();
 }

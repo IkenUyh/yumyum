@@ -76,6 +76,21 @@ public class CartRepository {
                 callback.onError(t.getMessage());
             }
         });
+     }
+
+    // Lấy tổng số lượng món trong giỏ hàng
+    public void getCartCount(final ApiCallback<Integer> callback) {
+        cartService.getCartCount().enqueue(new Callback<ApiResponse<Integer>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Integer>> call, Response<ApiResponse<Integer>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Integer>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
     }
 
     // Hàm Helper xử lý bóc tách ApiResponse chung

@@ -90,7 +90,15 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.tvStoreName.setText(deal.getStoreName());
         holder.tvDistance.setText(deal.getDistance() + "km");
         holder.tvDeliveryTime.setText(deal.getDeliveryTime() + " phút");
-        holder.ivFoodImage.setImageResource(deal.getFoodImageResId());
+        int resId = deal.getFoodImageResId();
+        if (resId == 0) {
+            String title = deal.getFoodTitle() != null ? deal.getFoodTitle().toLowerCase() : "";
+            if (title.contains("trà sữa") || title.contains("trà đào") || title.contains("sen")) resId = R.drawable.img_food_bubbletea;
+            else if (title.contains("cà phê") || title.contains("freeze") || title.contains("phin")) resId = R.drawable.img_food_coffee;
+            else if (title.contains("pizza")) resId = R.drawable.img_food_pizza;
+            else resId = R.drawable.img_food_chicken;
+        }
+        holder.ivFoodImage.setImageResource(resId);
         holder.tvDiscountTag.setText(deal.getDiscountTag());
         holder.tvFoodTitle.setText(deal.getFoodTitle());
         holder.tvSoldCount.setText(deal.getSoldCount() + " Đã bán");

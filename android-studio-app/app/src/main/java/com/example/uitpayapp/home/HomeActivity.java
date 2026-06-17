@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.activity.EdgeToEdge;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -104,7 +105,7 @@ public class HomeActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
 
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        EdgeToEdge.enable(this);
 
         setContentView(R.layout.activity_home);
 
@@ -846,13 +847,26 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         btnAddToCart.setOnClickListener(v -> {
-            CartManager.getInstance().addItem(new CartItem(item, popupQty[0], new java.util.ArrayList<>(selectedToppings)));
-            
-            View btnCart = findViewById(R.id.btn_cart);
-            CartAnimationHelper.animateFlyToCart(this, ivFoodImage, btnCart, () -> {
-                updateGlobalCartBadge();
+            CartItem newItem = new CartItem(item, popupQty[0], new java.util.ArrayList<>(selectedToppings));
+            CartManager.getInstance().addItemSync(newItem, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String data) {
+                    CartManager.getInstance().addItem(newItem);
+                    runOnUiThread(() -> {
+                        View btnCart = findViewById(R.id.btn_cart);
+                        CartAnimationHelper.animateFlyToCart(HomeActivity.this, ivFoodImage, btnCart, () -> {
+                            updateGlobalCartBadge();
+                        });
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    runOnUiThread(() -> {
+                        android.widget.Toast.makeText(HomeActivity.this, "Không thể thêm vào giỏ hàng: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                    });
+                }
             });
-            
             dialog.dismiss();
         });
 
@@ -983,17 +997,63 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateGlobalCartBadge();
+        updateNotificationBadge();
     }
 
     private void updateGlobalCartBadge() {
-        TextView tvBadge = findViewById(R.id.tv_global_cart_badge);
-        int count = CartManager.getInstance().getTotalItemCount();
-        if (count > 0) {
-            tvBadge.setVisibility(View.VISIBLE);
-            tvBadge.setText(String.valueOf(count));
-        } else {
-            tvBadge.setVisibility(View.GONE);
-        }
+        final TextView tvBadge = findViewById(R.id.tv_global_cart_badge);
+        if (tvBadge == null) return;
+        CartManager.getInstance().getCartCountSync(new com.example.uitpayapp.network.ApiCallback<Integer>() {
+            @Override
+            public void onSuccess(Integer count) {
+                runOnUiThread(() -> {
+                    if (count != null && count > 0) {
+                        tvBadge.setVisibility(View.VISIBLE);
+                        tvBadge.setText(String.valueOf(count));
+                    } else {
+                        tvBadge.setVisibility(View.GONE);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    int count = CartManager.getInstance().getTotalItemCount();
+                    if (count > 0) {
+                        tvBadge.setVisibility(View.VISIBLE);
+                        tvBadge.setText(String.valueOf(count));
+                    } else {
+                        tvBadge.setVisibility(View.GONE);
+                    }
+                });
+            }
+        });
+    }
+
+    private void updateNotificationBadge() {
+        final TextView tvNotificationBadge = findViewById(R.id.tv_notification_badge);
+        if (tvNotificationBadge == null) return;
+        
+        com.example.uitpayapp.modules.notification.NotificationRepository repo = 
+                new com.example.uitpayapp.modules.notification.NotificationRepository();
+        repo.getUnreadCount(new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Long>>() {
+            @Override
+            public void onSuccess(java.util.Map<String, Long> countData) {
+                long unreadCount = countData != null && countData.containsKey("unreadCount") ? countData.get("unreadCount") : 0;
+                if (unreadCount > 0) {
+                    tvNotificationBadge.setText(String.valueOf(unreadCount));
+                    tvNotificationBadge.setVisibility(View.VISIBLE);
+                } else {
+                    tvNotificationBadge.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Fail silently
+            }
+        });
     }
     private void checkoutGlobalCart() {
         Intent intent = new Intent(this, CartActivity.class);
