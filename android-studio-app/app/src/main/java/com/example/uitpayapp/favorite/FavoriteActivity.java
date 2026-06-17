@@ -88,6 +88,7 @@ public class FavoriteActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        updateNotificationBadge();
         if (mainAdapter != null) {
             loadDatabaseShops();
             applyFilterAndSorting();
@@ -255,12 +256,12 @@ public class FavoriteActivity extends AppCompatActivity {
             overridePendingTransition(0, 0);
         });
     }
-
+/*
     @Override
     protected void onResume() {
         super.onResume();
         updateNotificationBadge();
-    }
+    }*/
 
     private void updateNotificationBadge() {
         final TextView tvNotificationBadge = findViewById(R.id.tv_notification_badge);

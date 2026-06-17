@@ -39,24 +39,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Cat lay phan token nam sau chu "Bearer "
-        jwt = authHeader.substring(7);
-        phoneNumber = jwtService.extractUsername(jwt);
+        try {
+            // Cat lay phan token nam sau chu "Bearer "
+            jwt = authHeader.substring(7);
+            phoneNumber = jwtService.extractUsername(jwt);
 
-        // Neu co so dien thoai va chua duoc xac thuc
-        if (phoneNumber != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(phoneNumber);
+            // Neu co so dien thoai va chua duoc xac thuc
+            if (phoneNumber != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(phoneNumber);
 
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                // Luu vao SecurityContext
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    // Luu vao SecurityContext
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            // Bo qua cac loi lien quan den Token (het han, sai signature, token gia mao)
+            // de request di tiep. Spring Security tu dong chan neu API yeu cau authenticated.
         }
         filterChain.doFilter(request, response);
     }
