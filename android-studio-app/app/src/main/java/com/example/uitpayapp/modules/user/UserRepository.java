@@ -37,8 +37,8 @@ public class UserRepository {
     }
 
     // Đăng ký
-    public void register(String phoneNumber, String fullName, String password, String referredByCode, ApiCallback<UserResponseDTO> callback) {
-        RegisterRequestDTO dto = new RegisterRequestDTO(phoneNumber, fullName, password, referredByCode);
+    public void register(String phoneNumber, String fullName, String email, String password, String referredByCode, ApiCallback<UserResponseDTO> callback) {
+        RegisterRequestDTO dto = new RegisterRequestDTO(phoneNumber, fullName, email, password, referredByCode);
         userService.register(dto).enqueue(new Callback<ApiResponse<UserResponseDTO>>() {
             @Override
             public void onResponse(Call<ApiResponse<UserResponseDTO>> call, Response<ApiResponse<UserResponseDTO>> response) {

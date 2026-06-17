@@ -32,13 +32,13 @@ public class OrderRepository {
                         callback.onError(apiResponse.getMessage() != null ? apiResponse.getMessage() : "Unknown Error");
                     }
                 } else {
-                    callback.onError("Lỗi kết nối hệ thống: " + response.code());
+                    callback.onError("Không kết nối được server (Lỗi: " + response.code() + ")");
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<T>> call, Throwable t) {
-                callback.onError("Lỗi mạng: " + t.getMessage());
+                callback.onError("Không kết nối được server (Lỗi: " + (t.getMessage() != null ? t.getMessage() : "Mạng") + ")");
             }
         });
     }

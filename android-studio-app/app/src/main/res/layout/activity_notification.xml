@@ -12,8 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:paddingTop="40dp"
-        android:paddingBottom="12dp"
+        android:paddingBottom="8dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -23,6 +22,7 @@
             android:text="Thông báo"
             android:textColor="#212121"
             android:textSize="20sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -220,8 +220,7 @@
                     android:layout_marginTop="2dp"
                     android:text="Trang chủ"
                     android:textColor="#757575"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -299,7 +298,8 @@
                     android:layout_marginTop="2dp"
                     android:text="Thông báo"
                     android:textColor="#EE4D2D"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout

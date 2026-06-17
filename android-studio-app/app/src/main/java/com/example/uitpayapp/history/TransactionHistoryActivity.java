@@ -58,6 +58,13 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     private ImageButton btnDismissCalendar;
     private Button btnClearDateFilter, btnApplyDateFilter;
 
+    private View layoutLoading;
+    private android.widget.ImageView ivEmpty;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout;
+    private boolean isErrorState = false;
+    private String currentErrorMessage = "";
+    private boolean isLoadingData = false;
+
     private List<FoodOrder> allOrders;
     private List<FoodOrder> displayOrders;
 
@@ -115,6 +122,9 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         btnDismissCalendar = findViewById(R.id.btnDismissCalendar);
         btnClearDateFilter = findViewById(R.id.btnClearDateFilter);
         btnApplyDateFilter = findViewById(R.id.btnApplyDateFilter);
+        layoutLoading = findViewById(R.id.layoutLoading);
+        ivEmpty = findViewById(R.id.ivEmpty);
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
 
         allOrders = new ArrayList<>();
         displayOrders = new ArrayList<>();
@@ -135,18 +145,6 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         rvDeals.setLayoutManager(new LinearLayoutManager(this));
 
         allDealsList = new ArrayList<>();
-        // Khởi tạo dữ liệu mock kiểm thử (Mã hóa khớp 100% dữ liệu ảnh mẫu của bạn)
-        allDealsList.add(new DealHistory(
-                "DEAL_01",
-                "Trà Sữa An Viên - Đường 30 Tháng 4",
-                "15 Th01 2026",
-                "LỤC TRÀ CHANH DÂY",
-                "12.600đ",
-                "HSD: 15.01.2026 16:24-21.01.2026 23:59",
-                "1 Món ›",
-                "Đã sử dụng",
-                "15016-594977098" // ID đơn hàng thực tế để liên kết ngược
-        ));
 
         dealAdapter = new DealHistoryAdapter(allDealsList);
         rvDeals.setAdapter(dealAdapter);
@@ -162,6 +160,10 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         setupSearchLogic();
         setupBottomNavigation();
         applyFilter();
+
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            fetchOrdersFromBackend();
+        });
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -308,7 +310,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         if ("Đang đến".equalsIgnoreCase(currentTab)) {
             layoutCoinsBanner.setVisibility(View.GONE);
             layoutFilters.setVisibility(View.GONE);
-            layoutRecommendations.setVisibility(View.VISIBLE);
+            layoutRecommendations.setVisibility(View.GONE); // Đã ẩn theo yêu cầu
 
             recyclerView.setVisibility(View.VISIBLE);
             rvDeals.setVisibility(View.GONE); // Ẩn danh sách Deal
@@ -321,8 +323,22 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             layoutRecommendations.setVisibility(View.GONE);
 
             recyclerView.setVisibility(View.GONE); // Ẩn danh sách đơn hàng lịch sử
-            rvDeals.setVisibility(View.VISIBLE);  // BẬT DANH SÁCH DEAL LÊN
-            layoutEmpty.setVisibility(View.GONE);
+            if (allDealsList.isEmpty()) {
+                rvDeals.setVisibility(View.GONE);
+                layoutEmpty.setVisibility(View.VISIBLE);
+                if (isErrorState) {
+                    ivEmpty.setImageResource(R.drawable.ic_internet);
+                    tvEmptyTitle.setText("Lỗi tải dữ liệu");
+                    tvEmptyDesc.setText(currentErrorMessage);
+                } else {
+                    ivEmpty.setImageResource(R.drawable.img_transactionhistory_notransaction);
+                    tvEmptyTitle.setText("Chưa có deal nào");
+                    tvEmptyDesc.setText("Bạn chưa mua deal nào gần đây!");
+                }
+            } else {
+                rvDeals.setVisibility(View.VISIBLE);
+                layoutEmpty.setVisibility(View.GONE);
+            }
             return; // Ngắt hàm luôn để không chạy vòng lặp lọc đơn hàng phía dưới
         }
         else {
@@ -365,9 +381,24 @@ public class TransactionHistoryActivity extends AppCompatActivity {
 
         adapter.setData(displayOrders);
 
+        if (isLoadingData) {
+            recyclerView.setVisibility(View.GONE);
+            layoutEmpty.setVisibility(View.GONE);
+            return;
+        }
+
         if (displayOrders.isEmpty()) {
             recyclerView.setVisibility(View.GONE);
             layoutEmpty.setVisibility(View.VISIBLE);
+            if (isErrorState) {
+                ivEmpty.setImageResource(R.drawable.ic_internet);
+                tvEmptyTitle.setText("Lỗi tải dữ liệu");
+                tvEmptyDesc.setText(currentErrorMessage);
+            } else {
+                ivEmpty.setImageResource(R.drawable.img_transactionhistory_notransaction);
+                tvEmptyTitle.setText("Quên chưa đặt món rồi nè bạn ơi?");
+                tvEmptyDesc.setText("Bạn sẽ nhìn thấy các món đang được chuẩn bị hoặc giao đi tại đây để kiểm tra đơn hàng nhanh hơn!");
+            }
         } else {
             recyclerView.setVisibility(View.VISIBLE);
             layoutEmpty.setVisibility(View.GONE);
@@ -435,9 +466,19 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         if (orderRepository == null) {
             orderRepository = new OrderRepository();
         }
+        
+        isLoadingData = true;
+        isErrorState = false;
+        layoutLoading.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
+        layoutEmpty.setVisibility(View.GONE);
+        
         orderRepository.getCustomerHistory(new ApiCallback<List<OrderResponse>>() {
             @Override
             public void onSuccess(List<OrderResponse> orders) {
+                isLoadingData = false;
+                layoutLoading.setVisibility(View.GONE);
+                swipeRefreshLayout.setRefreshing(false);
                 allOrders.clear();
                 for (OrderResponse order : orders) {
                     String category = "Lịch sử";
@@ -499,9 +540,12 @@ public class TransactionHistoryActivity extends AppCompatActivity {
 
             @Override
             public void onError(String errorMessage) {
-                Toast.makeText(TransactionHistoryActivity.this, "Không thể tải lịch sử đơn hàng: " + errorMessage, Toast.LENGTH_SHORT).show();
-                // Fallback to dummy data
-                createDummyFoodOrders();
+                isLoadingData = false;
+                layoutLoading.setVisibility(View.GONE);
+                swipeRefreshLayout.setRefreshing(false);
+                isErrorState = true;
+                currentErrorMessage = errorMessage;
+                allOrders.clear();
                 applyFilter();
             }
         });
@@ -529,33 +573,48 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     }
 
     private void setupFilterMenus() {
-        tvFilterService.setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(this, v);
-            popup.getMenu().add("Tất cả");
-            popup.getMenu().add("Đồ ăn");
-            popup.getMenu().add("Thức uống");
-            popup.setOnMenuItemClickListener(item -> {
-                currentService = item.getTitle().toString();
-                tvFilterService.setText(currentService + " ∨");
-                applyFilter();
-                return true;
-            });
-            popup.show();
+        String[] categories = {"Tất cả", "Cơm", "Bún Phở", "Bánh mì", "Fastfood", "Lẩu", "Đồ nướng", "Cafe", "Trà sữa", "Ăn vặt", "Tráng miệng", "Hải sản", "Chay", "Đồ uống", "Gà rán", "Pizza"};
+        android.widget.ArrayAdapter<String> serviceAdapter = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_list_item_1, categories);
+        android.widget.ListPopupWindow servicePopup = new android.widget.ListPopupWindow(this);
+        servicePopup.setAdapter(serviceAdapter);
+        servicePopup.setAnchorView(tvFilterService);
+        servicePopup.setWidth((int) (150 * getResources().getDisplayMetrics().density));
+        servicePopup.setHeight((int) (200 * getResources().getDisplayMetrics().density));
+        
+        servicePopup.setOnItemClickListener((parent, view, position, id) -> {
+            currentService = categories[position];
+            if (currentService.equals("Tất cả")) {
+                tvFilterService.setText("Tất cả ▼");
+            } else {
+                tvFilterService.setText(currentService + " ▼");
+            }
+            applyFilter();
+            servicePopup.dismiss();
         });
 
-        tvFilterStatus.setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(this, v);
-            popup.getMenu().add("Tất cả");
-            popup.getMenu().add("Hoàn thành");
-            popup.getMenu().add("Đã hủy");
-            popup.setOnMenuItemClickListener(item -> {
-                currentStatus = item.getTitle().toString();
-                tvFilterStatus.setText(currentStatus + " ∨");
-                applyFilter();
-                return true;
-            });
-            popup.show();
+        tvFilterService.setOnClickListener(v -> servicePopup.show());
+        tvFilterService.setText("Tất cả ▼");
+
+        String[] statuses = {"Tất cả", "Hoàn thành", "Đã hủy"};
+        android.widget.ArrayAdapter<String> statusAdapter = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_list_item_1, statuses);
+        android.widget.ListPopupWindow statusPopup = new android.widget.ListPopupWindow(this);
+        statusPopup.setAdapter(statusAdapter);
+        statusPopup.setAnchorView(tvFilterStatus);
+        statusPopup.setWidth((int) (150 * getResources().getDisplayMetrics().density));
+        
+        statusPopup.setOnItemClickListener((parent, view, position, id) -> {
+            currentStatus = statuses[position];
+            if (currentStatus.equals("Tất cả")) {
+                tvFilterStatus.setText("Tất cả ▼");
+            } else {
+                tvFilterStatus.setText(currentStatus + " ▼");
+            }
+            applyFilter();
+            statusPopup.dismiss();
         });
+
+        tvFilterStatus.setOnClickListener(v -> statusPopup.show());
+        tvFilterStatus.setText("Tất cả ▼");
     }
 
     private void setupSearchLogic() {

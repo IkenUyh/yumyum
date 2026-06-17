@@ -59,13 +59,13 @@ public class HomeViewModel extends ViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     coreData.setValue(UiState.success(response.body()));
                 } else {
-                    coreData.setValue(UiState.error("Không kết nối được server", null));
+                    coreData.setValue(UiState.error("Không kết nối được server (Lỗi: " + response.code() + ")", null));
                 }
             }
 
             @Override
             public void onFailure(Call<HomeCoreResponse> call, Throwable t) {
-                coreData.setValue(UiState.error("Không kết nối được server", null));
+                coreData.setValue(UiState.error("Không kết nối được server (Lỗi: " + (t.getMessage() != null ? t.getMessage() : "Mạng") + ")", null));
             }
         });
     }
@@ -82,13 +82,13 @@ public class HomeViewModel extends ViewModel {
                         brandsData.setValue(UiState.success(response.body()));
                     }
                 } else {
-                    brandsData.setValue(UiState.error("Không kết nối được server", null));
+                    brandsData.setValue(UiState.error("Không kết nối được server (Lỗi: " + response.code() + ")", null));
                 }
             }
 
             @Override
             public void onFailure(Call<BrandResponse> call, Throwable t) {
-                brandsData.setValue(UiState.error("Không kết nối được server", null));
+                brandsData.setValue(UiState.error("Không kết nối được server (Lỗi: " + (t.getMessage() != null ? t.getMessage() : "Mạng") + ")", null));
             }
         });
     }
@@ -132,7 +132,7 @@ public class HomeViewModel extends ViewModel {
                     }
                 } else {
                     if (accumulatedDeals.isEmpty()) {
-                        dealsData.setValue(UiState.error("Không kết nối được server", null));
+                        dealsData.setValue(UiState.error("Không kết nối được server (Lỗi: " + response.code() + ")", null));
                     }
                 }
             }
@@ -141,7 +141,7 @@ public class HomeViewModel extends ViewModel {
             public void onFailure(Call<DealResponse> call, Throwable t) {
                 isDealsLoading = false;
                 if (accumulatedDeals.isEmpty()) {
-                    dealsData.setValue(UiState.error("Không kết nối được server", null));
+                    dealsData.setValue(UiState.error("Không kết nối được server (Lỗi: " + (t.getMessage() != null ? t.getMessage() : "Mạng") + ")", null));
                 }
             }
         });

@@ -69,7 +69,8 @@
         app:tabIndicatorHeight="3dp"
         app:tabMode="scrollable"
         app:tabSelectedTextColor="#EE4D2D"
-        app:tabTextColor="#757575" />
+        app:tabTextColor="#757575"
+        app:tabTextAppearance="@style/CustomTabTextAppearance" />
 
     <LinearLayout
         android:id="@+id/layoutCoinsBanner"
@@ -112,9 +113,9 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="Dịch vụ ∨"
-            android:textColor="#212121"
-            android:textSize="13sp"
+            android:text="Tất cả ▼"
+            android:textColor="#666666"
+            android:textSize="14sp"
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackground"
@@ -125,9 +126,9 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="Trạng thái ∨"
-            android:textColor="#212121"
-            android:textSize="13sp"
+            android:text="Tất cả ▼"
+            android:textColor="#666666"
+            android:textSize="14sp"
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackground"
@@ -146,75 +147,82 @@
             android:background="?attr/selectableItemBackground" />
     </LinearLayout>
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/mainHistoryScroll"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="4dp"
         app:layout_constraintBottom_toTopOf="@+id/bottom_container"
         app:layout_constraintTop_toBottomOf="@+id/layoutFilters">
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/mainHistoryScroll"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false" />
+                android:layout_height="match_parent"
+                android:layout_marginTop="4dp">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvDeals"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                android:visibility="gone" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvDeals"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/layoutRecommendations"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Có thể bạn cũng thích"
+                            android:textColor="#666666"
+                            android:textSize="13sp"
+                            android:gravity="center"
+                            android:layout_marginVertical="16dp"/>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvRecommendations"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"
+                            tools:listitem="@layout/activity_favorite_item_vertical"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
 
             <LinearLayout
-                android:id="@+id/layoutRecommendations"
+                android:id="@+id/layoutEmpty"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:background="#FFFFFF"
+                android:gravity="center_horizontal"
                 android:orientation="vertical"
+                android:paddingTop="60dp"
                 android:visibility="gone">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Có thể bạn cũng thích"
-                    android:textColor="#666666"
-                    android:textSize="13sp"
-                    android:gravity="center"
-                    android:layout_marginVertical="16dp"/>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvRecommendations"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
-                    tools:listitem="@layout/activity_favorite_item_vertical"/>
-            </LinearLayout>
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
-    <LinearLayout
-        android:id="@+id/layoutEmpty"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="#F5F5F5"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:paddingTop="60dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_container"
-        app:layout_constraintTop_toBottomOf="@id/layoutFilters">
-
         <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@android:drawable/ic_menu_edit"
-            app:tint="#FFA000"
+            android:id="@+id/ivEmpty"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:src="@drawable/img_transactionhistory_notransaction"
             tools:ignore="ContentDescription" />
 
         <TextView
@@ -227,17 +235,36 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvEmptyDesc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text="Bạn sẽ nhìn thấy các món đang được chuẩn bị hoặc giao đi tại đây để kiểm tra đơn hàng nhanh hơn!"
-            android:textColor="#757575"
-            android:textSize="13sp" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tvEmptyDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="Bạn sẽ nhìn thấy các món đang được chuẩn bị hoặc giao đi tại đây để kiểm tra đơn hàng nhanh hơn!"
+                android:textColor="#757575"
+                android:textSize="13sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutLoading"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#FFFFFF"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ProgressBar
+                    android:id="@+id/pbLoading"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:indeterminateTint="#EE4D2D" />
+            </LinearLayout>
+
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_container"
@@ -303,7 +330,8 @@
                     android:layout_marginTop="2dp"
                     android:text="Đơn hàng"
                     android:textColor="#EE4D2D"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
