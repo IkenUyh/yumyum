@@ -34,10 +34,18 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="40dp"
             android:padding="8dp">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp"
+            <ImageView android:id="@+id/img_wallet_logo"
+                android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@drawable/yumyum_demo_logo"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Ví UITpay" android:layout_marginLeft="34dp" android:textColor="#000000"/>
+            <TextView android:id="@+id/tv_wallet_name"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Ví UITpay" android:layout_marginLeft="10dp" android:textColor="#000000"
+                android:layout_toRightOf="@id/img_wallet_logo"/>
+            <TextView android:id="@+id/btn_topup"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Nạp tiền" android:textColor="#f24405" android:textStyle="bold"
+                android:layout_toRightOf="@id/tv_wallet_name" android:layout_marginLeft="15dp"
+                android:paddingLeft="10dp" android:paddingRight="10dp" android:background="@drawable/bg_tab_unselected"/>
             <TextView android:id="@+id/wallet_balance"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="0đ" android:layout_alignParentEnd="true" android:textColor="#000000"

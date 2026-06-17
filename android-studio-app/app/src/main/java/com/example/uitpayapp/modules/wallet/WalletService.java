@@ -25,4 +25,12 @@ public interface WalletService {
     // Dự phóng thêm API nạp tiền (vì backend đã cung cấp TopUpRequestDTO)
     @POST("api/v1/wallets/topup")
     Call<ApiResponse<Void>> topUp(@Body TopUpRequest request);
+
+    // ZaloPay TopUp API
+    @POST("api/v1/payments/zalopay/topup")
+    Call<ApiResponse<java.util.Map<String, Object>>> createZaloPayTopUp(@retrofit2.http.Query("amount") long amount);
+
+    // Query Order Status
+    @GET("api/v1/payments/zalopay/order-status/{appTransId}")
+    Call<ApiResponse<java.util.Map<String, Object>>> queryZaloPayOrderStatus(@retrofit2.http.Path("appTransId") String appTransId);
 }

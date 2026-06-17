@@ -423,4 +423,100 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
     }
+
+    public void showTopUpDialog() {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("Nạp tiền vào ví qua ZaloPay");
+
+        final android.widget.EditText input = new android.widget.EditText(this);
+        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        input.setHint("Nhập số tiền cần nạp (tối thiểu 10,000 VNĐ)");
+        builder.setView(input);
+
+        builder.setPositiveButton("Nạp ZaloPay", (dialog, which) -> {
+            String amountStr = input.getText().toString();
+            if (!amountStr.isEmpty()) {
+                long amount = Long.parseLong(amountStr);
+                if (amount < 10000) {
+                    Toast.makeText(this, "Số tiền tối thiểu là 10,000 VNĐ", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
+                walletRepo.createZaloPayTopUp(amount, new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
+                    @Override
+                    public void onSuccess(java.util.Map<String, Object> data) {
+                        runOnUiThread(() -> {
+                            if (data != null && data.containsKey("order_url")) {
+                                String orderUrl = (String) data.get("order_url");
+                                String appTransId = (String) data.get("app_trans_id");
+                                
+                                // Mở trang thanh toán ZaloPay
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(orderUrl));
+                                startActivity(browserIntent);
+                                
+                                // Hiện dialog để kiểm tra trạng thái
+                                showCheckStatusDialog(appTransId);
+                            } else {
+                                Toast.makeText(ProfileActivity.this, "Không lấy được link thanh toán", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(ProfileActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                });
+            }
+        });
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+    private void showCheckStatusDialog(String appTransId) {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("Đang chờ thanh toán");
+        builder.setMessage("Sau khi thanh toán xong trên ZaloPay, hãy bấm nút dưới đây để kiểm tra trạng thái nạp tiền nhé!");
+        builder.setCancelable(false);
+
+        builder.setPositiveButton("Kiểm tra trạng thái", (dialog, which) -> {
+            com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
+            walletRepo.queryZaloPayOrderStatus(appTransId, new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
+                @Override
+                public void onSuccess(java.util.Map<String, Object> data) {
+                    runOnUiThread(() -> {
+                        // return_code = 1 là thanh toán thành công
+                        if (data != null && data.containsKey("return_code")) {
+                            int returnCode = ((Number) data.get("return_code")).intValue();
+                            if (returnCode == 1) {
+                                Toast.makeText(ProfileActivity.this, "Thanh toán ZaloPay thành công!", Toast.LENGTH_SHORT).show();
+                                SetDataMainMenu(mainMenu); // Refresh ví
+                            } else {
+                                Toast.makeText(ProfileActivity.this, "Chưa thanh toán hoặc thất bại! (" + data.get("return_message") + ")", Toast.LENGTH_SHORT).show();
+                                // Hiện lại dialog để người dùng có thể kiểm tra tiếp
+                                showCheckStatusDialog(appTransId);
+                            }
+                        } else {
+                            Toast.makeText(ProfileActivity.this, "Chưa thanh toán hoặc lỗi mạng", Toast.LENGTH_SHORT).show();
+                            showCheckStatusDialog(appTransId);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(ProfileActivity.this, "Lỗi kiểm tra trạng thái: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        showCheckStatusDialog(appTransId);
+                    });
+                }
+            });
+        });
+        
+        builder.setNegativeButton("Đóng", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
 }

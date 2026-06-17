@@ -85,4 +85,28 @@ public class PaymentController {
 
         return result;
     }
+    // 3. Truy vấn trạng thái đơn hàng (Dành cho App gọi để kiểm tra)
+    @GetMapping("/zalopay/order-status/{appTransId}")
+    public ApiResponse<Map<String, Object>> getOrderStatus(@PathVariable String appTransId) {
+        Map<String, Object> result = zaloPayService.queryOrder(appTransId);
+        return ApiResponse.success(result);
+    }
+
+    // 4. Yêu cầu hoàn tiền (Refund)
+    @PostMapping("/zalopay/refund")
+    public ApiResponse<Map<String, Object>> refundOrder(
+            @RequestParam String zpTransId,
+            @RequestParam Long amount,
+            @RequestParam String description) {
+        
+        Map<String, Object> result = zaloPayService.refund(zpTransId, amount, description);
+        return ApiResponse.success(result);
+    }
+
+    // 5. Truy vấn trạng thái hoàn tiền
+    @GetMapping("/zalopay/refund-status/{mRefundId}")
+    public ApiResponse<Map<String, Object>> getRefundStatus(@PathVariable String mRefundId) {
+        Map<String, Object> result = zaloPayService.queryRefundStatus(mRefundId);
+        return ApiResponse.success(result);
+    }
 }

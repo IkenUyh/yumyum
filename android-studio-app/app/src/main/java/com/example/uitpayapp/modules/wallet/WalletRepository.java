@@ -55,4 +55,61 @@ public class WalletRepository {
             }
         });
     }
+
+    // Hàm gọi nạp tiền
+    public void topUp(com.example.uitpayapp.modules.wallet.models.requests.TopUpRequest request, final ApiCallback<String> callback) {
+        walletService.topUp(request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body().getMessage());
+                } else {
+                    callback.onError("Không thể nạp tiền: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                callback.onError("Lỗi kết nối hệ thống: " + t.getMessage());
+            }
+        });
+    }
+
+    // Nạp tiền qua ZaloPay
+    public void createZaloPayTopUp(long amount, final ApiCallback<java.util.Map<String, Object>> callback) {
+        walletService.createZaloPayTopUp(amount).enqueue(new Callback<ApiResponse<java.util.Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<java.util.Map<String, Object>>> call, Response<ApiResponse<java.util.Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body().getData());
+                } else {
+                    callback.onError("Không thể tạo đơn ZaloPay: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<java.util.Map<String, Object>>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
+    // Truy vấn trạng thái đơn ZaloPay
+    public void queryZaloPayOrderStatus(String appTransId, final ApiCallback<java.util.Map<String, Object>> callback) {
+        walletService.queryZaloPayOrderStatus(appTransId).enqueue(new Callback<ApiResponse<java.util.Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<java.util.Map<String, Object>>> call, Response<ApiResponse<java.util.Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body().getData());
+                } else {
+                    callback.onError("Không thể kiểm tra đơn hàng: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<java.util.Map<String, Object>>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
 }
