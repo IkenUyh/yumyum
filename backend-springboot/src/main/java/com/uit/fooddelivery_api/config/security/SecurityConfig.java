@@ -24,8 +24,8 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Chi cong khai API login va register
-                        .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
+                        // Chi cong khai API login va register va forgot password
+                        .requestMatchers("/api/v1/users/login", "/api/v1/users/register", "/api/v1/users/forgot-password/**").permitAll()
                         // Cho phep xem danh sach nha hang va thuc don thoai mai khong can Token
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/restaurants/**", "/api/v1/foods/**", "/api/v1/payments/zalopay/callback").permitAll()
                         // Tat ca API con lai deu phai xac thuc qua Token

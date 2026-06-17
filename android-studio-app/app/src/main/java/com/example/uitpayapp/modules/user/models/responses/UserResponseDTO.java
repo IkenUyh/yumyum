@@ -12,11 +12,15 @@ public class UserResponseDTO {
     @SerializedName("fullName")
     private String fullName;
 
+    @SerializedName("email")
+    private String email;
+
     @SerializedName("avatarUrl")
     private String avatarUrl;
 
     public Long getId() { return id; }
     public String getPhoneNumber() { return phoneNumber; }
     public String getFullName() { return fullName; }
+    public String getEmail() { return email; }
     public String getAvatarUrl() { return avatarUrl; }
 }

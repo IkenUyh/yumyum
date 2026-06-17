@@ -44,4 +44,11 @@ public interface UserService {
 
     @GET("api/v1/users/addresses")
     Call<ApiResponse<List<AddressResponseDTO>>> getAddresses();
+
+    // --- Các API quên mật khẩu ---
+    @POST("api/v1/users/forgot-password/request")
+    Call<ApiResponse<String>> forgotPasswordRequest(@Body ForgotPasswordRequestDTO request);
+
+    @POST("api/v1/users/forgot-password/reset")
+    Call<ApiResponse<String>> forgotPasswordReset(@Body ResetPasswordRequestDTO request);
 }

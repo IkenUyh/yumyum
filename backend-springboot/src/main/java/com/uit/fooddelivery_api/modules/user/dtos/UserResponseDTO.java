@@ -12,6 +12,7 @@ public class UserResponseDTO {
     private Long id;
     private String phoneNumber;
     private String fullName;
+    private String email;
     private String avatarUrl;
 
     // Viết hàm tiện ích để chuyển từ Entity gốc sang DTO an toàn
@@ -20,6 +21,7 @@ public class UserResponseDTO {
                 .id(user.getId())
                 .phoneNumber(user.getPhoneNumber())
                 .fullName(user.getFullName())
+                .email(user.getEmail())
                 .avatarUrl(user.getAvatarUrl())
                 .build();
     }

@@ -24,11 +24,19 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final WalletRepository walletRepository;
     private final com.uit.fooddelivery_api.modules.notification.services.NotificationService notificationService;
+    private final EmailService emailService;
+    private final org.springframework.data.redis.core.RedisTemplate<String, String> redisTemplate;
 
     @Transactional
     public User registerUser(com.uit.fooddelivery_api.modules.user.dtos.RegisterRequestDTO dto) {
         if (userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
             throw new RuntimeException("Số điện thoại này đã được đăng ký!");
+        }
+
+        if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
+            if (userRepository.existsByEmail(dto.getEmail().trim())) {
+                throw new RuntimeException("Email này đã được đăng ký!");
+            }
         }
 
         // 1. Tạo User mới và sinh mã giới thiệu ngẫu nhiên
@@ -37,6 +45,7 @@ public class UserService {
         User user = User.builder()
                 .phoneNumber(dto.getPhoneNumber())
                 .fullName(dto.getFullName())
+                .email(dto.getEmail() != null ? dto.getEmail().trim() : null)
                 .password(dto.getPassword()) // Trong thực tế nhớ mã hóa Bcrypt nhé
                 .role(Role.CUSTOMER)
                 .isActive(true)
@@ -145,5 +154,60 @@ public class UserService {
         user.setPhoneNumber("DEL_" + user.getId() + "_" + System.currentTimeMillis());
 
         userRepository.save(user);
+    }
+
+    // GỬI MÃ OTP QUÊN MẬT KHẨU
+    public void forgotPasswordRequest(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            throw new RuntimeException("Email không được để trống!");
+        }
+        String cleanEmail = email.trim();
+        User user = userRepository.findByEmail(cleanEmail)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng có email này!"));
+
+        // Sinh mã OTP ngẫu nhiên gồm 6 chữ số
+        String otp = String.format("%06d", new java.util.Random().nextInt(1000000));
+
+        // Lưu vào Redis với TTL là 5 phút
+        String redisKey = "otp:forgot-password:" + cleanEmail;
+        redisTemplate.opsForValue().set(redisKey, otp, 5, java.util.concurrent.TimeUnit.MINUTES);
+
+        // Gửi qua Email
+        emailService.sendOtpEmail(cleanEmail, otp);
+    }
+
+    // XÁC NHẬN OTP VÀ ĐẶT LẠI MẬT KHẨU MỚI
+    @Transactional
+    public void forgotPasswordReset(com.uit.fooddelivery_api.modules.user.dtos.ResetPasswordRequestDTO dto) {
+        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+            throw new RuntimeException("Email không được để trống!");
+        }
+        if (dto.getOtp() == null || dto.getOtp().trim().isEmpty()) {
+            throw new RuntimeException("Mã OTP không được để trống!");
+        }
+        if (dto.getNewPassword() == null || dto.getNewPassword().isEmpty()) {
+            throw new RuntimeException("Mật khẩu mới không được để trống!");
+        }
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            throw new RuntimeException("Mật khẩu xác nhận không khớp!");
+        }
+
+        String cleanEmail = dto.getEmail().trim();
+        String redisKey = "otp:forgot-password:" + cleanEmail;
+        String storedOtp = redisTemplate.opsForValue().get(redisKey);
+
+        if (storedOtp == null || !storedOtp.equals(dto.getOtp().trim())) {
+            throw new RuntimeException("Mã OTP không chính xác hoặc đã hết hạn!");
+        }
+
+        User user = userRepository.findByEmail(cleanEmail)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng có email này!"));
+
+        // Đặt mật khẩu mới
+        user.setPassword(dto.getNewPassword());
+        userRepository.save(user);
+
+        // Xóa OTP khỏi Redis
+        redisTemplate.delete(redisKey);
     }
 }
