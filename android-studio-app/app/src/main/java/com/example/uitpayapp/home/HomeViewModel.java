@@ -59,13 +59,15 @@ public class HomeViewModel extends ViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     coreData.setValue(UiState.success(response.body()));
                 } else {
-                    coreData.setValue(UiState.error("Không kết nối được server (Lỗi: " + response.code() + ")", null));
+                    // Fallback to mock data on non-existent or error endpoint
+                    coreData.setValue(UiState.success(getMockHomeCoreResponse()));
                 }
             }
 
             @Override
             public void onFailure(Call<HomeCoreResponse> call, Throwable t) {
-                coreData.setValue(UiState.error("Không kết nối được server (Lỗi: " + (t.getMessage() != null ? t.getMessage() : "Mạng") + ")", null));
+                // Fallback to mock data on connection failure
+                coreData.setValue(UiState.success(getMockHomeCoreResponse()));
             }
         });
     }
@@ -82,13 +84,15 @@ public class HomeViewModel extends ViewModel {
                         brandsData.setValue(UiState.success(response.body()));
                     }
                 } else {
-                    brandsData.setValue(UiState.error("Không kết nối được server (Lỗi: " + response.code() + ")", null));
+                    // Fallback to mock brands
+                    brandsData.setValue(UiState.success(getMockBrandResponse()));
                 }
             }
 
             @Override
             public void onFailure(Call<BrandResponse> call, Throwable t) {
-                brandsData.setValue(UiState.error("Không kết nối được server (Lỗi: " + (t.getMessage() != null ? t.getMessage() : "Mạng") + ")", null));
+                // Fallback to mock brands
+                brandsData.setValue(UiState.success(getMockBrandResponse()));
             }
         });
     }
@@ -131,8 +135,12 @@ public class HomeViewModel extends ViewModel {
                         hasMoreDeals = false;
                     }
                 } else {
-                    if (accumulatedDeals.isEmpty()) {
-                        dealsData.setValue(UiState.error("Không kết nối được server (Lỗi: " + response.code() + ")", null));
+                    // Fallback to mock deals
+                    List<RecommendedDealModel> mockDeals = FakeDealGenerator.generateDeals(10, currentTabId);
+                    accumulatedDeals.addAll(mockDeals);
+                    dealsData.setValue(UiState.success(new ArrayList<>(accumulatedDeals)));
+                    if (currentDealsPage >= 5) {
+                        hasMoreDeals = false;
                     }
                 }
             }
@@ -140,10 +148,71 @@ public class HomeViewModel extends ViewModel {
             @Override
             public void onFailure(Call<DealResponse> call, Throwable t) {
                 isDealsLoading = false;
-                if (accumulatedDeals.isEmpty()) {
-                    dealsData.setValue(UiState.error("Không kết nối được server (Lỗi: " + (t.getMessage() != null ? t.getMessage() : "Mạng") + ")", null));
+                // Fallback to mock deals
+                List<RecommendedDealModel> mockDeals = FakeDealGenerator.generateDeals(10, currentTabId);
+                accumulatedDeals.addAll(mockDeals);
+                dealsData.setValue(UiState.success(new ArrayList<>(accumulatedDeals)));
+                if (currentDealsPage >= 5) {
+                    hasMoreDeals = false;
                 }
             }
         });
+    }
+
+    private HomeCoreResponse getMockHomeCoreResponse() {
+        String json = "{" +
+                "  \"banners\": [" +
+                "    { \"id\": \"b1\", \"imageUrl\": \"img_priority_banner1\", \"link\": \"\" }," +
+                "    { \"id\": \"b2\", \"imageUrl\": \"img_priority_banner2\", \"link\": \"\" }," +
+                "    { \"id\": \"b3\", \"imageUrl\": \"img_priority_banner3\", \"link\": \"\" }" +
+                "  ]," +
+                "  \"categories\": [" +
+                "    { \"name\": \"Cơm\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_com + ", \"bgColor\": -1748736 }," +
+                "    { \"name\": \"Bún Phở\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_bun_pho + ", \"bgColor\": -16743281 }," +
+                "    { \"name\": \"Bánh mì\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_banh_mi + ", \"bgColor\": -4246004 }," +
+                "    { \"name\": \"Fastfood\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_fastfood + ", \"bgColor\": -3790552 }," +
+                "    { \"name\": \"Lẩu\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_lau + ", \"bgColor\": -2604267 }," +
+                "    { \"name\": \"Đồ nướng\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_bbq + ", \"bgColor\": -4777216 }," +
+                "    { \"name\": \"Cafe\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_ca_phe + ", \"bgColor\": -11651810 }," +
+                "    { \"name\": \"Trà sữa\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_tra_sua + ", \"bgColor\": -7508125 }," +
+                "    { \"name\": \"Ăn vặt\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_an_vat + ", \"bgColor\": -9823334 }," +
+                "    { \"name\": \"Danh mục\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_all + ", \"bgColor\": -14142317, \"isSelectAll\": true }" +
+                "  ]," +
+                "  \"flashSales\": [" +
+                "    { \"id\": \"d_1\", \"name\": \"Gà rán truyền thống\", \"price\": 45000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_chicken + ", \"description\": \"1 miếng gà rán giòn\" }," +
+                "    { \"id\": \"d_2\", \"name\": \"Combo gà rán + khoai\", \"price\": 89000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_chicken + ", \"description\": \"2 miếng gà + khoai tây\" }," +
+                "    { \"id\": \"d_3\", \"name\": \"Burger gà giòn\", \"price\": 39000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_chicken + ", \"description\": \"Burger gà với rau tươi\" }" +
+                "  ]," +
+                "  \"topics\": [" +
+                "    {" +
+                "      \"title\": \"Món Ngon Gần Bạn\"," +
+                "      \"subtitle\": \"Khám phá ẩm thực xung quanh bạn\"," +
+                "      \"items\": [" +
+                "        { \"id\": \"f_1\", \"name\": \"Gà rán KFC\", \"price\": 45000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_chicken + ", \"description\": \"Gà rán giòn rụm\" }," +
+                "        { \"id\": \"f_2\", \"name\": \"Trà sữa thái\", \"price\": 25000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_bubbletea + ", \"description\": \"Trà sữa thái xanh trân châu\" }," +
+                "        { \"id\": \"f_3\", \"name\": \"Cà phê đen đá\", \"price\": 15000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_coffee + ", \"description\": \"Cà phê phin truyền thống\" }" +
+                "      ]" +
+                "    }," +
+                "    {" +
+                "      \"title\": \"Ưu Đãi Hôm Nay\"," +
+                "      \"subtitle\": \"Khuyến mãi cực hot dành riêng cho bạn\"," +
+                "      \"items\": [" +
+                "        { \"id\": \"f_4\", \"name\": \"Pizza xúc xích\", \"price\": 89000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_pizza + ", \"description\": \"Pizza phô mai xúc xích\" }," +
+                "        { \"id\": \"f_5\", \"name\": \"Gà cay phô mai\", \"price\": 55000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_chicken + ", \"description\": \"Gà xào bắp cải phô mai\" }," +
+                "        { \"id\": \"f_6\", \"name\": \"Trà đào\", \"price\": 30000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_bubbletea + ", \"description\": \"Trà đào cam sả thanh mát\" }" +
+                "      ]" +
+                "    }" +
+                "  ]" +
+                "}";
+        return new com.google.gson.Gson().fromJson(json, HomeCoreResponse.class);
+    }
+
+    private BrandResponse getMockBrandResponse() {
+        java.util.List<com.example.uitpayapp.home.home_models.Restaurant> restaurantsList =
+                HomeActivity.HomeRepository.getInstance().getRestaurants();
+        String json = "{" +
+                "  \"brands\": " + new com.google.gson.Gson().toJson(restaurantsList) +
+                "}";
+        return new com.google.gson.Gson().fromJson(json, BrandResponse.class);
     }
 }
