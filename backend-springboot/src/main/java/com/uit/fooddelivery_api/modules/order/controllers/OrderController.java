@@ -18,6 +18,17 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    @PostMapping("/preview")
+    public ApiResponse<com.uit.fooddelivery_api.modules.order.dtos.OrderPreviewResponseDTO> previewOrder(
+            Authentication authentication,
+            @RequestBody CreateOrderDTO dto) {
+
+        User customer = (User) authentication.getPrincipal();
+        com.uit.fooddelivery_api.modules.order.dtos.OrderPreviewResponseDTO previewData = orderService.previewOrder(dto, customer);
+
+        return ApiResponse.success(previewData);
+    }
+
     @PostMapping
     public ApiResponse<OrderResponseDTO> createOrder(
             Authentication authentication,

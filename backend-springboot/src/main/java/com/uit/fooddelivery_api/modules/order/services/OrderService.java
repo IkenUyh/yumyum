@@ -44,6 +44,168 @@ public class OrderService {
     private static final double MAX_DELIVERY_RADIUS_KM = 15.0;
 
     @Transactional
+    public com.uit.fooddelivery_api.modules.order.dtos.OrderPreviewResponseDTO previewOrder(CreateOrderDTO dto, User customer) {
+        // Mô phỏng lại việc tính toán của createOrder nhưng KHÔNG GHI VÀO DB
+        List<CartItem> cartItems = cartItemRepository.findByUserId(customer.getId());
+        if (cartItems.isEmpty()) throw new RuntimeException("Giỏ hàng đang trống!");
+
+        Restaurant restaurant = restaurantRepository.findById(dto.getRestaurantId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà hàng!"));
+
+        UserAddress address = addressRepository.findByIdAndUserId(dto.getAddressId(), customer.getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ giao hàng!"));
+
+        // KIỂM TRA GIỜ HOẠT ĐỘNG
+        if (restaurant.getIsAcceptingOrders() != null && !restaurant.getIsAcceptingOrders()) {
+            throw new RuntimeException("Quán hiện đang tạm ngưng nhận đơn mới. Vui lòng thông cảm!");
+        }
+
+        java.time.LocalTime nowTime = java.time.LocalTime.now();
+        java.time.LocalTime open = restaurant.getOpenTime();
+        java.time.LocalTime close = restaurant.getCloseTime();
+
+        if (open != null && close != null) {
+            boolean isOpen;
+            if (open.isBefore(close)) {
+                isOpen = !nowTime.isBefore(open) && !nowTime.isAfter(close);
+            } else {
+                isOpen = !nowTime.isBefore(open) || !nowTime.isAfter(close);
+            }
+            if (!isOpen) {
+                throw new RuntimeException("Quán đã đóng cửa! Giờ hoạt động: " + open + " - " + close);
+            }
+        }
+
+        // TÍNH KHOẢNG CÁCH
+        if (restaurant.getLatitude() == null || restaurant.getLongitude() == null ||
+                address.getLatitude() == null || address.getLongitude() == null) {
+            throw new RuntimeException("Hệ thống chưa cập nhật đủ tọa độ để tính phí ship!");
+        }
+        double distanceKm = DistanceUtil.calculateDistance(
+                restaurant.getLatitude().doubleValue(), restaurant.getLongitude().doubleValue(),
+                address.getLatitude().doubleValue(), address.getLongitude().doubleValue()
+        );
+        if (distanceKm > MAX_DELIVERY_RADIUS_KM) {
+            throw new RuntimeException("Quá xa (" + String.format("%.1f", distanceKm) + "km). Vượt quá bán kính giao hàng!");
+        }
+
+        BigDecimal baseShippingFee = BigDecimal.valueOf(distanceKm).multiply(FEE_PER_KM).setScale(0, RoundingMode.HALF_UP);
+
+        // LOGIC LỰA CHỌN TỐC ĐỘ GIAO & ETA
+        String deliveryMode = (dto.getDeliveryMode() != null) ? dto.getDeliveryMode().toUpperCase() : "STANDARD";
+        BigDecimal extraShippingFee = BigDecimal.ZERO;
+        int prepTimeMinutes = 15;
+        double minutesPerKm = 3.0;
+
+        if ("FAST".equals(deliveryMode)) {
+            extraShippingFee = BigDecimal.valueOf(10000);
+            prepTimeMinutes = 10;
+            minutesPerKm = 2.0;
+        } else if ("EXPRESS".equals(deliveryMode)) {
+            extraShippingFee = BigDecimal.valueOf(25000);
+            prepTimeMinutes = 5;
+            minutesPerKm = 1.5;
+        }
+
+        BigDecimal shippingFee = baseShippingFee.add(extraShippingFee);
+        int travelTimeMinutes = (int) Math.ceil(distanceKm * minutesPerKm);
+        int totalMinutes = prepTimeMinutes + travelTimeMinutes;
+        LocalDateTime expectedDeliveryTime = LocalDateTime.now().plusMinutes(totalMinutes);
+
+        // QUÉT ĐỒ ĂN VÀ TÍNH TIỀN
+        BigDecimal foodTotal = BigDecimal.ZERO;
+
+        for (CartItem item : cartItems) {
+            if (!item.getFood().getRestaurant().getId().equals(restaurant.getId())) {
+                throw new RuntimeException("Món " + item.getFood().getName() + " không thuộc nhà hàng đang đặt!");
+            }
+
+            BigDecimal optionsPrice = BigDecimal.ZERO;
+            if (item.getSelectedOptions() != null && !item.getSelectedOptions().isEmpty() && !item.getSelectedOptions().equals("[]")) {
+                try {
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    List<java.util.Map<String, Object>> parsedOpts = mapper.readValue(item.getSelectedOptions(), new com.fasterxml.jackson.core.type.TypeReference<List<java.util.Map<String, Object>>>() {});
+                    for (java.util.Map<String, Object> opt : parsedOpts) {
+                        optionsPrice = optionsPrice.add(new BigDecimal(opt.get("price").toString()));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Lỗi đọc dữ liệu Topping!");
+                }
+            }
+
+            BigDecimal currentFoodPrice = item.getFood().getPrice();
+            java.util.Optional<com.uit.fooddelivery_api.modules.flashsale.entities.FlashSaleItem> flashSaleOpt =
+                    flashSaleItemRepository.findActiveFlashSaleItemByFoodId(item.getFood().getId(), LocalDateTime.now());
+
+            if (flashSaleOpt.isPresent()) {
+                com.uit.fooddelivery_api.modules.flashsale.entities.FlashSaleItem fsItem = flashSaleOpt.get();
+                if (fsItem.getSoldQuantity() + item.getQuantity() > fsItem.getStockQuantity()) {
+                    throw new RuntimeException("Món [" + item.getFood().getName() + "] đã hết suất Flashsale! Vui lòng giảm số lượng hoặc đợi đợt sau.");
+                }
+                currentFoodPrice = fsItem.getSalePrice();
+            }
+
+            BigDecimal pricePerItem = currentFoodPrice.add(optionsPrice);
+            BigDecimal itemTotal = pricePerItem.multiply(BigDecimal.valueOf(item.getQuantity()));
+            foodTotal = foodTotal.add(itemTotal);
+        }
+
+        // XỬ LÝ XẾP CHỒNG VOUCHER
+        BigDecimal totalOrderDiscount = BigDecimal.ZERO;
+        BigDecimal totalShippingDiscount = BigDecimal.ZERO;
+        boolean hasShippingDiscountType = false;
+        boolean hasOrderDiscountType = false;
+
+        if (dto.getVoucherCodes() != null && !dto.getVoucherCodes().isEmpty()) {
+            for (String code : dto.getVoucherCodes()) {
+                if (code == null || code.trim().isEmpty()) continue;
+                com.uit.fooddelivery_api.modules.voucher.entities.Voucher voucher = voucherRepository.findByCodeAndIsActiveTrue(code)
+                        .orElseThrow(() -> new RuntimeException("Mã giảm giá [" + code + "] không tồn tại hoặc đã hết lượt kích hoạt!"));
+
+                LocalDateTime now = LocalDateTime.now();
+                if (now.isBefore(voucher.getStartDate()) || now.isAfter(voucher.getEndDate())) {
+                    throw new RuntimeException("Mã giảm giá [" + code + "] đã hết hạn hoặc chưa đến thời gian sử dụng!");
+                }
+                if (voucher.getStockQuantity() <= 0) {
+                    throw new RuntimeException("Mã giảm giá [" + code + "] đã hết lượt sử dụng trên hệ thống!");
+                }
+                if (foodTotal.compareTo(voucher.getMinOrderValue()) < 0) {
+                    throw new RuntimeException("Mã [" + code + "] yêu cầu giá trị đơn hàng tối thiểu từ " + voucher.getMinOrderValue() + "đ!");
+                }
+
+                if (voucher.getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.SHIPPING_DISCOUNT) {
+                    if (hasShippingDiscountType) throw new RuntimeException("Hệ thống chỉ cho phép áp dụng tối đa 1 mã giảm giá phí vận chuyển trên một đơn hàng!");
+                    hasShippingDiscountType = true;
+                    BigDecimal calc = shippingFee.multiply(BigDecimal.valueOf(voucher.getDiscountPercent()))
+                            .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
+                    totalShippingDiscount = calc.min(voucher.getMaxDiscount()).min(shippingFee);
+                } else if (voucher.getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.ORDER_DISCOUNT) {
+                    if (hasOrderDiscountType) throw new RuntimeException("Hệ thống chỉ cho phép áp dụng tối đa 1 mã giảm giá hóa đơn trên một đơn hàng!");
+                    hasOrderDiscountType = true;
+                    BigDecimal calc = foodTotal.multiply(BigDecimal.valueOf(voucher.getDiscountPercent()))
+                            .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
+                    totalOrderDiscount = calc.min(voucher.getMaxDiscount()).min(foodTotal);
+                }
+            }
+        }
+
+        BigDecimal totalDiscountAmount = totalOrderDiscount.add(totalShippingDiscount);
+        BigDecimal finalTotal = foodTotal.add(shippingFee).subtract(totalDiscountAmount);
+        if (finalTotal.compareTo(BigDecimal.ZERO) < 0) finalTotal = BigDecimal.ZERO;
+
+        return com.uit.fooddelivery_api.modules.order.dtos.OrderPreviewResponseDTO.builder()
+                .foodTotal(foodTotal)
+                .shippingFee(shippingFee)
+                .totalOrderDiscount(totalOrderDiscount)
+                .totalShippingDiscount(totalShippingDiscount)
+                .totalDiscountAmount(totalDiscountAmount)
+                .finalTotal(finalTotal)
+                .distanceKm(distanceKm)
+                .expectedDeliveryTime(expectedDeliveryTime)
+                .build();
+    }
+
+    @Transactional
     public Order createOrder(CreateOrderDTO dto, User customer) {
         // 1. Lấy Giỏ hàng
         List<CartItem> cartItems = cartItemRepository.findByUserId(customer.getId());

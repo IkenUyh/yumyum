@@ -10,6 +10,9 @@ import retrofit2.http.*;
 
 public interface OrderService {
 
+    @POST("api/v1/orders/preview")
+    Call<ApiResponse<com.example.uitpayapp.modules.order.models.responses.OrderPreviewResponse>> previewOrder(@Body CreateOrderRequest request);
+
     @POST("api/v1/orders")
     Call<ApiResponse<OrderResponse>> createOrder(@Body CreateOrderRequest request);
 

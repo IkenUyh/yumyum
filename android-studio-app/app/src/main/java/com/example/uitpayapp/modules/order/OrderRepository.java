@@ -43,6 +43,10 @@ public class OrderRepository {
         });
     }
 
+    public void previewOrder(CreateOrderRequest request, ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderPreviewResponse> callback) {
+        enqueueCall(orderService.previewOrder(request), callback);
+    }
+
     public void createOrder(CreateOrderRequest request, ApiCallback<OrderResponse> callback) {
         enqueueCall(orderService.createOrder(request), callback);
     }
