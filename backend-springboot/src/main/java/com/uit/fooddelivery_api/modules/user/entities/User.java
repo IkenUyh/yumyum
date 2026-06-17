@@ -31,6 +31,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "email", unique = true, length = 255)
+    private String email;
+
     @Column(length = 6)
     private String pinCode;
 

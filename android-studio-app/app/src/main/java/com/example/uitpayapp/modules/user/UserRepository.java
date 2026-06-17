@@ -101,6 +101,38 @@ public class UserRepository {
         });
     }
 
+    // 5. Yêu cầu mã OTP quên mật khẩu
+    public void forgotPasswordRequest(String email, ApiCallback<String> callback) {
+        ForgotPasswordRequestDTO dto = new ForgotPasswordRequestDTO(email);
+        userService.forgotPasswordRequest(dto).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
+    // 6. Đặt lại mật khẩu mới bằng OTP
+    public void forgotPasswordReset(String email, String otp, String newPassword, String confirmPassword, ApiCallback<String> callback) {
+        ResetPasswordRequestDTO dto = new ResetPasswordRequestDTO(email, otp, newPassword, confirmPassword);
+        userService.forgotPasswordReset(dto).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
     // Hàm Helper bóc tách gói dữ liệu dùng chung nội bộ lớp
     private <T> void handleResponse(Response<ApiResponse<T>> response, ApiCallback<T> callback) {
         if (response.isSuccessful() && response.body() != null) {
@@ -111,6 +143,18 @@ public class UserRepository {
                 callback.onError(apiResponse.getMessage());
             }
         } else {
+            try {
+                if (response.errorBody() != null) {
+                    String errorJson = response.errorBody().string();
+                    ApiResponse<?> errorResponse = new com.google.gson.Gson().fromJson(errorJson, ApiResponse.class);
+                    if (errorResponse != null && errorResponse.getMessage() != null) {
+                        callback.onError(errorResponse.getMessage());
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                // Bỏ qua lỗi parse, trả về lỗi mặc định bên dưới
+            }
             callback.onError("Lỗi hệ thống: " + response.code());
         }
     }

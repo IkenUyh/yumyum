@@ -77,4 +77,20 @@ public class UserController {
         userService.deleteAccount(currentUser);
         return ApiResponse.success("Tài khoản đã được xóa vĩnh viễn khỏi hệ thống!");
     }
+
+    // API: Yêu cầu OTP để đặt lại mật khẩu (quên mật khẩu)
+    @PostMapping("/forgot-password/request")
+    public ApiResponse<String> forgotPasswordRequest(
+            @RequestBody com.uit.fooddelivery_api.modules.user.dtos.ForgotPasswordRequestDTO dto) {
+        userService.forgotPasswordRequest(dto.getEmail());
+        return ApiResponse.success("Mã OTP đã được gửi về email của bạn!");
+    }
+
+    // API: Đặt lại mật khẩu với mã OTP
+    @PostMapping("/forgot-password/reset")
+    public ApiResponse<String> forgotPasswordReset(
+            @RequestBody com.uit.fooddelivery_api.modules.user.dtos.ResetPasswordRequestDTO dto) {
+        userService.forgotPasswordReset(dto);
+        return ApiResponse.success("Đặt lại mật khẩu thành công!");
+    }
 }
