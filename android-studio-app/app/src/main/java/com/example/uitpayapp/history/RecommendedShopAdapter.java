@@ -37,15 +37,15 @@ public class RecommendedShopAdapter extends RecyclerView.Adapter<RecommendedShop
 
         // LOGIC TÁI SỬ DỤNG: Khối gợi ý thì ẩn tính năng yêu thích đi
         holder.tvFavoriteBadge.setVisibility(View.GONE);
-        holder.tvFavoriteHeart.setVisibility(View.GONE);
+        holder.ivFavoriteHeart.setVisibility(View.GONE);
     }
 
     @Override
     public int getItemCount() { return list.size(); }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvInfo, tvDiscount, tvFavoriteBadge, tvFavoriteHeart;
-        ImageView ivImage;
+        TextView tvName, tvInfo, tvDiscount, tvFavoriteBadge;
+        ImageView ivImage, ivFavoriteHeart;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -54,7 +54,7 @@ public class RecommendedShopAdapter extends RecyclerView.Adapter<RecommendedShop
             tvInfo = itemView.findViewById(R.id.tvVerticalInfo);
             tvDiscount = itemView.findViewById(R.id.tvVerticalDiscount);
             tvFavoriteBadge = itemView.findViewById(R.id.tvFavoriteBadge);
-            tvFavoriteHeart = itemView.findViewById(R.id.tvFavoriteHeart);
+            ivFavoriteHeart = itemView.findViewById(R.id.ivVerticalFavoriteHeart);
             ivImage = itemView.findViewById(R.id.ivVerticalImage);
         }
     }

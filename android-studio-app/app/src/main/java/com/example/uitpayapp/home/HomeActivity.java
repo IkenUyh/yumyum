@@ -141,9 +141,7 @@ public class HomeActivity extends AppCompatActivity {
         setupRestaurants();
         setupCategories();
         setupSearch();
-        setupTopics();
-        setupFlashsale();
-        setupBrands();
+        setupDeals();
         setupDeals();
         setupStickyTab();
         setupBottomNavigation();
@@ -162,47 +160,85 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setupObservers() {
         viewModel.getCoreData().observe(this, state -> {
-            View errorView = findViewById(R.id.layout_core_error);
-            View flashsale = findViewById(R.id.flashsale_section);
-            View topic1 = findViewById(R.id.topic_section_1);
-            View topic2 = findViewById(R.id.topic_section_2);
+            View fsLoading = findViewById(R.id.layout_flashsale_loading);
+            View fsError = findViewById(R.id.layout_flashsale_error);
+            View fsSection = findViewById(R.id.flashsale_section);
+            
+            View t1Loading = findViewById(R.id.layout_topic1_loading);
+            View t1Error = findViewById(R.id.layout_topic1_error);
+            View t1Section = findViewById(R.id.topic_section_1);
+            
+            View t2Loading = findViewById(R.id.layout_topic2_loading);
+            View t2Error = findViewById(R.id.layout_topic2_error);
+            View t2Section = findViewById(R.id.topic_section_2);
 
             if (state.isLoading()) {
-                // Show loading
+                if (fsLoading != null) fsLoading.setVisibility(View.VISIBLE);
+                if (fsError != null) fsError.setVisibility(View.GONE);
+                if (fsSection != null) fsSection.setVisibility(View.GONE);
+                
+                if (t1Loading != null) t1Loading.setVisibility(View.VISIBLE);
+                if (t1Error != null) t1Error.setVisibility(View.GONE);
+                if (t1Section != null) t1Section.setVisibility(View.GONE);
+                
+                if (t2Loading != null) t2Loading.setVisibility(View.VISIBLE);
+                if (t2Error != null) t2Error.setVisibility(View.GONE);
+                if (t2Section != null) t2Section.setVisibility(View.GONE);
             } else if (state.isSuccess()) {
-                if (errorView != null) errorView.setVisibility(View.GONE);
-                if (flashsale != null) flashsale.setVisibility(View.VISIBLE);
-                if (topic1 != null) topic1.setVisibility(View.VISIBLE);
-                if (topic2 != null) topic2.setVisibility(View.VISIBLE);
+                if (fsLoading != null) fsLoading.setVisibility(View.GONE);
+                if (fsError != null) fsError.setVisibility(View.GONE);
+                if (fsSection != null) fsSection.setVisibility(View.VISIBLE);
+                
+                if (t1Loading != null) t1Loading.setVisibility(View.GONE);
+                if (t1Error != null) t1Error.setVisibility(View.GONE);
+                if (t1Section != null) t1Section.setVisibility(View.VISIBLE);
+                
+                if (t2Loading != null) t2Loading.setVisibility(View.GONE);
+                if (t2Error != null) t2Error.setVisibility(View.GONE);
+                if (t2Section != null) t2Section.setVisibility(View.VISIBLE);
+                
                 HomeCoreResponse data = state.getData();
                 if (data != null) {
                     if (data.getFlashSales() != null && !data.getFlashSales().isEmpty()) {
                         updateFlashsaleUI(data.getFlashSales());
+                    } else if (fsSection != null) {
+                        fsSection.setVisibility(View.GONE);
                     }
                     if (data.getTopics() != null && data.getTopics().size() >= 2) {
                         updateTopicUI(findViewById(R.id.topic_section_1), data.getTopics().get(0));
                         updateTopicUI(findViewById(R.id.topic_section_2), data.getTopics().get(1));
+                    } else {
+                        if (t1Section != null) t1Section.setVisibility(View.GONE);
+                        if (t2Section != null) t2Section.setVisibility(View.GONE);
                     }
                 }
             } else if (state.isError() || state.isEmpty()) {
-                if (flashsale != null) flashsale.setVisibility(View.GONE);
-                if (topic1 != null) topic1.setVisibility(View.GONE);
-                if (topic2 != null) topic2.setVisibility(View.GONE);
-                if (errorView != null) {
-                    errorView.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvError = findViewById(R.id.tv_core_error);
-                    if (tvError != null) tvError.setText(state.isError() ? state.getMessage() : "Không có dữ liệu");
-                }
+                if (fsLoading != null) fsLoading.setVisibility(View.GONE);
+                if (fsSection != null) fsSection.setVisibility(View.GONE);
+                if (fsError != null) fsError.setVisibility(View.VISIBLE);
+                
+                if (t1Loading != null) t1Loading.setVisibility(View.GONE);
+                if (t1Section != null) t1Section.setVisibility(View.GONE);
+                if (t1Error != null) t1Error.setVisibility(View.VISIBLE);
+                
+                if (t2Loading != null) t2Loading.setVisibility(View.GONE);
+                if (t2Section != null) t2Section.setVisibility(View.GONE);
+                if (t2Error != null) t2Error.setVisibility(View.VISIBLE);
             }
         });
 
         viewModel.getBrandsData().observe(this, state -> {
+            View loadingView = findViewById(R.id.layout_brands_loading);
             View sectionView = findViewById(R.id.topic_brand_section);
             View errorView = findViewById(R.id.layout_brands_error);
             View divider = findViewById(R.id.divider_brands);
+            
             if (state.isLoading()) {
-                // Keep current state
+                if (loadingView != null) loadingView.setVisibility(View.VISIBLE);
+                if (sectionView != null) sectionView.setVisibility(View.GONE);
+                if (errorView != null) errorView.setVisibility(View.GONE);
             } else if (state.isSuccess()) {
+                if (loadingView != null) loadingView.setVisibility(View.GONE);
                 if (errorView != null) errorView.setVisibility(View.GONE);
                 if (sectionView != null) sectionView.setVisibility(View.VISIBLE);
                 if (divider != null) divider.setVisibility(View.VISIBLE);
@@ -211,12 +247,11 @@ public class HomeActivity extends AppCompatActivity {
                     updateBrandsUI(data.getBrands());
                 }
             } else if (state.isError() || state.isEmpty()) {
+                if (loadingView != null) loadingView.setVisibility(View.GONE);
                 if (sectionView != null) sectionView.setVisibility(View.GONE);
-                if (divider != null) divider.setVisibility(View.GONE);
+                if (divider != null) divider.setVisibility(View.VISIBLE);
                 if (errorView != null) {
                     errorView.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvError = findViewById(R.id.tv_brands_error);
-                    if (tvError != null) tvError.setText(state.isError() ? state.getMessage() : "Không có dữ liệu");
                 }
             }
         });

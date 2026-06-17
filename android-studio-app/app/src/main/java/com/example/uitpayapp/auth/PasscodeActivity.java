@@ -161,7 +161,7 @@ public class PasscodeActivity extends AppCompatActivity {
         new android.os.Handler().postDelayed(() -> {
             isChecking = false; // Mở khóa trạng thái
             SessionManager sessionManager = SessionManager.getInstance(PasscodeActivity.this);
-            sessionManager.createLoginSession(1, "mock_token", "Mock User", phoneNumber, "");
+            sessionManager.createLoginSession(1L, "mock_token", "Mock User", phoneNumber, "");
 
             Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);

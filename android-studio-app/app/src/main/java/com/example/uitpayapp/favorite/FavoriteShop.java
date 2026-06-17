@@ -10,6 +10,7 @@ public class FavoriteShop {
     private String discountTag;
     private String serviceType; // Đồ ăn, Thực phẩm, Rượu bia, Hoa, Siêu thị
     private int orderCount; // Số lượng đặt để xếp vào cụm "Đặt Nhiều Nhất"
+    private boolean isFavorited = true; // Theo dõi trạng thái yêu thích
 
     public FavoriteShop(String id, String name, double rating, double distance, int deliveryTime, int imageResId, String discountTag, String serviceType, int orderCount) {
         this.id = id;
@@ -33,4 +34,7 @@ public class FavoriteShop {
     public String getDiscountTag() { return discountTag; }
     public String getServiceType() { return serviceType; }
     public int getOrderCount() { return orderCount; }
+    
+    public boolean isFavorited() { return isFavorited; }
+    public void setFavorited(boolean favorited) { isFavorited = favorited; }
 }

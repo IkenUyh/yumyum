@@ -38,19 +38,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/tvFreeshipTag"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#00BFA5"
-            android:paddingHorizontal="4dp"
-            android:paddingVertical="1dp"
-            android:text="X9 FREESHIP"
-            android:textColor="@android:color/white"
-            android:textSize="9sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+        <ImageView
+            android:id="@+id/ivHorizontalFavoriteHeart"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_margin="4dp"
+            android:src="@drawable/favorite_filled_24px"
+            app:tint="#EE4D2D"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
@@ -59,13 +56,6 @@
         android:layout_marginTop="6dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="12dp"
-            android:layout_height="12dp"
-            android:src="@android:drawable/button_onoff_indicator_on"
-            app:tint="#FF9800"
-            android:layout_marginEnd="3dp"/>
 
         <TextView
             android:id="@+id/tvHorizontalName"
@@ -78,17 +68,5 @@
             android:textSize="13sp"
             android:textStyle="bold" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvHorizontalDiscount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:background="@android:drawable/toast_frame"
-        android:paddingHorizontal="4dp"
-        android:paddingVertical="1dp"
-        android:text="Mã giảm 19%"
-        android:textColor="#EE4D2D"
-        android:textSize="10sp" />
 
 </LinearLayout>

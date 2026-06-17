@@ -12,10 +12,16 @@ import java.util.List;
 
 public class FavoriteHorizontalAdapter extends RecyclerView.Adapter<FavoriteHorizontalAdapter.HorizontalViewHolder> {
 
-    private List<FavoriteShop> shopList;
+    public interface OnFavoriteRemoveListener {
+        void onRemove(FavoriteShop shop);
+    }
 
-    public FavoriteHorizontalAdapter(List<FavoriteShop> shopList) {
+    private List<FavoriteShop> shopList;
+    private OnFavoriteRemoveListener removeListener;
+
+    public FavoriteHorizontalAdapter(List<FavoriteShop> shopList, OnFavoriteRemoveListener removeListener) {
         this.shopList = shopList;
+        this.removeListener = removeListener;
     }
 
     @NonNull
@@ -30,8 +36,19 @@ public class FavoriteHorizontalAdapter extends RecyclerView.Adapter<FavoriteHori
         FavoriteShop shop = shopList.get(position);
 
         holder.tvHorizontalName.setText(shop.getName());
-        holder.tvHorizontalDiscount.setText(shop.getDiscountTag());
         holder.ivHorizontalImage.setImageResource(shop.getImageResId());
+
+        if (shop.isFavorited()) {
+            holder.ivHorizontalFavoriteHeart.setImageResource(R.drawable.favorite_filled_24px);
+        } else {
+            holder.ivHorizontalFavoriteHeart.setImageResource(R.drawable.favorite_border_24px);
+        }
+
+        holder.ivHorizontalFavoriteHeart.setOnClickListener(v -> {
+            if (removeListener != null) {
+                removeListener.onRemove(shop);
+            }
+        });
     }
 
     @Override
@@ -40,14 +57,14 @@ public class FavoriteHorizontalAdapter extends RecyclerView.Adapter<FavoriteHori
     }
 
     static class HorizontalViewHolder extends RecyclerView.ViewHolder {
-        TextView tvHorizontalName, tvHorizontalDiscount;
-        ImageView ivHorizontalImage;
+        TextView tvHorizontalName;
+        ImageView ivHorizontalImage, ivHorizontalFavoriteHeart;
 
         public HorizontalViewHolder(@NonNull View itemView) {
             super(itemView);
             tvHorizontalName = itemView.findViewById(R.id.tvHorizontalName);
-            tvHorizontalDiscount = itemView.findViewById(R.id.tvHorizontalDiscount);
             ivHorizontalImage = itemView.findViewById(R.id.ivHorizontalImage);
+            ivHorizontalFavoriteHeart = itemView.findViewById(R.id.ivHorizontalFavoriteHeart);
         }
     }
 }
