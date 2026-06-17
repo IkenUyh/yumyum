@@ -10,6 +10,12 @@ services:
       MYSQL_DATABASE: fooddelivery_db
     volumes:
       - mysql_data:/var/lib/mysql
+    command: --innodb-buffer-pool-size=64M --max-connections=50
+    # Thêm giới hạn cho MySQL
+    deploy:
+      resources:
+        limits:
+          memory: 300M
 
   redis-db:
     image: redis:7-alpine
@@ -17,6 +23,10 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          memory: 100M
 
   backend-app:
     build: .
@@ -30,16 +40,19 @@ services:
       - redis-db
       - elasticsearch
     environment:
-      # Ket noi voi MySQL thong qua ten service
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/fooddelivery_db?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
-      - SPRING_REDIS_HOST=redis-db # Link tới Redis
+      - SPRING_REDIS_HOST=redis-db
       - SPRING_REDIS_PORT=6379
       - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200
+    # Thêm giới hạn cho Backend
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
-  # Them Caddy de lo vu HTTPS
   reverse-proxy:
     image: caddy:2-alpine
     container_name: fooddelivery-caddy
@@ -59,10 +72,17 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
+      # Thêm biến này để bóp nghẹt RAM của Elasticsearch xuống 256MB
+      - ES_JAVA_OPTS="-Xms256m -Xmx256m"
     ports:
       - "9200:9200"
     volumes:
       - es_data:/usr/share/elasticsearch/data
+    # Thêm giới hạn phần cứng
+    deploy:
+      resources:
+        limits:
+          memory: 400M
 
 volumes:
   mysql_data:
