@@ -184,6 +184,7 @@
             android:id="@+id/bottomNavContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#F5F5F5"
             android:layout_alignParentBottom="true">
             <LinearLayout
                 android:id="@+id/layoutBottomNav"
