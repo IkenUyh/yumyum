@@ -1,12 +1,14 @@
 package com.example.uitpayapp.merchant.shop;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.example.uitpayapp.R;
 
@@ -21,6 +23,7 @@ public class AddMerchantCategoryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         setContentView(R.layout.activity_add_merchant_category);
 
         isToppingGroup = getIntent().getBooleanExtra("is_topping_group", false);

@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -41,6 +42,7 @@ public class SellerMarketingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         setContentView(R.layout.activity_seller_marketing);
 
         initViews();
@@ -150,6 +152,10 @@ public class SellerMarketingActivity extends AppCompatActivity {
             case "Thống kê":
                 Intent intentStats = new Intent(this, SellerStatisticsActivity.class);
                 startActivity(intentStats);
+                break;
+            case "Thanh toán":
+                Intent intentWallet = new Intent(this, SellerWalletActivity.class);
+                startActivity(intentWallet);
                 break;
             case "Thông tin ứng dụng":
                 Intent intentAppInfo = new Intent(this, InfoApplication.class);

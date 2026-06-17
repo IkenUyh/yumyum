@@ -184,7 +184,9 @@
         <activity
             android:name=".home.SearchActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".merchant.marketing.SellerWalletActivity"
+            android:exported="false" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
