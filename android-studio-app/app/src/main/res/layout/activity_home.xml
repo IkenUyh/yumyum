@@ -277,6 +277,7 @@
                 android:id="@+id/layout_flashsale_loading"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
+                android:background="#FFFFFF"
                 android:visibility="visible">
                 <ProgressBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminateTint="#F24405" />
             </FrameLayout>
@@ -289,7 +290,7 @@
                 android:background="#FFFFFF"
                 android:visibility="gone">
                 <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@android:drawable/ic_dialog_alert" app:tint="#F44336" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Không kết nối được server" android:textColor="#757575" />
+                <TextView android:id="@+id/tv_flashsale_error" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Không kết nối được server" android:textColor="#757575" />
             </LinearLayout>
             <include
                 android:id="@+id/flashsale_section"
@@ -307,6 +308,7 @@
                 android:id="@+id/layout_brands_loading"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
+                android:background="#FFFFFF"
                 android:visibility="visible">
                 <ProgressBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminateTint="#F24405" />
             </FrameLayout>
@@ -350,6 +352,7 @@
                 android:id="@+id/layout_topic1_loading"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
+                android:background="#FFFFFF"
                 android:visibility="visible">
                 <ProgressBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminateTint="#F24405" />
             </FrameLayout>
@@ -362,7 +365,7 @@
                 android:background="#FFFFFF"
                 android:visibility="gone">
                 <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@android:drawable/ic_dialog_alert" app:tint="#F44336" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Không kết nối được server" android:textColor="#757575" />
+                <TextView android:id="@+id/tv_topic1_error" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Không kết nối được server" android:textColor="#757575" />
             </LinearLayout>
             <include
                 android:id="@+id/topic_section_1"
@@ -379,6 +382,7 @@
                 android:id="@+id/layout_topic2_loading"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
+                android:background="#FFFFFF"
                 android:visibility="visible">
                 <ProgressBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminateTint="#F24405" />
             </FrameLayout>
@@ -391,7 +395,7 @@
                 android:background="#FFFFFF"
                 android:visibility="gone">
                 <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@android:drawable/ic_dialog_alert" app:tint="#F44336" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Không kết nối được server" android:textColor="#757575" />
+                <TextView android:id="@+id/tv_topic2_error" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Không kết nối được server" android:textColor="#757575" />
             </LinearLayout>
             <include
                 android:id="@+id/topic_section_2"

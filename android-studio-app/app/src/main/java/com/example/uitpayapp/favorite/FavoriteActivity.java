@@ -51,6 +51,12 @@ public class FavoriteActivity extends AppCompatActivity {
             return insets;
         });
 
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.layoutHeader), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), systemBars.top, v.getPaddingRight(), v.getPaddingBottom());
+            return insets;
+        });
+
         tabLayout = findViewById(R.id.layoutTabs);
         tvFilterService = findViewById(R.id.tvFilterService);
         layoutEmptyState = findViewById(R.id.layoutEmptyState);

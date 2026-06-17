@@ -215,15 +215,27 @@ public class HomeActivity extends AppCompatActivity {
             } else if (state.isError() || state.isEmpty()) {
                 if (fsLoading != null) fsLoading.setVisibility(View.GONE);
                 if (fsSection != null) fsSection.setVisibility(View.GONE);
-                if (fsError != null) fsError.setVisibility(View.VISIBLE);
+                if (fsError != null) {
+                    fsError.setVisibility(View.VISIBLE);
+                    android.widget.TextView tvFsError = findViewById(R.id.tv_flashsale_error);
+                    if (tvFsError != null) tvFsError.setText(state.getMessage());
+                }
                 
                 if (t1Loading != null) t1Loading.setVisibility(View.GONE);
                 if (t1Section != null) t1Section.setVisibility(View.GONE);
-                if (t1Error != null) t1Error.setVisibility(View.VISIBLE);
+                if (t1Error != null) {
+                    t1Error.setVisibility(View.VISIBLE);
+                    android.widget.TextView tvT1Error = findViewById(R.id.tv_topic1_error);
+                    if (tvT1Error != null) tvT1Error.setText(state.getMessage());
+                }
                 
                 if (t2Loading != null) t2Loading.setVisibility(View.GONE);
                 if (t2Section != null) t2Section.setVisibility(View.GONE);
-                if (t2Error != null) t2Error.setVisibility(View.VISIBLE);
+                if (t2Error != null) {
+                    t2Error.setVisibility(View.VISIBLE);
+                    android.widget.TextView tvT2Error = findViewById(R.id.tv_topic2_error);
+                    if (tvT2Error != null) tvT2Error.setText(state.getMessage());
+                }
             }
         });
 
@@ -252,6 +264,8 @@ public class HomeActivity extends AppCompatActivity {
                 if (divider != null) divider.setVisibility(View.VISIBLE);
                 if (errorView != null) {
                     errorView.setVisibility(View.VISIBLE);
+                    android.widget.TextView tvBrandsError = findViewById(R.id.tv_brands_error);
+                    if (tvBrandsError != null) tvBrandsError.setText(state.getMessage());
                 }
             }
         });

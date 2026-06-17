@@ -42,6 +42,12 @@ public class NotificationActivity extends AppCompatActivity {
             return insets;
         });
 
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.layoutHeader), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), systemBars.top, v.getPaddingRight(), v.getPaddingBottom());
+            return insets;
+        });
+
         // Ánh xạ và chuyển hướng màn hình con chính xác như mẫu
         findViewById(R.id.btnNavNews).setOnClickListener(v -> {
             startActivity(new Intent(NotificationActivity.this, NotificationNewsActivity.class));
