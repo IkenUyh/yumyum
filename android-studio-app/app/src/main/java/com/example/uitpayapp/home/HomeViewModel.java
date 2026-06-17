@@ -57,8 +57,10 @@ public class HomeViewModel extends ViewModel {
             @Override
             public void onResponse(Call<HomeCoreResponse> call, Response<HomeCoreResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    android.util.Log.d("HomeViewModel", "getHomeCore: SUCCESS - Loaded from server.");
                     coreData.setValue(UiState.success(response.body()));
                 } else {
+                    android.util.Log.w("HomeViewModel", "getHomeCore: FAIL (code " + response.code() + ") - Loading fake data.");
                     // Fallback to mock data on non-existent or error endpoint
                     coreData.setValue(UiState.success(getMockHomeCoreResponse()));
                 }
@@ -66,6 +68,7 @@ public class HomeViewModel extends ViewModel {
 
             @Override
             public void onFailure(Call<HomeCoreResponse> call, Throwable t) {
+                android.util.Log.e("HomeViewModel", "getHomeCore: FAILURE (" + t.getMessage() + ") - Loading fake data.");
                 // Fallback to mock data on connection failure
                 coreData.setValue(UiState.success(getMockHomeCoreResponse()));
             }
@@ -78,12 +81,14 @@ public class HomeViewModel extends ViewModel {
             @Override
             public void onResponse(Call<BrandResponse> call, Response<BrandResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    android.util.Log.d("HomeViewModel", "getPopularBrands: SUCCESS - Loaded from server.");
                     if (response.body().getBrands() == null || response.body().getBrands().isEmpty()) {
                         brandsData.setValue(UiState.empty());
                     } else {
                         brandsData.setValue(UiState.success(response.body()));
                     }
                 } else {
+                    android.util.Log.w("HomeViewModel", "getPopularBrands: FAIL (code " + response.code() + ") - Loading fake data.");
                     // Fallback to mock brands
                     brandsData.setValue(UiState.success(getMockBrandResponse()));
                 }
@@ -91,6 +96,7 @@ public class HomeViewModel extends ViewModel {
 
             @Override
             public void onFailure(Call<BrandResponse> call, Throwable t) {
+                android.util.Log.e("HomeViewModel", "getPopularBrands: FAILURE (" + t.getMessage() + ") - Loading fake data.");
                 // Fallback to mock brands
                 brandsData.setValue(UiState.success(getMockBrandResponse()));
             }
@@ -121,6 +127,7 @@ public class HomeViewModel extends ViewModel {
             public void onResponse(Call<DealResponse> call, Response<DealResponse> response) {
                 isDealsLoading = false;
                 if (response.isSuccessful() && response.body() != null) {
+                    android.util.Log.d("HomeViewModel", "getRecommendedDeals (page " + currentDealsPage + "): SUCCESS - Loaded from server.");
                     List<RecommendedDealModel> newDeals = response.body().getDeals();
                     if (newDeals != null) {
                         accumulatedDeals.addAll(newDeals);
@@ -135,6 +142,7 @@ public class HomeViewModel extends ViewModel {
                         hasMoreDeals = false;
                     }
                 } else {
+                    android.util.Log.w("HomeViewModel", "getRecommendedDeals (page " + currentDealsPage + "): FAIL (code " + response.code() + ") - Loading fake data.");
                     // Fallback to mock deals
                     List<RecommendedDealModel> mockDeals = FakeDealGenerator.generateDeals(10, currentTabId);
                     accumulatedDeals.addAll(mockDeals);
@@ -148,6 +156,7 @@ public class HomeViewModel extends ViewModel {
             @Override
             public void onFailure(Call<DealResponse> call, Throwable t) {
                 isDealsLoading = false;
+                android.util.Log.e("HomeViewModel", "getRecommendedDeals (page " + currentDealsPage + "): FAILURE (" + t.getMessage() + ") - Loading fake data.");
                 // Fallback to mock deals
                 List<RecommendedDealModel> mockDeals = FakeDealGenerator.generateDeals(10, currentTabId);
                 accumulatedDeals.addAll(mockDeals);

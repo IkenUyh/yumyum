@@ -3,6 +3,7 @@ package com.uit.fooddelivery_api.modules.user.services;
 import com.uit.fooddelivery_api.config.security.JwtService;
 import com.uit.fooddelivery_api.modules.user.dtos.AuthResponseDTO;
 import com.uit.fooddelivery_api.modules.user.dtos.UserResponseDTO;
+import com.uit.fooddelivery_api.modules.user.dtos.UpdateProfileDTO;
 import com.uit.fooddelivery_api.modules.user.entities.Role;
 import com.uit.fooddelivery_api.modules.user.entities.User;
 import com.uit.fooddelivery_api.modules.user.repositories.UserRepository;
@@ -118,6 +119,31 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
         user.setAvatarUrl(avatarUrl);
         userRepository.save(user);
+    }
+
+    @Transactional
+    public User updateProfile(String phoneNumber, UpdateProfileDTO dto) {
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        if (dto.getFullName() != null && !dto.getFullName().trim().isEmpty()) {
+            user.setFullName(dto.getFullName().trim());
+        }
+
+        if (dto.getEmail() != null) {
+            String email = dto.getEmail().trim();
+            if (email.isEmpty()) {
+                user.setEmail(null);
+            } else {
+                java.util.Optional<User> existingUser = userRepository.findByEmail(email);
+                if (existingUser.isPresent() && !existingUser.get().getId().equals(user.getId())) {
+                    throw new RuntimeException("Email này đã được đăng ký bởi người dùng khác!");
+                }
+                user.setEmail(email);
+            }
+        }
+
+        return userRepository.save(user);
     }
 
     // ĐỔI MẬT KHẨU
