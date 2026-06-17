@@ -58,6 +58,9 @@ public class HomeService {
 
         // 3. Flashsales
         List<FlashSaleItem> activeFS = flashSaleItemRepository.findActiveFlashSaleItems(LocalDateTime.now());
+        // Lấy tất cả Food cùng Restaurant (chỉ gọi 1 lần để dùng chung)
+        List<Food> allFoodsWithRestaurant = foodRepository.findAllWithRestaurant();
+
         List<FoodMenuItemDTO> flashSales = new ArrayList<>();
         if (!activeFS.isEmpty()) {
             flashSales = activeFS.stream()
@@ -72,8 +75,7 @@ public class HomeService {
                     .collect(Collectors.toList());
         } else {
             // Fallback: use first 3 available foods from database
-            List<Food> allFoods = foodRepository.findAll();
-            flashSales = allFoods.stream()
+            flashSales = allFoodsWithRestaurant.stream()
                     .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
                     .map(f -> FoodMenuItemDTO.builder()
                             .id("f_" + f.getId())
@@ -87,8 +89,7 @@ public class HomeService {
         }
 
         // 4. Topics
-        List<Food> allFoods = foodRepository.findAll();
-        List<FoodMenuItemDTO> topic1Items = allFoods.stream()
+        List<FoodMenuItemDTO> topic1Items = allFoodsWithRestaurant.stream()
                 .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
                 .map(f -> FoodMenuItemDTO.builder()
                         .id("t1_" + f.getId())
@@ -100,7 +101,7 @@ public class HomeService {
                 .limit(4)
                 .collect(Collectors.toList());
 
-        List<FoodMenuItemDTO> topic2Items = allFoods.stream()
+        List<FoodMenuItemDTO> topic2Items = allFoodsWithRestaurant.stream()
                 .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
                 .skip(4)
                 .map(f -> FoodMenuItemDTO.builder()
@@ -135,10 +136,16 @@ public class HomeService {
     }
 
     public BrandResponseDTO getPopularBrands(String addressId) {
-        List<Restaurant> dbRestaurants = restaurantRepository.findAll();
-        List<RestaurantHomeDTO> brands = dbRestaurants.stream()
-                .map(r -> {
-                    List<Food> foods = foodRepository.findByRestaurantId(r.getId());
+        // Tránh O(N^2) N+1 query: Lấy tất cả Food cùng Restaurant rồi group by Restaurant
+        List<Food> allFoods = foodRepository.findAllWithRestaurant();
+        java.util.Map<Restaurant, List<Food>> foodsByRestaurant = allFoods.stream()
+                .filter(f -> f.getRestaurant() != null)
+                .collect(Collectors.groupingBy(Food::getRestaurant));
+
+        List<RestaurantHomeDTO> brands = foodsByRestaurant.entrySet().stream()
+                .map(entry -> {
+                    Restaurant r = entry.getKey();
+                    List<Food> foods = entry.getValue();
                     List<FoodMenuItemDTO> menu = foods.stream()
                             .map(f -> FoodMenuItemDTO.builder()
                                     .id("rm_" + f.getId())
@@ -170,7 +177,7 @@ public class HomeService {
     }
 
     public DealResponseDTO getRecommendedDeals(String addressId, int tabId, int page, int size) {
-        List<Food> allFoods = foodRepository.findAll();
+        List<Food> allFoods = foodRepository.findAllWithRestaurant();
         if (allFoods.isEmpty()) {
             return DealResponseDTO.builder()
                     .deals(new ArrayList<>())
