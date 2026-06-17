@@ -72,8 +72,7 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      # Thêm biến này để bóp nghẹt RAM của Elasticsearch xuống 256MB
-      - ES_JAVA_OPTS="-Xms256m -Xmx256m"
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
     ports:
       - "9200:9200"
     volumes:
