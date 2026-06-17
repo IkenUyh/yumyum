@@ -150,4 +150,8 @@ public class RetrofitClient {
     public static RestaurantSearchService getRestaurantSearchService() {
         return getClient().create(RestaurantSearchService.class);
     }
+
+    public static com.example.uitpayapp.home.network.HomeApiService getHomeApiService() {
+        return getClient().create(com.example.uitpayapp.home.network.HomeApiService.class);
+    }
 }

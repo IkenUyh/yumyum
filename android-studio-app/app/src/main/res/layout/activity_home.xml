@@ -272,14 +272,87 @@
                 android:layout_height="8dp"
                 android:background="#F0F0F0" />
 
+            <!-- Error State cho Core (Flash Sale & Topics) -->
+            <LinearLayout
+                android:id="@+id/layout_core_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:background="#FFFFFF"
+                android:visibility="gone">
+                
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@android:drawable/ic_dialog_alert"
+                    app:tint="#F44336" />
+                    
+                <TextView
+                    android:id="@+id/tv_core_error"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Không kết nối được server"
+                    android:textColor="#757575"
+                    android:textSize="14sp" />
+                    
+                <Button
+                    android:id="@+id/btn_retry_core"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:backgroundTint="#F24405"
+                    android:textColor="#FFFFFF"
+                    android:text="Thử lại" />
+            </LinearLayout>
+
             <include
                 android:id="@+id/flashsale_section"
                 layout="@layout/layout_flashsale_section" />
 
             <View
+                android:id="@+id/divider_brands"
                 android:layout_width="match_parent"
                 android:layout_height="8dp"
                 android:background="#F0F0F0" />
+
+            <!-- Error State cho Brands -->
+            <LinearLayout
+                android:id="@+id/layout_brands_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:background="#FFFFFF"
+                android:visibility="gone">
+                
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@android:drawable/ic_dialog_alert"
+                    app:tint="#F44336" />
+                    
+                <TextView
+                    android:id="@+id/tv_brands_error"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Không kết nối được server"
+                    android:textColor="#757575"
+                    android:textSize="14sp" />
+                    
+                <Button
+                    android:id="@+id/btn_retry_brands"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:backgroundTint="#F24405"
+                    android:textColor="#FFFFFF"
+                    android:text="Thử lại" />
+            </LinearLayout>
 
             <include
                 android:id="@+id/topic_brand_section"
@@ -353,6 +426,69 @@
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/item_food_recommend_deal"
                     tools:itemCount="4" />
+
+                <!-- Empty State cho Deals -->
+                <LinearLayout
+                    android:id="@+id/layout_deals_empty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="32dp"
+                    android:background="#FFFFFF"
+                    android:visibility="gone">
+                    
+                    <ImageView
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@android:drawable/ic_menu_info_details"
+                        app:tint="#BDBDBD" />
+                        
+                    <TextView
+                        android:id="@+id/tv_deals_empty"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Không có dữ liệu cho mục này."
+                        android:textColor="#757575"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Error State cho Deals -->
+                <LinearLayout
+                    android:id="@+id/layout_deals_error"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="32dp"
+                    android:background="#FFFFFF"
+                    android:visibility="gone">
+                    
+                    <ImageView
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@android:drawable/ic_dialog_alert"
+                        app:tint="#F44336" />
+                        
+                    <TextView
+                        android:id="@+id/tv_deals_error"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Không kết nối được server"
+                        android:textColor="#757575"
+                        android:textSize="14sp" />
+                        
+                    <Button
+                        android:id="@+id/btn_retry_deals"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:backgroundTint="#F24405"
+                        android:textColor="#FFFFFF"
+                        android:text="Thử lại" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
         </androidx.core.widget.NestedScrollView>
