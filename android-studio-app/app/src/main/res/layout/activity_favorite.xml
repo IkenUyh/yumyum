@@ -68,32 +68,39 @@
             android:background="?attr/selectableItemBackground" />
     </LinearLayout>
 
-    <!-- Danh sách Quán ăn Yêu thích chính -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvMainFavorite"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/bottom_container"
-        app:layout_constraintTop_toBottomOf="@+id/layoutFilters" />
+        app:layout_constraintTop_toBottomOf="@+id/layoutFilters">
 
-    <!-- Màn hình trống (Empty State) xe đẩy đồ ăn màu cam (Ảnh 1) -->
-    <LinearLayout
-        android:id="@+id/layoutEmptyState"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:layout_marginTop="40dp"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/layoutFilters">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <!-- Bạn có thể thay thế bằng ảnh xe đẩy màu cam tương tự -->
-        <ImageView
-            android:layout_width="110dp"
-            android:layout_height="110dp"
-            android:src="@android:drawable/ic_dialog_map"
-            app:tint="#FFA000" />
-    </LinearLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvMainFavorite"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:id="@+id/layoutEmptyState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:layout_marginTop="40dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="110dp"
+                    android:layout_height="110dp"
+                    android:src="@android:drawable/ic_dialog_map"
+                    app:tint="#FFA000" />
+            </LinearLayout>
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_container"

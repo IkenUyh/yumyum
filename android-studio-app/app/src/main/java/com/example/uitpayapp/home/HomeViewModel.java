@@ -59,13 +59,13 @@ public class HomeViewModel extends ViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     coreData.setValue(UiState.success(response.body()));
                 } else {
-                    coreData.setValue(UiState.error("Không kết nối được server (Lỗi " + response.code() + ")", null));
+                    coreData.setValue(UiState.error("Không kết nối được server", null));
                 }
             }
 
             @Override
             public void onFailure(Call<HomeCoreResponse> call, Throwable t) {
-                coreData.setValue(UiState.error("Không kết nối được server: " + t.getMessage(), null));
+                coreData.setValue(UiState.error("Không kết nối được server", null));
             }
         });
     }
@@ -82,7 +82,7 @@ public class HomeViewModel extends ViewModel {
                         brandsData.setValue(UiState.success(response.body()));
                     }
                 } else {
-                    brandsData.setValue(UiState.error("Không tải được danh sách thương hiệu", null));
+                    brandsData.setValue(UiState.error("Không kết nối được server", null));
                 }
             }
 

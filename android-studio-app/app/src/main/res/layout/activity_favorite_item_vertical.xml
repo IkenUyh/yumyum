@@ -84,13 +84,13 @@
                     android:paddingVertical="2dp"
                     android:paddingHorizontal="6dp"/>
 
-                <TextView
-                    android:id="@+id/tvFavoriteHeart"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <ImageView
+                    android:id="@+id/ivVerticalFavoriteHeart"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_alignParentEnd="true"
-                    android:text="❤️"
-                    android:textSize="14sp"/>
+                    android:src="@drawable/favorite_filled_24px"
+                    app:tint="#EE4D2D"/>
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>

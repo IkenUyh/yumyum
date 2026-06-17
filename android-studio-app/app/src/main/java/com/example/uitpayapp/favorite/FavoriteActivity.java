@@ -13,11 +13,14 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.uitpayapp.R;
 import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.example.uitpayapp.home.HomeActivity;
+import com.example.uitpayapp.home.home_models.Restaurant;
 
 public class FavoriteActivity extends AppCompatActivity {
 
@@ -25,6 +28,7 @@ public class FavoriteActivity extends AppCompatActivity {
     private TextView tvFilterService;
     private View layoutEmptyState;
     private RecyclerView rvMainFavorite;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private FavoriteMainAdapter mainAdapter;
 
     private List<FavoriteShop> baseShops;        // Danh sách gốc từ DB
@@ -51,11 +55,21 @@ public class FavoriteActivity extends AppCompatActivity {
         tvFilterService = findViewById(R.id.tvFilterService);
         layoutEmptyState = findViewById(R.id.layoutEmptyState);
         rvMainFavorite = findViewById(R.id.rvMainFavorite);
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            loadDatabaseShops();
+            applyFilterAndSorting();
+            swipeRefreshLayout.setRefreshing(false);
+        });
 
         loadDatabaseShops();
 
         filteredShops = new ArrayList<>(baseShops);
-        mainAdapter = new FavoriteMainAdapter(filteredShops, topOrderedShops);
+        mainAdapter = new FavoriteMainAdapter(filteredShops, topOrderedShops, shop -> {
+            shop.setFavorited(!shop.isFavorited());
+            mainAdapter.notifyDataSetChanged();
+        });
         rvMainFavorite.setAdapter(mainAdapter);
         rvMainFavorite.setLayoutManager(new LinearLayoutManager(this));
 
@@ -65,20 +79,53 @@ public class FavoriteActivity extends AppCompatActivity {
         setupBottomNavigation();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mainAdapter != null) {
+            loadDatabaseShops();
+            applyFilterAndSorting();
+        }
+    }
+
     private void loadDatabaseShops() {
-        baseShops = new ArrayList<>();
-        topOrderedShops = new ArrayList<>();
+        if (baseShops == null) {
+            baseShops = new ArrayList<>();
+        } else {
+            baseShops.clear();
+        }
+        
+        if (topOrderedShops == null) {
+            topOrderedShops = new ArrayList<>();
+        } else {
+            topOrderedShops.clear();
+        }
 
-        // Thêm dữ liệu mô phỏng quán ăn
-        baseShops.add(new FavoriteShop("1", "Cơm Chiên Dương Châu & Mì Trộn Tóp Mỡ", 4.7, 3.5, 27, android.R.drawable.ic_menu_report_image, "Mã giảm 19%", "Đồ ăn", 200));
-        baseShops.add(new FavoriteShop("2", "Banchan House - Quán Ăn Hàn Quốc", 4.4, 0.4, 22, android.R.drawable.ic_menu_report_image, "Mã giảm 19%", "Đồ ăn", 180));
-        baseShops.add(new FavoriteShop("3", "TIỆM BÚN A NHỬU - BÚN THÁI", 4.5, 1.2, 15, android.R.drawable.ic_menu_report_image, "Flash Sale", "Đồ ăn", 140));
-        baseShops.add(new FavoriteShop("4", "Siêu Thị Lotte Mart - Nguyễn Hữu Thọ", 4.6, 2.1, 30, android.R.drawable.ic_menu_report_image, "Mã giảm 10%", "Siêu thị", 40));
-
-        // Nạp riêng các quán có lượt đặt cao vào mục Ngang
-        for (FavoriteShop shop : baseShops) {
-            if (shop.getOrderCount() >= 100) {
-                topOrderedShops.add(shop);
+        List<Restaurant> restaurants = HomeActivity.HomeRepository.getInstance().getRestaurants();
+        for (int i = 0; i < restaurants.size(); i++) {
+            Restaurant r = restaurants.get(i);
+            
+            // Generate a random distance since Restaurant doesn't have it
+            double distance = 0.5 + (Math.random() * 5.0);
+            distance = Math.round(distance * 10.0) / 10.0;
+            
+            int orderCount = 50 + (i * 20); // Giả lập lượt đặt
+            
+            FavoriteShop fs = new FavoriteShop(
+                String.valueOf(i), 
+                r.getName(), 
+                r.getRating(), 
+                distance, 
+                r.getDeliveryTime(), 
+                r.getImageResId(), 
+                "Mã giảm " + (10 + (i % 3) * 5) + "%", 
+                r.getCategory(), 
+                orderCount
+            );
+            baseShops.add(fs);
+            
+            if (orderCount >= 100) {
+                topOrderedShops.add(fs);
             }
         }
     }
@@ -101,31 +148,54 @@ public class FavoriteActivity extends AppCompatActivity {
     }
 
     private void setupDropdownFilters() {
-        tvFilterService.setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(this, v);
-            popup.getMenu().add("Dịch vụ"); // Hiển thị tất cả
-            popup.getMenu().add("Đồ ăn");
-            popup.getMenu().add("Thực phẩm");
-            popup.getMenu().add("Rượu bia");
-            popup.getMenu().add("Hoa");
-            popup.getMenu().add("Siêu thị");
-
-            popup.setOnMenuItemClickListener(item -> {
-                currentCategory = item.getTitle().toString();
-                tvFilterService.setText(currentCategory + " ∨");
-                applyFilterAndSorting();
-                return true;
-            });
-            popup.show();
+        String[] categories = {"Tất cả", "Cơm", "Bún Phở", "Bánh mì", "Fastfood", "Lẩu", "Đồ nướng", "Cafe", "Trà sữa", "Ăn vặt", "Tráng miệng", "Hải sản", "Chay", "Đồ uống", "Gà rán", "Pizza"};
+        
+        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_list_item_1, categories);
+        
+        android.widget.ListPopupWindow listPopupWindow = new android.widget.ListPopupWindow(this);
+        listPopupWindow.setAdapter(adapter);
+        listPopupWindow.setAnchorView(tvFilterService);
+        listPopupWindow.setWidth((int) (150 * getResources().getDisplayMetrics().density));
+        listPopupWindow.setHeight((int) (200 * getResources().getDisplayMetrics().density));
+        
+        listPopupWindow.setOnItemClickListener((parent, view, position, id) -> {
+            currentCategory = categories[position];
+            if (currentCategory.equals("Tất cả")) {
+                tvFilterService.setText("Tất cả ▼");
+            } else {
+                tvFilterService.setText(currentCategory + " ▼");
+            }
+            applyFilterAndSorting();
+            listPopupWindow.dismiss();
         });
+
+        tvFilterService.setOnClickListener(v -> {
+            listPopupWindow.show();
+        });
+        tvFilterService.setText("Tất cả ▼");
     }
 
     private void applyFilterAndSorting() {
+        // Xóa hẳn các shop đã bị unfavorite khi chuyển tab hoặc filter
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            baseShops.removeIf(shop -> !shop.isFavorited());
+            topOrderedShops.removeIf(shop -> !shop.isFavorited());
+        } else {
+            java.util.Iterator<FavoriteShop> it = baseShops.iterator();
+            while (it.hasNext()) {
+                if (!it.next().isFavorited()) it.remove();
+            }
+            java.util.Iterator<FavoriteShop> it2 = topOrderedShops.iterator();
+            while (it2.hasNext()) {
+                if (!it2.next().isFavorited()) it2.remove();
+            }
+        }
+
         filteredShops.clear();
 
         // 1. Thực hiện Lọc theo danh mục dịch vụ chọn từ Dropdown (Ảnh 2)
         for (FavoriteShop shop : baseShops) {
-            if (currentCategory.equals("Dịch vụ") || shop.getServiceType().equalsIgnoreCase(currentCategory)) {
+            if (currentCategory.equals("Dịch vụ") || currentCategory.equals("Tất cả") || shop.getServiceType().equalsIgnoreCase(currentCategory)) {
                 filteredShops.add(shop);
             }
         }

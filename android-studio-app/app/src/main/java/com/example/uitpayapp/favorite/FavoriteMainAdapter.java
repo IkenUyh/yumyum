@@ -19,10 +19,12 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private List<FavoriteShop> verticalShops;
     private List<FavoriteShop> horizontalShops;
+    private FavoriteHorizontalAdapter.OnFavoriteRemoveListener removeListener;
 
-    public FavoriteMainAdapter(List<FavoriteShop> verticalShops, List<FavoriteShop> horizontalShops) {
+    public FavoriteMainAdapter(List<FavoriteShop> verticalShops, List<FavoriteShop> horizontalShops, FavoriteHorizontalAdapter.OnFavoriteRemoveListener removeListener) {
         this.verticalShops = verticalShops;
         this.horizontalShops = horizontalShops;
+        this.removeListener = removeListener;
     }
 
     @Override
@@ -87,7 +89,7 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 ));
 
                 // Khởi tạo và gắn Adapter con xử lý cuộn ngang
-                FavoriteHorizontalAdapter subAdapter = new FavoriteHorizontalAdapter(horizontalShops);
+                FavoriteHorizontalAdapter subAdapter = new FavoriteHorizontalAdapter(horizontalShops, removeListener);
                 hvh.rvHorizontal.setAdapter(subAdapter);
                 hvh.rvHorizontal.setLayoutManager(new LinearLayoutManager(holder.itemView.getContext(), LinearLayoutManager.HORIZONTAL, false));
             }
@@ -103,6 +105,18 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             vsh.tvInfo.setText("⭐ " + shop.getRating() + "  |  " + shop.getDistance() + "km  |  " + shop.getDeliveryTime() + "phút");
             vsh.tvDiscount.setText(shop.getDiscountTag());
             vsh.ivImage.setImageResource(shop.getImageResId());
+
+            if (shop.isFavorited()) {
+                vsh.ivFavoriteHeart.setImageResource(R.drawable.favorite_filled_24px);
+            } else {
+                vsh.ivFavoriteHeart.setImageResource(R.drawable.favorite_border_24px);
+            }
+
+            vsh.ivFavoriteHeart.setOnClickListener(v -> {
+                if (removeListener != null) {
+                    removeListener.onRemove(shop);
+                }
+            });
         }
     }
 
@@ -124,13 +138,14 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     static class VerticalShopViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvInfo, tvDiscount;
-        ImageView ivImage;
+        ImageView ivImage, ivFavoriteHeart;
         public VerticalShopViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvVerticalName);
             tvInfo = itemView.findViewById(R.id.tvVerticalInfo);
             tvDiscount = itemView.findViewById(R.id.tvVerticalDiscount);
             ivImage = itemView.findViewById(R.id.ivVerticalImage);
+            ivFavoriteHeart = itemView.findViewById(R.id.ivVerticalFavoriteHeart);
         }
     }
 
