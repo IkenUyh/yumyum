@@ -34,7 +34,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Lấy các đơn hàng PENDING mà thời gian tạo đã vượt qua mốc thời gian quy định
     @org.springframework.data.jpa.repository.Query("SELECT o " +
-            "FROM Order o " +
+            "FROM Order o JOIN FETCH o.user JOIN FETCH o.restaurant " +
             "WHERE o.status = 'PENDING' AND o.createdAt <= :cutoffTime")
     java.util.List<Order> findStalePendingOrders(@org.springframework.data.repository.query.Param("cutoffTime") java.time.LocalDateTime cutoffTime);
 
