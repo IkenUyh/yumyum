@@ -25,6 +25,18 @@ spring:
   elasticsearch:
     uris: http://localhost:9200
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:no-reply@fooddelivery.com}
+    password: ${MAIL_PASSWORD:dummy}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   data:
     redis:
       host: localhost
