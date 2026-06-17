@@ -6,7 +6,6 @@ import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,19 +19,22 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.uitpayapp.home.home_adapters.ImageSliderAdapter;
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.modules.user.UserRepository;
+import com.example.uitpayapp.modules.user.models.responses.AuthResponseDTO;
+import com.example.uitpayapp.network.ApiCallback;
 
 import java.util.List;
 
 public class SignInActivity extends AppCompatActivity {
 
     private EditText edtPhoneNumber;
+    private TextView tvErrorPhone;
     private Button btnLogin;
     private Handler sliderHandler;
     private Runnable sliderRunnable;
-    FrameLayout loading;
-    TextView txtDots;
-    Handler handler;
-    Runnable runnable;
+    private android.app.Dialog loadingDialog;
+    private UserRepository userRepository;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -51,66 +53,87 @@ public class SignInActivity extends AppCompatActivity {
             return insets;
         });
         btnLogin= findViewById(R.id.btnLogin);
-        loading = findViewById(R.id.loadingOverlay);
-        txtDots = findViewById(R.id.txtDots);
-        handler = new Handler(Looper.getMainLooper());
+        tvErrorPhone = findViewById(R.id.tv_error_phone);
         edtPhoneNumber = findViewById(R.id.PhoneNumber);
-        runnable = new Runnable() {
-            int count = 0;
+        
+        userRepository = new UserRepository();
+        
+        loadingDialog = new android.app.Dialog(this);
+        loadingDialog.setContentView(R.layout.dialog_loading);
+        loadingDialog.setCancelable(false);
+        if (loadingDialog.getWindow() != null) {
+            loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
 
-            @Override
-            public void run() {
-                count = (count + 1) % 4;
-
-                String dots = "";
-                for (int i = 0; i < count; i++) {
-                    dots += "●";
-                }
-
-                txtDots.setText(dots);
-
-                handler.postDelayed(this, 500);
+        edtPhoneNumber.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_rounded);
+                tvErrorPhone.setVisibility(View.GONE);
             }
-        };
+        });
+
         btnLogin.setOnClickListener(v -> {
             String phone = edtPhoneNumber.getText().toString();
 
             if(phone.isEmpty()){
-                Toast.makeText(SignInActivity.this, "Vui lòng nhập số điện thoại", Toast.LENGTH_SHORT).show();
+                edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_error);
+                tvErrorPhone.setText("Vui lòng nhập số điện thoại");
+                tvErrorPhone.setVisibility(View.VISIBLE);
                 return;
             }
 
-            loading.setVisibility(View.VISIBLE);
-            handler.post(runnable);
+            if (loadingDialog != null && !isFinishing()) loadingDialog.show();
 
-            // Giả lập loading nhẹ 0.5s cho mượt rồi chuyển màn hình
-            new Handler().postDelayed(() -> {
-                loading.setVisibility(View.GONE);
-                handler.removeCallbacks(runnable);
-                sliderHandler.removeCallbacks(sliderRunnable);
-                android.content.Intent intent = new android.content.Intent(SignInActivity.this, PasscodeActivity.class);
-                intent.putExtra("PHONE_NUMBER", phone); // Gói dữ liệu
-                startActivity(intent);
+            new android.os.Handler().postDelayed(() -> {
+                proceedToPasscode(phone);
             }, 500);
         });
-        List <Integer> imageList = List.of(
-                R.drawable.img_advertisment1,
-                R.drawable.img_advertisment2,
-                R.drawable.img_advertisment3);
+
+        // Nút quay lại
+        View btnBack = findViewById(R.id.btn_back);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
+
+        // Nút đăng ký
+        View btnRegister = findViewById(R.id.btnRegister);
+        if (btnRegister != null) {
+            btnRegister.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(SignInActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        // Setup Banner Slider
+        List<Integer> imageList = List.of(
+                R.drawable.img_priority_banner1,
+                R.drawable.img_priority_banner2,
+                R.drawable.img_priority_banner3);
         ViewPager2 viewPager2 = findViewById(R.id.imgAdvertisement);
-        //adapter se la trung gian dua anh len viewpaper
-        ImageSliderAdapter adapter = new ImageSliderAdapter(imageList);
-        viewPager2.setAdapter(adapter);
-        sliderHandler=new Handler(Looper.getMainLooper());
-        sliderRunnable=new Runnable() {
-            @Override
-            public void run() {
-                int currentitem=viewPager2.getCurrentItem();
-                currentitem=(currentitem+1)%imageList.size();
-                viewPager2.setCurrentItem(currentitem,true);
-                sliderHandler.postDelayed(this,3000);
-            }
-        };
-        sliderHandler.post(sliderRunnable);
+        if (viewPager2 != null) {
+            ImageSliderAdapter adapter = new ImageSliderAdapter(imageList);
+            viewPager2.setAdapter(adapter);
+            sliderHandler = new Handler(Looper.getMainLooper());
+            sliderRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    int currentitem = viewPager2.getCurrentItem();
+                    currentitem = (currentitem + 1) % imageList.size();
+                    viewPager2.setCurrentItem(currentitem, true);
+                    sliderHandler.postDelayed(this, 3000);
+                }
+            };
+            sliderHandler.post(sliderRunnable);
+        }
+    }
+    
+    private void proceedToPasscode(String phone) {
+        if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
+        if (sliderHandler != null && sliderRunnable != null) {
+            sliderHandler.removeCallbacks(sliderRunnable);
+        }
+        android.content.Intent intent = new android.content.Intent(SignInActivity.this, PasscodeActivity.class);
+        intent.putExtra("PHONE_NUMBER", phone); // Gói dữ liệu
+        startActivity(intent);
     }
 }

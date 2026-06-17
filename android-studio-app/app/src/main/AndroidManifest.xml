@@ -22,6 +22,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Androidstudioapp">
         <activity
+            android:name=".auth.ForgotPhoneActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".auth.ForgotOtpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".auth.ForgotPinActivity"
+            android:exported="false" />
+        <activity
             android:name=".history.DealDetailActivity"
             android:exported="false" />
         <activity
@@ -90,6 +100,13 @@
             android:exported="false" />
         <activity
             android:name=".auth.PasscodeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".auth.RegisterActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".auth.RegisterPinActivity"
             android:exported="false" />
         <activity
             android:name=".YumYumPriority.PriorityYumYumActivity"

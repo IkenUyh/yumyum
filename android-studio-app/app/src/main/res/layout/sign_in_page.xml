@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -13,6 +15,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#FFFFFF">
+
+            <ImageView
+                android:id="@+id/btn_back"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="#000000"
+                android:elevation="2dp"
+                android:background="@drawable/bg_white_circle" />
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/imgAdvertisement"
@@ -27,9 +43,9 @@
                 android:orientation="vertical"
                 android:gravity="center"
                 android:layout_below="@id/imgAdvertisement"
-                android:padding="32dp"
-                android:background="@drawable/bg_rounded_top_white"
-                android:layout_marginTop="20dp">
+                android:padding="16dp"
+                android:background="#FFFFFF"
+                android:layout_marginTop="24dp">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -46,8 +62,42 @@
                     android:hint="Nhập số điện thoại"
                     android:inputType="number"
                     android:padding="12dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="4dp"
                     android:background="@drawable/bg_edittext_rounded" />
+
+                <TextView
+                    android:id="@+id/tv_error_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tài khoản không tồn tại"
+                    android:textColor="#E53935"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    android:layout_marginBottom="16dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="start"
+                    android:layout_marginTop="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Chưa có tài khoản? "
+                        android:textColor="#757575"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/btnRegister"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Đăng ký ngay"
+                        android:textColor="#FF5722"
+                        android:textStyle="bold"
+                        android:textSize="14sp" />
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -61,14 +111,6 @@
                 android:paddingRight="32dp"
                 android:paddingBottom="12dp">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="#000000"
-                    android:textSize="12sp"
-                    android:text="Bằng việc sử dụng ZaloPay, tôi đồng ý với Thỏa thuận sử dụng ZaloPay và Chính sách bảo vệ quyền riêng tư."
-                    android:textAlignment="center"
-                    android:paddingBottom="15dp"/>
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btnLogin"
@@ -78,59 +120,9 @@
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:background="@drawable/bg_button_login_rounded" />
+
             </LinearLayout>
 
         </RelativeLayout>
     </ScrollView>
-
-    <FrameLayout
-        android:id="@+id/loadingOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:layout_width="140dp"
-            android:layout_height="140dp"
-            android:layout_gravity="center"
-            android:background="@drawable/bg_loading_box"
-            android:elevation="6dp">
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <TextView
-                        android:text="UIT PAY"
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:textSize="20sp"
-                        android:textColor="#FFFFFF"/>
-
-                    <TextView
-                        android:id="@+id/txtDots"
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:text="●"
-                        android:textSize="25sp"
-                        android:textColor="#FFFFFF"/>
-
-                </LinearLayout>
-
-            </FrameLayout>
-
-        </LinearLayout>
-
-
-
-    </FrameLayout>
-
 </FrameLayout>

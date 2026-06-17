@@ -25,7 +25,7 @@ public class PasscodeActivity extends AppCompatActivity {
     // --- Cấu hình hằng số (Constants) ---
     private static final int MAX_LENGTH = 6;
     private static final int RESET_DELAY_MS = 1500;
-    private static final int COLOR_ACTIVE = Color.parseColor("#0052CC"); // Chấm xanh
+    private static final int COLOR_ACTIVE = Color.parseColor("#FF5722"); // Chấm cam
     private static final int COLOR_INACTIVE = Color.parseColor("#BDBDBD"); // Chấm xám
 
     private final TextView[] dots = new TextView[MAX_LENGTH];
@@ -59,7 +59,6 @@ public class PasscodeActivity extends AppCompatActivity {
 
         // === LOAD AVATAR VA THONG TIN USER TU CACHE ===
         android.widget.ImageView ivAvatar = findViewById(R.id.iv_avatar);
-        TextView tvUsername = findViewById(R.id.tv_username);
         TextView tvPhoneNumber = findViewById(R.id.tv_phone_number);
 
         android.content.SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
@@ -75,10 +74,6 @@ public class PasscodeActivity extends AppCompatActivity {
                         .circleCrop()
                         .into(ivAvatar);
             }
-        }
-        else {
-            // Neu khong khop thi chi de chu "Username" co dinh
-            tvUsername.setText("Username");
         }
 
         // Hien thi so dien thoai da duoc che (Masked) voi ma vung
@@ -123,25 +118,13 @@ public class PasscodeActivity extends AppCompatActivity {
         //Tìm text quên mật khẩu
         TextView btnForgotPass = findViewById(R.id.btn_forgot_pass);
         btnForgotPass.setOnClickListener(v -> {
-            com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog =
-                    new com.google.android.material.bottomsheet.BottomSheetDialog(PasscodeActivity.this);
-            View bottomSheetView = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_forgot, null);
-            bottomSheetDialog.setContentView(bottomSheetView);
-
-            TextView btnCloseX = bottomSheetView.findViewById(R.id.btn_close_sheet);
-            btnCloseX.setOnClickListener(v1 -> {
-                bottomSheetDialog.dismiss();
-            });
-
-            bottomSheetDialog.show();
-        });
-
-        //Tìm text Đây không phải tài khoản của tôi
-        TextView btnNotMyAccount = findViewById(R.id.btn_not_my_account);
-        btnNotMyAccount.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(PasscodeActivity.this, ContactSupportActivity.class);
+            Intent intent = new Intent(PasscodeActivity.this, ForgotPhoneActivity.class);
+            intent.putExtra("PHONE_NUMBER", phoneNumber);
             startActivity(intent);
         });
+
+        // Nút X (Đóng) quay lại màn hình nhập số điện thoại
+        findViewById(R.id.btn_close).setOnClickListener(v -> finish());
     }
 
     private void onNumberClick(String number) {
@@ -175,39 +158,16 @@ public class PasscodeActivity extends AppCompatActivity {
         isChecking = true;
 
         // Gọi hàm qua lớp cầu nối UserRepository theo cấu trúc mới
-        userRepository.login(phoneNumber, passcode, new ApiCallback<AuthResponseDTO>() {
-            @Override
-            public void onSuccess(AuthResponseDTO result) {
-                isChecking = false; // Mở khóa trạng thái
+        new android.os.Handler().postDelayed(() -> {
+            isChecking = false; // Mở khóa trạng thái
+            SessionManager sessionManager = SessionManager.getInstance(PasscodeActivity.this);
+            sessionManager.createLoginSession(1, "mock_token", "Mock User", phoneNumber, "");
 
-                // Nhận dữ liệu user từ gói AuthResponseDTO do backend trả về
-                UserResponseDTO user = result.getUser();
-                String token = result.getToken();
-
-                // === THAY ĐỔI Ở ĐÂY: Sử dụng SessionManager ===
-                SessionManager sessionManager = SessionManager.getInstance(PasscodeActivity.this);
-
-                // Cách 1: Nếu bạn giữ nguyên SessionManager cũ (chỉ lưu token và tên)
-                // sessionManager.createLoginSession(token, user.getFullName());
-
-                // Cách 2: Sử dụng SessionManager đã nâng cấp (Khuyên dùng - xem cấu hình ở Bước 2)
-                sessionManager.createLoginSession(user.getId(), token, user.getFullName(), user.getPhoneNumber(), user.getAvatarUrl());
-                // =============================================
-
-                // Chuyển màn hình sang HomeActivity
-                Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
-                startActivity(intent);
-                finish();
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                isChecking = false;
-                // errorMessage ở đây đã được Repository xử lý sạch
-                showLoginError(errorMessage);
-            }
-        });
+            Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
+            startActivity(intent);
+            finish();
+        }, 500);
     }
     // Hàm phụ trợ để báo lỗi và reset bàn phím
     private void showLoginError(String message) {
@@ -217,6 +177,8 @@ public class PasscodeActivity extends AppCompatActivity {
         passcode = "";
         updateDots();
     }
+
+
 
     // Cập nhật giao diện 6 dấu chấm
     private void updateDots() {
