@@ -58,4 +58,12 @@ public class CartController {
         cartService.clearCart(currentUser);
         return ApiResponse.success("Đã dọn sạch giỏ hàng!");
     }
+
+    // Lấy tổng số lượng món trong giỏ hàng
+    @GetMapping("/count")
+    public ApiResponse<Integer> getCartCount(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        Integer count = cartService.getCartItemCount(currentUser);
+        return ApiResponse.success(count);
+    }
 }

@@ -76,6 +76,21 @@ public class AddressRepository {
                 callback.onError("Mất kết nối máy chủ: " + t.getMessage());
             }
         });
+     }
+
+    // 5. Lấy địa chỉ mặc định
+    public void getDefaultAddress(ApiCallback<AddressResponseDTO> callback) {
+        addressService.getDefaultAddress().enqueue(new Callback<ApiResponse<AddressResponseDTO>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<AddressResponseDTO>> call, Response<ApiResponse<AddressResponseDTO>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<AddressResponseDTO>> call, Throwable t) {
+                callback.onError("Mất kết nối máy chủ: " + t.getMessage());
+            }
+        });
     }
 
     // Hộp bóc tách gói dữ liệu chung

@@ -6,6 +6,7 @@ import com.example.uitpayapp.network.ApiCallback;
 import com.example.uitpayapp.network.RetrofitClient;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,6 +28,20 @@ public class NotificationRepository {
 
             @Override
             public void onFailure(Call<ApiResponse<List<NotificationResponseDTO>>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void getUnreadCount(final ApiCallback<Map<String, Long>> callback) {
+        notificationService.getUnreadCount().enqueue(new Callback<ApiResponse<Map<String, Long>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Map<String, Long>>> call, Response<ApiResponse<Map<String, Long>>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Map<String, Long>>> call, Throwable t) {
                 callback.onError(t.getMessage());
             }
         });

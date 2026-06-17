@@ -30,6 +30,17 @@ public class UserAddressController {
         return ApiResponse.success(list);
     }
 
+    // API: Lấy địa chỉ mặc định của cá nhân
+    @GetMapping("/default")
+    public ApiResponse<AddressResponseDTO> getDefaultAddress(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        UserAddress defaultAddress = addressService.getDefaultAddress(currentUser);
+        if (defaultAddress == null) {
+            return ApiResponse.success(null);
+        }
+        return ApiResponse.success(AddressResponseDTO.fromEntity(defaultAddress));
+    }
+
     // API: Tạo mới một địa chỉ vào sổ tay
     @PostMapping
     public ApiResponse<AddressResponseDTO> createAddress(

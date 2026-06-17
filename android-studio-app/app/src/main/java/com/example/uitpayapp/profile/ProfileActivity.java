@@ -337,5 +337,31 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         checkLoginStatus();
+        updateNotificationBadge();
+    }
+
+    private void updateNotificationBadge() {
+        final TextView tvNotificationBadge = findViewById(R.id.tv_notification_badge);
+        if (tvNotificationBadge == null) return;
+        
+        com.example.uitpayapp.modules.notification.NotificationRepository repo = 
+                new com.example.uitpayapp.modules.notification.NotificationRepository();
+        repo.getUnreadCount(new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Long>>() {
+            @Override
+            public void onSuccess(java.util.Map<String, Long> countData) {
+                long unreadCount = countData != null && countData.containsKey("unreadCount") ? countData.get("unreadCount") : 0;
+                if (unreadCount > 0) {
+                    tvNotificationBadge.setText(String.valueOf(unreadCount));
+                    tvNotificationBadge.setVisibility(View.VISIBLE);
+                } else {
+                    tvNotificationBadge.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Fail silently
+            }
+        });
     }
 }

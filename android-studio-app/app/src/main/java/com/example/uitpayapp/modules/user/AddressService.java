@@ -33,4 +33,7 @@ public interface AddressService {
     Call<ApiResponse<String>> deleteAddress(
             @Path("id") Long addressId
     );
+
+    @GET("api/v1/addresses/default")
+    Call<ApiResponse<AddressResponseDTO>> getDefaultAddress();
 }
