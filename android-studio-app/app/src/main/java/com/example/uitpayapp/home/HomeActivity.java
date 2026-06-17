@@ -60,7 +60,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+import androidx.lifecycle.ViewModelProvider;
+import com.example.uitpayapp.home.network.HomeCoreResponse;
+import com.example.uitpayapp.home.network.BrandResponse;
+import com.example.uitpayapp.home.network.TopicResponse;
+import android.util.Log;
+
 public class HomeActivity extends AppCompatActivity {
+    
+    private HomeViewModel viewModel;
 
     private List<Restaurant> restaurants;
     private List<Restaurant> filteredRestaurants;
@@ -127,6 +135,9 @@ public class HomeActivity extends AppCompatActivity {
             dummyAddressBar.setOnClickListener(v -> showAddressSelection());
         }
 
+        RetrofitClient.initialize(this);
+        viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+
         setupRestaurants();
         setupCategories();
         setupSearch();
@@ -136,16 +147,231 @@ public class HomeActivity extends AppCompatActivity {
         setupDeals();
         setupStickyTab();
         setupBottomNavigation();
-        RetrofitClient.initialize(this);
+        setupObservers();
+
+        viewModel.setAddressAndRefresh(ADDRESSES[0]);
+
         androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipe_refresh_home);
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setOnRefreshListener(() -> {
-                setupTopics();
-                setupFlashsale();
-                setupBrands();
-                setupDeals();
+                viewModel.refreshAll();
                 swipeRefreshLayout.setRefreshing(false);
             });
+        }
+    }
+
+    private void setupObservers() {
+        viewModel.getCoreData().observe(this, state -> {
+            View errorView = findViewById(R.id.layout_core_error);
+            View flashsale = findViewById(R.id.flashsale_section);
+            View topic1 = findViewById(R.id.topic_section_1);
+            View topic2 = findViewById(R.id.topic_section_2);
+
+            if (state.isLoading()) {
+                // Show loading
+            } else if (state.isSuccess()) {
+                if (errorView != null) errorView.setVisibility(View.GONE);
+                if (flashsale != null) flashsale.setVisibility(View.VISIBLE);
+                if (topic1 != null) topic1.setVisibility(View.VISIBLE);
+                if (topic2 != null) topic2.setVisibility(View.VISIBLE);
+                HomeCoreResponse data = state.getData();
+                if (data != null) {
+                    if (data.getFlashSales() != null && !data.getFlashSales().isEmpty()) {
+                        updateFlashsaleUI(data.getFlashSales());
+                    }
+                    if (data.getTopics() != null && data.getTopics().size() >= 2) {
+                        updateTopicUI(findViewById(R.id.topic_section_1), data.getTopics().get(0));
+                        updateTopicUI(findViewById(R.id.topic_section_2), data.getTopics().get(1));
+                    }
+                }
+            } else if (state.isError() || state.isEmpty()) {
+                if (flashsale != null) flashsale.setVisibility(View.GONE);
+                if (topic1 != null) topic1.setVisibility(View.GONE);
+                if (topic2 != null) topic2.setVisibility(View.GONE);
+                if (errorView != null) {
+                    errorView.setVisibility(View.VISIBLE);
+                    android.widget.TextView tvError = findViewById(R.id.tv_core_error);
+                    if (tvError != null) tvError.setText(state.isError() ? state.getMessage() : "Không có dữ liệu");
+                }
+            }
+        });
+
+        viewModel.getBrandsData().observe(this, state -> {
+            View sectionView = findViewById(R.id.topic_brand_section);
+            View errorView = findViewById(R.id.layout_brands_error);
+            View divider = findViewById(R.id.divider_brands);
+            if (state.isLoading()) {
+                // Keep current state
+            } else if (state.isSuccess()) {
+                if (errorView != null) errorView.setVisibility(View.GONE);
+                if (sectionView != null) sectionView.setVisibility(View.VISIBLE);
+                if (divider != null) divider.setVisibility(View.VISIBLE);
+                BrandResponse data = state.getData();
+                if (data != null && data.getBrands() != null) {
+                    updateBrandsUI(data.getBrands());
+                }
+            } else if (state.isError() || state.isEmpty()) {
+                if (sectionView != null) sectionView.setVisibility(View.GONE);
+                if (divider != null) divider.setVisibility(View.GONE);
+                if (errorView != null) {
+                    errorView.setVisibility(View.VISIBLE);
+                    android.widget.TextView tvError = findViewById(R.id.tv_brands_error);
+                    if (tvError != null) tvError.setText(state.isError() ? state.getMessage() : "Không có dữ liệu");
+                }
+            }
+        });
+
+        viewModel.getDealsData().observe(this, state -> {
+            View emptyView = findViewById(R.id.layout_deals_empty);
+            View errorView = findViewById(R.id.layout_deals_error);
+            androidx.recyclerview.widget.RecyclerView rvDeals = findViewById(R.id.rv_home_deals);
+            View loadingOverlay = findViewById(R.id.layout_loading_overlay);
+            boolean isStickyVisible = stickyTabLayout != null && stickyTabLayout.getVisibility() == View.VISIBLE;
+            
+            if (state.isLoading()) {
+                if (isStickyVisible && loadingOverlay != null) {
+                    loadingOverlay.setVisibility(View.VISIBLE);
+                } else {
+                    if (emptyView != null) emptyView.setVisibility(View.GONE);
+                    if (errorView != null) errorView.setVisibility(View.GONE);
+                    if (rvDeals != null) rvDeals.setVisibility(View.VISIBLE);
+                    if (dealItems.isEmpty() || dealItems.get(dealItems.size() - 1) != null) {
+                        dealItems.add(null);
+                        if (homeDealAdapter != null) homeDealAdapter.notifyItemInserted(dealItems.size() - 1);
+                    }
+                }
+                isLoadingMore = true;
+            } else {
+                if (loadingOverlay != null) loadingOverlay.setVisibility(View.GONE);
+                int loadingPos = dealItems.indexOf(null);
+                if (loadingPos >= 0) {
+                    dealItems.remove(loadingPos);
+                    if (homeDealAdapter != null) homeDealAdapter.notifyItemRemoved(loadingPos);
+                }
+                isLoadingMore = false;
+                
+                if (state.isSuccess()) {
+                    if (emptyView != null) emptyView.setVisibility(View.GONE);
+                    if (errorView != null) errorView.setVisibility(View.GONE);
+                    if (rvDeals != null) rvDeals.setVisibility(View.VISIBLE);
+                    updateDealsUI(state.getData());
+                } else if (state.isEmpty()) {
+                    if (rvDeals != null) rvDeals.setVisibility(View.GONE);
+                    if (errorView != null) errorView.setVisibility(View.GONE);
+                    if (emptyView != null) emptyView.setVisibility(View.VISIBLE);
+                } else if (state.isError()) {
+                    if (rvDeals != null) rvDeals.setVisibility(View.GONE);
+                    if (emptyView != null) emptyView.setVisibility(View.GONE);
+                    if (errorView != null) errorView.setVisibility(View.VISIBLE);
+                    android.widget.TextView tvError = findViewById(R.id.tv_deals_error);
+                    if (tvError != null) tvError.setText(state.getMessage());
+                }
+            }
+        });
+        
+        View btnRetryDeals = findViewById(R.id.btn_retry_deals);
+        if (btnRetryDeals != null) {
+            btnRetryDeals.setOnClickListener(v -> viewModel.resetAndFetchDeals(tabHomeDeals.getSelectedTabPosition()));
+        }
+
+        View btnRetryCore = findViewById(R.id.btn_retry_core);
+        if (btnRetryCore != null) {
+            btnRetryCore.setOnClickListener(v -> viewModel.refreshAll());
+        }
+
+        View btnRetryBrands = findViewById(R.id.btn_retry_brands);
+        if (btnRetryBrands != null) {
+            btnRetryBrands.setOnClickListener(v -> viewModel.refreshAll());
+        }
+    }
+
+    private void updateFlashsaleUI(List<FoodMenuItem> flashsaleFoods) {
+        if (flashsaleFoods.size() < 3) return;
+        int[] cardIds = {R.id.card_flashsale_1, R.id.card_flashsale_2, R.id.card_flashsale_3};
+        int[] ivIds = {R.id.iv_flashsale_1, R.id.iv_flashsale_2, R.id.iv_flashsale_3};
+        int[] nameIds = {R.id.tv_name_1, R.id.tv_name_2, R.id.tv_name_3};
+        int[] origPriceIds = {R.id.tv_orig_price_1, R.id.tv_orig_price_2, R.id.tv_orig_price_3};
+        int[] discPriceIds = {R.id.tv_disc_price_1, R.id.tv_disc_price_2, R.id.tv_disc_price_3};
+
+        for (int i = 0; i < 3; i++) {
+            FoodMenuItem item = flashsaleFoods.get(i);
+            View card = findViewById(cardIds[i]);
+            if (card == null) continue;
+
+            android.widget.ImageView iv = card.findViewById(ivIds[i]);
+            android.widget.TextView tvName = card.findViewById(nameIds[i]);
+            android.widget.TextView tvOrigPrice = card.findViewById(origPriceIds[i]);
+            android.widget.TextView tvDiscPrice = card.findViewById(discPriceIds[i]);
+
+            iv.setImageResource(item.getImageResId() != 0 ? item.getImageResId() : R.drawable.img_food_chicken);
+            tvName.setText(item.getName());
+
+            long originalPrice = item.getPrice();
+            long discountedPrice = originalPrice / 2;
+
+            tvOrigPrice.setText(String.format("%,dđ", originalPrice).replace(',', '.'));
+            tvOrigPrice.setPaintFlags(tvOrigPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+
+            tvDiscPrice.setText(String.format("%,dđ", discountedPrice).replace(',', '.'));
+
+            card.setOnClickListener(v -> {
+                FoodMenuItem discountedItem = new FoodMenuItem(
+                        item.getId(),
+                        item.getName(),
+                        discountedPrice,
+                        item.getImageResId() != 0 ? item.getImageResId() : R.drawable.img_food_chicken,
+                        item.getDescription()
+                );
+                showFoodItemDetailPopup(discountedItem, iv);
+            });
+        }
+    }
+
+    private void updateTopicUI(View sectionView, TopicResponse topic) {
+        if (sectionView == null || topic == null) return;
+        android.widget.TextView tvTitle = sectionView.findViewById(R.id.tv_topic_title);
+        android.widget.TextView tvSubtitle = sectionView.findViewById(R.id.tv_topic_subtitle);
+        androidx.recyclerview.widget.RecyclerView rvStores = sectionView.findViewById(R.id.rv_topic_stores);
+
+        tvTitle.setText(topic.getTitle());
+        tvSubtitle.setText(topic.getSubtitle());
+
+        TopicStoreAdapter adapter = new TopicStoreAdapter(topic.getFoods(), (item, holder) -> {
+            showFoodItemDetailPopup(item, holder.ivImage);
+        });
+        rvStores.setAdapter(adapter);
+    }
+
+    private void updateBrandsUI(List<Restaurant> brands) {
+        View sectionView = findViewById(R.id.topic_brand_section);
+        if (sectionView == null) return;
+        androidx.recyclerview.widget.RecyclerView rvStores = sectionView.findViewById(R.id.rv_topic_stores);
+        BrandAdapter brandAdapter = new BrandAdapter(brands, restaurant -> {
+            Intent intent = new Intent(this, StoreDetailActivity.class);
+            intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, restaurant.getName());
+            startActivity(intent);
+        });
+        rvStores.setAdapter(brandAdapter);
+    }
+
+    @android.annotation.SuppressLint("NotifyDataSetChanged")
+    private void updateDealsUI(List<RecommendedDealModel> deals) {
+        dealItems.clear();
+        dealItemCount = 0;
+        nextBannerAt = 5 + bannerRandom.nextInt(3); // 5-7
+        
+        for (RecommendedDealModel deal : deals) {
+            dealItems.add(deal);
+            dealItemCount++;
+
+            if (dealItemCount >= nextBannerAt) {
+                dealItems.add(HomeDealAdapter.BannerItem.random());
+                nextBannerAt = dealItemCount + 5 + bannerRandom.nextInt(3);
+            }
+        }
+        
+        if (homeDealAdapter != null) {
+            homeDealAdapter.notifyDataSetChanged();
         }
     }
 
@@ -279,6 +505,7 @@ public class HomeActivity extends AppCompatActivity {
                 TextView tvDummy = findViewById(R.id.tv_delivery_address_dummy);
                 if (tvDummy != null) tvDummy.setText(address);
                 dialog.dismiss();
+                if (viewModel != null) viewModel.setAddressAndRefresh(address);
             });
 
             rootLayout.addView(itemLayout);
@@ -665,78 +892,16 @@ public class HomeActivity extends AppCompatActivity {
 
     @android.annotation.SuppressLint("NotifyDataSetChanged")
     private void resetAndLoadDeals() {
-        RecyclerView rvDeals = findViewById(R.id.rv_home_deals);
-        if (rvDeals != null && rvDeals.getHeight() > 0) {
-            rvDeals.setMinimumHeight(rvDeals.getHeight());
+        if (viewModel != null) {
+            viewModel.resetAndFetchDeals(tabHomeDeals.getSelectedTabPosition());
         }
-
-        dealItems.clear();
-        dealItemCount = 0;
-        nextBannerAt = 5 + bannerRandom.nextInt(3); // 5-7
-        homeDealAdapter.notifyDataSetChanged();
-        isLoadingMore = false;
-        
-        boolean isStickyVisible = stickyTabLayout != null && stickyTabLayout.getVisibility() == View.VISIBLE;
-        loadMoreDeals(isStickyVisible);
     }
 
     @android.annotation.SuppressLint("NotifyDataSetChanged")
     private void loadMoreDeals(boolean useFloatingOverlay) {
-        if (isLoadingMore) return;
-        isLoadingMore = true;
-
-        if (useFloatingOverlay) {
-            View loadingOverlay = findViewById(R.id.layout_loading_overlay);
-            if (loadingOverlay != null) {
-                loadingOverlay.setVisibility(View.VISIBLE);
-            }
-        } else {
-            // Add loading indicator to bottom
-            dealItems.add(null);
-            homeDealAdapter.notifyItemInserted(dealItems.size() - 1);
+        if (viewModel != null) {
+            viewModel.loadNextDealsPage();
         }
-
-        int tabIndex = tabHomeDeals.getSelectedTabPosition();
-        int delay = 800 + bannerRandom.nextInt(700); // 800-1500ms
-
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (useFloatingOverlay) {
-                View loadingOverlay = findViewById(R.id.layout_loading_overlay);
-                if (loadingOverlay != null) {
-                    loadingOverlay.setVisibility(View.GONE);
-                }
-            } else {
-                // Remove loading indicator from bottom
-                int loadingPos = dealItems.indexOf(null);
-                if (loadingPos >= 0) {
-                    dealItems.remove(loadingPos);
-                    homeDealAdapter.notifyItemRemoved(loadingPos);
-                }
-            }
-
-            // Generate 5 fake deals
-            List<RecommendedDealModel> newDeals = FakeDealGenerator.generateDeals(5, tabIndex);
-
-            for (RecommendedDealModel deal : newDeals) {
-                dealItems.add(deal);
-                dealItemCount++;
-
-                // Insert banner every 5-7 deal items
-                if (dealItemCount >= nextBannerAt) {
-                    dealItems.add(HomeDealAdapter.BannerItem.random());
-                    nextBannerAt = dealItemCount + 5 + bannerRandom.nextInt(3);
-                }
-            }
-
-            homeDealAdapter.notifyDataSetChanged();
-            isLoadingMore = false;
-            
-            // Reset minHeight so it can grow or shrink properly on subsequent loads
-            RecyclerView rv = findViewById(R.id.rv_home_deals);
-            if (rv != null) {
-                rv.setMinimumHeight(0);
-            }
-        }, delay);
     }
 
     private void setupStickyTab() {
