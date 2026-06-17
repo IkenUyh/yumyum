@@ -6,4 +6,5 @@ import java.util.List;
 public class BrandResponse {
     private List<Restaurant> brands;
     public List<Restaurant> getBrands() { return brands; }
+    public void setBrands(List<Restaurant> brands) { this.brands = brands; }
 }

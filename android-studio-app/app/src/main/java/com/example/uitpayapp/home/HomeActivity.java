@@ -200,17 +200,44 @@ public class HomeActivity extends AppCompatActivity {
                 
                 HomeCoreResponse data = state.getData();
                 if (data != null) {
+                    if (data.getCategories() != null && !data.getCategories().isEmpty() && categoryAdapter != null) {
+                        categoryAdapter.updateData(data.getCategories());
+                    }
+
                     if (data.getFlashSales() != null && !data.getFlashSales().isEmpty()) {
+                        if (fsError != null) fsError.setVisibility(View.GONE);
+                        if (fsSection != null) fsSection.setVisibility(View.VISIBLE);
                         updateFlashsaleUI(data.getFlashSales());
-                    } else if (fsSection != null) {
-                        fsSection.setVisibility(View.GONE);
+                    } else {
+                        if (fsSection != null) fsSection.setVisibility(View.GONE);
+                        if (fsError != null) {
+                            fsError.setVisibility(View.VISIBLE);
+                            android.widget.TextView tvFsError = findViewById(R.id.tv_flashsale_error);
+                            if (tvFsError != null) tvFsError.setText("Chưa có dữ liệu");
+                        }
                     }
                     if (data.getTopics() != null && data.getTopics().size() >= 2) {
+                        if (t1Error != null) t1Error.setVisibility(View.GONE);
+                        if (t1Section != null) t1Section.setVisibility(View.VISIBLE);
                         updateTopicUI(findViewById(R.id.topic_section_1), data.getTopics().get(0));
+                        
+                        if (t2Error != null) t2Error.setVisibility(View.GONE);
+                        if (t2Section != null) t2Section.setVisibility(View.VISIBLE);
                         updateTopicUI(findViewById(R.id.topic_section_2), data.getTopics().get(1));
                     } else {
                         if (t1Section != null) t1Section.setVisibility(View.GONE);
+                        if (t1Error != null) {
+                            t1Error.setVisibility(View.VISIBLE);
+                            android.widget.TextView tvT1Error = findViewById(R.id.tv_topic1_error);
+                            if (tvT1Error != null) tvT1Error.setText("Chưa có dữ liệu");
+                        }
+                        
                         if (t2Section != null) t2Section.setVisibility(View.GONE);
+                        if (t2Error != null) {
+                            t2Error.setVisibility(View.VISIBLE);
+                            android.widget.TextView tvT2Error = findViewById(R.id.tv_topic2_error);
+                            if (tvT2Error != null) tvT2Error.setText("Chưa có dữ liệu");
+                        }
                     }
                 }
             } else if (state.isError() || state.isEmpty()) {
@@ -219,7 +246,7 @@ public class HomeActivity extends AppCompatActivity {
                 if (fsError != null) {
                     fsError.setVisibility(View.VISIBLE);
                     android.widget.TextView tvFsError = findViewById(R.id.tv_flashsale_error);
-                    if (tvFsError != null) tvFsError.setText(state.getMessage());
+                    if (tvFsError != null) tvFsError.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
                 }
                 
                 if (t1Loading != null) t1Loading.setVisibility(View.GONE);
@@ -227,7 +254,7 @@ public class HomeActivity extends AppCompatActivity {
                 if (t1Error != null) {
                     t1Error.setVisibility(View.VISIBLE);
                     android.widget.TextView tvT1Error = findViewById(R.id.tv_topic1_error);
-                    if (tvT1Error != null) tvT1Error.setText(state.getMessage());
+                    if (tvT1Error != null) tvT1Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
                 }
                 
                 if (t2Loading != null) t2Loading.setVisibility(View.GONE);
@@ -235,7 +262,7 @@ public class HomeActivity extends AppCompatActivity {
                 if (t2Error != null) {
                     t2Error.setVisibility(View.VISIBLE);
                     android.widget.TextView tvT2Error = findViewById(R.id.tv_topic2_error);
-                    if (tvT2Error != null) tvT2Error.setText(state.getMessage());
+                    if (tvT2Error != null) tvT2Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
                 }
             }
         });
@@ -266,7 +293,7 @@ public class HomeActivity extends AppCompatActivity {
                 if (errorView != null) {
                     errorView.setVisibility(View.VISIBLE);
                     android.widget.TextView tvBrandsError = findViewById(R.id.tv_brands_error);
-                    if (tvBrandsError != null) tvBrandsError.setText(state.getMessage());
+                    if (tvBrandsError != null) tvBrandsError.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
                 }
             }
         });
@@ -339,7 +366,7 @@ public class HomeActivity extends AppCompatActivity {
             android.widget.TextView tvOrigPrice = card.findViewById(origPriceIds[i]);
             android.widget.TextView tvDiscPrice = card.findViewById(discPriceIds[i]);
 
-            iv.setImageResource(item.getImageResId() != 0 ? item.getImageResId() : R.drawable.img_food_chicken);
+            iv.setImageResource(item.getImageResId() != 0 ? item.getImageResId() : 0);
             tvName.setText(item.getName());
 
             long originalPrice = item.getPrice();
@@ -355,7 +382,7 @@ public class HomeActivity extends AppCompatActivity {
                         item.getId(),
                         item.getName(),
                         discountedPrice,
-                        item.getImageResId() != 0 ? item.getImageResId() : R.drawable.img_food_chicken,
+                        item.getImageResId(),
                         item.getDescription()
                 );
                 showFoodItemDetailPopup(discountedItem, iv);
@@ -368,20 +395,45 @@ public class HomeActivity extends AppCompatActivity {
         android.widget.TextView tvTitle = sectionView.findViewById(R.id.tv_topic_title);
         android.widget.TextView tvSubtitle = sectionView.findViewById(R.id.tv_topic_subtitle);
         androidx.recyclerview.widget.RecyclerView rvStores = sectionView.findViewById(R.id.rv_topic_stores);
+        android.widget.TextView tvEmpty = sectionView.findViewById(R.id.tv_topic_empty);
 
         tvTitle.setText(topic.getTitle());
         tvSubtitle.setText(topic.getSubtitle());
 
-        TopicStoreAdapter adapter = new TopicStoreAdapter(topic.getFoods(), (item, holder) -> {
-            showFoodItemDetailPopup(item, holder.ivImage);
-        });
-        rvStores.setAdapter(adapter);
+        if (topic.getFoods() == null || topic.getFoods().isEmpty()) {
+            rvStores.setVisibility(View.GONE);
+            if (tvEmpty != null) tvEmpty.setVisibility(View.VISIBLE);
+        } else {
+            rvStores.setVisibility(View.VISIBLE);
+            if (tvEmpty != null) tvEmpty.setVisibility(View.GONE);
+            
+            if (rvStores.getLayoutManager() == null) {
+                rvStores.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false));
+            }
+            
+            TopicStoreAdapter adapter = new TopicStoreAdapter(topic.getFoods(), (item, holder) -> {
+                showFoodItemDetailPopup(item, holder.ivImage);
+            });
+            rvStores.setAdapter(adapter);
+        }
     }
 
     private void updateBrandsUI(List<Restaurant> brands) {
         View sectionView = findViewById(R.id.topic_brand_section);
         if (sectionView == null) return;
+        
+        TextView tvTitle = sectionView.findViewById(R.id.tv_topic_title);
+        TextView tvSubtitle = sectionView.findViewById(R.id.tv_topic_subtitle);
+        TextView tvSeeMore = sectionView.findViewById(R.id.tv_topic_see_more);
+        
+        if (tvTitle != null) tvTitle.setText("Cửa hàng nổi bật");
+        if (tvSubtitle != null) tvSubtitle.setText("Các cửa hàng được yêu thích nhất");
+        if (tvSeeMore != null) tvSeeMore.setVisibility(View.GONE);
+
         androidx.recyclerview.widget.RecyclerView rvStores = sectionView.findViewById(R.id.rv_topic_stores);
+        if (rvStores.getLayoutManager() == null) {
+            rvStores.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        }
         BrandAdapter brandAdapter = new BrandAdapter(brands, restaurant -> {
             Intent intent = new Intent(this, StoreDetailActivity.class);
             intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, restaurant.getName());
@@ -568,16 +620,6 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setupCategories() {
         List<FoodCategory> categories = new ArrayList<>();
-        categories.add(new FoodCategory("Cơm", R.drawable.ic_cat_com, Color.parseColor("#E65100")));
-        categories.add(new FoodCategory("Bún Phở", R.drawable.ic_cat_bun_pho, Color.parseColor("#00838F")));
-        categories.add(new FoodCategory("Bánh mì", R.drawable.ic_cat_banh_mi, Color.parseColor("#BF360C")));
-        categories.add(new FoodCategory("Fastfood", R.drawable.ic_cat_fastfood, Color.parseColor("#C62828")));
-        categories.add(new FoodCategory("Lẩu", R.drawable.ic_cat_lau, Color.parseColor("#D84315")));
-        categories.add(new FoodCategory("Đồ nướng", R.drawable.ic_cat_bbq, Color.parseColor("#B71C1C")));
-        categories.add(new FoodCategory("Cafe", R.drawable.ic_cat_ca_phe, Color.parseColor("#4E342E")));
-        categories.add(new FoodCategory("Trà sữa", R.drawable.ic_cat_tra_sua, Color.parseColor("#8D6E63")));
-        categories.add(new FoodCategory("Ăn vặt", R.drawable.ic_cat_an_vat, Color.parseColor("#6A1B9A")));
-        categories.add(new FoodCategory("Danh mục", R.drawable.ic_cat_all, Color.parseColor("#283593"), true));
 
         RecyclerView rv = findViewById(R.id.rv_categories);
         rv.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(
