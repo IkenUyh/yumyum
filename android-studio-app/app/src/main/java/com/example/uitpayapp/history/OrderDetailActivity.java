@@ -25,13 +25,14 @@ import java.util.List;
 import com.example.uitpayapp.home.home_models.CartManager;
 import com.example.uitpayapp.home.home_models.CartItem;
 
-public class OrderDetailActivity extends AppCompatActivity {
+public class OrderDetailActivity extends AppCompatActivity implements com.google.android.gms.maps.OnMapReadyCallback {
 
     // 1. Hệ thống điều khiển & Giao diện trượt
     private BottomSheetBehavior<View> bottomSheetBehavior;
     private View mapContainer;
     private View layoutDriverInfo;
     private Toolbar toolbar;
+    private com.google.android.gms.maps.GoogleMap mMap;
 
     // 2. Hệ thống nút bấm tương tác
     private ImageButton btnMapBack;
@@ -78,6 +79,12 @@ public class OrderDetailActivity extends AppCompatActivity {
         mapContainer = findViewById(R.id.mapContainer);
         toolbar = findViewById(R.id.toolbar);
         btnMapBack = findViewById(R.id.btnMapBack);
+        
+        com.google.android.gms.maps.SupportMapFragment mapFragment = (com.google.android.gms.maps.SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.mapFragment);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
         btnCallDriver = findViewById(R.id.btnCallDriver);
         btnChatDriver = findViewById(R.id.btnChatDriver);
         btnCancelOrder = findViewById(R.id.btnCancelOrder);
@@ -206,6 +213,31 @@ public class OrderDetailActivity extends AppCompatActivity {
         // Logic nút hủy đơn hàng
         btnCancelOrder.setOnClickListener(v -> {
             Toast.makeText(this, "Đang gửi yêu cầu hủy đơn " + data.getOrderId() + " lên hệ thống...", Toast.LENGTH_SHORT).show();
+            com.example.uitpayapp.modules.order.models.requests.CancelOrderRequest request = 
+                new com.example.uitpayapp.modules.order.models.requests.CancelOrderRequest("Khách hàng đổi ý");
+
+            com.example.uitpayapp.modules.order.OrderRepository orderRepo = new com.example.uitpayapp.modules.order.OrderRepository();
+            // Lấy ID đơn hàng, tạm parse từ String (nếu hệ thống BE dùng Long, bạn cần đảm bảo ORDER_ID là số)
+            long orderIdLong = 1L; // Mock vì data.getOrderId() hiện là chuỗi format "05066-..."
+            try { orderIdLong = Long.parseLong(data.getOrderId()); } catch(Exception ignored) {}
+
+            orderRepo.cancelOrder(orderIdLong, request, new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderResponse>() {
+                @Override
+                public void onSuccess(com.example.uitpayapp.modules.order.models.responses.OrderResponse res) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(OrderDetailActivity.this, "Hủy đơn thành công!", Toast.LENGTH_SHORT).show();
+                        data.setStatus("CANCELLED");
+                        bindOrderData(data); // Cập nhật lại UI
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(OrderDetailActivity.this, "Lỗi hủy đơn: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
         });
 
         btnCallDriver.setOnClickListener(v -> {
@@ -229,8 +261,12 @@ public class OrderDetailActivity extends AppCompatActivity {
             startActivity(chatIntent);
         });
 
-        if ("COMPLETED".equalsIgnoreCase(data.getStatus())) {
-            tvOrderStatusTitle.setText("Hoàn thành");
+        if ("COMPLETED".equalsIgnoreCase(data.getStatus()) || "CANCELLED".equalsIgnoreCase(data.getStatus())) {
+            if ("CANCELLED".equalsIgnoreCase(data.getStatus())) {
+                tvOrderStatusTitle.setText("Đã hủy");
+            } else {
+                tvOrderStatusTitle.setText("Hoàn thành");
+            }
             tvOrderTimeHeader.setVisibility(View.GONE);
             layoutDriverInfo.setVisibility(View.GONE);
             mapContainer.setVisibility(View.GONE);
@@ -270,6 +306,36 @@ public class OrderDetailActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    @Override
+    public void onMapReady(@NonNull com.google.android.gms.maps.GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Dummy coordinates for Demo
+        com.google.android.gms.maps.model.LatLng merchantLocation = new com.google.android.gms.maps.model.LatLng(10.8800, 106.8000);
+        com.google.android.gms.maps.model.LatLng customerLocation = new com.google.android.gms.maps.model.LatLng(10.8750, 106.7900);
+
+        mMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions().position(merchantLocation).title("Quán"));
+        mMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions().position(customerLocation).title("Khách hàng"));
+
+        // Move camera
+        com.google.android.gms.maps.model.LatLngBounds.Builder builder = new com.google.android.gms.maps.model.LatLngBounds.Builder();
+        builder.include(merchantLocation);
+        builder.include(customerLocation);
+        com.google.android.gms.maps.model.LatLngBounds bounds = builder.build();
+
+        mMap.setOnMapLoadedCallback(() -> {
+            mMap.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 100));
+        });
+        
+        // Draw polyline (Demo direct line, actual route would require Directions API call)
+        com.google.android.gms.maps.model.PolylineOptions polylineOptions = new com.google.android.gms.maps.model.PolylineOptions()
+                .add(merchantLocation)
+                .add(customerLocation)
+                .width(8)
+                .color(android.graphics.Color.parseColor("#E84A26"));
+        mMap.addPolyline(polylineOptions);
     }
 
     // Lớp Adapter nội bộ cập nhật theo class OrderDetail mới

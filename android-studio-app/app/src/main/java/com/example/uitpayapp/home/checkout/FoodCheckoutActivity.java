@@ -57,7 +57,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
 
         initViews();
         loadCartData();
-        updateTotals();
+        fetchPreviewData(); // Fetch real data from backend
     }
 
     private void initViews() {
@@ -151,6 +151,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         totalAmount = subtotalAmount + deliveryFee - totalDiscount;
 
         tvSubtotal.setText(String.format("%,dđ", subtotalAmount).replace(',', '.'));
+        tvDeliveryFee.setText(String.format("%,dđ", deliveryFee).replace(',', '.'));
         btnConfirmCheckout.setText("Đặt đơn - " + String.format("%,dđ", totalAmount).replace(',', '.'));
 
         if (discount > 0) {
@@ -163,6 +164,32 @@ public class FoodCheckoutActivity extends AppCompatActivity {
             tvSelectedVoucher.setText("Chọn hoặc nhập mã ưu đãi");
             tvSelectedVoucher.setTextColor(android.graphics.Color.parseColor("#757575"));
         }
+    }
+
+    private void fetchPreviewData() {
+        com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest request = 
+                new com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest(
+                1L, 1L, "STANDARD", new ArrayList<>() // hardcoded cho demo
+        );
+
+        com.example.uitpayapp.modules.order.OrderRepository orderRepo = new com.example.uitpayapp.modules.order.OrderRepository();
+        orderRepo.previewOrder(request, new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderPreviewResponse>() {
+            @Override
+            public void onSuccess(com.example.uitpayapp.modules.order.models.responses.OrderPreviewResponse data) {
+                runOnUiThread(() -> {
+                    deliveryFee = (long) data.getShippingFee();
+                    subtotalAmount = (long) data.getFoodTotal();
+                    updateTotals();
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    Toast.makeText(FoodCheckoutActivity.this, "Không thể tính phí ship: " + errorMessage, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
 
     private void showVoucherBottomSheet() {

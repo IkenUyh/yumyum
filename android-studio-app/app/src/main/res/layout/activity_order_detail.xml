@@ -12,13 +12,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
+        <fragment
+            android:id="@+id/mapFragment"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@android:drawable/ic_menu_mapmode"
-            app:tint="#C2C2C2"
-            tools:ignore="ContentDescription" />
+            android:layout_height="match_parent" />
 
         <ImageButton
             android:id="@+id/btnMapBack"
