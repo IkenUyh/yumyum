@@ -18,8 +18,48 @@ public class RestaurantController {
     private final RestaurantService restaurantService;
     private final com.uit.fooddelivery_api.modules.food.services.FoodService foodService;
 
+    // =====================================================
+    // PUBLIC ENDPOINTS - Không cần đăng nhập
+    // =====================================================
+
+    // 1. Lấy tất cả nhà hàng cho khách hàng xem (trang Home)
+    @GetMapping
+    @org.springframework.cache.annotation.Cacheable(value = "restaurantsList")
+    public ApiResponse<java.util.List<RestaurantResponseDTO>> getAllRestaurants() {
+        System.out.println("Đang truy vấn Database MySQL để lấy danh sách quán ăn...");
+
+        java.util.List<RestaurantResponseDTO> list = restaurantService.getAllRestaurants()
+                .stream()
+                .map(RestaurantResponseDTO::fromEntity)
+                .toList();
+        return ApiResponse.success(list);
+    }
+
+    // 2. Lấy chi tiết 1 nhà hàng theo ID (public - không cần đăng nhập)
+    @GetMapping("/{id}")
+    public ApiResponse<RestaurantResponseDTO> getRestaurantById(@PathVariable("id") Long restaurantId) {
+        return ApiResponse.success(RestaurantResponseDTO.fromEntity(restaurantService.getRestaurantById(restaurantId)));
+    }
+
+    // 3. Lấy thực đơn (Menu) của một nhà hàng (public - không cần đăng nhập)
+    @GetMapping("/{id}/foods")
+    public ApiResponse<java.util.List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO>> getRestaurantMenu(
+            @PathVariable("id") Long restaurantId) {
+
+        java.util.List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> menu = foodService.getFoodsByRestaurant(restaurantId)
+                .stream()
+                .map(com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO::fromEntity)
+                .toList();
+        return ApiResponse.success(menu);
+    }
+
+    // =====================================================
+    // PROTECTED ENDPOINTS - Yêu cầu đăng nhập (Chủ quán)
+    // =====================================================
+
+    // Tạo nhà hàng mới (chủ quán)
     @PostMapping
-    @org.springframework.cache.annotation.CacheEvict(value = "restaurantsList", allEntries = true) // Xóa cache cũ
+    @org.springframework.cache.annotation.CacheEvict(value = "restaurantsList", allEntries = true)
     public ApiResponse<RestaurantResponseDTO> createRestaurant(
             Authentication authentication,
             @RequestBody CreateRestaurantDTO dto) {
@@ -34,31 +74,7 @@ public class RestaurantController {
         return ApiResponse.success(RestaurantResponseDTO.fromEntity(savedRestaurant));
     }
 
-    // 1. API lấy tất cả nhà hàng cho khách hàng xem
-    @GetMapping
-    @org.springframework.cache.annotation.Cacheable(value = "restaurantsList")
-    public ApiResponse<java.util.List<RestaurantResponseDTO>> getAllRestaurants() {
-        System.out.println("Đang truy vấn Database MySQL để lấy danh sách quán ăn...");
-
-        java.util.List<RestaurantResponseDTO> list = restaurantService.getAllRestaurants()
-                .stream()
-                .map(RestaurantResponseDTO::fromEntity)
-                .toList();
-        return ApiResponse.success(list);
-    }
-
-    // 2. API lay thuc don (Menu) cua mot nha hang cu the
-    @GetMapping("/{id}/foods")
-    public ApiResponse<java.util.List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO>> getRestaurantMenu(
-            @PathVariable("id") Long restaurantId) {
-
-        java.util.List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> menu = foodService.getFoodsByRestaurant(restaurantId)
-                .stream()
-                .map(com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO::fromEntity)
-                .toList();
-        return ApiResponse.success(menu);
-    }
-
+    // Cập nhật cài đặt nhà hàng (chủ quán)
     @PutMapping("/{id}/settings")
     @org.springframework.cache.annotation.CacheEvict(value = "restaurantsList", allEntries = true)
     public ApiResponse<RestaurantResponseDTO> updateRestaurantSettings(
