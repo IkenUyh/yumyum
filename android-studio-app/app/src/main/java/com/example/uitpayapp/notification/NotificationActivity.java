@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -52,24 +53,133 @@ public class NotificationActivity extends AppCompatActivity {
 
         rvPromotions = findViewById(R.id.rvPromotions);
         promoList = new ArrayList<>();
-        loadPromoDummyData();
-
         promoAdapter = new PromoAdapter(promoList);
         rvPromotions.setAdapter(promoAdapter);
         rvPromotions.setLayoutManager(new LinearLayoutManager(this));
+
+        loadRealData();
         setupBottomNavigation();
     }
 
-    private void loadPromoDummyData() {
-        promoList.add(new PromoNotification("1",
-                "[HCMC, HN, DN] Coca-Cola mời COMBO CỰC HỜI!",
-                "⚡ Giảm 48.000Đ đơn từ 100.000Đ\n🥰 Áp dụng combo 2 món + 2 Coca-Cola\n🥤 Uống Coca-Cola mát lạnh, ăn ngon hết sẩy\n⚡ Đặt ngay ShopeeFood bạn nha!",
-                "30/05/2026 15:00", android.R.drawable.ic_menu_gallery));
+    private void loadRealData() {
+        // A. Load Latest News for "Tin tức" row sub-text
+        com.example.uitpayapp.modules.news.NewsRepository newsRepository = new com.example.uitpayapp.modules.news.NewsRepository();
+        newsRepository.getActiveNews(new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.news.models.NewsDTO>>() {
+            @Override
+            public void onSuccess(List<com.example.uitpayapp.modules.news.models.NewsDTO> data) {
+                if (data != null && !data.isEmpty()) {
+                    TextView tvLatestNews = findViewById(R.id.tvLatestNews);
+                    if (tvLatestNews != null) {
+                        tvLatestNews.setText(data.get(0).getTitle());
+                    }
+                }
+            }
 
-        promoList.add(new PromoNotification("2",
-                "[HCMC, HN, DN] Quán mới KHAO BẠN 30.000Đ",
-                "🌮 Bánh mì nướng muối ớt, nước long nhãn\n🥥 Sương Sâm Dừa Nước...\n🧡 Ăn xế thảnh thơi, đặt liền bạn ơi!",
-                "30/05/2026 13:30", android.R.drawable.ic_menu_gallery));
+            @Override
+            public void onError(String errorMessage) {
+                // Keep default placeholder on error
+            }
+        });
+
+        // B. Load Notification History for "Khuyến mãi" list, "Đơn hàng" row sub-text, and unread badge
+        com.example.uitpayapp.modules.notification.NotificationRepository notificationRepository = new com.example.uitpayapp.modules.notification.NotificationRepository();
+        notificationRepository.getHistory(new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO>>() {
+            @Override
+            public void onSuccess(List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO> data) {
+                List<PromoNotification> promos = new ArrayList<>();
+                int unreadOrderCount = 0;
+                String latestOrderTitle = null;
+
+                for (com.example.uitpayapp.modules.notification.models.NotificationResponseDTO dto : data) {
+                    if ("PROMOTION".equalsIgnoreCase(dto.getType())) {
+                        promos.add(new PromoNotification(
+                                String.valueOf(dto.getId()),
+                                dto.getTitle(),
+                                dto.getMessage(),
+                                formatDateTime(dto.getCreatedAt()),
+                                android.R.drawable.ic_menu_gallery
+                        ));
+                    } else if ("ORDER_UPDATE".equalsIgnoreCase(dto.getType()) || "SYSTEM".equalsIgnoreCase(dto.getType())) {
+                        if (latestOrderTitle == null) {
+                            latestOrderTitle = dto.getTitle();
+                        }
+                        if (dto.getIsRead() == null || !dto.getIsRead()) {
+                            unreadOrderCount++;
+                        }
+                    }
+                }
+
+                // Update Promotions RecyclerView
+                if (!promos.isEmpty()) {
+                    promoList.clear();
+                    promoList.addAll(promos);
+                    promoAdapter.notifyDataSetChanged();
+                }
+
+                // Update latest order text snippet
+                if (latestOrderTitle != null) {
+                    TextView tvLatestOrderNoti = findViewById(R.id.tvLatestOrderNoti);
+                    if (tvLatestOrderNoti != null) {
+                        tvLatestOrderNoti.setText(latestOrderTitle);
+                    }
+                }
+
+                // Update order notifications badge count
+                TextView tvOrderBadge = findViewById(R.id.tvOrderBadge);
+                if (tvOrderBadge != null) {
+                    if (unreadOrderCount > 0) {
+                        tvOrderBadge.setText(String.valueOf(unreadOrderCount));
+                        tvOrderBadge.setVisibility(View.VISIBLE);
+                    } else {
+                        tvOrderBadge.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Keep default/dummy data on failure
+            }
+        });
+    }
+
+    private String formatDateTime(String isoString) {
+        if (isoString == null) return "";
+        try {
+            String cleanStr = isoString;
+            if (cleanStr.contains(".")) {
+                int dotIdx = cleanStr.indexOf(".");
+                int tIdx = cleanStr.indexOf("+");
+                if (tIdx == -1) tIdx = cleanStr.indexOf("-", dotIdx);
+                if (tIdx == -1) tIdx = cleanStr.indexOf("Z", dotIdx);
+                if (tIdx != -1) {
+                    cleanStr = cleanStr.substring(0, dotIdx) + cleanStr.substring(tIdx);
+                } else {
+                    cleanStr = cleanStr.substring(0, dotIdx);
+                }
+            }
+            java.text.SimpleDateFormat inputFormat;
+            if (cleanStr.endsWith("Z")) {
+                inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault());
+                inputFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            } else if (cleanStr.contains("+") || (cleanStr.lastIndexOf("-") > 10)) {
+                try {
+                    inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.getDefault());
+                    java.util.Date date = inputFormat.parse(cleanStr);
+                    java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+                    return outputFormat.format(date);
+                } catch (Exception ex) {
+                    inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+                }
+            } else {
+                inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+            }
+            java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+            java.util.Date date = inputFormat.parse(cleanStr);
+            return outputFormat.format(date);
+        } catch (Exception e) {
+            return isoString;
+        }
     }
 
     private void setupBottomNavigation() {

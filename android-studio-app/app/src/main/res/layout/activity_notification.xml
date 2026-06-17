@@ -72,6 +72,7 @@
                         android:textSize="15sp"
                         android:textStyle="bold" />
                     <TextView
+                        android:id="@+id/tvLatestNews"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="📢 Cập nhật chính sách ShopeeFood"
@@ -128,6 +129,7 @@
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <TextView
+                            android:id="@+id/tvOrderBadge"
                             android:layout_width="18dp"
                             android:layout_height="18dp"
                             android:layout_marginStart="8dp"
@@ -140,6 +142,7 @@
                             android:textStyle="bold" />
                     </LinearLayout>
                     <TextView
+                        android:id="@+id/tvLatestOrderNoti"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Đơn hàng tại Hồng Trà Sữa Ba Cô Gái Tam..."

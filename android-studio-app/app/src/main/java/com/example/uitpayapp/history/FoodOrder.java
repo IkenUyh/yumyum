@@ -19,7 +19,7 @@ public class FoodOrder {
         private String name;
         private int imageResId;
         private String imageUrl;
- 
+
         public SubItem(String name, int imageResId) {
             this.name = name;
             this.imageResId = imageResId;

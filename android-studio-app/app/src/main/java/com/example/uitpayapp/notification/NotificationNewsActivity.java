@@ -23,15 +23,68 @@ public class NotificationNewsActivity extends AppCompatActivity {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         RecyclerView rv = findViewById(R.id.rvNewsNotifications);
-        List<NewsNotification> list = new ArrayList<>();
-
-        list.add(new NewsNotification("1",
-                "[HCMC, HN, CT] 📢 Cập nhật chính sách ShopeeFood",
-                "Ra mắt tính năng dịch vụ \"Lấy tại quán\" &amp; cập nhật các chính sách liên quan từ ngày 19.05.2026",
-                "26/05/2026 18:00"));
-
-        rv.setAdapter(new NewsAdapter(list));
         rv.setLayoutManager(new LinearLayoutManager(this));
+        
+        com.example.uitpayapp.modules.news.NewsRepository newsRepository = new com.example.uitpayapp.modules.news.NewsRepository();
+        newsRepository.getActiveNews(new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.news.models.NewsDTO>>() {
+            @Override
+            public void onSuccess(List<com.example.uitpayapp.modules.news.models.NewsDTO> data) {
+                List<NewsNotification> list = new ArrayList<>();
+                for (com.example.uitpayapp.modules.news.models.NewsDTO dto : data) {
+                    list.add(new NewsNotification(
+                            String.valueOf(dto.getId()),
+                            dto.getTitle(),
+                            dto.getContent(),
+                            formatDateTime(dto.getCreatedAt())
+                    ));
+                }
+                rv.setAdapter(new NewsAdapter(list));
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                android.widget.Toast.makeText(NotificationNewsActivity.this, "Lỗi tải tin tức: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private String formatDateTime(String isoString) {
+        if (isoString == null) return "";
+        try {
+            String cleanStr = isoString;
+            if (cleanStr.contains(".")) {
+                int dotIdx = cleanStr.indexOf(".");
+                int tIdx = cleanStr.indexOf("+");
+                if (tIdx == -1) tIdx = cleanStr.indexOf("-", dotIdx);
+                if (tIdx == -1) tIdx = cleanStr.indexOf("Z", dotIdx);
+                if (tIdx != -1) {
+                    cleanStr = cleanStr.substring(0, dotIdx) + cleanStr.substring(tIdx);
+                } else {
+                    cleanStr = cleanStr.substring(0, dotIdx);
+                }
+            }
+            java.text.SimpleDateFormat inputFormat;
+            if (cleanStr.endsWith("Z")) {
+                inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault());
+                inputFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            } else if (cleanStr.contains("+") || (cleanStr.lastIndexOf("-") > 10)) {
+                try {
+                    inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.getDefault());
+                    java.util.Date date = inputFormat.parse(cleanStr);
+                    java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+                    return outputFormat.format(date);
+                } catch (Exception ex) {
+                    inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+                }
+            } else {
+                inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+            }
+            java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+            java.util.Date date = inputFormat.parse(cleanStr);
+            return outputFormat.format(date);
+        } catch (Exception e) {
+            return isoString;
+        }
     }
 
     private static class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {

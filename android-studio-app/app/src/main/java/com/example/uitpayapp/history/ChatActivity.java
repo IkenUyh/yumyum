@@ -1,15 +1,23 @@
 package com.example.uitpayapp.history;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.modules.chat.ChatRepository;
+import com.example.uitpayapp.modules.chat.StompSockJsClient;
+import com.example.uitpayapp.modules.chat.models.responses.ChatMessageResponse;
+import com.example.uitpayapp.network.ApiCallback;
+import com.example.uitpayapp.network.SessionManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +27,16 @@ public class ChatActivity extends AppCompatActivity {
     private ChatAdapter chatAdapter;
     private List<ChatMessage> messages;
     private EditText etMessageInput;
-    private ImageButton btnBackChat, btnGridMenu, btnSendMessage; // Đổi tên nút gửi ảnh thành nút gửi tin nhắn
+    private ImageButton btnBackChat, btnSendMessage;
     private TextView tvChatSubtitle;
     private LinearLayout lnQuickRepliesContainer;
+
+    // Các trường phục vụ kết nối API và WebSocket
+    private ChatRepository chatRepository;
+    private StompSockJsClient stompClient;
+    private Long orderIdLong;
+    private Long userId;
+    private boolean isChatLocked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +49,7 @@ public class ChatActivity extends AppCompatActivity {
         btnBackChat = findViewById(R.id.btnBackChat);
         tvChatSubtitle = findViewById(R.id.tvChatSubtitle);
         lnQuickRepliesContainer = findViewById(R.id.lnQuickRepliesContainer);
-        btnSendMessage = findViewById(R.id.btnSendMessage); // Ánh xạ nút gửi tin nhắn mới
+        btnSendMessage = findViewById(R.id.btnSendMessage);
 
         messages = new ArrayList<>();
         chatAdapter = new ChatAdapter(messages);
@@ -45,19 +60,40 @@ public class ChatActivity extends AppCompatActivity {
         // Đọc thông tin mã đơn nhận từ trang chi tiết
         String orderId = getIntent().getStringExtra("ORDER_ID");
         String merchantName = getIntent().getStringExtra("MERCHANT_NAME");
+        isChatLocked = getIntent().getBooleanExtra("IS_CHAT_LOCKED", false);
+
         if (orderId != null && merchantName != null) {
             tvChatSubtitle.setText(merchantName + " | Mã đơn: #" + orderId);
         }
 
-        // Tải lịch sử chat mock ban đầu
-        loadInitialMockChatHistory();
+        // Lấy thông tin người dùng hiện tại
+        userId = SessionManager.getInstance(this).getUserId();
 
-        // CÁCH 1: Click vào chính nút Mũi tên gửi trên màn hình (Sửa lỗi của ông)
-        btnSendMessage.setOnClickListener(v -> {
-            performSendMessage();
-        });
+        // Kiểm tra xem phòng chat có bị khóa do đơn hàng đã hoàn tất/hủy hay không
+        if (isChatLocked) {
+            etMessageInput.setEnabled(false);
+            etMessageInput.setHint("Cuộc trò chuyện đã kết thúc");
+            btnSendMessage.setEnabled(false);
+            lnQuickRepliesContainer.setVisibility(View.GONE);
+        }
 
-        // CÁCH 2: Nhấn nút Enter / Gửi từ bàn phím ảo hệ thống
+        // Cố gắng chuyển đổi ID đơn hàng thành số
+        try {
+            if (orderId != null) {
+                orderIdLong = Long.parseLong(orderId);
+            }
+        } catch (NumberFormatException e) {
+            orderIdLong = null; // Trả về null nếu ID là dạng chuỗi mock có dấu gạch ngang
+        }
+
+        // Khởi tạo Repository và bắt đầu tải lịch sử chat
+        chatRepository = new ChatRepository();
+        loadChatHistoryAndConnect();
+
+        // Click vào nút gửi tin nhắn trên màn hình
+        btnSendMessage.setOnClickListener(v -> performSendMessage());
+
+        // Nhấn nút Enter / Gửi từ bàn phím ảo hệ thống
         etMessageInput.setOnEditorActionListener((v, actionId, event) -> {
             performSendMessage();
             return true;
@@ -69,12 +105,121 @@ public class ChatActivity extends AppCompatActivity {
         btnBackChat.setOnClickListener(v -> finish());
     }
 
-    // Khối hàm xử lý gửi tin nhắn dùng chung (Dễ bảo trì và gán API)
+    private void loadChatHistoryAndConnect() {
+        if (orderIdLong != null) {
+            // Tải lịch sử chat từ Backend REST API
+            chatRepository.fetchChatHistory(orderIdLong, new ApiCallback<List<ChatMessageResponse>>() {
+                @Override
+                public void onSuccess(List<ChatMessageResponse> history) {
+                    messages.clear();
+                    for (ChatMessageResponse msg : history) {
+                        int senderType = ChatMessage.TYPE_DRIVER;
+                        if (msg.getSenderId() != null && msg.getSenderId().equals(userId)) {
+                            senderType = ChatMessage.TYPE_USER;
+                        }
+                        String displayName = (senderType == ChatMessage.TYPE_USER) ? "Bạn" : (msg.getSenderName() != null ? msg.getSenderName() : "Tài xế");
+                        messages.add(new ChatMessage(
+                                String.valueOf(msg.getId()),
+                                senderType,
+                                msg.getContent(),
+                                formatTimestamp(msg.getCreatedAt()),
+                                displayName
+                        ));
+                    }
+                    chatAdapter.notifyDataSetChanged();
+                    if (!messages.isEmpty()) {
+                        rvChatContent.scrollToPosition(messages.size() - 1);
+                    }
+
+                    // Khởi tạo kết nối WebSocket cho thời gian thực
+                    initWebSocket();
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    // Nếu lỗi kết nối, tự động chuyển sang chế độ giả lập (Simulation mode) để không làm crash UI
+                    Toast.makeText(ChatActivity.this, "Không thể tải lịch sử từ máy chủ. Đang bật chế độ mô phỏng.", Toast.LENGTH_SHORT).show();
+                    loadInitialMockChatHistory();
+                }
+            });
+        } else {
+            // Chạy chế độ mô phỏng nếu đơn hàng là đơn hàng mock tĩnh
+            Toast.makeText(this, "Đang chạy chế độ mô phỏng (Đơn hàng thử nghiệm)", Toast.LENGTH_SHORT).show();
+            loadInitialMockChatHistory();
+        }
+    }
+
+    private void initWebSocket() {
+        if (isChatLocked) return;
+
+        String token = SessionManager.getInstance(this).getAuthToken();
+        // Server URL được cấu hình trực tiếp từ endpoint hệ thống
+        stompClient = new StompSockJsClient("https://kienhuy-dev.name.vn/", token, orderIdLong, new StompSockJsClient.StompListener() {
+            @Override
+            public void onConnected() {
+                runOnUiThread(() -> {
+                    Log.d("ChatActivity", "WebSocket STOMP connected.");
+                    Toast.makeText(ChatActivity.this, "Đã kết nối trực tiếp với tài xế", Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onMessageReceived(ChatMessageResponse message) {
+                runOnUiThread(() -> {
+                    // Kiểm tra trùng lặp tin nhắn trước khi hiển thị
+                    boolean isDuplicate = false;
+                    for (ChatMessage existingMsg : messages) {
+                        if (String.valueOf(message.getId()).equals(existingMsg.getMessageId())) {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+                    if (!isDuplicate) {
+                        int senderType = ChatMessage.TYPE_DRIVER;
+                        if (message.getSenderId() != null && message.getSenderId().equals(userId)) {
+                            senderType = ChatMessage.TYPE_USER;
+                        }
+                        String displayName = (senderType == ChatMessage.TYPE_USER) ? "Bạn" : (message.getSenderName() != null ? message.getSenderName() : "Tài xế");
+                        messages.add(new ChatMessage(
+                                String.valueOf(message.getId()),
+                                senderType,
+                                message.getContent(),
+                                formatTimestamp(message.getCreatedAt()),
+                                displayName
+                        ));
+                        chatAdapter.notifyItemInserted(messages.size() - 1);
+                        rvChatContent.scrollToPosition(messages.size() - 1);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    Log.e("ChatActivity", "WebSocket Error: " + error);
+                    Toast.makeText(ChatActivity.this, "Lỗi kết nối chat: " + error, Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onDisconnected() {
+                runOnUiThread(() -> Log.d("ChatActivity", "WebSocket disconnected."));
+            }
+        });
+        stompClient.connect();
+    }
+
     private void performSendMessage() {
         String text = etMessageInput.getText().toString().trim();
         if (!text.isEmpty()) {
-            appendUserMessage(text);
-            etMessageInput.setText(""); // Xóa sạch khung nhập sau khi gửi thành công
+            if (stompClient != null) {
+                stompClient.sendMessage(userId, text);
+                etMessageInput.setText("");
+            } else {
+                // Chế độ mô phỏng cục bộ
+                appendUserMessage(text);
+                etMessageInput.setText("");
+            }
         }
     }
 
@@ -87,24 +232,16 @@ public class ChatActivity extends AppCompatActivity {
                 "Halo skibibi",
                 "12:38", "foodee_gl6s3niq"));
 
-
         chatAdapter.notifyDataSetChanged();
         rvChatContent.scrollToPosition(messages.size() - 1);
     }
 
     private void appendUserMessage(String text) {
         String uniqueId = String.valueOf(System.currentTimeMillis());
-        messages.add(new ChatMessage(uniqueId, ChatMessage.TYPE_USER, text, "Vừa xong", "foodee_gl6s3niq"));
+        messages.add(new ChatMessage(uniqueId, ChatMessage.TYPE_USER, text, "Vừa xong", "Bạn"));
 
         chatAdapter.notifyItemInserted(messages.size() - 1);
         rvChatContent.scrollToPosition(messages.size() - 1);
-
-        /* 💡 NƠI GẮN API SAU NÀY:
-          if (webSocket != null) {
-              String json = new com.google.gson.Gson().toJson(myMsg);
-              webSocket.send(json);
-          }
-        */
     }
 
     private void setupQuickRepliesClickEvent() {
@@ -114,9 +251,35 @@ public class ChatActivity extends AppCompatActivity {
                 TextView tvReply = (TextView) child;
                 tvReply.setOnClickListener(v -> {
                     String text = tvReply.getText().toString();
-                    appendUserMessage(text);
+                    if (stompClient != null) {
+                        stompClient.sendMessage(userId, text);
+                    } else {
+                        appendUserMessage(text);
+                    }
                 });
             }
+        }
+    }
+
+    private String formatTimestamp(String createdAt) {
+        if (createdAt == null || createdAt.isEmpty()) return "Vừa xong";
+        try {
+            if (createdAt.contains("T")) {
+                String timePart = createdAt.split("T")[1];
+                String[] parts = timePart.split(":");
+                return parts[0] + ":" + parts[1];
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return createdAt;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (stompClient != null) {
+            stompClient.disconnect();
         }
     }
 }

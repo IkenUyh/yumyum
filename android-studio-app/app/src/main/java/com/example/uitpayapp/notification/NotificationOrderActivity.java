@@ -22,22 +22,108 @@ public class NotificationOrderActivity extends AppCompatActivity {
         setContentView(R.layout.activity_notification_order);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        TextView tvReadAll = findViewById(R.id.tvReadAll);
 
         RecyclerView rv = findViewById(R.id.rvOrderNotifications);
-        List<OrderNotification> list = new ArrayList<>();
-
-        list.add(new OrderNotification("1",
-                "Đơn hàng tại Hồng Trà Sữa Ba Cô Gái Tam Hảo - 100 Ba Tháng Hai, Cần Thơ đã hoàn tất",
-                "Cảm ơn bạn đã sử dụng dịch vụ ShopeeFood. Hãy chia sẻ cảm nhận của bạn về đơn hàng để giúp những Khách hàng khác có thể tham khảo nhé!",
-                "21/05/2026 17:47", android.R.drawable.ic_menu_gallery));
-
-        list.add(new OrderNotification("2",
-                "Đơn hàng tại TIỆM BÚN A NHỬU - MẠC THIÊN TÍCH đã hoàn tất",
-                "Cảm ơn bạn đã sử dụng dịch vụ ShopeeFood. Hãy chia sẻ cảm nhận của bạn về đơn hàng để giúp những Khách hàng khác có thể tham khảo nhé!",
-                "21/03/2026 19:42", android.R.drawable.ic_menu_gallery));
-
-        rv.setAdapter(new OrderAdapter(list));
         rv.setLayoutManager(new LinearLayoutManager(this));
+
+        com.example.uitpayapp.modules.notification.NotificationRepository notificationRepository = new com.example.uitpayapp.modules.notification.NotificationRepository();
+        notificationRepository.getHistory(new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO>>() {
+            @Override
+            public void onSuccess(List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO> data) {
+                List<OrderNotification> list = new ArrayList<>();
+                int unreadCount = 0;
+                for (com.example.uitpayapp.modules.notification.models.NotificationResponseDTO dto : data) {
+                    if ("ORDER_UPDATE".equalsIgnoreCase(dto.getType()) || "SYSTEM".equalsIgnoreCase(dto.getType())) {
+                        boolean isRead = dto.getIsRead() != null && dto.getIsRead();
+                        if (!isRead) {
+                            unreadCount++;
+                        }
+                        list.add(new OrderNotification(
+                                String.valueOf(dto.getId()),
+                                dto.getTitle(),
+                                dto.getMessage(),
+                                formatDateTime(dto.getCreatedAt()),
+                                android.R.drawable.ic_menu_gallery,
+                                isRead
+                        ));
+                    }
+                }
+
+                OrderAdapter adapter = new OrderAdapter(list);
+                rv.setAdapter(adapter);
+
+                final int finalUnreadCount = unreadCount;
+                updateReadAllText(tvReadAll, finalUnreadCount);
+
+                tvReadAll.setOnClickListener(v -> {
+                    if (list.isEmpty()) return;
+                    for (OrderNotification noti : list) {
+                        noti.setRead(true);
+                    }
+                    adapter.notifyDataSetChanged();
+                    updateReadAllText(tvReadAll, 0);
+                    android.widget.Toast.makeText(NotificationOrderActivity.this, "Đã đánh dấu đọc tất cả thông báo", android.widget.Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                android.widget.Toast.makeText(NotificationOrderActivity.this, "Lỗi tải thông báo: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateReadAllText(TextView tvReadAll, int count) {
+        if (tvReadAll == null) return;
+        if (count > 0) {
+            tvReadAll.setText("Đọc tất cả (" + count + ")");
+            tvReadAll.setEnabled(true);
+            tvReadAll.setAlpha(1.0f);
+        } else {
+            tvReadAll.setText("Đọc tất cả");
+            tvReadAll.setEnabled(false);
+            tvReadAll.setAlpha(0.5f);
+        }
+    }
+
+    private String formatDateTime(String isoString) {
+        if (isoString == null) return "";
+        try {
+            String cleanStr = isoString;
+            if (cleanStr.contains(".")) {
+                int dotIdx = cleanStr.indexOf(".");
+                int tIdx = cleanStr.indexOf("+");
+                if (tIdx == -1) tIdx = cleanStr.indexOf("-", dotIdx);
+                if (tIdx == -1) tIdx = cleanStr.indexOf("Z", dotIdx);
+                if (tIdx != -1) {
+                    cleanStr = cleanStr.substring(0, dotIdx) + cleanStr.substring(tIdx);
+                } else {
+                    cleanStr = cleanStr.substring(0, dotIdx);
+                }
+            }
+            java.text.SimpleDateFormat inputFormat;
+            if (cleanStr.endsWith("Z")) {
+                inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault());
+                inputFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            } else if (cleanStr.contains("+") || (cleanStr.lastIndexOf("-") > 10)) {
+                try {
+                    inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.getDefault());
+                    java.util.Date date = inputFormat.parse(cleanStr);
+                    java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+                    return outputFormat.format(date);
+                } catch (Exception ex) {
+                    inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+                }
+            } else {
+                inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+            }
+            java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+            java.util.Date date = inputFormat.parse(cleanStr);
+            return outputFormat.format(date);
+        } catch (Exception e) {
+            return isoString;
+        }
     }
 
     private static class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
@@ -57,6 +143,17 @@ public class NotificationOrderActivity extends AppCompatActivity {
             h.t2.setText(m.getContent());
             h.t3.setText(m.getTimestamp());
             h.iv.setImageResource(m.getShopImageResId());
+
+            // Thay đổi giao diện dựa trên trạng thái đã đọc
+            if (m.isRead()) {
+                h.t1.setTypeface(null, android.graphics.Typeface.NORMAL);
+                h.t1.setTextColor(android.graphics.Color.parseColor("#757575"));
+                h.itemView.setBackgroundColor(android.graphics.Color.WHITE);
+            } else {
+                h.t1.setTypeface(null, android.graphics.Typeface.BOLD);
+                h.t1.setTextColor(android.graphics.Color.parseColor("#212121"));
+                h.itemView.setBackgroundColor(android.graphics.Color.parseColor("#FFF5F2")); // Nền cam nhạt cho thông báo chưa đọc
+            }
         }
 
         @Override
