@@ -63,4 +63,15 @@
         android:orientation="horizontal"
         tools:listitem="@layout/item_topic_store"
         tools:itemCount="4" />
+
+    <TextView
+        android:id="@+id/tv_topic_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chưa có dữ liệu"
+        android:textAlignment="center"
+        android:textColor="#9E9E9E"
+        android:textSize="14sp"
+        android:padding="24dp"
+        android:visibility="gone" />
 </LinearLayout>

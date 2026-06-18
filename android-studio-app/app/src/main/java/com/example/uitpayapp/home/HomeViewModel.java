@@ -12,7 +12,11 @@ import com.example.uitpayapp.network.RetrofitClient;
 import com.example.uitpayapp.recommendeddeal.RecommendedDealModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import com.example.uitpayapp.models.ApiResponse;
+import com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -53,52 +57,48 @@ public class HomeViewModel extends ViewModel {
 
     private void fetchCoreData() {
         coreData.setValue(UiState.loading(null));
-        apiService.getHomeCore(currentAddressId).enqueue(new Callback<HomeCoreResponse>() {
+        apiService.getHomeCore(currentAddressId).enqueue(new Callback<ApiResponse<HomeCoreResponse>>() {
             @Override
-            public void onResponse(Call<HomeCoreResponse> call, Response<HomeCoreResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
+            public void onResponse(Call<ApiResponse<HomeCoreResponse>> call, Response<ApiResponse<HomeCoreResponse>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     android.util.Log.d("HomeViewModel", "getHomeCore: SUCCESS - Loaded from server.");
-                    coreData.setValue(UiState.success(response.body()));
+                    coreData.setValue(UiState.success(response.body().getData()));
                 } else {
-                    android.util.Log.w("HomeViewModel", "getHomeCore: FAIL (code " + response.code() + ") - Loading fake data.");
-                    // Fallback to mock data on non-existent or error endpoint
-                    coreData.setValue(UiState.success(getMockHomeCoreResponse()));
+                    android.util.Log.w("HomeViewModel", "getHomeCore: FAIL (code " + response.code() + ") - Showing error.");
+                    coreData.setValue(UiState.error("Không kết nối được server", null));
                 }
             }
 
             @Override
-            public void onFailure(Call<HomeCoreResponse> call, Throwable t) {
-                android.util.Log.e("HomeViewModel", "getHomeCore: FAILURE (" + t.getMessage() + ") - Loading fake data.");
-                // Fallback to mock data on connection failure
-                coreData.setValue(UiState.success(getMockHomeCoreResponse()));
+            public void onFailure(Call<ApiResponse<HomeCoreResponse>> call, Throwable t) {
+                android.util.Log.e("HomeViewModel", "getHomeCore: FAILURE (" + t.getMessage() + ") - Showing error.");
+                coreData.setValue(UiState.error("Không kết nối được server", null));
             }
         });
     }
 
     private void fetchBrandsData() {
         brandsData.setValue(UiState.loading(null));
-        apiService.getPopularBrands(currentAddressId).enqueue(new Callback<BrandResponse>() {
+        apiService.getPopularBrands(currentAddressId).enqueue(new Callback<ApiResponse<BrandResponse>>() {
             @Override
-            public void onResponse(Call<BrandResponse> call, Response<BrandResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    android.util.Log.d("HomeViewModel", "getPopularBrands: SUCCESS - Loaded from server.");
-                    if (response.body().getBrands() == null || response.body().getBrands().isEmpty()) {
+            public void onResponse(Call<ApiResponse<BrandResponse>> call, Response<ApiResponse<BrandResponse>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    BrandResponse data = response.body().getData();
+                    if (data.getBrands() == null || data.getBrands().isEmpty()) {
                         brandsData.setValue(UiState.empty());
                     } else {
-                        brandsData.setValue(UiState.success(response.body()));
+                        brandsData.setValue(UiState.success(data));
                     }
                 } else {
-                    android.util.Log.w("HomeViewModel", "getPopularBrands: FAIL (code " + response.code() + ") - Loading fake data.");
-                    // Fallback to mock brands
-                    brandsData.setValue(UiState.success(getMockBrandResponse()));
+                    android.util.Log.w("HomeViewModel", "getPopularBrands: FAIL (code " + response.code() + ") - Showing error.");
+                    brandsData.setValue(UiState.error("Không kết nối được server", null));
                 }
             }
 
             @Override
-            public void onFailure(Call<BrandResponse> call, Throwable t) {
-                android.util.Log.e("HomeViewModel", "getPopularBrands: FAILURE (" + t.getMessage() + ") - Loading fake data.");
-                // Fallback to mock brands
-                brandsData.setValue(UiState.success(getMockBrandResponse()));
+            public void onFailure(Call<ApiResponse<BrandResponse>> call, Throwable t) {
+                android.util.Log.e("HomeViewModel", "getPopularBrands: FAILURE (" + t.getMessage() + ") - Showing error.");
+                brandsData.setValue(UiState.error("Không kết nối được server", null));
             }
         });
     }
@@ -142,13 +142,9 @@ public class HomeViewModel extends ViewModel {
                         hasMoreDeals = false;
                     }
                 } else {
-                    android.util.Log.w("HomeViewModel", "getRecommendedDeals (page " + currentDealsPage + "): FAIL (code " + response.code() + ") - Loading fake data.");
-                    // Fallback to mock deals
-                    List<RecommendedDealModel> mockDeals = FakeDealGenerator.generateDeals(10, currentTabId);
-                    accumulatedDeals.addAll(mockDeals);
-                    dealsData.setValue(UiState.success(new ArrayList<>(accumulatedDeals)));
-                    if (currentDealsPage >= 5) {
-                        hasMoreDeals = false;
+                    android.util.Log.w("HomeViewModel", "getRecommendedDeals (page " + currentDealsPage + "): FAIL (code " + response.code() + ") - Showing error.");
+                    if (accumulatedDeals.isEmpty()) {
+                        dealsData.setValue(UiState.error("Không kết nối được server", null));
                     }
                 }
             }
@@ -156,13 +152,9 @@ public class HomeViewModel extends ViewModel {
             @Override
             public void onFailure(Call<DealResponse> call, Throwable t) {
                 isDealsLoading = false;
-                android.util.Log.e("HomeViewModel", "getRecommendedDeals (page " + currentDealsPage + "): FAILURE (" + t.getMessage() + ") - Loading fake data.");
-                // Fallback to mock deals
-                List<RecommendedDealModel> mockDeals = FakeDealGenerator.generateDeals(10, currentTabId);
-                accumulatedDeals.addAll(mockDeals);
-                dealsData.setValue(UiState.success(new ArrayList<>(accumulatedDeals)));
-                if (currentDealsPage >= 5) {
-                    hasMoreDeals = false;
+                android.util.Log.e("HomeViewModel", "getRecommendedDeals (page " + currentDealsPage + "): FAILURE (" + t.getMessage() + ") - Showing error.");
+                if (accumulatedDeals.isEmpty()) {
+                    dealsData.setValue(UiState.error("Không kết nối được server", null));
                 }
             }
         });
