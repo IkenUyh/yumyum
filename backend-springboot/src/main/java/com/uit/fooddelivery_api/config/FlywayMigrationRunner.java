@@ -25,6 +25,7 @@ public class FlywayMigrationRunner {
                     .outOfOrder(false)
                     .load();
 
+            flyway.repair();
             flyway.migrate();
             System.out.println("✓ Flyway migration completed successfully!");
         } catch (Exception e) {

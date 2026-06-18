@@ -154,7 +154,9 @@ public class ChatActivity extends AppCompatActivity {
 
         String token = SessionManager.getInstance(this).getAuthToken();
         // Server URL được cấu hình trực tiếp từ endpoint hệ thống
-        stompClient = new StompSockJsClient("https://kienhuy-dev.name.vn/", token, orderIdLong, new StompSockJsClient.StompListener() {
+//        stompClient = new StompSockJsClient("https://kienhuy-dev.name.vn/", token, orderIdLong, new StompSockJsClient.StompListener() {
+        // Dùng URL dưới đây để test local trên máy ảo (Emulator)
+        stompClient = new StompSockJsClient("http://10.0.2.2:8083/", token, orderIdLong, new StompSockJsClient.StompListener() {
             @Override
             public void onConnected() {
                 runOnUiThread(() -> {

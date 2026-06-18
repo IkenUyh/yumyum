@@ -463,6 +463,17 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     }
 
     private void fetchOrdersFromBackend() {
+        if (!com.example.uitpayapp.network.SessionManager.getInstance(this).isLoggedIn()) {
+            isLoadingData = false;
+            layoutLoading.setVisibility(View.GONE);
+            swipeRefreshLayout.setRefreshing(false);
+            isErrorState = true;
+            currentErrorMessage = "Vui lòng đăng nhập để xem đơn hàng của bạn";
+            allOrders.clear();
+            applyFilter();
+            return;
+        }
+
         if (orderRepository == null) {
             orderRepository = new OrderRepository();
         }
