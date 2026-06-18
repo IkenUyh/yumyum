@@ -25,6 +25,7 @@ import java.util.List;
 public class CategoryActivity extends AppCompatActivity {
 
     public static final String EXTRA_SELECTED_CATEGORY = "extra_selected_category";
+    public static final String EXTRA_SELECTED_CATEGORY_ID = "extra_selected_category_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +58,8 @@ public class CategoryActivity extends AppCompatActivity {
         ViewPager2 viewPager = findViewById(R.id.view_pager_categories);
 
         String selectedCategory = getIntent().getStringExtra(EXTRA_SELECTED_CATEGORY);
+        long categoryId = getIntent().getLongExtra(EXTRA_SELECTED_CATEGORY_ID, -1L);
+
         if (selectedCategory != null) {
             TextView tvTitle = findViewById(R.id.tv_category_title);
             tvTitle.setText(selectedCategory);
@@ -66,7 +69,7 @@ public class CategoryActivity extends AppCompatActivity {
 
         List<String> filters = java.util.Arrays.asList("Gần tôi", "Bán chạy", "Đánh giá");
 
-        CategoryPagerAdapter adapter = new CategoryPagerAdapter(this, selectedCategory, filters);
+        CategoryPagerAdapter adapter = new CategoryPagerAdapter(this, selectedCategory, categoryId, filters);
         viewPager.setAdapter(adapter);
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
@@ -107,3 +110,4 @@ public class CategoryActivity extends AppCompatActivity {
         }
     }
 }
+

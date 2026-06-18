@@ -660,6 +660,9 @@ public class HomeActivity extends AppCompatActivity {
                 } else {
                     Intent intent = new Intent(this, CategoryActivity.class);
                     intent.putExtra(CategoryActivity.EXTRA_SELECTED_CATEGORY, category.getName());
+                    if (category.getId() != null) {
+                        intent.putExtra(CategoryActivity.EXTRA_SELECTED_CATEGORY_ID, category.getId());
+                    }
                     startActivity(intent);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 }

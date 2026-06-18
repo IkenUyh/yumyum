@@ -1,6 +1,7 @@
 package com.example.uitpayapp.home.home_models;
 
 public class FoodCategory {
+    private Long id;
     private String name;
     private String emoji;
     private int iconResId; // 0 = use emoji, >0 = use drawable
@@ -41,6 +42,8 @@ public class FoodCategory {
         this.isSelectAll = isSelectAll;
     }
 
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
     public String getEmoji() { return emoji; }
     public int getIconResId() { return iconResId; }

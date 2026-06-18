@@ -160,4 +160,8 @@ public class RetrofitClient {
     public static com.example.uitpayapp.home.network.HomeApiService getHomeApiService() {
         return getClient().create(com.example.uitpayapp.home.network.HomeApiService.class);
     }
+
+    public static com.example.uitpayapp.home.network.CategoryApiService getCategoryApiService() {
+        return getClient().create(com.example.uitpayapp.home.network.CategoryApiService.class);
+    }
 }
