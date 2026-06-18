@@ -78,6 +78,13 @@ public class FoodService {
         return foodRepository.findByRestaurantId(restaurantId);
     }
 
+    // Lấy danh sách món ăn theo danh mục (public - không cần đăng nhập)
+    public List<Food> getFoodsByCategory(Long categoryId) {
+        categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục món ăn!"));
+        return foodRepository.findByCategoryIdAndIsAvailableTrue(categoryId);
+    }
+
     // Lấy chi tiết 1 món ăn theo ID (public - không cần đăng nhập)
     public Food getFoodById(Long foodId) {
         return foodRepository.findById(foodId)
