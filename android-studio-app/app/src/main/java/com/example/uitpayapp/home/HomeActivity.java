@@ -165,14 +165,6 @@ public class HomeActivity extends AppCompatActivity {
             View fsError = findViewById(R.id.layout_flashsale_error);
             View fsSection = findViewById(R.id.flashsale_section);
             
-            View t1Loading = findViewById(R.id.layout_topic1_loading);
-            View t1Error = findViewById(R.id.layout_topic1_error);
-            View t1Section = findViewById(R.id.topic_section_1);
-            
-            View t2Loading = findViewById(R.id.layout_topic2_loading);
-            View t2Error = findViewById(R.id.layout_topic2_error);
-            View t2Section = findViewById(R.id.topic_section_2);
-
             View catLoading = findViewById(R.id.layout_categories_loading);
             View catError = findViewById(R.id.layout_categories_error);
             View catContent = findViewById(R.id.layout_categories_content);
@@ -181,14 +173,6 @@ public class HomeActivity extends AppCompatActivity {
                 if (fsLoading != null) fsLoading.setVisibility(View.VISIBLE);
                 if (fsError != null) fsError.setVisibility(View.GONE);
                 if (fsSection != null) fsSection.setVisibility(View.GONE);
-                
-                if (t1Loading != null) t1Loading.setVisibility(View.VISIBLE);
-                if (t1Error != null) t1Error.setVisibility(View.GONE);
-                if (t1Section != null) t1Section.setVisibility(View.GONE);
-                
-                if (t2Loading != null) t2Loading.setVisibility(View.VISIBLE);
-                if (t2Error != null) t2Error.setVisibility(View.GONE);
-                if (t2Section != null) t2Section.setVisibility(View.GONE);
 
                 if (catLoading != null) catLoading.setVisibility(View.VISIBLE);
                 if (catError != null) catError.setVisibility(View.GONE);
@@ -197,14 +181,6 @@ public class HomeActivity extends AppCompatActivity {
                 if (fsLoading != null) fsLoading.setVisibility(View.GONE);
                 if (fsError != null) fsError.setVisibility(View.GONE);
                 if (fsSection != null) fsSection.setVisibility(View.VISIBLE);
-                
-                if (t1Loading != null) t1Loading.setVisibility(View.GONE);
-                if (t1Error != null) t1Error.setVisibility(View.GONE);
-                if (t1Section != null) t1Section.setVisibility(View.VISIBLE);
-                
-                if (t2Loading != null) t2Loading.setVisibility(View.GONE);
-                if (t2Error != null) t2Error.setVisibility(View.GONE);
-                if (t2Section != null) t2Section.setVisibility(View.VISIBLE);
 
                 if (catLoading != null) catLoading.setVisibility(View.GONE);
                 if (catError != null) catError.setVisibility(View.GONE);
@@ -235,29 +211,6 @@ public class HomeActivity extends AppCompatActivity {
                             if (tvFsError != null) tvFsError.setText("Chưa có dữ liệu");
                         }
                     }
-                    if (data.getTopics() != null && data.getTopics().size() >= 2) {
-                        if (t1Error != null) t1Error.setVisibility(View.GONE);
-                        if (t1Section != null) t1Section.setVisibility(View.VISIBLE);
-                        updateTopicUI(findViewById(R.id.topic_section_1), data.getTopics().get(0));
-                        
-                        if (t2Error != null) t2Error.setVisibility(View.GONE);
-                        if (t2Section != null) t2Section.setVisibility(View.VISIBLE);
-                        updateTopicUI(findViewById(R.id.topic_section_2), data.getTopics().get(1));
-                    } else {
-                        if (t1Section != null) t1Section.setVisibility(View.GONE);
-                        if (t1Error != null) {
-                            t1Error.setVisibility(View.VISIBLE);
-                            android.widget.TextView tvT1Error = findViewById(R.id.tv_topic1_error);
-                            if (tvT1Error != null) tvT1Error.setText("Chưa có dữ liệu");
-                        }
-                        
-                        if (t2Section != null) t2Section.setVisibility(View.GONE);
-                        if (t2Error != null) {
-                            t2Error.setVisibility(View.VISIBLE);
-                            android.widget.TextView tvT2Error = findViewById(R.id.tv_topic2_error);
-                            if (tvT2Error != null) tvT2Error.setText("Chưa có dữ liệu");
-                        }
-                    }
                 }
             } else if (state.isError() || state.isEmpty()) {
                 if (fsLoading != null) fsLoading.setVisibility(View.GONE);
@@ -274,22 +227,6 @@ public class HomeActivity extends AppCompatActivity {
                     catError.setVisibility(View.VISIBLE);
                     android.widget.TextView tvCatError = findViewById(R.id.tv_categories_error);
                     if (tvCatError != null) tvCatError.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
-                }
-                
-                if (t1Loading != null) t1Loading.setVisibility(View.GONE);
-                if (t1Section != null) t1Section.setVisibility(View.GONE);
-                if (t1Error != null) {
-                    t1Error.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvT1Error = findViewById(R.id.tv_topic1_error);
-                    if (tvT1Error != null) tvT1Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
-                }
-                
-                if (t2Loading != null) t2Loading.setVisibility(View.GONE);
-                if (t2Section != null) t2Section.setVisibility(View.GONE);
-                if (t2Error != null) {
-                    t2Error.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvT2Error = findViewById(R.id.tv_topic2_error);
-                    if (tvT2Error != null) tvT2Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
                 }
             }
         });
