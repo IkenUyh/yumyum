@@ -20,6 +20,7 @@ import com.example.uitpayapp.modules.user.DriverService;
 import com.example.uitpayapp.modules.user.UserService;
 import com.example.uitpayapp.modules.wallet.WalletService;
 import com.example.uitpayapp.modules.grouporder.GroupOrderService;
+import com.example.uitpayapp.modules.favorite.FavoriteService;
 
 import java.io.IOException;
 import okhttp3.Interceptor;
@@ -30,9 +31,10 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-//    private static final String BASE_URL = "https://kienhuy-dev.name.vn/";
+    // private static final String BASE_URL = "https://kienhuy-dev.name.vn/";
     // Dùng URL dưới đây để test local trên máy ảo (Emulator)
-    // Nếu test trên máy thật (Physical Device) thì đổi thành IP LAN của máy tính (VD: "http://192.168.x.x:8083/")
+    // Nếu test trên máy thật (Physical Device) thì đổi thành IP LAN của máy tính
+    // (VD: "http://192.168.x.x:8083/")
     private static final String BASE_URL = "http://10.0.2.2:8081/";
     private static Retrofit retrofit = null;
     private static Context appContext = null; // Lưu trữ context toàn cục kích thước nhỏ gọn
@@ -47,7 +49,8 @@ public class RetrofitClient {
     private static Retrofit getClient() {
         if (retrofit == null) {
             if (appContext == null) {
-                throw new IllegalStateException("RetrofitClient chưa được khởi tạo! Hãy gọi RetrofitClient.initialize(context) trước.");
+                throw new IllegalStateException(
+                        "RetrofitClient chưa được khởi tạo! Hãy gọi RetrofitClient.initialize(context) trước.");
             }
 
             // Cấu hình OkHttpClient tự động đính kèm Token
@@ -59,7 +62,8 @@ public class RetrofitClient {
                             String path = originalRequest.url().encodedPath();
 
                             // Bỏ qua đính kèm Token cho các API public như login, register, forgot-password
-                            if (path.contains("/users/login") || path.contains("/users/register") || path.contains("/users/forgot-password")) {
+                            if (path.contains("/users/login") || path.contains("/users/register")
+                                    || path.contains("/users/forgot-password")) {
                                 return chain.proceed(originalRequest);
                             }
 
@@ -86,7 +90,8 @@ public class RetrofitClient {
         return retrofit;
     }
 
-    // === Quay trở lại hàm KHÔNG THAM SỐ như cũ - Xóa sạch lỗi compile cũ của bạn ===
+    // === Quay trở lại hàm KHÔNG THAM SỐ như cũ - Xóa sạch lỗi compile cũ của bạn
+    // ===
 
     public static UserService getUserService() {
         return getClient().create(UserService.class);
@@ -166,5 +171,9 @@ public class RetrofitClient {
 
     public static com.example.uitpayapp.home.network.CategoryApiService getCategoryApiService() {
         return getClient().create(com.example.uitpayapp.home.network.CategoryApiService.class);
+    }
+
+    public static FavoriteService getFavoriteService() {
+        return getClient().create(FavoriteService.class);
     }
 }

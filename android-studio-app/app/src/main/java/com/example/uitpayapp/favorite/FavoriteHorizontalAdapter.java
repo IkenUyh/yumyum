@@ -27,7 +27,8 @@ public class FavoriteHorizontalAdapter extends RecyclerView.Adapter<FavoriteHori
     @NonNull
     @Override
     public HorizontalViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_favorite_item_shop, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_favorite_item_shop, parent,
+                false);
         return new HorizontalViewHolder(view);
     }
 
@@ -36,7 +37,15 @@ public class FavoriteHorizontalAdapter extends RecyclerView.Adapter<FavoriteHori
         FavoriteShop shop = shopList.get(position);
 
         holder.tvHorizontalName.setText(shop.getName());
-        holder.ivHorizontalImage.setImageResource(shop.getImageResId());
+        if (shop.getImageUrl() != null && !shop.getImageUrl().isEmpty()) {
+            com.bumptech.glide.Glide.with(holder.ivHorizontalImage.getContext())
+                    .load(shop.getImageUrl())
+                    .placeholder(R.drawable.img_food_chicken)
+                    .error(shop.getImageResId() != 0 ? shop.getImageResId() : R.drawable.img_food_chicken)
+                    .into(holder.ivHorizontalImage);
+        } else {
+            holder.ivHorizontalImage.setImageResource(shop.getImageResId() != 0 ? shop.getImageResId() : R.drawable.img_food_chicken);
+        }
 
         if (shop.isFavorited()) {
             holder.ivHorizontalFavoriteHeart.setImageResource(R.drawable.favorite_filled_24px);

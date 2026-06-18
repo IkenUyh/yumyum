@@ -33,13 +33,14 @@ public class SearchStoreFragment extends Fragment {
     private RecyclerView rvSearchResults;
 
     private SearchStoreAdapter searchAdapter;
-    
+
     private List<Restaurant> allStores;
     private List<Restaurant> filteredStores;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search_tab, container, false);
 
         layoutEmptyState = view.findViewById(R.id.layout_empty_state);
@@ -53,15 +54,20 @@ public class SearchStoreFragment extends Fragment {
             EditText etSearchInput = ((SearchActivity) getActivity()).getSearchInput();
             if (etSearchInput != null) {
                 etSearchInput.addTextChangedListener(new TextWatcher() {
-                    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    }
 
                     @Override
                     public void afterTextChanged(Editable s) {
                         filter(s.toString().trim().toLowerCase());
                     }
                 });
-                
+
                 // Initial check
                 filter(etSearchInput.getText().toString().trim().toLowerCase());
             }
@@ -72,7 +78,7 @@ public class SearchStoreFragment extends Fragment {
 
     private void setupPopularSearches() {
         List<String> keywords = Arrays.asList("KFC", "Phúc Long", "Highlands", "Gà rán", "Trà sữa", "Cơm tấm");
-        
+
         cgPopularSearches.removeAllViews();
         for (String keyword : keywords) {
             Chip chip = new Chip(getContext());
@@ -81,7 +87,7 @@ public class SearchStoreFragment extends Fragment {
             chip.setTextColor(0xFF333333);
             chip.setTextSize(14);
             // Optionally, add a slight border or use default Chip style
-            
+
             chip.setOnClickListener(v -> {
                 if (getActivity() instanceof SearchActivity) {
                     EditText etSearchInput = ((SearchActivity) getActivity()).getSearchInput();
@@ -151,7 +157,7 @@ public class SearchStoreFragment extends Fragment {
             Restaurant item = items.get(position);
             holder.tvName.setText(item.getName());
             holder.tvCategory.setText(item.getCategory());
-            
+
             // Just map some dummy rating and distance for visual
             holder.itemView.setOnClickListener(v -> listener.onItemClick(item));
         }
@@ -164,6 +170,7 @@ public class SearchStoreFragment extends Fragment {
         public static class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvName;
             TextView tvCategory;
+
             public ViewHolder(View itemView) {
                 super(itemView);
                 tvName = itemView.findViewById(R.id.tv_store_name);

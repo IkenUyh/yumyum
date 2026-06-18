@@ -21,6 +21,9 @@ import java.util.Collections;
 import java.util.List;
 import com.example.uitpayapp.home.HomeActivity;
 import com.example.uitpayapp.home.home_models.Restaurant;
+import com.example.uitpayapp.modules.favorite.FavoriteRepository;
+import com.example.uitpayapp.modules.favorite.models.FavoriteRestaurantResponseDTO;
+import com.example.uitpayapp.network.ApiCallback;
 
 public class FavoriteActivity extends AppCompatActivity {
 
@@ -31,10 +34,11 @@ public class FavoriteActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipeRefreshLayout;
     private FavoriteMainAdapter mainAdapter;
 
-    private List<FavoriteShop> baseShops;        // Danh sách gốc từ DB
-    private List<FavoriteShop> filteredShops;    // Danh sách hiển thị sau bộ lọc dọc
-    private List<FavoriteShop> topOrderedShops;  // Danh sách lướt ngang
+    private List<FavoriteShop> baseShops; // Danh sách gốc từ DB
+    private List<FavoriteShop> filteredShops; // Danh sách hiển thị sau bộ lọc dọc
+    private List<FavoriteShop> topOrderedShops; // Danh sách lướt ngang
 
+    private FavoriteRepository favoriteRepository;
     private String currentCategory = "Dịch vụ";
     private boolean isNearMeActive = false;
 
@@ -63,25 +67,37 @@ public class FavoriteActivity extends AppCompatActivity {
         rvMainFavorite = findViewById(R.id.rvMainFavorite);
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
 
+        favoriteRepository = new FavoriteRepository();
+
         swipeRefreshLayout.setOnRefreshListener(() -> {
             loadDatabaseShops();
-            applyFilterAndSorting();
             swipeRefreshLayout.setRefreshing(false);
         });
 
-        loadDatabaseShops();
-
-        filteredShops = new ArrayList<>(baseShops);
+        baseShops = new ArrayList<>();
+        topOrderedShops = new ArrayList<>();
+        filteredShops = new ArrayList<>();
         mainAdapter = new FavoriteMainAdapter(filteredShops, topOrderedShops, shop -> {
-            shop.setFavorited(!shop.isFavorited());
-            mainAdapter.notifyDataSetChanged();
+            favoriteRepository.toggleFavorite(Long.parseLong(shop.getId()), new ApiCallback<com.example.uitpayapp.modules.favorite.models.ToggleFavoriteResponseDTO>() {
+                @Override
+                public void onSuccess(com.example.uitpayapp.modules.favorite.models.ToggleFavoriteResponseDTO result) {
+                    shop.setFavorited(result.isFavorited());
+                    applyFilterAndSorting();
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    android.widget.Toast.makeText(FavoriteActivity.this, "Không thể bỏ yêu thích: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                }
+            });
         });
         rvMainFavorite.setAdapter(mainAdapter);
         rvMainFavorite.setLayoutManager(new LinearLayoutManager(this));
 
+        loadDatabaseShops();
+
         setupTabs();
         setupDropdownFilters();
-        applyFilterAndSorting();
         setupBottomNavigation();
     }
 
@@ -91,7 +107,6 @@ public class FavoriteActivity extends AppCompatActivity {
         updateNotificationBadge();
         if (mainAdapter != null) {
             loadDatabaseShops();
-            applyFilterAndSorting();
         }
     }
 
@@ -101,40 +116,64 @@ public class FavoriteActivity extends AppCompatActivity {
         } else {
             baseShops.clear();
         }
-        
+
         if (topOrderedShops == null) {
             topOrderedShops = new ArrayList<>();
         } else {
             topOrderedShops.clear();
         }
 
-        List<Restaurant> restaurants = HomeActivity.HomeRepository.getInstance().getRestaurants();
-        for (int i = 0; i < restaurants.size(); i++) {
-            Restaurant r = restaurants.get(i);
-            
-            // Generate a random distance since Restaurant doesn't have it
-            double distance = 0.5 + (Math.random() * 5.0);
-            distance = Math.round(distance * 10.0) / 10.0;
-            
-            int orderCount = 50 + (i * 20); // Giả lập lượt đặt
-            
-            FavoriteShop fs = new FavoriteShop(
-                String.valueOf(i), 
-                r.getName(), 
-                r.getRating(), 
-                distance, 
-                r.getDeliveryTime(), 
-                r.getImageResId(), 
-                "Mã giảm " + (10 + (i % 3) * 5) + "%", 
-                r.getCategory(), 
-                orderCount
-            );
-            baseShops.add(fs);
-            
-            if (orderCount >= 100) {
-                topOrderedShops.add(fs);
+        favoriteRepository.getMyFavorites(new ApiCallback<List<FavoriteRestaurantResponseDTO>>() {
+            @Override
+            public void onSuccess(List<FavoriteRestaurantResponseDTO> favorites) {
+                if (favorites != null) {
+                    for (int i = 0; i < favorites.size(); i++) {
+                        FavoriteRestaurantResponseDTO dto = favorites.get(i);
+                        
+                        // Try to map to the local resource ID if the name matches our mock list
+                        int localResId = 0;
+                        String name = dto.getRestaurantName();
+                        if (name.contains("KFC")) localResId = R.drawable.img_food_chicken;
+                        else if (name.contains("Phúc Long")) localResId = R.drawable.img_food_bubbletea;
+                        else if (name.contains("Coffee House")) localResId = R.drawable.img_food_coffee;
+                        else if (name.contains("Jollibee")) localResId = R.drawable.img_food_chicken;
+                        else if (name.contains("Highlands")) localResId = R.drawable.img_food_coffee;
+                        else localResId = R.drawable.img_food_pizza; // fallback default
+                        
+                        // Fake distance, delivery time, order count for UI demo
+                        double distance = 0.5 + (Math.random() * 5.0);
+                        distance = Math.round(distance * 10.0) / 10.0;
+                        int deliveryTime = 15 + (i * 5) % 20;
+                        int orderCount = 50 + (i * 25);
+                        
+                        FavoriteShop fs = new FavoriteShop(
+                                String.valueOf(dto.getRestaurantId()),
+                                dto.getRestaurantName(),
+                                dto.getRatingAverage() != null ? dto.getRatingAverage().doubleValue() : 4.5,
+                                distance,
+                                deliveryTime,
+                                localResId,
+                                "Mã giảm 15%",
+                                dto.getRestaurantName().contains("Trà sữa") || dto.getRestaurantName().contains("Coffee") ? "Cafe" : "Cơm",
+                                orderCount
+                        );
+                        fs.setImageUrl(dto.getRestaurantImageUrl());
+                        baseShops.add(fs);
+
+                        if (orderCount >= 100) {
+                            topOrderedShops.add(fs);
+                        }
+                    }
+                }
+                applyFilterAndSorting();
             }
-        }
+
+            @Override
+            public void onError(String errorMessage) {
+                android.widget.Toast.makeText(FavoriteActivity.this, "Không thể tải danh sách yêu thích: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                applyFilterAndSorting();
+            }
+        });
     }
 
     private void setupTabs() {
@@ -147,24 +186,30 @@ public class FavoriteActivity extends AppCompatActivity {
                 isNearMeActive = tab.getPosition() == 1; // Tab 1 là tab "Gần tôi"
                 applyFilterAndSorting();
             }
+
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
         });
     }
 
     private void setupDropdownFilters() {
-        String[] categories = {"Tất cả", "Cơm", "Bún Phở", "Bánh mì", "Fastfood", "Lẩu", "Đồ nướng", "Cafe", "Trà sữa", "Ăn vặt", "Tráng miệng", "Hải sản", "Chay", "Đồ uống", "Gà rán", "Pizza"};
-        
-        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_list_item_1, categories);
-        
+        String[] categories = { "Tất cả", "Cơm", "Bún Phở", "Bánh mì", "Fastfood", "Lẩu", "Đồ nướng", "Cafe", "Trà sữa",
+                "Ăn vặt", "Tráng miệng", "Hải sản", "Chay", "Đồ uống", "Gà rán", "Pizza" };
+
+        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_1, categories);
+
         android.widget.ListPopupWindow listPopupWindow = new android.widget.ListPopupWindow(this);
         listPopupWindow.setAdapter(adapter);
         listPopupWindow.setAnchorView(tvFilterService);
         listPopupWindow.setWidth((int) (150 * getResources().getDisplayMetrics().density));
         listPopupWindow.setHeight((int) (200 * getResources().getDisplayMetrics().density));
-        
+
         listPopupWindow.setOnItemClickListener((parent, view, position, id) -> {
             currentCategory = categories[position];
             if (currentCategory.equals("Tất cả")) {
@@ -190,11 +235,13 @@ public class FavoriteActivity extends AppCompatActivity {
         } else {
             java.util.Iterator<FavoriteShop> it = baseShops.iterator();
             while (it.hasNext()) {
-                if (!it.next().isFavorited()) it.remove();
+                if (!it.next().isFavorited())
+                    it.remove();
             }
             java.util.Iterator<FavoriteShop> it2 = topOrderedShops.iterator();
             while (it2.hasNext()) {
-                if (!it2.next().isFavorited()) it2.remove();
+                if (!it2.next().isFavorited())
+                    it2.remove();
             }
         }
 
@@ -202,7 +249,8 @@ public class FavoriteActivity extends AppCompatActivity {
 
         // 1. Thực hiện Lọc theo danh mục dịch vụ chọn từ Dropdown (Ảnh 2)
         for (FavoriteShop shop : baseShops) {
-            if (currentCategory.equals("Dịch vụ") || currentCategory.equals("Tất cả") || shop.getServiceType().equalsIgnoreCase(currentCategory)) {
+            if (currentCategory.equals("Dịch vụ") || currentCategory.equals("Tất cả")
+                    || shop.getServiceType().equalsIgnoreCase(currentCategory)) {
                 filteredShops.add(shop);
             }
         }
@@ -235,7 +283,7 @@ public class FavoriteActivity extends AppCompatActivity {
             startActivity(intent);
             overridePendingTransition(0, 0);
         });
-        navNotification.setOnClickListener(v->{
+        navNotification.setOnClickListener(v -> {
             Intent intent = new Intent(this, com.example.uitpayapp.notification.NotificationActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
@@ -256,23 +304,26 @@ public class FavoriteActivity extends AppCompatActivity {
             overridePendingTransition(0, 0);
         });
     }
-/*
-    @Override
-    protected void onResume() {
-        super.onResume();
-        updateNotificationBadge();
-    }*/
+    /*
+     * @Override
+     * protected void onResume() {
+     * super.onResume();
+     * updateNotificationBadge();
+     * }
+     */
 
     private void updateNotificationBadge() {
         final TextView tvNotificationBadge = findViewById(R.id.tv_notification_badge);
-        if (tvNotificationBadge == null) return;
-        
-        com.example.uitpayapp.modules.notification.NotificationRepository repo = 
-                new com.example.uitpayapp.modules.notification.NotificationRepository();
+        if (tvNotificationBadge == null)
+            return;
+
+        com.example.uitpayapp.modules.notification.NotificationRepository repo = new com.example.uitpayapp.modules.notification.NotificationRepository();
         repo.getUnreadCount(new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Long>>() {
             @Override
             public void onSuccess(java.util.Map<String, Long> countData) {
-                long unreadCount = countData != null && countData.containsKey("unreadCount") ? countData.get("unreadCount") : 0;
+                long unreadCount = countData != null && countData.containsKey("unreadCount")
+                        ? countData.get("unreadCount")
+                        : 0;
                 if (unreadCount > 0) {
                     tvNotificationBadge.setText(String.valueOf(unreadCount));
                     tvNotificationBadge.setVisibility(View.VISIBLE);
