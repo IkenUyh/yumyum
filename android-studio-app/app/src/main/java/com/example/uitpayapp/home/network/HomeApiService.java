@@ -14,7 +14,7 @@ public interface HomeApiService {
     Call<ApiResponse<BrandResponse>> getPopularBrands(@Query("addressId") String addressId);
 
     @GET("api/v1/home/deals")
-    Call<DealResponse> getRecommendedDeals(
+    Call<ApiResponse<DealResponse>> getRecommendedDeals(
             @Query("addressId") String addressId,
             @Query("tabId") int tabId,
             @Query("page") int page,

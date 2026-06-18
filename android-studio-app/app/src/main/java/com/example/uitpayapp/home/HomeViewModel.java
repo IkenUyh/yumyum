@@ -8,6 +8,9 @@ import com.example.uitpayapp.home.network.BrandResponse;
 import com.example.uitpayapp.home.network.DealResponse;
 import com.example.uitpayapp.home.network.HomeApiService;
 import com.example.uitpayapp.home.network.HomeCoreResponse;
+import com.example.uitpayapp.home.network.TopicResponse;
+import com.example.uitpayapp.modules.food.models.responses.CategoryResponse;
+import com.example.uitpayapp.modules.food.models.responses.FoodResponse;
 import com.example.uitpayapp.network.RetrofitClient;
 import com.example.uitpayapp.recommendeddeal.RecommendedDealModel;
 
@@ -24,10 +27,12 @@ import retrofit2.Response;
 
 public class HomeViewModel extends ViewModel {
     private final HomeApiService apiService;
+    private final com.example.uitpayapp.home.network.CategoryApiService categoryApiService;
 
     private final MutableLiveData<UiState<HomeCoreResponse>> coreData = new MutableLiveData<>();
     private final MutableLiveData<UiState<BrandResponse>> brandsData = new MutableLiveData<>();
     private final MutableLiveData<UiState<List<RecommendedDealModel>>> dealsData = new MutableLiveData<>();
+    private final MutableLiveData<UiState<List<TopicResponse>>> randomTopicsData = new MutableLiveData<>();
 
     private int currentDealsPage = 1;
     private int currentTabId = 0;
@@ -38,11 +43,13 @@ public class HomeViewModel extends ViewModel {
 
     public HomeViewModel() {
         this.apiService = RetrofitClient.getHomeApiService();
+        this.categoryApiService = RetrofitClient.getCategoryApiService();
     }
 
     public LiveData<UiState<HomeCoreResponse>> getCoreData() { return coreData; }
     public LiveData<UiState<BrandResponse>> getBrandsData() { return brandsData; }
     public LiveData<UiState<List<RecommendedDealModel>>> getDealsData() { return dealsData; }
+    public LiveData<UiState<List<TopicResponse>>> getRandomTopicsData() { return randomTopicsData; }
 
     public void setAddressAndRefresh(String addressId) {
         this.currentAddressId = addressId;
@@ -53,6 +60,7 @@ public class HomeViewModel extends ViewModel {
         fetchCoreData();
         fetchBrandsData();
         resetAndFetchDeals(currentTabId);
+        fetchRandomTopics();
     }
 
     private void fetchCoreData() {
@@ -122,13 +130,13 @@ public class HomeViewModel extends ViewModel {
     private void fetchDealsPage() {
         isDealsLoading = true;
         apiService.getRecommendedDeals(currentAddressId, currentTabId, currentDealsPage, 10)
-                .enqueue(new Callback<DealResponse>() {
+                .enqueue(new Callback<ApiResponse<DealResponse>>() {
             @Override
-            public void onResponse(Call<DealResponse> call, Response<DealResponse> response) {
+            public void onResponse(Call<ApiResponse<DealResponse>> call, Response<ApiResponse<DealResponse>> response) {
                 isDealsLoading = false;
-                if (response.isSuccessful() && response.body() != null) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     android.util.Log.d("HomeViewModel", "getRecommendedDeals (page " + currentDealsPage + "): SUCCESS - Loaded from server.");
-                    List<RecommendedDealModel> newDeals = response.body().getDeals();
+                    List<RecommendedDealModel> newDeals = response.body().getData().getDeals();
                     if (newDeals != null) {
                         accumulatedDeals.addAll(newDeals);
                     }
@@ -138,7 +146,7 @@ public class HomeViewModel extends ViewModel {
                         dealsData.setValue(UiState.success(new ArrayList<>(accumulatedDeals)));
                     }
                     
-                    if (currentDealsPage >= response.body().getTotalPages()) {
+                    if (currentDealsPage >= response.body().getData().getTotalPages()) {
                         hasMoreDeals = false;
                     }
                 } else {
@@ -150,7 +158,7 @@ public class HomeViewModel extends ViewModel {
             }
 
             @Override
-            public void onFailure(Call<DealResponse> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<DealResponse>> call, Throwable t) {
                 isDealsLoading = false;
                 android.util.Log.e("HomeViewModel", "getRecommendedDeals (page " + currentDealsPage + "): FAILURE (" + t.getMessage() + ") - Showing error.");
                 if (accumulatedDeals.isEmpty()) {
@@ -158,6 +166,81 @@ public class HomeViewModel extends ViewModel {
                 }
             }
         });
+    }
+
+    private void fetchRandomTopics() {
+        randomTopicsData.setValue(UiState.loading(null));
+        categoryApiService.getAllCategories().enqueue(new Callback<ApiResponse<List<CategoryResponse>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<CategoryResponse>>> call, Response<ApiResponse<List<CategoryResponse>>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    List<CategoryResponse> categories = new ArrayList<>(response.body().getData());
+                    if (categories.isEmpty()) {
+                        randomTopicsData.setValue(UiState.empty());
+                        return;
+                    }
+                    Collections.shuffle(categories);
+                    int count = Math.min(2, categories.size());
+                    List<CategoryResponse> selected = categories.subList(0, count);
+                    fetchFoodsForCategories(selected);
+                } else {
+                    randomTopicsData.setValue(UiState.error("Không kết nối được server (Lỗi: " + response.code() + ")", null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<CategoryResponse>>> call, Throwable t) {
+                randomTopicsData.setValue(UiState.error("Không kết nối được server (" + t.getMessage() + ")", null));
+            }
+        });
+    }
+
+    private void fetchFoodsForCategories(List<CategoryResponse> categories) {
+        List<TopicResponse> result = new ArrayList<>();
+        java.util.concurrent.atomic.AtomicInteger pendingCalls = new java.util.concurrent.atomic.AtomicInteger(categories.size());
+
+        for (int i = 0; i < categories.size(); i++) {
+            CategoryResponse cat = categories.get(i);
+            final int index = i;
+            categoryApiService.getFoodsByCategory(cat.getId()).enqueue(new Callback<ApiResponse<List<FoodResponse>>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<List<FoodResponse>>> call, Response<ApiResponse<List<FoodResponse>>> response) {
+                    handleFoodResponse(cat, response, result, pendingCalls);
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<List<FoodResponse>>> call, Throwable t) {
+                    handleFoodResponse(cat, null, result, pendingCalls);
+                }
+            });
+        }
+    }
+
+    private synchronized void handleFoodResponse(CategoryResponse cat, Response<ApiResponse<List<FoodResponse>>> response, List<TopicResponse> result, java.util.concurrent.atomic.AtomicInteger pendingCalls) {
+        if (response != null && response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+            List<FoodResponse> foods = response.body().getData();
+            List<com.example.uitpayapp.home.home_models.FoodMenuItem> items = new ArrayList<>();
+            for (FoodResponse f : foods) {
+                items.add(new com.example.uitpayapp.home.home_models.FoodMenuItem(
+                        "f_" + f.getId(),
+                        f.getName(),
+                        f.getPrice() != null ? f.getPrice().longValue() : 0,
+                        com.example.uitpayapp.R.drawable.img_food_chicken,
+                        f.getDescription() != null ? f.getDescription() : ""
+                ));
+            }
+            if (!items.isEmpty()) {
+                result.add(new TopicResponse(cat.getName(), "", items));
+            }
+        }
+        
+        if (pendingCalls.decrementAndGet() == 0) {
+            if (result.isEmpty()) {
+                randomTopicsData.postValue(UiState.empty());
+            } else {
+                randomTopicsData.postValue(UiState.success(result));
+            }
+        }
     }
 
     private HomeCoreResponse getMockHomeCoreResponse() {
