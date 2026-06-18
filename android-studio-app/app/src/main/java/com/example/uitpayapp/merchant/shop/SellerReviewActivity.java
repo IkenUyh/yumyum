@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.graphics.Insets;
@@ -15,6 +16,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.merchant.shop.shop_model.ReviewModel;
+import com.example.uitpayapp.network.SessionManager;
+import com.example.uitpayapp.network.ApiCallback;
+import com.example.uitpayapp.modules.restaurant.RestaurantRepository;
+import com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO;
+import com.example.uitpayapp.modules.review.ReviewRepository;
+import com.example.uitpayapp.modules.review.ReviewService;
+import com.example.uitpayapp.network.RetrofitClient;
+import com.example.uitpayapp.modules.review.models.responses.ReviewResponse;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -44,11 +53,25 @@ public class SellerReviewActivity extends AppCompatActivity {
     private String selectedEvaluation = "Đánh giá";
     private String selectedComment = "Bình luận";
 
+    private SessionManager sessionManager;
+    private RestaurantRepository restaurantRepository;
+    private ReviewRepository reviewRepository;
+    private Long merchantId;
+    private Long restaurantId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         setContentView(R.layout.activity_seller_review);
+
+        // Khởi tạo session và repositories
+        sessionManager = SessionManager.getInstance(this);
+        restaurantRepository = new RestaurantRepository();
+        ReviewService reviewService = RetrofitClient.getReviewService();
+        reviewRepository = new ReviewRepository(reviewService);
+        
+        merchantId = sessionManager.getUserId();
 
         initViews();
         setupData();
@@ -90,15 +113,120 @@ public class SellerReviewActivity extends AppCompatActivity {
     }
 
     private void setupData() {
-        allReviews.add(new ReviewModel("Huỳnh Thị Hồng Vân", "", 5.0f, "Tuyệt vời", "", "16/11/2024 19:19", "Cảm ơn shop nhé!", ""));
-        allReviews.add(new ReviewModel("Trần Văn An", "", 4.0f, "Rất tốt", "#16105-393706528", "17/10/2024 14:30", "Món ăn ngon, giao hàng nhanh.", ""));
-        allReviews.add(new ReviewModel("Nguyễn Minh Tâm", "", 5.0f, "Tuyệt vời", "#16105-393706530", "15/10/2024 12:00", "Chất lượng tuyệt vời.", ""));
-        allReviews.add(new ReviewModel("Lê Văn B", "", 3.0f, "Bình thường", "#16105-393706531", "10/09/2024 10:00", "", ""));
-        allReviews.add(new ReviewModel("Phạm Thị C", "", 2.0f, "Kém", "#16105-393706532", "05/08/2024 09:00", "Đồ ăn hơi nguội", ""));
-
-        displayReviews.addAll(allReviews);
         adapter = new SellerReviewAdapter(displayReviews);
-        rvReviews.setAdapter(adapter);
+        if (rvReviews != null) {
+            rvReviews.setAdapter(adapter);
+        }
+        loadReviewsFromApi();
+    }
+
+    private void loadReviewsFromApi() {
+        if (merchantId == null || merchantId == -1L) {
+            Toast.makeText(this, "Không tìm thấy phiên đăng nhập chủ quán!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 1. Lấy tất cả nhà hàng để tìm nhà hàng thuộc về merchantId này
+        restaurantRepository.getAllRestaurants(new ApiCallback<List<RestaurantResponseDTO>>() {
+            @Override
+            public void onSuccess(List<RestaurantResponseDTO> data) {
+                if (data == null || data.isEmpty()) {
+                    Toast.makeText(SellerReviewActivity.this, "Không tìm thấy quán ăn nào!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Tìm quán ăn của merchant hiện tại
+                for (RestaurantResponseDTO r : data) {
+                    if (r.getMerchantId() != null && r.getMerchantId().equals(merchantId)) {
+                        restaurantId = r.getId();
+                        break;
+                    }
+                }
+
+                if (restaurantId == null) {
+                    Toast.makeText(SellerReviewActivity.this, "Tài khoản của bạn chưa đăng ký quán ăn!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // 2. Tải các đánh giá của quán ăn đó từ API
+                fetchReviews(restaurantId);
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(SellerReviewActivity.this, "Lỗi tải thông tin quán ăn: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void fetchReviews(Long resId) {
+        reviewRepository.getReviewsByRestaurant(resId, new ApiCallback<List<ReviewResponse>>() {
+            @Override
+            public void onSuccess(List<ReviewResponse> data) {
+                allReviews.clear();
+                displayReviews.clear();
+                if (data != null) {
+                    for (ReviewResponse res : data) {
+                        String ratingText = "Bình thường";
+                        if (res.getRating() != null) {
+                            int r = res.getRating();
+                            if (r == 5) ratingText = "Tuyệt vời";
+                            else if (r == 4) ratingText = "Rất tốt";
+                            else if (r == 3) ratingText = "Bình thường";
+                            else if (r == 2) ratingText = "Kém";
+                            else if (r == 1) ratingText = "Rất kém";
+                        }
+
+                        ReviewModel model = new ReviewModel(
+                                res.getCustomerName() != null ? res.getCustomerName() : "Ẩn danh",
+                                "",
+                                res.getRating() != null ? res.getRating().floatValue() : 0.0f,
+                                ratingText,
+                                res.getOrderId() != null ? "#" + res.getOrderId() : "",
+                                formatIsoDate(res.getCreatedAt()),
+                                res.getComment() != null ? res.getComment() : "",
+                                ""
+                        );
+                        allReviews.add(model);
+                    }
+                }
+                displayReviews.addAll(allReviews);
+                adapter.notifyDataSetChanged();
+                updateRatingSummaries();
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(SellerReviewActivity.this, "Lỗi tải danh sách đánh giá: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private String formatIsoDate(String isoDateStr) {
+        if (isoDateStr == null) return "";
+        if (isoDateStr.matches("\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}")) {
+            return isoDateStr;
+        }
+
+        String[] patterns = {
+            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS",
+            "yyyy-MM-dd'T'HH:mm:ssXXX",
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss",
+            "yyyy-MM-dd HH:mm:ss"
+        };
+
+        for (String pattern : patterns) {
+            try {
+                SimpleDateFormat parser = new SimpleDateFormat(pattern, Locale.getDefault());
+                Date date = parser.parse(isoDateStr);
+                SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                return outputFormat.format(date);
+            } catch (Exception ignored) {}
+        }
+        return isoDateStr;
     }
 
     private void setupListeners() {

@@ -77,7 +77,7 @@ public class HomeServiceTest {
         when(categoryRepository.findAll()).thenReturn(List.of(category));
         when(flashSaleItemRepository.findActiveFlashSaleItems(any(LocalDateTime.class)))
                 .thenReturn(Collections.emptyList());
-        when(foodRepository.findAll()).thenReturn(List.of(food));
+        when(foodRepository.findAllWithRestaurant()).thenReturn(List.of(food));
 
         HomeCoreResponseDTO response = homeService.getHomeCore("addr1");
 
@@ -92,8 +92,7 @@ public class HomeServiceTest {
 
     @Test
     void getPopularBrands_shouldReturnBrandResponse() {
-        when(restaurantRepository.findAll()).thenReturn(List.of(restaurant));
-        when(foodRepository.findByRestaurantId(1L)).thenReturn(List.of(food));
+        when(foodRepository.findAllWithRestaurant()).thenReturn(List.of(food));
 
         BrandResponseDTO response = homeService.getPopularBrands("addr1");
 
@@ -107,7 +106,7 @@ public class HomeServiceTest {
 
     @Test
     void getRecommendedDeals_shouldReturnDealResponse() {
-        when(foodRepository.findAll()).thenReturn(List.of(food));
+        when(foodRepository.findAllWithRestaurant()).thenReturn(List.of(food));
 
         DealResponseDTO response = homeService.getRecommendedDeals("addr1", 0, 1, 10);
 
