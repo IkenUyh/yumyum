@@ -174,6 +174,7 @@ public class HomeActivity extends AppCompatActivity {
             View t2Error = findViewById(R.id.layout_topic2_error);
             View t2Section = findViewById(R.id.topic_section_2);
 
+            
             View catLoading = findViewById(R.id.layout_categories_loading);
             View catError = findViewById(R.id.layout_categories_error);
             View catContent = findViewById(R.id.layout_categories_content);
@@ -233,6 +234,21 @@ public class HomeActivity extends AppCompatActivity {
                 if (catError != null)
                     catError.setVisibility(View.GONE);
 
+                if (fsLoading != null) fsLoading.setVisibility(View.VISIBLE);
+                if (fsError != null) fsError.setVisibility(View.GONE);
+                if (fsSection != null) fsSection.setVisibility(View.GONE);
+
+                if (catLoading != null) catLoading.setVisibility(View.VISIBLE);
+                if (catError != null) catError.setVisibility(View.GONE);
+                if (catContent != null) catContent.setVisibility(View.GONE);
+            } else if (state.isSuccess()) {
+                if (fsLoading != null) fsLoading.setVisibility(View.GONE);
+                if (fsError != null) fsError.setVisibility(View.GONE);
+                if (fsSection != null) fsSection.setVisibility(View.VISIBLE);
+
+                if (catLoading != null) catLoading.setVisibility(View.GONE);
+                if (catError != null) catError.setVisibility(View.GONE);
+                
                 HomeCoreResponse data = state.getData();
                 if (data != null) {
                     if (data.getCategories() != null && !data.getCategories().isEmpty()) {
