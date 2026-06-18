@@ -230,14 +230,38 @@
                 android:layout_marginBottom="16dp"
                 tools:background="#E0E0E0" />
 
+            <!-- Categories States -->
+            <FrameLayout
+                android:id="@+id/layout_categories_loading"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:background="#FFFFFF"
+                android:visibility="visible">
+                <ProgressBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminateTint="#F24405" />
+            </FrameLayout>
+
             <LinearLayout
+                android:id="@+id/layout_categories_error"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="#FFFFFF"
+                android:visibility="gone">
+                <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@android:drawable/ic_dialog_alert" app:tint="#F44336" />
+                <TextView android:id="@+id/tv_categories_error" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Không kết nối được server" android:textColor="#757575" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_categories_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="#FFFFFF"
                 android:paddingHorizontal="8dp"
                 android:paddingBottom="12dp"
-                android:paddingTop="12dp">
+                android:paddingTop="12dp"
+                android:visibility="gone">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_categories"

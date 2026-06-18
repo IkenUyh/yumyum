@@ -65,14 +65,14 @@ public class HomeViewModel extends ViewModel {
                     coreData.setValue(UiState.success(response.body().getData()));
                 } else {
                     android.util.Log.w("HomeViewModel", "getHomeCore: FAIL (code " + response.code() + ") - Showing error.");
-                    coreData.setValue(UiState.error("Không kết nối được server", null));
+                    coreData.setValue(UiState.error("Không kết nối được server (Lỗi: " + response.code() + ")", null));
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<HomeCoreResponse>> call, Throwable t) {
                 android.util.Log.e("HomeViewModel", "getHomeCore: FAILURE (" + t.getMessage() + ") - Showing error.");
-                coreData.setValue(UiState.error("Không kết nối được server", null));
+                coreData.setValue(UiState.error("Không kết nối được server (" + t.getMessage() + ")", null));
             }
         });
     }
@@ -91,14 +91,14 @@ public class HomeViewModel extends ViewModel {
                     }
                 } else {
                     android.util.Log.w("HomeViewModel", "getPopularBrands: FAIL (code " + response.code() + ") - Showing error.");
-                    brandsData.setValue(UiState.error("Không kết nối được server", null));
+                    brandsData.setValue(UiState.error("Không kết nối được server (Lỗi: " + response.code() + ")", null));
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<BrandResponse>> call, Throwable t) {
                 android.util.Log.e("HomeViewModel", "getPopularBrands: FAILURE (" + t.getMessage() + ") - Showing error.");
-                brandsData.setValue(UiState.error("Không kết nối được server", null));
+                brandsData.setValue(UiState.error("Không kết nối được server (" + t.getMessage() + ")", null));
             }
         });
     }
@@ -144,7 +144,7 @@ public class HomeViewModel extends ViewModel {
                 } else {
                     android.util.Log.w("HomeViewModel", "getRecommendedDeals (page " + currentDealsPage + "): FAIL (code " + response.code() + ") - Showing error.");
                     if (accumulatedDeals.isEmpty()) {
-                        dealsData.setValue(UiState.error("Không kết nối được server", null));
+                        dealsData.setValue(UiState.error("Không kết nối được server (Lỗi: " + response.code() + ")", null));
                     }
                 }
             }
@@ -154,7 +154,7 @@ public class HomeViewModel extends ViewModel {
                 isDealsLoading = false;
                 android.util.Log.e("HomeViewModel", "getRecommendedDeals (page " + currentDealsPage + "): FAILURE (" + t.getMessage() + ") - Showing error.");
                 if (accumulatedDeals.isEmpty()) {
-                    dealsData.setValue(UiState.error("Không kết nối được server", null));
+                    dealsData.setValue(UiState.error("Không kết nối được server (" + t.getMessage() + ")", null));
                 }
             }
         });
