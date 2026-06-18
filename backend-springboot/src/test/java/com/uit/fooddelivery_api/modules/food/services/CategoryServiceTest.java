@@ -1,5 +1,6 @@
 package com.uit.fooddelivery_api.modules.food.services;
 
+import com.uit.fooddelivery_api.modules.food.dtos.CategoryFoodCountResponseDTO;
 import com.uit.fooddelivery_api.modules.food.entities.Category;
 import com.uit.fooddelivery_api.modules.food.repositories.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,5 +53,21 @@ public class CategoryServiceTest {
         assertEquals(2, result.size());
         assertEquals("Cơm", result.get(0).getName());
         assertEquals("Bánh Mì", result.get(1).getName());
+    }
+
+    @Test
+    void getCategoryFoodCounts_shouldReturnCategoryCounts() {
+        Object[] row1 = new Object[]{1L, "Cơm", "https://res.cloudinary.com/demo/com.jpg", 10L};
+        Object[] row2 = new Object[]{2L, "Bánh Mì", "https://res.cloudinary.com/demo/banhmi.jpg", 5L};
+        when(categoryRepository.findCategoriesWithFoodCount()).thenReturn(List.of(row1, row2));
+
+        List<CategoryFoodCountResponseDTO> result = categoryService.getCategoryFoodCounts();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Cơm", result.get(0).getName());
+        assertEquals(10L, result.get(0).getFoodCount());
+        assertEquals("Bánh Mì", result.get(1).getName());
+        assertEquals(5L, result.get(1).getFoodCount());
     }
 }

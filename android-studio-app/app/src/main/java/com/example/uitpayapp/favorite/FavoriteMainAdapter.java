@@ -21,7 +21,8 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private List<FavoriteShop> horizontalShops;
     private FavoriteHorizontalAdapter.OnFavoriteRemoveListener removeListener;
 
-    public FavoriteMainAdapter(List<FavoriteShop> verticalShops, List<FavoriteShop> horizontalShops, FavoriteHorizontalAdapter.OnFavoriteRemoveListener removeListener) {
+    public FavoriteMainAdapter(List<FavoriteShop> verticalShops, List<FavoriteShop> horizontalShops,
+            FavoriteHorizontalAdapter.OnFavoriteRemoveListener removeListener) {
         this.verticalShops = verticalShops;
         this.horizontalShops = horizontalShops;
         this.removeListener = removeListener;
@@ -30,9 +31,11 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public int getItemViewType(int position) {
         // Vị trí đầu tiên luôn là danh sách cuộn ngang "Đặt Nhiều Nhất"
-        if (position == 0) return TYPE_TOP_HORIZONTAL;
+        if (position == 0)
+            return TYPE_TOP_HORIZONTAL;
         // Vị trí cuối cùng luôn là dòng thông báo chân trang
-        if (position == verticalShops.size() + 1) return TYPE_FOOTER;
+        if (position == verticalShops.size() + 1)
+            return TYPE_FOOTER;
         // Các vị trí còn lại là danh sách quán ăn hàng dọc
         return TYPE_VERTICAL_SHOP;
     }
@@ -48,7 +51,8 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             return new HorizontalContainerViewHolder(v);
 
         } else if (viewType == TYPE_FOOTER) {
-            // Tạo trực tiếp một TextView làm chân trang để tránh phải tạo thêm file XML layout thừa
+            // Tạo trực tiếp một TextView làm chân trang để tránh phải tạo thêm file XML
+            // layout thừa
             TextView tv = new TextView(parent.getContext());
             tv.setText("Đã hiển thị tất cả kết quả");
             tv.setGravity(android.view.Gravity.CENTER);
@@ -58,8 +62,7 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             // Đặt khoảng cách đệm trên dưới cho thoáng chữ
             RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.setMargins(0, 45, 0, 45);
             tv.setLayoutParams(lp);
 
@@ -85,13 +88,13 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 hvh.itemView.setVisibility(View.VISIBLE);
                 hvh.itemView.setLayoutParams(new RecyclerView.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                ));
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
 
                 // Khởi tạo và gắn Adapter con xử lý cuộn ngang
                 FavoriteHorizontalAdapter subAdapter = new FavoriteHorizontalAdapter(horizontalShops, removeListener);
                 hvh.rvHorizontal.setAdapter(subAdapter);
-                hvh.rvHorizontal.setLayoutManager(new LinearLayoutManager(holder.itemView.getContext(), LinearLayoutManager.HORIZONTAL, false));
+                hvh.rvHorizontal.setLayoutManager(
+                        new LinearLayoutManager(holder.itemView.getContext(), LinearLayoutManager.HORIZONTAL, false));
             }
 
         } else if (holder instanceof VerticalShopViewHolder) {
@@ -102,9 +105,18 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
             // Đổ dữ liệu thật vào giao diện hàng dọc
             vsh.tvName.setText(shop.getName());
-            vsh.tvInfo.setText("⭐ " + shop.getRating() + "  |  " + shop.getDistance() + "km  |  " + shop.getDeliveryTime() + "phút");
+            vsh.tvInfo.setText("⭐ " + shop.getRating() + "  |  " + shop.getDistance() + "km  |  "
+                    + shop.getDeliveryTime() + "phút");
             vsh.tvDiscount.setVisibility(View.GONE);
-            vsh.ivImage.setImageResource(shop.getImageResId());
+            if (shop.getImageUrl() != null && !shop.getImageUrl().isEmpty()) {
+                com.bumptech.glide.Glide.with(vsh.ivImage.getContext())
+                        .load(shop.getImageUrl())
+                        .placeholder(R.drawable.img_food_chicken)
+                        .error(shop.getImageResId() != 0 ? shop.getImageResId() : R.drawable.img_food_chicken)
+                        .into(vsh.ivImage);
+            } else {
+                vsh.ivImage.setImageResource(shop.getImageResId() != 0 ? shop.getImageResId() : R.drawable.img_food_chicken);
+            }
 
             if (shop.isFavorited()) {
                 vsh.ivFavoriteHeart.setImageResource(R.drawable.favorite_filled_24px);
@@ -122,7 +134,8 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public int getItemCount() {
-        // Tổng số item = Số lượng quán dọc + 1 (Khối ngang đầu trang) + 1 (Dòng chữ Footer chân trang)
+        // Tổng số item = Số lượng quán dọc + 1 (Khối ngang đầu trang) + 1 (Dòng chữ
+        // Footer chân trang)
         return verticalShops.size() + 2;
     }
 
@@ -130,6 +143,7 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     static class HorizontalContainerViewHolder extends RecyclerView.ViewHolder {
         RecyclerView rvHorizontal;
+
         public HorizontalContainerViewHolder(@NonNull View itemView) {
             super(itemView);
             rvHorizontal = itemView.findViewById(R.id.rvHorizontal);
@@ -139,6 +153,7 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     static class VerticalShopViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvInfo, tvDiscount;
         ImageView ivImage, ivFavoriteHeart;
+
         public VerticalShopViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvVerticalName);

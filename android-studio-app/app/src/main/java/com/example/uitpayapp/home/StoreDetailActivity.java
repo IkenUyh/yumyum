@@ -18,7 +18,6 @@ import com.google.android.material.appbar.AppBarLayout;
 import android.graphics.Color;
 import androidx.core.view.WindowInsetsControllerCompat;
 
-
 import com.example.uitpayapp.home.home_models.CartManager;
 import com.example.uitpayapp.home.home_models.CartItem;
 import com.example.uitpayapp.R;
@@ -35,10 +34,19 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.example.uitpayapp.modules.favorite.FavoriteRepository;
+import com.example.uitpayapp.modules.favorite.models.FavoriteStatusResponseDTO;
+import com.example.uitpayapp.modules.favorite.models.ToggleFavoriteResponseDTO;
+import com.example.uitpayapp.network.ApiCallback;
+
 public class StoreDetailActivity extends AppCompatActivity {
     public static final String EXTRA_RESTAURANT_NAME = "extra_restaurant_name";
 
     private Restaurant restaurant;
+    private ImageView btnFavorite;
+    private FavoriteRepository favoriteRepository;
+    private boolean isFavorited = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,11 +81,33 @@ public class StoreDetailActivity extends AppCompatActivity {
                 }
             });
         }
+        favoriteRepository = new FavoriteRepository();
+        checkFavoriteStatus();
     }
 
     private void initViews() {
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> finish());
+
+        btnFavorite = findViewById(R.id.btn_favorite);
+        if (btnFavorite != null) {
+            btnFavorite.setOnClickListener(v -> {
+                if (restaurant == null || restaurant.getId() == null) return;
+                favoriteRepository.toggleFavorite(restaurant.getId(), new ApiCallback<ToggleFavoriteResponseDTO>() {
+                    @Override
+                    public void onSuccess(ToggleFavoriteResponseDTO result) {
+                        isFavorited = result.isFavorited();
+                        updateFavoriteHeartIcon();
+                        Toast.makeText(StoreDetailActivity.this, result.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        Toast.makeText(StoreDetailActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
+        }
 
         View btnCart = findViewById(R.id.btn_cart);
         if (btnCart != null) {
@@ -111,7 +141,8 @@ public class StoreDetailActivity extends AppCompatActivity {
         // Popular foods (first 3-4 items, shuffled)
         List<FoodMenuItem> popularFoods = new ArrayList<>(restaurant.getMenu());
         Collections.shuffle(popularFoods);
-        if (popularFoods.size() > 4) popularFoods = popularFoods.subList(0, 4);
+        if (popularFoods.size() > 4)
+            popularFoods = popularFoods.subList(0, 4);
 
         RecyclerView rvPopularFoods = findViewById(R.id.rv_popular_foods);
         rvPopularFoods.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -124,43 +155,45 @@ public class StoreDetailActivity extends AppCompatActivity {
     }
 
     private Restaurant findRestaurantByName(String name) {
-        if (name == null) return null;
+        if (name == null)
+            return null;
         List<Restaurant> all = HomeActivity.HomeRepository.getInstance().getRestaurants();
-        
+
         // Exact match
         for (Restaurant r : all) {
             if (name.equals(r.getName())) {
                 return r;
             }
         }
-        
+
         // Partial match (e.g. "Gà Rán Popeyes" vs "Gà Rán Popeyes - Võ Văn Ngân")
         for (Restaurant r : all) {
             if (name.contains(r.getName()) || r.getName().contains(name)) {
                 return r;
             }
         }
-        
+
         // If not found, create a mock restaurant dynamically so the UI still works
         Restaurant randomRest = all.get(new java.util.Random().nextInt(all.size()));
         String shortName = name.length() >= 2 ? name.substring(0, 2).toUpperCase() : "ST";
-        return new Restaurant(name, shortName, randomRest.getBgColor(), 
-                "Đồ ăn", randomRest.getMenu(), randomRest.getImageResId(), 
+        return new Restaurant(name, shortName, randomRest.getBgColor(),
+                "Đồ ăn", randomRest.getMenu(), randomRest.getImageResId(),
                 4.5, 120, 20, "Địa chỉ mẫu, TP.HCM");
     }
 
     private void showFoodItemDetailPopup(FoodMenuItem item) {
-        com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(this, item, null, (selectedItem, quantity, selectedToppings) -> {
-            CartManager.getInstance().addItem(new CartItem(selectedItem, quantity, selectedToppings));
-            
-            updateGlobalCartBadge();
-            
-            View btnCart = findViewById(R.id.btn_cart);
-            // Fallback for image view animation context (can just use root view if needed)
-            View rootView = findViewById(android.R.id.content);
-            CartAnimationHelper.animateFlyToCart(this, rootView, btnCart, () -> {
-            });
-        });
+        com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(this, item, null,
+                (selectedItem, quantity, selectedToppings) -> {
+                    CartManager.getInstance().addItem(new CartItem(selectedItem, quantity, selectedToppings));
+
+                    updateGlobalCartBadge();
+
+                    View btnCart = findViewById(R.id.btn_cart);
+                    // Fallback for image view animation context (can just use root view if needed)
+                    View rootView = findViewById(android.R.id.content);
+                    CartAnimationHelper.animateFlyToCart(this, rootView, btnCart, () -> {
+                    });
+                });
     }
 
     private void updateGlobalCartBadge() {
@@ -168,7 +201,7 @@ public class StoreDetailActivity extends AppCompatActivity {
         for (com.example.uitpayapp.home.home_models.CartItem item : CartManager.getInstance().getCart()) {
             count += item.getQuantity();
         }
-        
+
         TextView tvCartBadge = findViewById(R.id.tv_global_cart_badge);
         if (tvCartBadge != null) {
             if (count > 0) {
@@ -184,5 +217,37 @@ public class StoreDetailActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateGlobalCartBadge();
+        checkFavoriteStatus();
+    }
+
+    private void checkFavoriteStatus() {
+        if (restaurant == null || restaurant.getId() == null || btnFavorite == null) {
+            if (btnFavorite != null) btnFavorite.setVisibility(View.GONE);
+            return;
+        }
+
+        favoriteRepository.getFavoriteStatus(restaurant.getId(), new ApiCallback<FavoriteStatusResponseDTO>() {
+            @Override
+            public void onSuccess(FavoriteStatusResponseDTO status) {
+                isFavorited = status.isFavorited();
+                updateFavoriteHeartIcon();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Fail silently
+            }
+        });
+    }
+
+    private void updateFavoriteHeartIcon() {
+        if (btnFavorite == null) return;
+        if (isFavorited) {
+            btnFavorite.setImageResource(R.drawable.favorite_filled_24px);
+            btnFavorite.setImageTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#EE4D2D")));
+        } else {
+            btnFavorite.setImageResource(R.drawable.favorite_border_24px);
+            btnFavorite.setImageTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
+        }
     }
 }
