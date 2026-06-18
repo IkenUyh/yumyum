@@ -173,6 +173,10 @@ public class HomeActivity extends AppCompatActivity {
             View t2Error = findViewById(R.id.layout_topic2_error);
             View t2Section = findViewById(R.id.topic_section_2);
 
+            View catLoading = findViewById(R.id.layout_categories_loading);
+            View catError = findViewById(R.id.layout_categories_error);
+            View catContent = findViewById(R.id.layout_categories_content);
+
             if (state.isLoading()) {
                 if (fsLoading != null) fsLoading.setVisibility(View.VISIBLE);
                 if (fsError != null) fsError.setVisibility(View.GONE);
@@ -185,6 +189,10 @@ public class HomeActivity extends AppCompatActivity {
                 if (t2Loading != null) t2Loading.setVisibility(View.VISIBLE);
                 if (t2Error != null) t2Error.setVisibility(View.GONE);
                 if (t2Section != null) t2Section.setVisibility(View.GONE);
+
+                if (catLoading != null) catLoading.setVisibility(View.VISIBLE);
+                if (catError != null) catError.setVisibility(View.GONE);
+                if (catContent != null) catContent.setVisibility(View.GONE);
             } else if (state.isSuccess()) {
                 if (fsLoading != null) fsLoading.setVisibility(View.GONE);
                 if (fsError != null) fsError.setVisibility(View.GONE);
@@ -197,11 +205,22 @@ public class HomeActivity extends AppCompatActivity {
                 if (t2Loading != null) t2Loading.setVisibility(View.GONE);
                 if (t2Error != null) t2Error.setVisibility(View.GONE);
                 if (t2Section != null) t2Section.setVisibility(View.VISIBLE);
+
+                if (catLoading != null) catLoading.setVisibility(View.GONE);
+                if (catError != null) catError.setVisibility(View.GONE);
                 
                 HomeCoreResponse data = state.getData();
                 if (data != null) {
-                    if (data.getCategories() != null && !data.getCategories().isEmpty() && categoryAdapter != null) {
-                        categoryAdapter.updateData(data.getCategories());
+                    if (data.getCategories() != null && !data.getCategories().isEmpty()) {
+                        if (catContent != null) catContent.setVisibility(View.VISIBLE);
+                        if (categoryAdapter != null) categoryAdapter.updateData(data.getCategories());
+                    } else {
+                        if (catContent != null) catContent.setVisibility(View.GONE);
+                        if (catError != null) {
+                            catError.setVisibility(View.VISIBLE);
+                            android.widget.TextView tvCatError = findViewById(R.id.tv_categories_error);
+                            if (tvCatError != null) tvCatError.setText("Chưa có dữ liệu");
+                        }
                     }
 
                     if (data.getFlashSales() != null && !data.getFlashSales().isEmpty()) {
@@ -247,6 +266,14 @@ public class HomeActivity extends AppCompatActivity {
                     fsError.setVisibility(View.VISIBLE);
                     android.widget.TextView tvFsError = findViewById(R.id.tv_flashsale_error);
                     if (tvFsError != null) tvFsError.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
+                }
+
+                if (catLoading != null) catLoading.setVisibility(View.GONE);
+                if (catContent != null) catContent.setVisibility(View.GONE);
+                if (catError != null) {
+                    catError.setVisibility(View.VISIBLE);
+                    android.widget.TextView tvCatError = findViewById(R.id.tv_categories_error);
+                    if (tvCatError != null) tvCatError.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
                 }
                 
                 if (t1Loading != null) t1Loading.setVisibility(View.GONE);
