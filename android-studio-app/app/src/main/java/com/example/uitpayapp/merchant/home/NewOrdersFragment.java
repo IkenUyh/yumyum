@@ -41,8 +41,8 @@ public class NewOrdersFragment extends Fragment {
         adapter = new SellerOrderAdapter(getContext(), new ArrayList<>(), new SellerOrderAdapter.OnOrderActionListener() {
             @Override
             public void onAccept(SellerOrder order) {
+                // Gọi API xác nhận đơn qua ViewModel
                 viewModel.acceptOrder(order);
-                Toast.makeText(getContext(), "Đã xác nhận đơn hàng", Toast.LENGTH_SHORT).show();
             }
 
             @Override

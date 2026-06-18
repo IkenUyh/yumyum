@@ -3,18 +3,24 @@ package com.example.uitpayapp.merchant.home.home_model;
 import java.util.List;
 
 public class SellerOrder {
-    private String id;
+    private Long orderId;      // ID thực từ API (dùng để gọi cancel/accept/removeItem)
+    private String id;         // Chuỗi hiển thị dạng "#20240001"
     private String customerName;
+    private String customerPhone;
     private String avatarUrl;
     private int numberOfDishes;
     private String totalPrice;
-    private String status; // new, confirmed
+    private String status;     // PENDING, PREPARING, ...
     private String guestNote;
     private List<OrderItem> dishes;
 
-    public SellerOrder(String id, String customerName, String avatarUrl, int numberOfDishes, String totalPrice, String status, String guestNote, List<OrderItem> dishes) {
+    public SellerOrder(Long orderId, String id, String customerName, String customerPhone,
+                       String avatarUrl, int numberOfDishes, String totalPrice,
+                       String status, String guestNote, List<OrderItem> dishes) {
+        this.orderId = orderId;
         this.id = id;
         this.customerName = customerName;
+        this.customerPhone = customerPhone;
         this.avatarUrl = avatarUrl;
         this.numberOfDishes = numberOfDishes;
         this.totalPrice = totalPrice;
@@ -23,9 +29,12 @@ public class SellerOrder {
         this.dishes = dishes;
     }
 
+    public Long getOrderId() { return orderId; }
+    public void setOrderId(Long orderId) { this.orderId = orderId; }
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getCustomerName() { return customerName; }
+    public String getCustomerPhone() { return customerPhone; }
     public String getAvatarUrl() { return avatarUrl; }
     public int getNumberOfDishes() { return numberOfDishes; }
     public void setNumberOfDishes(int numberOfDishes) { this.numberOfDishes = numberOfDishes; }

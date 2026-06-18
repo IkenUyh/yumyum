@@ -42,4 +42,7 @@ public interface OrderService {
 
     @PUT("api/v1/orders/{orderId}/driver-complete")
     Call<ApiResponse<OrderResponse>> driverComplete(@Path("orderId") Long orderId, @Body ConfirmDeliveryRequest request);
-}
+
+    @PUT("api/v1/orders/{orderId}/remove-item")
+    Call<ApiResponse<OrderResponse>> removeItemFromOrder(@Path("orderId") Long orderId, @Body RemoveItemRequest request);
+}

@@ -23,7 +23,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.merchant.home.home_model.OrderItem;
-import com.example.uitpayapp.merchant.home.home_model.SellerHistoryOrder;
 import com.example.uitpayapp.merchant.home.home_model.SellerOrder;
 import com.example.uitpayapp.merchant.marketing.SellerMarketingActivity;
 import com.example.uitpayapp.merchant.notification.SellerNotificationActivity;
@@ -47,16 +46,26 @@ public class SellerHomeActivity extends AppCompatActivity {
         setContentView(R.layout.seller_activity_home);
 
         viewModel = new ViewModelProvider(this).get(SellerOrderViewModel.class);
-        viewModel.loadData();
 
         initViews();
         setupTabLayout();
         setupBottomNav();
         setupBadges();
+        setupObservers();
 
         if (savedInstanceState == null) {
             replaceFragment(new NewOrdersFragment());
         }
+
+        // Tải dữ liệu thực từ API
+        viewModel.loadData();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh khi quay lại màn hình
+        viewModel.loadData();
     }
 
     private void initViews() {
@@ -69,14 +78,29 @@ public class SellerHomeActivity extends AppCompatActivity {
             return insets;
         });
 
-        findViewById(R.id.tv_shop_status).setOnClickListener(v -> 
+        findViewById(R.id.tv_shop_status).setOnClickListener(v ->
             startActivity(new Intent(this, SellerStatusActivity.class)));
-        findViewById(R.id.seller_home_contact_support).setOnClickListener(v ->{
+        findViewById(R.id.seller_home_contact_support).setOnClickListener(v -> {
             Intent intent = new Intent(this, ProfileWebView.class);
-            intent.putExtra("URL_KEY","https://merchant.shopeefood.vn/edu/collection/co-ban");
+            intent.putExtra("URL_KEY", "https://merchant.shopeefood.vn/edu/collection/co-ban");
             startActivity(intent);
         });
+    }
 
+    private void setupObservers() {
+        // Hiển thị lỗi dạng Toast
+        viewModel.getErrorMessage().observe(this, msg -> {
+            if (msg != null && !msg.isEmpty()) {
+                Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+            }
+        });
+
+        // Hiển thị thông báo thành công
+        viewModel.getSuccessMessage().observe(this, msg -> {
+            if (msg != null && !msg.isEmpty()) {
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupTabLayout() {
@@ -142,7 +166,7 @@ public class SellerHomeActivity extends AppCompatActivity {
         ((TextView) view.findViewById(R.id.tv_order_id)).setText(order.getId());
 
         view.findViewById(R.id.btn_close).setOnClickListener(v -> dialog.dismiss());
-        
+
         view.findViewById(R.id.btn_modify_order).setOnClickListener(v -> {
             dialog.dismiss();
             showEditOrderBottomSheet(order);
@@ -152,18 +176,18 @@ public class SellerHomeActivity extends AppCompatActivity {
             dialog.dismiss();
             showCancelOrderDialog(order);
         });
-        
+
         TextView btnComplete = view.findViewById(R.id.btn_complete_order);
-        if ("new".equalsIgnoreCase(order.getStatus())) {
+        String status = order.getStatus() != null ? order.getStatus().toUpperCase() : "";
+        if ("PENDING".equals(status)) {
             btnComplete.setText("Xác nhận đơn");
         } else {
             btnComplete.setText("Đóng");
         }
 
         btnComplete.setOnClickListener(v -> {
-            if ("new".equalsIgnoreCase(order.getStatus())) {
+            if ("PENDING".equals(status)) {
                 viewModel.acceptOrder(order);
-                Toast.makeText(this, "Đã xác nhận đơn hàng", Toast.LENGTH_SHORT).show();
             }
             dialog.dismiss();
         });
@@ -177,12 +201,16 @@ public class SellerHomeActivity extends AppCompatActivity {
         dialog.setContentView(view);
 
         ((TextView) view.findViewById(R.id.tv_customer_name)).setText(order.getCustomerName());
-        
+
         CheckBox cbWrongPrice = view.findViewById(R.id.cb_wrong_price);
         CheckBox cbOutOfStock = view.findViewById(R.id.cb_out_of_stock);
         View btnContinue = view.findViewById(R.id.btn_continue);
+
+        // Hiển thị SĐT thực từ API, fallback về chuỗi rỗng nếu chưa có
         TextView tvPhone = view.findViewById(R.id.tv_customer_phone);
-        tvPhone.setText("0327187310");
+        String phone = (order.getCustomerPhone() != null && !order.getCustomerPhone().isEmpty())
+                ? order.getCustomerPhone() : "Không có thông tin";
+        tvPhone.setText(phone);
 
         android.widget.CompoundButton.OnCheckedChangeListener listener = (buttonView, isChecked) -> {
             boolean hasReason = cbWrongPrice.isChecked() || cbOutOfStock.isChecked();
@@ -193,9 +221,14 @@ public class SellerHomeActivity extends AppCompatActivity {
         cbOutOfStock.setOnCheckedChangeListener(listener);
 
         view.findViewById(R.id.cv_call_customer).setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_DIAL);
-            intent.setData(Uri.parse("tel:" + tvPhone.getText().toString()));
-            startActivity(intent);
+            String phoneNum = tvPhone.getText().toString();
+            if (!phoneNum.isEmpty() && !phoneNum.equals("Không có thông tin")) {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + phoneNum));
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Không có số điện thoại khách hàng", Toast.LENGTH_SHORT).show();
+            }
         });
 
         btnContinue.setOnClickListener(v -> {
@@ -215,7 +248,7 @@ public class SellerHomeActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.layout_dialog_reject_reason, null);
         builder.setView(dialogView);
-        
+
         AlertDialog alertDialog = builder.create();
         if (alertDialog.getWindow() != null) {
             alertDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -228,14 +261,9 @@ public class SellerHomeActivity extends AppCompatActivity {
                 Toast.makeText(this, "Vui lòng nhập lý do hủy", Toast.LENGTH_SHORT).show();
                 return;
             }
-            
-            SellerHistoryOrder historyOrder = new SellerHistoryOrder(
-                    order.getId(), order.getCustomerName(), "Đã hủy", "Vừa xong", 
-                    order.getNumberOfDishes(), "0.0 km", "Hôm nay", "Bây giờ", order.getTotalPrice()
-            );
-            viewModel.cancelOrder(historyOrder, order);
-            
-            Toast.makeText(this, "Đã hủy đơn hàng", Toast.LENGTH_SHORT).show();
+
+            // Gọi API hủy đơn qua ViewModel
+            viewModel.cancelOrder(order, reason);
             alertDialog.dismiss();
         });
 
@@ -252,7 +280,7 @@ public class SellerHomeActivity extends AppCompatActivity {
         ((TextView) view.findViewById(R.id.tv_order_id)).setText(order.getId());
 
         LinearLayout llItems = view.findViewById(R.id.ll_items_remove_container);
-        refreshRemoveItemsList(order, llItems);
+        refreshRemoveItemsList(order, llItems, dialog);
 
         view.findViewById(R.id.btn_back).setOnClickListener(v -> {
             dialog.dismiss();
@@ -260,6 +288,7 @@ public class SellerHomeActivity extends AppCompatActivity {
         });
 
         view.findViewById(R.id.btn_preview_order).setOnClickListener(v -> {
+            // Lưu thay đổi: ViewModel đã cập nhật cục bộ, notify UI
             viewModel.notifyOrderUpdated();
             Toast.makeText(this, "Đã cập nhật đơn hàng", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
@@ -268,7 +297,7 @@ public class SellerHomeActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void refreshRemoveItemsList(SellerOrder order, LinearLayout container) {
+    private void refreshRemoveItemsList(SellerOrder order, LinearLayout container, BottomSheetDialog dialog) {
         container.removeAllViews();
         List<OrderItem> dishes = order.getDishes();
         for (int i = 0; i < dishes.size(); i++) {
@@ -279,16 +308,16 @@ public class SellerHomeActivity extends AppCompatActivity {
 
             int finalI = i;
             itemView.findViewById(R.id.tv_remove).setOnClickListener(v -> {
-                dishes.remove(finalI);
-
-                long newTotal = 0;
-                for (OrderItem oi : dishes) {
-                    newTotal += (long) oi.getPrice() * oi.getQuantity();
+                if (dishes.size() <= 1) {
+                    Toast.makeText(this, "Không thể xóa tất cả món, đơn phải có ít nhất 1 món!", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-                order.setTotalPrice(String.format("%,dđ", newTotal));
-                order.setNumberOfDishes(dishes.size());
-                
-                refreshRemoveItemsList(order, container);
+
+                OrderItem itemToRemove = dishes.get(finalI);
+                // Gọi ViewModel (sẽ tự quyết định API call hay local remove)
+                viewModel.removeItemFromOrder(order, itemToRemove, () -> {
+                    refreshRemoveItemsList(order, container, dialog);
+                });
             });
             container.addView(itemView);
         }

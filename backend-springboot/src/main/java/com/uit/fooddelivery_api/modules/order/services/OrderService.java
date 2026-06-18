@@ -713,4 +713,48 @@ public class OrderService {
     public List<Order> getMerchantOrderHistory(User merchant) {
         return orderRepository.findByRestaurantMerchantIdOrderByCreatedAtDesc(merchant.getId());
     }
-}
+
+    // Chủ quán xóa 1 món ra khỏi đơn (chỉ khi đơn đang PENDING)
+    @Transactional
+    public Order removeItemFromOrder(Long orderId, Long foodId, User merchant) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+
+        if (!order.getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền sửa đơn hàng của quán khác!");
+        }
+
+        if (!order.getStatus().equals("PENDING") && !order.getStatus().equals("PREPARING")) {
+            throw new RuntimeException("Chỉ có thể sửa đơn hàng đang chờ xử lý hoặc đang chuẩn bị!");
+        }
+
+        List<OrderItem> items = order.getOrderItems();
+        if (items == null || items.isEmpty()) {
+            throw new RuntimeException("Đơn hàng không có món nào để xóa!");
+        }
+
+        // Tìm và xóa item khớp với foodId
+        OrderItem toRemove = items.stream()
+                .filter(item -> item.getFood().getId().equals(foodId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy món ăn trong đơn hàng!"));
+
+        if (items.size() == 1) {
+            throw new RuntimeException("Không thể xóa tất cả món, đơn phải có ít nhất 1 món!");
+        }
+
+        items.remove(toRemove);
+
+        // Tính lại tổng tiền món ăn
+        BigDecimal newFoodTotal = items.stream()
+                .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Giữ nguyên shippingFee và discountAmount, chỉ thay phần tiền đồ ăn
+        BigDecimal shipping = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
+        BigDecimal discount = order.getDiscountAmount() != null ? order.getDiscountAmount() : BigDecimal.ZERO;
+        order.setTotalAmount(newFoodTotal.add(shipping).subtract(discount));
+
+        return orderRepository.save(order);
+    }
+}

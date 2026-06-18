@@ -18,6 +18,7 @@ import com.example.uitpayapp.merchant.home.home_model.SellerOrder;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
 public class ConfirmedOrdersFragment extends Fragment {
@@ -43,17 +44,21 @@ public class ConfirmedOrdersFragment extends Fragment {
         adapter = new SellerOrderAdapter(getContext(), new ArrayList<>(), new SellerOrderAdapter.OnOrderActionListener() {
             @Override
             public void onAccept(SellerOrder order) {
-                // Đối với tab Đã xác nhận, "Accept" nghĩa là hoàn tất và chuyển sang lịch sử
+                // Đối với tab Đã xác nhận, "Accept" nghĩa là hoàn tất giao hàng → chuyển sang lịch sử (local)
                 SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                String pickupTime = sdf.format(System.currentTimeMillis());
+                SimpleDateFormat dateFmt = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                String pickupTime = sdf.format(new Date());
+                String today = dateFmt.format(new Date());
+
                 SellerHistoryOrder historyOrder = new SellerHistoryOrder(
+                        order.getOrderId(),
                         order.getId(),
                         order.getCustomerName(),
                         "Đang giao",
                         pickupTime,
                         order.getNumberOfDishes(),
-                        "0.1 km",
-                        "Hôm nay",
+                        "—",
+                        today,
                         "Đang giao",
                         order.getTotalPrice()
                 );

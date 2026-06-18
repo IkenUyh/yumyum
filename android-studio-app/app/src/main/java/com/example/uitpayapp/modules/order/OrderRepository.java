@@ -86,4 +86,8 @@ public class OrderRepository {
     public void driverComplete(Long orderId, ConfirmDeliveryRequest request, ApiCallback<OrderResponse> callback) {
         enqueueCall(orderService.driverComplete(orderId, request), callback);
     }
-}
+
+    public void removeItemFromOrder(Long orderId, RemoveItemRequest request, ApiCallback<OrderResponse> callback) {
+        enqueueCall(orderService.removeItemFromOrder(orderId, request), callback);
+    }
+}
