@@ -362,6 +362,76 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        viewModel.getRandomTopicsData().observe(this, state -> {
+            View t1Loading = findViewById(R.id.layout_topic1_loading);
+            View t1Error = findViewById(R.id.layout_topic1_error);
+            View t1Section = findViewById(R.id.topic_section_1);
+
+            View t2Loading = findViewById(R.id.layout_topic2_loading);
+            View t2Error = findViewById(R.id.layout_topic2_error);
+            View t2Section = findViewById(R.id.topic_section_2);
+
+            if (state.isLoading()) {
+                if (t1Loading != null) t1Loading.setVisibility(View.VISIBLE);
+                if (t1Error != null) t1Error.setVisibility(View.GONE);
+                if (t1Section != null) t1Section.setVisibility(View.GONE);
+
+                if (t2Loading != null) t2Loading.setVisibility(View.VISIBLE);
+                if (t2Error != null) t2Error.setVisibility(View.GONE);
+                if (t2Section != null) t2Section.setVisibility(View.GONE);
+            } else if (state.isSuccess()) {
+                if (t1Loading != null) t1Loading.setVisibility(View.GONE);
+                if (t2Loading != null) t2Loading.setVisibility(View.GONE);
+                
+                java.util.List<com.example.uitpayapp.home.network.TopicResponse> data = state.getData();
+                if (data != null) {
+                    if (data.size() >= 1) {
+                        if (t1Error != null) t1Error.setVisibility(View.GONE);
+                        if (t1Section != null) t1Section.setVisibility(View.VISIBLE);
+                        com.example.uitpayapp.home.network.TopicResponse t1 = data.get(0);
+                        setupTopicSection(t1Section, t1.getTitle(), t1.getSubtitle(), t1.getItems());
+                    } else {
+                        if (t1Section != null) t1Section.setVisibility(View.GONE);
+                        if (t1Error != null) {
+                            t1Error.setVisibility(View.VISIBLE);
+                            android.widget.TextView tvTopic1Error = findViewById(R.id.tv_topic1_error);
+                            if (tvTopic1Error != null) tvTopic1Error.setText("Chưa có dữ liệu");
+                        }
+                    }
+
+                    if (data.size() >= 2) {
+                        if (t2Error != null) t2Error.setVisibility(View.GONE);
+                        if (t2Section != null) t2Section.setVisibility(View.VISIBLE);
+                        com.example.uitpayapp.home.network.TopicResponse t2 = data.get(1);
+                        setupTopicSection(t2Section, t2.getTitle(), t2.getSubtitle(), t2.getItems());
+                    } else {
+                        if (t2Section != null) t2Section.setVisibility(View.GONE);
+                        if (t2Error != null) {
+                            t2Error.setVisibility(View.VISIBLE);
+                            android.widget.TextView tvTopic2Error = findViewById(R.id.tv_topic2_error);
+                            if (tvTopic2Error != null) tvTopic2Error.setText("Chưa có dữ liệu");
+                        }
+                    }
+                }
+            } else if (state.isError() || state.isEmpty()) {
+                if (t1Loading != null) t1Loading.setVisibility(View.GONE);
+                if (t1Section != null) t1Section.setVisibility(View.GONE);
+                if (t1Error != null) {
+                    t1Error.setVisibility(View.VISIBLE);
+                    android.widget.TextView tvTopic1Error = findViewById(R.id.tv_topic1_error);
+                    if (tvTopic1Error != null) tvTopic1Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
+                }
+
+                if (t2Loading != null) t2Loading.setVisibility(View.GONE);
+                if (t2Section != null) t2Section.setVisibility(View.GONE);
+                if (t2Error != null) {
+                    t2Error.setVisibility(View.VISIBLE);
+                    android.widget.TextView tvTopic2Error = findViewById(R.id.tv_topic2_error);
+                    if (tvTopic2Error != null) tvTopic2Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
+                }
+            }
+        });
+
         viewModel.getBrandsData().observe(this, state -> {
             View loadingView = findViewById(R.id.layout_brands_loading);
             View sectionView = findViewById(R.id.topic_brand_section);
@@ -928,6 +998,7 @@ public class HomeActivity extends AppCompatActivity {
 
         tvTitle.setText(title);
         tvSubtitle.setText(subtitle);
+        tvSubtitle.setVisibility(View.GONE); // Hide subtitle as requested
 
         rvStores.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         TopicStoreAdapter adapter = new TopicStoreAdapter(foods, (item, holder) -> {
