@@ -47,7 +47,7 @@ public class RatingMerchantActivity extends AppCompatActivity {
     private String userToken;
 
     private final List<String> merchantCompliments = Arrays.asList("Ngon xỉu!", "Đóng gói tốt", "No căng bụng", "Giá phải chăng");
-    private final List<String> orderDishes = Arrays.asList("Mì Trộn Thập Cẩm", "Cơm Chiên Dương Châu");
+    private final List<String> orderDishes = new java.util.ArrayList<>(java.util.Arrays.asList("Mì Trộn Thập Cẩm", "Cơm Chiên Dương Châu"));
 
     private final Map<String, Integer> dishSatisfactionMap = new HashMap<>();
     private final List<String> mSelectedCompliments = new ArrayList<>();
@@ -59,8 +59,32 @@ public class RatingMerchantActivity extends AppCompatActivity {
 
         // 1. Lấy dữ liệu Token và Order ID chuyển giao từ màn hình trước
         // (Thay thế giá trị mặc định bằng logic SharedPreferences/Intent thực tế của bạn)
-        orderId = getIntent().getLongExtra("ORDER_ID", 1L);
+        long tempId = 1L;
+        if (getIntent().hasExtra("ORDER_ID")) {
+            try {
+                tempId = getIntent().getLongExtra("ORDER_ID", 1L);
+                if (tempId == 1L) {
+                    String strVal = getIntent().getStringExtra("ORDER_ID");
+                    if (strVal != null) {
+                        if (strVal.startsWith("DRV_")) {
+                            strVal = strVal.substring(4);
+                        }
+                        tempId = Long.parseLong(strVal);
+                    }
+                }
+            } catch (Exception e) {
+                tempId = 1L;
+            }
+        }
+        orderId = tempId;
         userToken = "YOUR_STORED_JWT_TOKEN";
+
+        // Nhận danh sách món ăn thực tế được truyền từ Intent
+        java.util.ArrayList<String> receivedDishes = getIntent().getStringArrayListExtra("DISH_NAMES");
+        if (receivedDishes != null && !receivedDishes.isEmpty()) {
+            orderDishes.clear();
+            orderDishes.addAll(receivedDishes);
+        }
 
         // 2. Khởi tạo tầng Repository kết nối API
         ReviewService reviewService = RetrofitClient.getReviewService();
@@ -218,7 +242,19 @@ public class RatingMerchantActivity extends AppCompatActivity {
                         finish();
                     } else {
                         btnMerchantSubmit.setEnabled(true); // Kích hoạt lại nút nếu lỗi xảy ra để người dùng thử lại
-                        Toast.makeText(RatingMerchantActivity.this, "Lỗi khi gửi đánh giá: Mã lỗi " + response.code(), Toast.LENGTH_LONG).show();
+                        String errorMsg = "Mã lỗi " + response.code();
+                        try {
+                            if (response.errorBody() != null) {
+                                String errorJson = response.errorBody().string();
+                                ApiResponse<?> errorResponse = new com.google.gson.Gson().fromJson(errorJson, ApiResponse.class);
+                                if (errorResponse != null && errorResponse.getMessage() != null) {
+                                    errorMsg = errorResponse.getMessage();
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        Toast.makeText(RatingMerchantActivity.this, "Lỗi khi gửi đánh giá: " + errorMsg, Toast.LENGTH_LONG).show();
                     }
                 }
 

@@ -19,6 +19,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
+    private final com.uit.fooddelivery_api.modules.loyalty.services.LoyaltyService loyaltyService;
 
     /**
      * Hệ thống Regex Engine nâng cao - Cập nhật danh sách từ thô tục mới
@@ -72,12 +73,17 @@ public class ReviewService {
             throw new RuntimeException("Bạn không có quyền đánh giá đơn hàng của người khác!"); //[cite: 1]
         }
 
-        // 3. Logic: Chỉ được đánh giá khi đơn đã giao xong[cite: 1]
+        // 3. Logic: Chỉ được đánh giá khi đơn đã giao xong
         if (!"COMPLETED".equals(order.getStatus())) {
-            throw new RuntimeException("Chỉ có thể đánh giá khi đơn hàng đã hoàn tất giao hàng!"); //[cite: 1]
+            throw new RuntimeException("Chỉ có thể đánh giá khi đơn hàng đã hoàn tất giao hàng!");
         }
 
-        // 4. Logic: Mỗi đơn chỉ đánh giá 1 lần[cite: 1]
+        // 3.5. Logic: Đơn hàng chỉ được đánh giá trong vòng 7 ngày kể từ khi đặt hàng
+        if (order.getCreatedAt() != null && java.time.LocalDateTime.now().isAfter(order.getCreatedAt().plusDays(7))) {
+            throw new RuntimeException("Đơn hàng này đã quá hạn 7 ngày để đánh giá!");
+        }
+
+        // 4. Logic: Mỗi đơn chỉ đánh giá 1 lần
         if (reviewRepository.existsByOrderId(order.getId())) {
             throw new RuntimeException("Đơn hàng này đã được đánh giá rồi!"); //[cite: 1]
         }
@@ -94,15 +100,20 @@ public class ReviewService {
             }
         }
 
-        // 7. Lưu Review[cite: 1]
+        // 7. Lưu Review
         Review review = Review.builder()
                 .order(order)
                 .restaurant(order.getRestaurant())
                 .rating(dto.getRating())
                 .comment(dto.getComment())
-                .build(); //[cite: 1]
+                .build();
 
-        return reviewRepository.save(review); //[cite: 1]
+        Review savedReview = reviewRepository.save(review);
+
+        // Thưởng xu cho khách hàng sau khi đánh giá thành công
+        loyaltyService.rewardPointsForReview(customer);
+
+        return savedReview;
     }
 
     public List<Review> getRestaurantReviews(Long restaurantId) {

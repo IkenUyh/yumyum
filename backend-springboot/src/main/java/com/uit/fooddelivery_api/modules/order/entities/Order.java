@@ -32,6 +32,10 @@ public class Order {
     @JoinColumn(name = "driver_id")
     private User driver;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_id")
+    private com.uit.fooddelivery_api.modules.user.entities.UserAddress address;
+
     @Column(name = "total_amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal totalAmount;
 
@@ -72,4 +76,7 @@ public class Order {
 
     @Column(name = "delivery_pin", length = 10)
     private String deliveryPin;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private com.uit.fooddelivery_api.modules.review.entities.Review review;
 }

@@ -45,6 +45,33 @@ public class OrderResponse {
     @SerializedName("customerPhone")
     private String customerPhone;
 
+    @SerializedName("reviewed")
+    private Boolean reviewed;
+
+    @SerializedName("reviewExpired")
+    private Boolean reviewExpired;
+
+    @SerializedName("shippingFee")
+    private BigDecimal shippingFee;
+
+    @SerializedName("discountAmount")
+    private BigDecimal discountAmount;
+
+    @SerializedName("destAddress")
+    private String destAddress;
+
+    @SerializedName("restaurantLatitude")
+    private BigDecimal restaurantLatitude;
+
+    @SerializedName("restaurantLongitude")
+    private BigDecimal restaurantLongitude;
+
+    @SerializedName("destLatitude")
+    private BigDecimal destLatitude;
+
+    @SerializedName("destLongitude")
+    private BigDecimal destLongitude;
+
 
     public static class OrderItemResponse {
         @SerializedName("name")
@@ -112,4 +139,31 @@ public class OrderResponse {
 
     public String getCustomerPhone() { return customerPhone; }
     public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
+
+    public Boolean getReviewed() { return reviewed != null && reviewed; }
+    public void setReviewed(Boolean reviewed) { this.reviewed = reviewed; }
+
+    public Boolean getReviewExpired() { return reviewExpired != null && reviewExpired; }
+    public void setReviewExpired(Boolean reviewExpired) { this.reviewExpired = reviewExpired; }
+
+    public BigDecimal getShippingFee() { return shippingFee; }
+    public void setShippingFee(BigDecimal shippingFee) { this.shippingFee = shippingFee; }
+
+    public BigDecimal getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(BigDecimal discountAmount) { this.discountAmount = discountAmount; }
+
+    public String getDestAddress() { return destAddress; }
+    public void setDestAddress(String destAddress) { this.destAddress = destAddress; }
+
+    public BigDecimal getRestaurantLatitude() { return restaurantLatitude; }
+    public void setRestaurantLatitude(BigDecimal restaurantLatitude) { this.restaurantLatitude = restaurantLatitude; }
+
+    public BigDecimal getRestaurantLongitude() { return restaurantLongitude; }
+    public void setRestaurantLongitude(BigDecimal restaurantLongitude) { this.restaurantLongitude = restaurantLongitude; }
+
+    public BigDecimal getDestLatitude() { return destLatitude; }
+    public void setDestLatitude(BigDecimal destLatitude) { this.destLatitude = destLatitude; }
+
+    public BigDecimal getDestLongitude() { return destLongitude; }
+    public void setDestLongitude(BigDecimal destLongitude) { this.destLongitude = destLongitude; }
 }

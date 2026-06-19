@@ -297,6 +297,7 @@ public class OrderService {
         Order order = Order.builder()
                 .user(customer)
                 .restaurant(restaurant)
+                .address(address)
                 .status("PENDING")
                 .shippingFee(shippingFee)
                 .deliveryMode(deliveryMode)
@@ -756,5 +757,10 @@ public class OrderService {
         order.setTotalAmount(newFoodTotal.add(shipping).subtract(discount));
 
         return orderRepository.save(order);
+    }
+
+    public Order getOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
     }
 }
