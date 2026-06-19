@@ -50,7 +50,7 @@ import com.example.uitpayapp.home.home_models.CartItem;
 import com.example.uitpayapp.home.home_models.CartManager;
 import com.example.uitpayapp.home.home_models.FoodCategory;
 import com.example.uitpayapp.home.home_models.FoodMenuItem;
-import com.example.uitpayapp.home.FakeDealGenerator;
+
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
 
@@ -86,12 +86,16 @@ public class HomeActivity extends AppCompatActivity {
     private int nextBannerAt = 5; // Insert banner after this many deal items
     private final Random bannerRandom = new Random();
 
+    private final String[] RANDOM_SUBTITLES = {"Khám phá ngay", "Gợi ý cho bạn", "Đừng bỏ lỡ"};
+
     private String selectedCategory = null;
     private String currentSearchQuery = "";
     private TextView tvDeliveryAddress;
 
     private Handler sliderHandler;
     private Runnable sliderRunnable;
+    private ImageSliderAdapter bannerAdapter;
+    private List<String> loadedBannerUrls = new ArrayList<>();
 
     private static final String[] ADDRESSES = {
             "48 Phó Cơ Điều, Phường Chợ Lớn, TP. Hồ Chí Minh",
@@ -168,11 +172,11 @@ public class HomeActivity extends AppCompatActivity {
 
             View t1Loading = findViewById(R.id.layout_topic1_loading);
             View t1Error = findViewById(R.id.layout_topic1_error);
-            View t1Section = findViewById(R.id.topic_section_1);
+            View t1Section = findViewById(R.id.random_topic_section_1);
 
             View t2Loading = findViewById(R.id.layout_topic2_loading);
             View t2Error = findViewById(R.id.layout_topic2_error);
-            View t2Section = findViewById(R.id.topic_section_2);
+            View t2Section = findViewById(R.id.random_topic_section_2);
 
             
             View catLoading = findViewById(R.id.layout_categories_loading);
@@ -207,6 +211,13 @@ public class HomeActivity extends AppCompatActivity {
                     catError.setVisibility(View.GONE);
                 if (catContent != null)
                     catContent.setVisibility(View.GONE);
+                    
+                View bannerLoading = findViewById(R.id.layout_banner_loading);
+                View bannerError = findViewById(R.id.layout_banner_error);
+                View bannerContent = findViewById(R.id.imgAdvertisement);
+                if (bannerLoading != null) bannerLoading.setVisibility(View.VISIBLE);
+                if (bannerError != null) bannerError.setVisibility(View.GONE);
+                if (bannerContent != null) bannerContent.setVisibility(View.GONE);
             } else if (state.isSuccess()) {
                 if (fsLoading != null)
                     fsLoading.setVisibility(View.GONE);
@@ -249,6 +260,12 @@ public class HomeActivity extends AppCompatActivity {
                 if (catLoading != null) catLoading.setVisibility(View.GONE);
                 if (catError != null) catError.setVisibility(View.GONE);
                 
+                View bannerLoading = findViewById(R.id.layout_banner_loading);
+                View bannerError = findViewById(R.id.layout_banner_error);
+                View bannerContent = findViewById(R.id.imgAdvertisement);
+                if (bannerLoading != null) bannerLoading.setVisibility(View.GONE);
+                if (bannerError != null) bannerError.setVisibility(View.GONE);
+                
                 HomeCoreResponse data = state.getData();
                 if (data != null) {
                     if (data.getCategories() != null && !data.getCategories().isEmpty()) {
@@ -288,13 +305,15 @@ public class HomeActivity extends AppCompatActivity {
                             t1Error.setVisibility(View.GONE);
                         if (t1Section != null)
                             t1Section.setVisibility(View.VISIBLE);
-                        updateTopicUI(findViewById(R.id.topic_section_1), data.getTopics().get(0));
+                        updateTopicUI(findViewById(R.id.random_topic_section_1), data.getTopics().get(0));
 
                         if (t2Error != null)
                             t2Error.setVisibility(View.GONE);
                         if (t2Section != null)
                             t2Section.setVisibility(View.VISIBLE);
-                        updateTopicUI(findViewById(R.id.topic_section_2), data.getTopics().get(1));
+                        updateTopicUI(findViewById(R.id.random_topic_section_2), data.getTopics().get(1));
+                        
+                        applyRandomSubtitles();
                     } else {
                         if (t1Section != null)
                             t1Section.setVisibility(View.GONE);
@@ -312,6 +331,29 @@ public class HomeActivity extends AppCompatActivity {
                             android.widget.TextView tvT2Error = findViewById(R.id.tv_topic2_error);
                             if (tvT2Error != null)
                                 tvT2Error.setText("Chưa có dữ liệu");
+                        }
+                    }
+                    
+                    if (data.getBanners() != null && !data.getBanners().isEmpty()) {
+                        if (bannerError != null) bannerError.setVisibility(View.GONE);
+                        if (bannerContent != null) bannerContent.setVisibility(View.VISIBLE);
+                        List<String> bannerUrls = new ArrayList<>();
+                        for (com.example.uitpayapp.home.network.Banner b : data.getBanners()) {
+                            bannerUrls.add(b.getImageUrl());
+                        }
+                        loadedBannerUrls.clear();
+                        loadedBannerUrls.addAll(bannerUrls);
+                        
+                        if (bannerAdapter != null) {
+                            bannerAdapter.updateData(bannerUrls);
+                        }
+                    } else {
+                        if (bannerContent != null) bannerContent.setVisibility(View.GONE);
+                        if (bannerError != null) {
+                            bannerError.setVisibility(View.VISIBLE);
+                            android.widget.TextView tvBannerError = findViewById(R.id.tv_banner_error);
+                            if (tvBannerError != null)
+                                tvBannerError.setText("Chưa có dữ liệu");
                         }
                     }
                 }
@@ -359,17 +401,29 @@ public class HomeActivity extends AppCompatActivity {
                     if (tvT2Error != null)
                         tvT2Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
                 }
+                
+                View bannerLoading = findViewById(R.id.layout_banner_loading);
+                View bannerError = findViewById(R.id.layout_banner_error);
+                View bannerContent = findViewById(R.id.imgAdvertisement);
+                if (bannerLoading != null) bannerLoading.setVisibility(View.GONE);
+                if (bannerContent != null) bannerContent.setVisibility(View.GONE);
+                if (bannerError != null) {
+                    bannerError.setVisibility(View.VISIBLE);
+                    android.widget.TextView tvBannerError = findViewById(R.id.tv_banner_error);
+                    if (tvBannerError != null)
+                        tvBannerError.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
+                }
             }
         });
 
         viewModel.getRandomTopicsData().observe(this, state -> {
             View t1Loading = findViewById(R.id.layout_topic1_loading);
             View t1Error = findViewById(R.id.layout_topic1_error);
-            View t1Section = findViewById(R.id.topic_section_1);
+            View t1Section = findViewById(R.id.random_topic_section_1);
 
             View t2Loading = findViewById(R.id.layout_topic2_loading);
             View t2Error = findViewById(R.id.layout_topic2_error);
-            View t2Section = findViewById(R.id.topic_section_2);
+            View t2Section = findViewById(R.id.random_topic_section_2);
 
             if (state.isLoading()) {
                 if (t1Loading != null) t1Loading.setVisibility(View.VISIBLE);
@@ -412,6 +466,7 @@ public class HomeActivity extends AppCompatActivity {
                             if (tvTopic2Error != null) tvTopic2Error.setText("Chưa có dữ liệu");
                         }
                     }
+                    applyRandomSubtitles();
                 }
             } else if (state.isError() || state.isEmpty()) {
                 if (t1Loading != null) t1Loading.setVisibility(View.GONE);
@@ -615,6 +670,29 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    private void applyRandomSubtitles() {
+        List<String> subs = new ArrayList<>(Arrays.asList(RANDOM_SUBTITLES));
+        java.util.Collections.shuffle(subs);
+        
+        View t1 = findViewById(R.id.random_topic_section_1);
+        if (t1 != null) {
+            TextView tvSub1 = t1.findViewById(R.id.tv_topic_subtitle);
+            if (tvSub1 != null) {
+                tvSub1.setText(subs.get(0));
+                tvSub1.setVisibility(View.VISIBLE);
+            }
+        }
+        
+        View t2 = findViewById(R.id.random_topic_section_2);
+        if (t2 != null) {
+            TextView tvSub2 = t2.findViewById(R.id.tv_topic_subtitle);
+            if (tvSub2 != null) {
+                tvSub2.setText(subs.get(1));
+                tvSub2.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
     private void updateBrandsUI(List<Restaurant> brands) {
         View sectionView = findViewById(R.id.topic_brand_section);
         if (sectionView == null)
@@ -653,8 +731,9 @@ public class HomeActivity extends AppCompatActivity {
             dealItems.add(deal);
             dealItemCount++;
 
-            if (dealItemCount >= nextBannerAt) {
-                dealItems.add(HomeDealAdapter.BannerItem.random());
+            if (dealItemCount >= nextBannerAt && !loadedBannerUrls.isEmpty()) {
+                String randomUrl = loadedBannerUrls.get(bannerRandom.nextInt(loadedBannerUrls.size()));
+                dealItems.add(new HomeDealAdapter.BannerItem(randomUrl));
                 nextBannerAt = dealItemCount + 5 + bannerRandom.nextInt(3);
             }
         }
@@ -666,20 +745,18 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setupImageSlider() {
         ViewPager2 viewPager2 = findViewById(R.id.imgAdvertisement);
-        List<Integer> imageList = Arrays.asList(
-                R.drawable.img_priority_banner1,
-                R.drawable.img_priority_banner2,
-                R.drawable.img_priority_banner3);
-        ImageSliderAdapter sliderAdapter = new ImageSliderAdapter(imageList);
-        viewPager2.setAdapter(sliderAdapter);
+        bannerAdapter = new ImageSliderAdapter(new ArrayList<>());
+        viewPager2.setAdapter(bannerAdapter);
 
         sliderHandler = new Handler(Looper.getMainLooper());
         sliderRunnable = new Runnable() {
             @Override
             public void run() {
-                int currentItem = viewPager2.getCurrentItem();
-                currentItem = (currentItem + 1) % imageList.size();
-                viewPager2.setCurrentItem(currentItem, true);
+                if (bannerAdapter != null && bannerAdapter.getItemCount() > 1) {
+                    int currentItem = viewPager2.getCurrentItem();
+                    currentItem = (currentItem + 1) % bannerAdapter.getItemCount();
+                    viewPager2.setCurrentItem(currentItem, true);
+                }
                 sliderHandler.postDelayed(this, 3000);
             }
         };
@@ -907,13 +984,14 @@ public class HomeActivity extends AppCompatActivity {
         List<Object[]> topicPool = HomeRepository.getInstance().getTopics();
 
         java.util.Collections.shuffle(topicPool);
-        int[] sectionIds = { R.id.topic_section_1, R.id.topic_section_2 };
+        int[] sectionIds = { R.id.random_topic_section_1, R.id.random_topic_section_2 };
         for (int i = 0; i < 2; i++) {
             Object[] topic = topicPool.get(i);
             @SuppressWarnings("unchecked")
             List<FoodMenuItem> foods = (List<FoodMenuItem>) topic[2];
             setupTopicSection(findViewById(sectionIds[i]), (String) topic[0], (String) topic[1], foods);
         }
+        applyRandomSubtitles();
     }
 
     private void setupBrands() {

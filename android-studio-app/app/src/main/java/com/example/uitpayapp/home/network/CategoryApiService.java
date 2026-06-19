@@ -15,4 +15,7 @@ public interface CategoryApiService {
 
     @GET("api/v1/categories/{id}/foods")
     Call<ApiResponse<List<FoodResponse>>> getFoodsByCategory(@Path("id") Long categoryId);
+
+    @GET("api/v1/categories/food-count")
+    Call<ApiResponse<List<com.example.uitpayapp.modules.food.models.responses.CategoryFoodCountResponseDTO>>> getCategoryFoodCounts();
 }

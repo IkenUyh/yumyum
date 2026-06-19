@@ -105,25 +105,60 @@ public class SignInActivity extends AppCompatActivity {
         }
 
         // Setup Banner Slider
-        List<Integer> imageList = List.of(
-                R.drawable.img_priority_banner1,
-                R.drawable.img_priority_banner2,
-                R.drawable.img_priority_banner3);
         ViewPager2 viewPager2 = findViewById(R.id.imgAdvertisement);
+        View bannerLoading = findViewById(R.id.layout_banner_loading);
+        View bannerError = findViewById(R.id.layout_banner_error);
+        
         if (viewPager2 != null) {
-            ImageSliderAdapter adapter = new ImageSliderAdapter(imageList);
+            ImageSliderAdapter adapter = new ImageSliderAdapter(new java.util.ArrayList<>());
             viewPager2.setAdapter(adapter);
             sliderHandler = new Handler(Looper.getMainLooper());
             sliderRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    int currentitem = viewPager2.getCurrentItem();
-                    currentitem = (currentitem + 1) % imageList.size();
-                    viewPager2.setCurrentItem(currentitem, true);
+                    if (adapter.getItemCount() > 1) {
+                        int currentitem = viewPager2.getCurrentItem();
+                        currentitem = (currentitem + 1) % adapter.getItemCount();
+                        viewPager2.setCurrentItem(currentitem, true);
+                    }
                     sliderHandler.postDelayed(this, 3000);
                 }
             };
             sliderHandler.post(sliderRunnable);
+            
+            if (bannerLoading != null) bannerLoading.setVisibility(View.VISIBLE);
+            if (bannerError != null) bannerError.setVisibility(View.GONE);
+            viewPager2.setVisibility(View.GONE);
+
+            com.example.uitpayapp.network.RetrofitClient.getHomeApiService().getHomeCore("").enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>>() {
+                @Override
+                public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>> response) {
+                    if (bannerLoading != null) bannerLoading.setVisibility(View.GONE);
+                    if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                        List<com.example.uitpayapp.home.network.Banner> banners = response.body().getData().getBanners();
+                        if (banners != null && !banners.isEmpty()) {
+                            viewPager2.setVisibility(View.VISIBLE);
+                            List<String> urls = new java.util.ArrayList<>();
+                            for (com.example.uitpayapp.home.network.Banner b : banners) urls.add(b.getImageUrl());
+                            adapter.updateData(urls);
+                        } else {
+                            if (bannerError != null) bannerError.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        if (bannerError != null) bannerError.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                @Override
+                public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>> call, Throwable t) {
+                    if (bannerLoading != null) bannerLoading.setVisibility(View.GONE);
+                    if (bannerError != null) {
+                        bannerError.setVisibility(View.VISIBLE);
+                        TextView tvError = findViewById(R.id.tv_banner_error);
+                        if (tvError != null) tvError.setText("Không kết nối được server");
+                    }
+                }
+            });
         }
     }
     

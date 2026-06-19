@@ -168,23 +168,38 @@ public class GiftExchangeActivity extends AppCompatActivity {
     }
 
     private void setBannerData() {
-        List<Integer> bannerList = new ArrayList<>();
-        bannerList.add(R.drawable.img_priority_banner1);
-        bannerList.add(R.drawable.img_priority_banner2);
-        bannerList.add(R.drawable.img_priority_banner3);
-        ImageSliderAdapter adapter = new ImageSliderAdapter(bannerList);
+        ImageSliderAdapter adapter = new ImageSliderAdapter(new ArrayList<>());
         BannerSlider.setAdapter(adapter);
         sliderHandler = new Handler(Looper.getMainLooper());
         sliderRunnable = new Runnable() {
             @Override
             public void run() {
-                int currentitem = BannerSlider.getCurrentItem();
-                currentitem = (currentitem + 1) % bannerList.size();
-                BannerSlider.setCurrentItem(currentitem, true);
+                if (adapter.getItemCount() > 1) {
+                    int currentitem = BannerSlider.getCurrentItem();
+                    currentitem = (currentitem + 1) % adapter.getItemCount();
+                    BannerSlider.setCurrentItem(currentitem, true);
+                }
                 sliderHandler.postDelayed(this, 3000);
             }
         };
         sliderHandler.post(sliderRunnable);
+        
+        com.example.uitpayapp.network.RetrofitClient.getHomeApiService().getHomeCore("").enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>>() {
+            @Override
+            public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    List<com.example.uitpayapp.home.network.Banner> banners = response.body().getData().getBanners();
+                    if (banners != null && !banners.isEmpty()) {
+                        List<String> urls = new ArrayList<>();
+                        for (com.example.uitpayapp.home.network.Banner b : banners) urls.add(b.getImageUrl());
+                        adapter.updateData(urls);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>> call, Throwable t) {}
+        });
     }
     private void SetCheckInData() {
         List<CheckInModel> checkInList = new ArrayList<>();

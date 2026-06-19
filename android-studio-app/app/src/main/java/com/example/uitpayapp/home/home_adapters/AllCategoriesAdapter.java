@@ -9,40 +9,45 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.home.home_models.FoodCategory;
+import com.example.uitpayapp.modules.food.models.responses.CategoryFoodCountResponseDTO;
 
 import java.util.List;
 
 public class AllCategoriesAdapter extends RecyclerView.Adapter<AllCategoriesAdapter.ViewHolder> {
 
     public interface OnCategoryClickListener {
-        void onCategoryClick(FoodCategory category);
+        void onCategoryClick(CategoryFoodCountResponseDTO category);
     }
 
-    private final List<FoodCategory> categories;
+    private final List<CategoryFoodCountResponseDTO> categories;
     private final OnCategoryClickListener listener;
 
-    public AllCategoriesAdapter(List<FoodCategory> categories, OnCategoryClickListener listener) {
+    public AllCategoriesAdapter(List<CategoryFoodCountResponseDTO> categories, OnCategoryClickListener listener) {
         this.categories = categories;
         this.listener = listener;
+    }
+
+    public void updateData(List<CategoryFoodCountResponseDTO> newCategories) {
+        this.categories.clear();
+        if (newCategories != null) {
+            this.categories.addAll(newCategories);
+        }
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_all_category, parent, false);
+                .inflate(R.layout.item_all_category_simple, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        FoodCategory category = categories.get(position);
-        holder.tvName.setText(category.getName());
+        CategoryFoodCountResponseDTO category = categories.get(position);
         
-        // Mock item count
-        int count = 50 + (category.getName().length() * 12) % 150;
-        holder.tvCount.setText("(" + count + " món)");
+        holder.tvNameCount.setText(category.getCategoryName() + " (" + category.getFoodCount() + ")");
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -57,13 +62,11 @@ public class AllCategoriesAdapter extends RecyclerView.Adapter<AllCategoriesAdap
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName;
-        TextView tvCount;
+        TextView tvNameCount;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvName = itemView.findViewById(R.id.tv_all_category_name);
-            tvCount = itemView.findViewById(R.id.tv_all_category_count);
+            tvNameCount = itemView.findViewById(R.id.tv_category_name_count);
         }
     }
 }

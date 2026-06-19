@@ -39,9 +39,26 @@ public class FoodCategoryAdapter extends RecyclerView.Adapter<FoodCategoryAdapte
     public void updateData(List<FoodCategory> newCategories) {
         this.categories.clear();
         if (newCategories != null) {
-            this.categories.addAll(newCategories);
+            for (FoodCategory category : newCategories) {
+                if (hasSupportedIcon(category)) {
+                    this.categories.add(category);
+                }
+            }
         }
         notifyDataSetChanged();
+    }
+
+    private boolean hasSupportedIcon(FoodCategory category) {
+        if (category.isSelectAll()) return true;
+        if (category.getIconResId() != 0) return true;
+        
+        String name = category.getName() != null ? category.getName().trim().toLowerCase() : "";
+        return name.contains("cơm") || name.contains("bún") || name.contains("phở") ||
+               name.contains("bánh mì") || name.contains("bánh mỳ") || 
+               name.contains("fastfood") || name.contains("nhanh") ||
+               name.contains("lẩu") || name.contains("nướng") || name.contains("bbq") ||
+               name.contains("cafe") || name.contains("cà phê") ||
+               name.contains("trà sữa") || name.contains("ăn vặt") || name.contains("bánh ngọt");
     }
 
     @NonNull
