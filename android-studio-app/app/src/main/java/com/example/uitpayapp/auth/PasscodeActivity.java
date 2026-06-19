@@ -57,23 +57,28 @@ public class PasscodeActivity extends AppCompatActivity {
         }
         tvErrorMessage = findViewById(R.id.tv_error_message);
 
-        // === LOAD AVATAR VA THONG TIN USER TU CACHE ===
+        // === LOAD AVATAR VA THONG TIN USER ===
         android.widget.ImageView ivAvatar = findViewById(R.id.iv_avatar);
         TextView tvPhoneNumber = findViewById(R.id.tv_phone_number);
 
-        android.content.SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        String savedPhone = prefs.getString("PHONE_NUMBER", "");
-        String savedName = prefs.getString("FULL_NAME", "Username");
-        String avatarUrl = prefs.getString("AVATAR_URL", "");
+        // Uu tien lay tu Intent truoc (do SignInActivity truyen sang)
+        String avatarUrl = getIntent().getStringExtra("AVATAR_URL");
+        String fullName = getIntent().getStringExtra("FULL_NAME");
 
-        // Kiem tra: Neu khop so dien thoai cu thi hien avatar
-        if (phoneNumber.equals(savedPhone)) {
-            if (!avatarUrl.isEmpty() && ivAvatar != null) {
-                com.bumptech.glide.Glide.with(this)
-                        .load(avatarUrl)
-                        .circleCrop()
-                        .into(ivAvatar);
+        // Neu khong co thi fallback lay tu SharedPreferences (cho truong hop tu dang ky qua hay quen mat khau)
+        if (avatarUrl == null || avatarUrl.isEmpty()) {
+            android.content.SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            String savedPhone = prefs.getString("PHONE_NUMBER", "");
+            if (phoneNumber.equals(savedPhone)) {
+                avatarUrl = prefs.getString("AVATAR_URL", "");
             }
+        }
+
+        if (avatarUrl != null && !avatarUrl.isEmpty() && ivAvatar != null) {
+            com.bumptech.glide.Glide.with(this)
+                    .load(avatarUrl)
+                    .circleCrop()
+                    .into(ivAvatar);
         }
 
         // Hien thi so dien thoai da duoc che (Masked) voi ma vung

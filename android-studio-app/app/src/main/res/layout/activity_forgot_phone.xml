@@ -46,7 +46,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Nhập số điện thoại đã đăng ký để lấy lại mã PIN"
+                android:text="Nhập email đã đăng ký để lấy lại mã PIN"
                 android:textColor="#757575"
                 android:textSize="14sp"
                 android:layout_marginBottom="24dp" />
@@ -54,7 +54,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Số điện thoại"
+                android:text="Email"
                 android:textColor="#000000"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -65,8 +65,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_edittext_rounded"
-                android:hint="Nhập số điện thoại"
-                android:inputType="phone"
+                android:hint="Nhập email"
+                android:inputType="textEmailAddress"
                 android:padding="16dp"
                 android:layout_marginBottom="4dp" />
 
@@ -74,7 +74,7 @@
                 android:id="@+id/tv_error_phone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Vui lòng nhập số điện thoại"
+                android:text="Vui lòng nhập email"
                 android:textColor="#E53935"
                 android:textSize="12sp"
                 android:visibility="gone"
