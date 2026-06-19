@@ -117,14 +117,14 @@ INSERT INTO foods (restaurant_id, category_id, name, description, price,image_ur
 (@r6, @cat3, 'Phở Gà Ta Xé Phay', 'Thịt gà ta da giòn, nước dùng thanh ngọt', 55000.00,'https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1781702981/download_7_vflqyh.jpg'),
 (@r6, @cat3, 'Quẩy Nóng Giòn', 'Đĩa 3 chiếc quẩy ăn kèm phở chuẩn vị Bắc', 10000.00,'https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1781703248/d7bdc233-4236-4296-8c4c-a207539221b8.png'),
 (@r6, @cat3, 'Trứng Chần Sốt Nước Tiết', 'Chén trứng chần bổ dưỡng cho bữa sáng', 12000.00,'https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1781703358/8b90d550-642b-40bd-bf93-4d26b651df81.png'),
-(@r6, @cat3, 'Phở Đặc Biệt (Tái, Nạm, Gầu, Trứng)', 'Tô phở khổng lồ full topping nâng cấp', 85000.00,'https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1781703476/download_5_g6rfpb.jpg"),
+(@r6, @cat3, 'Phở Đặc Biệt (Tái, Nạm, Gầu, Trứng)', 'Tô phở khổng lồ full topping nâng cấp', 85000.00,'https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1781703476/download_5_g6rfpb.jpg'),
 
 -- R7: Hủ Tiếu Nam Vang Thành Đạt
 (@r7, @cat3, 'Hủ Tiếu Khô Đặc Biệt', 'Hủ tiếu trộn sốt hắc xì dầu kèm chén súp sườn tinh túy', 55000.00,'https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1781703678/H%E1%BB%A7_ti%E1%BA%BFu_nam_vang_1_lrwn92.jpg'),
 (@r7, @cat3, 'Hủ Tiếu Nước Đầy Đủ', 'Nước dùng ngọt xương ống, tôm, mực, trứng cút', 50000.00,'https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1781703740/Hu_Tieu_Nam_Vang_Vietnamese_Pork_and_Prawn_Clear_Noodle_Soup_i0e3me.jpg'),
 (@r7, @cat3, 'Hủ Tiếu Mì Sườn Kho', 'Sợi mì trứng dai mềm hầm cùng sườn heo bản lớn', 60000.00,'https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1781703983/77904784-6a2c-4563-8834-45da403a4561.png'),
 (@r7, @cat3, 'Hủ Tiếu Mực Tươi Khô', 'Mực ống tươi roi rói trụng vừa chín tới', 55000.00,'https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1781704195/8730a091-a481-4a10-b68f-23419fba9d30.png'),
-(@r7, @cat3, 'Súp Hoành Thánh Tôm Thịt', 'Hoành thánh gói tay ngập nhân thịt tôm bằm', 35000.00,'https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1781704319/8ce20cad-00fc-4b22-afd9-31ff26347fa1.png''),
+(@r7, @cat3, 'Súp Hoành Thánh Tôm Thịt', 'Hoành thánh gói tay ngập nhân thịt tôm bằm', 35000.00,'https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1781704319/8ce20cad-00fc-4b22-afd9-31ff26347fa1.png'),
 (@r7, @cat3, 'Xí Quách Heo Thêm', 'Khúc xương ống tủy lớn kèm nước lèo', 30000.00,'https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1781704465/73a9b37c-9547-4598-8d6e-9ba317aa010d.png'),
 
 -- R8: Bún Chả Hà Nội 1986
