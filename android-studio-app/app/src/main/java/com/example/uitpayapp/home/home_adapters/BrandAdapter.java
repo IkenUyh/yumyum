@@ -15,6 +15,19 @@ import com.example.uitpayapp.home.home_models.Restaurant;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.widget.ImageView;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.Color;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.graphics.drawable.Drawable;
+import androidx.annotation.Nullable;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
+
 public class BrandAdapter extends RecyclerView.Adapter<BrandAdapter.ViewHolder> {
 
     public interface OnBrandClickListener {
@@ -45,15 +58,40 @@ public class BrandAdapter extends RecyclerView.Adapter<BrandAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Restaurant restaurant = restaurants.get(position);
-        holder.tvInitial.setText(restaurant.getShortName());
         holder.tvName.setText(restaurant.getName());
 
-        // Set brand color as circle background
-        GradientDrawable bg = new GradientDrawable();
-        bg.setShape(GradientDrawable.RECTANGLE);
-        bg.setCornerRadius(16 * holder.itemView.getContext().getResources().getDisplayMetrics().density);
-        bg.setColor(restaurant.getBgColor());
-        holder.viewBg.setBackground(bg);
+        holder.ivImage.clearAnimation();
+        String imageUrl = restaurant.getImageUrl();
+        ColorDrawable grayPlaceholder = new ColorDrawable(Color.parseColor("#E0E0E0"));
+
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            AlphaAnimation blinkAnimation = new AlphaAnimation(0.5f, 1.0f);
+            blinkAnimation.setDuration(500);
+            blinkAnimation.setRepeatMode(Animation.REVERSE);
+            blinkAnimation.setRepeatCount(Animation.INFINITE);
+            holder.ivImage.startAnimation(blinkAnimation);
+
+            RequestOptions options = new RequestOptions().placeholder(grayPlaceholder);
+            Glide.with(holder.itemView.getContext())
+                    .load(imageUrl)
+                    .apply(options)
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            holder.ivImage.clearAnimation();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                            holder.ivImage.clearAnimation();
+                            return false;
+                        }
+                    })
+                    .into(holder.ivImage);
+        } else {
+            holder.ivImage.setImageDrawable(grayPlaceholder);
+        }
 
         // Bind star rating
         if (holder.tvRating != null) {
@@ -71,17 +109,15 @@ public class BrandAdapter extends RecyclerView.Adapter<BrandAdapter.ViewHolder> 
     public int getItemCount() { return restaurants.size(); }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvInitial;
+        ImageView ivImage;
         TextView tvName;
         TextView tvRating;
-        View viewBg;
 
         ViewHolder(View itemView) {
             super(itemView);
-            tvInitial = itemView.findViewById(R.id.tv_brand_initial);
+            ivImage = itemView.findViewById(R.id.iv_brand_image);
             tvName = itemView.findViewById(R.id.tv_brand_name);
             tvRating = itemView.findViewById(R.id.tv_brand_rating);
-            viewBg = itemView.findViewById(R.id.view_brand_bg);
         }
     }
 }

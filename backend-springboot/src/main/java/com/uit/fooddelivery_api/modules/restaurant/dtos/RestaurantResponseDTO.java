@@ -19,6 +19,7 @@ public class RestaurantResponseDTO {
     private Long merchantId;
     private Boolean isAcceptingOrders;
     private Integer maxPendingOrders;
+    private String imageUrl;
 
     // Ham tien ich de chuyen tu Entity sang DTO
     public static RestaurantResponseDTO fromEntity(Restaurant restaurant) {
@@ -31,6 +32,7 @@ public class RestaurantResponseDTO {
                 .merchantId(restaurant.getMerchant().getId()) // Chi lay ID cua chu quan
                 .isAcceptingOrders(restaurant.getIsAcceptingOrders())
                 .maxPendingOrders(restaurant.getMaxPendingOrders())
+                .imageUrl(restaurant.getImageUrl())
                 .build();
     }
 }

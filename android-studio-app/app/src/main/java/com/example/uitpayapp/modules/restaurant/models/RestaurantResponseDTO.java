@@ -27,6 +27,9 @@ public class RestaurantResponseDTO {
     @SerializedName("maxPendingOrders")
     private Integer maxPendingOrders;
 
+    @SerializedName("imageUrl")
+    private String imageUrl;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
@@ -43,4 +46,6 @@ public class RestaurantResponseDTO {
     public void setIsAcceptingOrders(Boolean isAcceptingOrders) { this.isAcceptingOrders = isAcceptingOrders; }
     public Integer getMaxPendingOrders() { return maxPendingOrders; }
     public void setMaxPendingOrders(Integer maxPendingOrders) { this.maxPendingOrders = maxPendingOrders; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }
