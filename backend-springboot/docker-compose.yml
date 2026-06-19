@@ -29,9 +29,12 @@ services:
     ports:
       - "8083:8081"
     depends_on:
-      - mysql-db
-      - redis-db
-      - elasticsearch
+      mysql-db:
+        condition: service_started
+      redis-db:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/fooddelivery_db?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
@@ -66,6 +69,11 @@ services:
       - "9200:9200"
     volumes:
       - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 volumes:
   mysql_data:
