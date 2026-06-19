@@ -17,6 +17,10 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.merchant.shop.shop_model.MerchantMenuItem;
+import com.example.uitpayapp.merchant.shop.shop_model.ToppingGroup;
+import com.example.uitpayapp.merchant.shop.viewmodel.MerchantMenuViewModel;
+
+import java.util.List;
 
 public class AddMerchantToppingActivity extends AppCompatActivity {
 
@@ -25,6 +29,9 @@ public class AddMerchantToppingActivity extends AppCompatActivity {
     private boolean isEditMode = false;
     private MerchantMenuItem toppingData;
     private String categoryName;
+    private Long groupId;
+    private final List<ToppingGroup> toppingGroupsList = new java.util.ArrayList<>();
+    private MerchantMenuViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,12 +43,36 @@ public class AddMerchantToppingActivity extends AppCompatActivity {
         toppingData = (MerchantMenuItem) getIntent().getSerializableExtra("topping_data");
         categoryName = getIntent().getStringExtra("category_name");
 
+        viewModel = new androidx.lifecycle.ViewModelProvider(this).get(com.example.uitpayapp.merchant.shop.viewmodel.MerchantMenuViewModel.class);
+
         initViews();
         setupListeners();
 
         if (isEditMode && toppingData != null) {
             populateData();
         }
+
+        viewModel.initializeRestaurant(this, () -> {
+            viewModel.loadMenu();
+        });
+
+        viewModel.getToppingGroups().observe(this, state -> {
+            if (state != null && state.isSuccess() && state.getData() != null) {
+                toppingGroupsList.clear();
+                toppingGroupsList.addAll(state.getData());
+            }
+        });
+
+        viewModel.getOperationStatus().observe(this, state -> {
+            if (state != null) {
+                if (state.isSuccess()) {
+                    Toast.makeText(this, state.getData(), Toast.LENGTH_SHORT).show();
+                    finish();
+                } else if (state.isError()) {
+                    Toast.makeText(this, state.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void initViews() {
@@ -70,6 +101,7 @@ public class AddMerchantToppingActivity extends AppCompatActivity {
     private void populateData() {
         etToppingName.setText(toppingData.getName());
         etToppingPrice.setText(String.valueOf((int) toppingData.getPrice()));
+        groupId = toppingData.getCategoryId();
         if (categoryName != null) {
             tvCategorySelector.setText(categoryName);
             tvCategorySelector.setTextColor(Color.BLACK);
@@ -115,25 +147,37 @@ public class AddMerchantToppingActivity extends AppCompatActivity {
 
     private void showCategoryPopup() {
         PopupMenu popup = new PopupMenu(this, tvCategorySelector);
-        String[] categories = {"Ban Muốn Dùng Cơm Nào", "Topping Thêm", "Chọn Size", "Mức đường", "Mức đá"};
-        for (String item : categories) {
-            popup.getMenu().add(item);
+        for (int i = 0; i < toppingGroupsList.size(); i++) {
+            com.example.uitpayapp.merchant.shop.shop_model.ToppingGroup group = toppingGroupsList.get(i);
+            popup.getMenu().add(0, i, 0, group.getName());
         }
         popup.setOnMenuItemClickListener(item -> {
-            tvCategorySelector.setText(item.getTitle());
+            int index = item.getItemId();
+            com.example.uitpayapp.merchant.shop.shop_model.ToppingGroup selected = toppingGroupsList.get(index);
+            tvCategorySelector.setText(selected.getName());
             tvCategorySelector.setTextColor(Color.BLACK);
+            groupId = selected.getId();
             return true;
         });
         popup.show();
     }
 
     private void performSave() {
-        if (etToppingName.getText().toString().trim().isEmpty() || etToppingPrice.getText().toString().trim().isEmpty()) {
+        String name = etToppingName.getText().toString().trim();
+        String priceStr = etToppingPrice.getText().toString().trim();
+        if (name.isEmpty() || priceStr.isEmpty()) {
             Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
             return;
         }
-        String message = isEditMode ? "Đã cập nhật topping thành công!" : "Đã lưu topping thành công!";
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-        finish();
+        double price = Double.parseDouble(priceStr);
+        if (isEditMode && toppingData != null) {
+            viewModel.updateTopping(toppingData.getId(), name, price);
+        } else {
+            if (groupId == null) {
+                Toast.makeText(this, "Vui lòng chọn nhóm topping", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            viewModel.addToppingToGroup(groupId, name, price);
+        }
     }
 }

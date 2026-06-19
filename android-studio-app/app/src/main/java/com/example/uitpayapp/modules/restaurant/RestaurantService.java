@@ -6,6 +6,7 @@ import com.example.uitpayapp.modules.restaurant.models.CreateRestaurantDTO;
 import com.example.uitpayapp.modules.restaurant.models.DashboardResponseDTO;
 import com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO;
 import com.example.uitpayapp.modules.restaurant.models.RestaurantSettingsDTO;
+import com.example.uitpayapp.modules.restaurant.models.UpdateRestaurantInfoDTO;
 
 import java.util.List;
 
@@ -36,6 +37,17 @@ public interface RestaurantService {
     Call<ApiResponse<RestaurantResponseDTO>> updateRestaurantSettings(
             @Path("id") Long restaurantId,
             @Body RestaurantSettingsDTO dto
+    );
+
+    @GET("api/v1/restaurants/{id}")
+    Call<ApiResponse<RestaurantResponseDTO>> getRestaurantById(
+            @Path("id") Long restaurantId
+    );
+
+    @PUT("api/v1/restaurants/{id}/info")
+    Call<ApiResponse<RestaurantResponseDTO>> updateRestaurantInfo(
+            @Path("id") Long restaurantId,
+            @Body UpdateRestaurantInfoDTO dto
     );
 
     @GET("api/v1/dashboard/merchant")

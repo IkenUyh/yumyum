@@ -40,6 +40,7 @@ public class HomeService {
                 List<Category> dbCategories = categoryRepository.findAll();
                 List<FoodCategoryDTO> categories = dbCategories.stream()
                                 .map(c -> FoodCategoryDTO.builder()
+                                                .id(c.getId())
                                                 .name(c.getName())
                                                 .bgColor(0) // dynamic fallback on frontend
                                                 .iconResId(0) // dynamic fallback on frontend

@@ -31,11 +31,11 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    private static final String BASE_URL = "https://kienhuy-dev.name.vn/";
+    //private static final String BASE_URL = "https://kienhuy-dev.name.vn/";
     // Dùng URL dưới đây để test local trên máy ảo (Emulator)
     // Nếu test trên máy thật (Physical Device) thì đổi thành IP LAN của máy tính
     // (VD: "http://192.168.x.x:8083/")
-    // private static final String BASE_URL = "http://10.0.2.2:8081/";
+    private static final String BASE_URL = "http://10.0.2.2:8083/";
     private static Retrofit retrofit = null;
     private static Context appContext = null; // Lưu trữ context toàn cục kích thước nhỏ gọn
 
@@ -68,9 +68,10 @@ public class RetrofitClient {
                             }
 
                             // Lấy token thông qua appContext đã được khởi tạo trước đó
-                            String token = SessionManager.getInstance(appContext).getAuthToken();
+                            SessionManager sessionManager = SessionManager.getInstance(appContext);
+                            String token = sessionManager.getAuthToken();
 
-                            if (token != null && !token.isEmpty()) {
+                            if (token != null && !token.isEmpty() && !sessionManager.isTokenExpired(token)) {
                                 Request newRequest = originalRequest.newBuilder()
                                         .header("Authorization", "Bearer " + token)
                                         .build();
@@ -131,6 +132,10 @@ public class RetrofitClient {
 
     public static FoodService getFoodService() {
         return getClient().create(FoodService.class);
+    }
+
+    public static com.example.uitpayapp.modules.food.CategoryService getCategoryService() {
+        return getClient().create(com.example.uitpayapp.modules.food.CategoryService.class);
     }
 
     public static CartService getCartService() {

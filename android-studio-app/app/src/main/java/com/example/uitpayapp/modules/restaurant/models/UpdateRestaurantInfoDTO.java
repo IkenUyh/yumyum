@@ -2,10 +2,7 @@ package com.example.uitpayapp.modules.restaurant.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class RestaurantResponseDTO {
-    @SerializedName("id")
-    private Long id;
-
+public class UpdateRestaurantInfoDTO {
     @SerializedName("name")
     private String name;
 
@@ -18,20 +15,17 @@ public class RestaurantResponseDTO {
     @SerializedName("closeTime")
     private String closeTime;
 
-    @SerializedName("merchantId")
-    private Long merchantId;
-
-    @SerializedName("isAcceptingOrders")
-    private Boolean isAcceptingOrders;
-
-    @SerializedName("maxPendingOrders")
-    private Integer maxPendingOrders;
-
     @SerializedName("imageUrl")
     private String imageUrl;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UpdateRestaurantInfoDTO(String name, String address, String openTime, String closeTime, String imageUrl) {
+        this.name = name;
+        this.address = address;
+        this.openTime = openTime;
+        this.closeTime = closeTime;
+        this.imageUrl = imageUrl;
+    }
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getAddress() { return address; }
@@ -40,12 +34,6 @@ public class RestaurantResponseDTO {
     public void setOpenTime(String openTime) { this.openTime = openTime; }
     public String getCloseTime() { return closeTime; }
     public void setCloseTime(String closeTime) { this.closeTime = closeTime; }
-    public Long getMerchantId() { return merchantId; }
-    public void setMerchantId(Long merchantId) { this.merchantId = merchantId; }
-    public Boolean getIsAcceptingOrders() { return isAcceptingOrders; }
-    public void setIsAcceptingOrders(Boolean isAcceptingOrders) { this.isAcceptingOrders = isAcceptingOrders; }
-    public Integer getMaxPendingOrders() { return maxPendingOrders; }
-    public void setMaxPendingOrders(Integer maxPendingOrders) { this.maxPendingOrders = maxPendingOrders; }
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

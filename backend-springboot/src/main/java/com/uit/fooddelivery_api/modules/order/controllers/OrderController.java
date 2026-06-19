@@ -155,4 +155,15 @@ public class OrderController {
         Order order = orderService.removeItemFromOrder(orderId, dto.getFoodId(), merchant);
         return ApiResponse.success(OrderResponseDTO.fromEntity(order));
     }
-}
+
+    // 5. API: Chủ quán hoàn thành trực tiếp đơn hàng (không qua tài xế)
+    @PutMapping("/{orderId}/merchant-complete")
+    public ApiResponse<OrderResponseDTO> merchantCompleteOrder(
+            @PathVariable Long orderId,
+            Authentication authentication) {
+        User merchant = (User) authentication.getPrincipal();
+        Order order = orderService.merchantCompleteOrder(orderId, merchant);
+        return ApiResponse.success(OrderResponseDTO.fromEntity(order));
+    }
+}
+

@@ -62,7 +62,33 @@ public class SellerMarketingActivity extends AppCompatActivity {
                 return insets;
             });
         }
+        updateShopHeader();
     }
+
+    private void updateShopHeader() {
+        SharedPreferences sellerPrefs = getSharedPreferences("SellerPrefs", MODE_PRIVATE);
+        String storeName = sellerPrefs.getString("current_store_name", null);
+        String storeAddress = sellerPrefs.getString("current_store_address", null);
+
+        TextView tvShopName = findViewById(R.id.tv_shop_name);
+        TextView tvShopAddress = findViewById(R.id.tv_shop_address);
+        if (tvShopName != null) {
+            if (storeName != null && !storeName.isEmpty()) {
+                tvShopName.setText(storeName);
+                tvShopAddress.setText(storeAddress);
+            } else {
+                tvShopName.setText("Cửa hàng của bạn");
+                tvShopAddress.setText("Địa chỉ quán");
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateShopHeader();
+    }
+
 
     private void setupServicesGrid() {
         List<FoodCategory> serviceList = new ArrayList<>();
@@ -115,6 +141,11 @@ public class SellerMarketingActivity extends AppCompatActivity {
                 break;
             case "Thông tin cửa hàng":
                 Intent intentShopInfo = new Intent(this, SellerShopInfoActivity.class);
+                SharedPreferences sellerPrefs = getSharedPreferences("SellerPrefs", MODE_PRIVATE);
+                long currentStoreId = sellerPrefs.getLong("current_store_id", -1L);
+                if (currentStoreId != -1L) {
+                    intentShopInfo.putExtra("RESTAURANT_ID", currentStoreId);
+                }
                 startActivity(intentShopInfo);
                 break;
             case "Cài đặt thông báo":
