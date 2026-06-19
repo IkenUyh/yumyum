@@ -42,6 +42,9 @@ public class RecommendedDealAdapter extends RecyclerView.Adapter<RecommendedDeal
         holder.tvStoreName.setText(deal.getStoreName());
         holder.tvDistance.setText(deal.getDistance() + "km");
         holder.tvDeliveryTime.setText(deal.getDeliveryTime() + " phút");
+        if (holder.tvRating != null) {
+            holder.tvRating.setText(String.valueOf(deal.getRating()));
+        }
         holder.ivFoodImage.clearAnimation();
         String imageUrl = deal.getImageUrl();
         android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
@@ -95,6 +98,8 @@ public class RecommendedDealAdapter extends RecyclerView.Adapter<RecommendedDeal
             intent.putExtra("distance", deal.getDistance());
             intent.putExtra("delivery_time", deal.getDeliveryTime());
             intent.putExtra("food_image", deal.getFoodImageResId());
+            intent.putExtra("image_url", deal.getImageUrl());
+            intent.putExtra("rating", deal.getRating());
             v.getContext().startActivity(intent);
         });
 
@@ -107,6 +112,8 @@ public class RecommendedDealAdapter extends RecyclerView.Adapter<RecommendedDeal
             intent.putExtra("distance", deal.getDistance());
             intent.putExtra("delivery_time", deal.getDeliveryTime());
             intent.putExtra("food_image", deal.getFoodImageResId());
+            intent.putExtra("image_url", deal.getImageUrl());
+            intent.putExtra("rating", deal.getRating());
             v.getContext().startActivity(intent);
         });
     }
@@ -117,7 +124,7 @@ public class RecommendedDealAdapter extends RecyclerView.Adapter<RecommendedDeal
     }
 
     public static class DealViewHolder extends RecyclerView.ViewHolder {
-        TextView tvStoreName, tvDistance, tvDeliveryTime, tvDiscountTag, tvFoodTitle, tvSoldCount, tvOriginalPrice, tvDiscountPrice, btnBuyNow;
+        TextView tvStoreName, tvDistance, tvDeliveryTime, tvDiscountTag, tvFoodTitle, tvSoldCount, tvOriginalPrice, tvDiscountPrice, btnBuyNow, tvRating;
         ImageView ivFoodImage;
 
         public DealViewHolder(@NonNull View itemView) {
@@ -132,6 +139,7 @@ public class RecommendedDealAdapter extends RecyclerView.Adapter<RecommendedDeal
             tvOriginalPrice = itemView.findViewById(R.id.tv_original_price);
             tvDiscountPrice = itemView.findViewById(R.id.tv_discount_price);
             btnBuyNow = itemView.findViewById(R.id.btn_buy_now);
+            tvRating = itemView.findViewById(R.id.tv_rating);
         }
     }
 }

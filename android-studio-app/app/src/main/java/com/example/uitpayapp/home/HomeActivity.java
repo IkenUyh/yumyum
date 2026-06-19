@@ -624,7 +624,8 @@ public class HomeActivity extends AppCompatActivity {
                         item.getName(),
                         discountedPrice,
                         item.getImageResId(),
-                        item.getDescription());
+                        item.getDescription(),
+                        item.getImageUrl());
                 showFoodItemDetailPopup(discountedItem, iv);
             });
         }
@@ -1000,12 +1001,37 @@ public class HomeActivity extends AppCompatActivity {
         tvSubtitle.setText("Các cửa hàng được yêu thích nhất");
 
         rvStores.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        BrandAdapter brandAdapter = new BrandAdapter(restaurants, restaurant -> {
+        BrandAdapter brandAdapter = new BrandAdapter(new ArrayList<>(), restaurant -> {
             Intent intent = new Intent(this, StoreDetailActivity.class);
             intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, restaurant.getName());
+            intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_ID, restaurant.getId());
             startActivity(intent);
         });
         rvStores.setAdapter(brandAdapter);
+
+        com.example.uitpayapp.network.RetrofitClient.getRestaurantService().getAllRestaurants().enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>>() {
+            @Override
+            public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    List<com.example.uitpayapp.home.home_models.Restaurant> mappedRestaurants = new ArrayList<>();
+                    for (com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto : response.body().getData()) {
+                        String shortName = dto.getName() != null && dto.getName().length() > 0 ? dto.getName().substring(0, 1) : "A";
+                        mappedRestaurants.add(new com.example.uitpayapp.home.home_models.Restaurant(
+                                dto.getId(), dto.getName(), shortName, 
+                                android.graphics.Color.parseColor("#E4002B"), "Danh mục", 
+                                new ArrayList<>(), R.drawable.img_food_chicken, 
+                                4.5, 100, 30, dto.getAddress(), dto.getImageUrl()));
+                    }
+                    brandAdapter.updateData(mappedRestaurants);
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call, Throwable t) {
+                // Fallback to mock data on error
+                brandAdapter.updateData(HomeRepository.getInstance().getRestaurants());
+            }
+        });
 
         tvSeeMore.setOnClickListener(v -> {
             Intent intent = new Intent(this, AllBrandsActivity.class);
@@ -1054,7 +1080,8 @@ public class HomeActivity extends AppCompatActivity {
                         item.getName(),
                         discountedPrice,
                         item.getImageResId(),
-                        item.getDescription());
+                        item.getDescription(),
+                        item.getImageUrl());
                 showFoodItemDetailPopup(discountedItem, iv);
             });
         }

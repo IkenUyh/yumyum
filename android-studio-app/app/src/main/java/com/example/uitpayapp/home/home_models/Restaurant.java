@@ -14,6 +14,7 @@ public class Restaurant implements java.io.Serializable {
     private int reviewCount;
     private int deliveryTime;
     private String address;
+    private String imageUrl;
 
     public Restaurant(String name, String shortName, int bgColor, String category, List<FoodMenuItem> menu,
             int imageResId, double rating, int reviewCount, int deliveryTime, String address) {
@@ -30,7 +31,7 @@ public class Restaurant implements java.io.Serializable {
     }
 
     public Restaurant(Long id, String name, String shortName, int bgColor, String category, List<FoodMenuItem> menu,
-            int imageResId, double rating, int reviewCount, int deliveryTime, String address) {
+            int imageResId, double rating, int reviewCount, int deliveryTime, String address, String imageUrl) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -42,6 +43,12 @@ public class Restaurant implements java.io.Serializable {
         this.reviewCount = reviewCount;
         this.deliveryTime = deliveryTime;
         this.address = address;
+        this.imageUrl = imageUrl;
+    }
+
+    public Restaurant(Long id, String name, String shortName, int bgColor, String category, List<FoodMenuItem> menu,
+            int imageResId, double rating, int reviewCount, int deliveryTime, String address) {
+        this(id, name, shortName, bgColor, category, menu, imageResId, rating, reviewCount, deliveryTime, address, null);
     }
 
     public String getName() {
@@ -90,5 +97,13 @@ public class Restaurant implements java.io.Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

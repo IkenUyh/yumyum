@@ -28,6 +28,21 @@ public class UserService {
     private final EmailService emailService;
     private final org.springframework.data.redis.core.RedisTemplate<String, String> redisTemplate;
 
+    public com.uit.fooddelivery_api.modules.user.dtos.CheckPhoneResponseDTO checkPhoneInfo(String phoneNumber) {
+        java.util.Optional<User> userOpt = userRepository.findByPhoneNumber(phoneNumber);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            return com.uit.fooddelivery_api.modules.user.dtos.CheckPhoneResponseDTO.builder()
+                    .exists(true)
+                    .avatarUrl(user.getAvatarUrl())
+                    .fullName(user.getFullName())
+                    .build();
+        }
+        return com.uit.fooddelivery_api.modules.user.dtos.CheckPhoneResponseDTO.builder()
+                .exists(false)
+                .build();
+    }
+
     @Transactional
     public User registerUser(com.uit.fooddelivery_api.modules.user.dtos.RegisterRequestDTO dto) {
         if (userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {

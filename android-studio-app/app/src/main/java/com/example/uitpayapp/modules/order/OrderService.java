@@ -49,4 +49,4 @@ public interface OrderService {
     @PUT("api/v1/orders/{orderId}/merchant-complete")
     Call<ApiResponse<OrderResponse>> merchantCompleteOrder(@Path("orderId") Long orderId);
 }
-
+

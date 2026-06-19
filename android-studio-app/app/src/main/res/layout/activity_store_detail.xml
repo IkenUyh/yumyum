@@ -100,16 +100,6 @@
                             app:tint="#ffffff"
                             android:padding="8dp"
                             android:layout_marginEnd="12dp" />
-                            
-                        <ImageView
-                            android:layout_width="35dp"
-                            android:layout_height="35dp"
-                            android:background="@drawable/bg_button_login_rounded"
-                            android:backgroundTint="#40000000"
-                            android:src="@drawable/ic_share_ver2"
-                            app:tint="#ffffff"
-                            android:padding="8dp"
-                            android:layout_marginEnd="12dp" />
 
                         <FrameLayout
                             android:id="@+id/btn_cart"
@@ -242,61 +232,7 @@
                 android:layout_height="8dp"
                 android:background="#F6F6F6" />
 
-            <!-- Delivery & Voucher Section -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="vertical"
-                android:paddingVertical="12dp">
-                
 
-                
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="16dp"
-                    android:orientation="horizontal">
-                    
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_discount_voucher"
-                        app:tint="#F24405" />
-                        
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        android:text="Ưu đãi dành cho bạn"
-                        android:textColor="#333333"
-                        android:textStyle="bold"
-                        android:textSize="14sp" />
-                        
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Xem thêm >"
-                        android:textColor="#757575"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_vouchers"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:clipToPadding="false"
-                    android:paddingHorizontal="16dp" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:background="#F6F6F6" />
 
             <!-- Popular Food Section -->
             <LinearLayout

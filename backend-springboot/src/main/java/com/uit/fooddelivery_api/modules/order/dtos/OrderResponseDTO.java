@@ -29,6 +29,15 @@ public class OrderResponseDTO {
     private List<OrderItemDTO> items;
     private String customerName;
     private String customerPhone;
+    private Boolean reviewed;
+    private Boolean reviewExpired;
+    private java.math.BigDecimal shippingFee;
+    private java.math.BigDecimal discountAmount;
+    private String destAddress;
+    private java.math.BigDecimal restaurantLatitude;
+    private java.math.BigDecimal restaurantLongitude;
+    private java.math.BigDecimal destLatitude;
+    private java.math.BigDecimal destLongitude;
 
     @Getter
     @Setter
@@ -71,6 +80,15 @@ public class OrderResponseDTO {
                 .items(itemDTOs)
                 .customerName(order.getUser() != null ? order.getUser().getFullName() : null)
                 .customerPhone(order.getUser() != null ? order.getUser().getPhoneNumber() : null)
+                .reviewed(order.getReview() != null)
+                .reviewExpired(order.getCreatedAt() != null && java.time.LocalDateTime.now().isAfter(order.getCreatedAt().plusDays(7)))
+                .shippingFee(order.getShippingFee())
+                .discountAmount(order.getDiscountAmount())
+                .destAddress(order.getAddress() != null ? order.getAddress().getDetailedAddress() : null)
+                .restaurantLatitude(order.getRestaurant().getLatitude())
+                .restaurantLongitude(order.getRestaurant().getLongitude())
+                .destLatitude(order.getAddress() != null ? order.getAddress().getLatitude() : null)
+                .destLongitude(order.getAddress() != null ? order.getAddress().getLongitude() : null)
                 .build();
     }
 }

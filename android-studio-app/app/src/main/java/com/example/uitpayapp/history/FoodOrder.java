@@ -13,6 +13,8 @@ public class FoodOrder {
     private boolean isFavorite;
     private String category;
     private List<SubItem> subItems; // ĐÃ THÊM: Danh sách các món ăn chi tiết bên trong đơn
+    private boolean isReviewed;
+    private boolean isReviewExpired;
 
     // Class con đại diện cho từng món trong đơn hàng
     public static class SubItem {
@@ -37,6 +39,14 @@ public class FoodOrder {
     }
 
     public FoodOrder(String orderId, String merchantName, long totalPrice, int itemCount, String date, String status, String service, boolean isFavorite, String category, List<SubItem> subItems) {
+        this(orderId, merchantName, totalPrice, itemCount, date, status, service, isFavorite, category, subItems, false, false);
+    }
+
+    public FoodOrder(String orderId, String merchantName, long totalPrice, int itemCount, String date, String status, String service, boolean isFavorite, String category, List<SubItem> subItems, boolean isReviewed) {
+        this(orderId, merchantName, totalPrice, itemCount, date, status, service, isFavorite, category, subItems, isReviewed, false);
+    }
+
+    public FoodOrder(String orderId, String merchantName, long totalPrice, int itemCount, String date, String status, String service, boolean isFavorite, String category, List<SubItem> subItems, boolean isReviewed, boolean isReviewExpired) {
         this.orderId = orderId;
         this.merchantName = merchantName;
         this.totalPrice = totalPrice;
@@ -47,6 +57,8 @@ public class FoodOrder {
         this.isFavorite = isFavorite;
         this.category = category;
         this.subItems = subItems;
+        this.isReviewed = isReviewed;
+        this.isReviewExpired = isReviewExpired;
     }
 
     public String getOrderId() { return orderId; }
@@ -59,4 +71,8 @@ public class FoodOrder {
     public boolean isFavorite() { return isFavorite; }
     public String getCategory() { return category; }
     public List<SubItem> getSubItems() { return subItems; }
+    public boolean isReviewed() { return isReviewed; }
+    public void setReviewed(boolean reviewed) { this.isReviewed = reviewed; }
+    public boolean isReviewExpired() { return isReviewExpired; }
+    public void setReviewExpired(boolean reviewExpired) { this.isReviewExpired = reviewExpired; }
 }

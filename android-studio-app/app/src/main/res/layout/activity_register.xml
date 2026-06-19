@@ -111,6 +111,35 @@
                 android:textColor="#E53935"
                 android:textSize="12sp"
                 android:visibility="gone"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:textColor="#212121"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/edt_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nhập email của bạn"
+                android:inputType="textEmailAddress"
+                android:padding="14dp"
+                android:layout_marginBottom="4dp"
+                android:background="@drawable/bg_edittext_rounded" />
+
+            <TextView
+                android:id="@+id/tv_error_email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vui lòng nhập email hợp lệ"
+                android:textColor="#E53935"
+                android:textSize="12sp"
+                android:visibility="gone"
                 android:layout_marginBottom="24dp" />
 
             <TextView

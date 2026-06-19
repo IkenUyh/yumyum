@@ -25,6 +25,9 @@ public interface UserService {
     @POST("api/v1/users/login")
     Call<ApiResponse<AuthResponseDTO>> login(@Body LoginRequestDTO request);
 
+    @GET("api/v1/users/check-phone")
+    Call<ApiResponse<CheckPhoneResponseDTO>> checkPhoneExists(@retrofit2.http.Query("phoneNumber") String phoneNumber);
+
     @GET("api/v1/users/me")
     Call<ApiResponse<UserResponseDTO>> getProfile();
 

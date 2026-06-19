@@ -60,6 +60,16 @@ public class LoyaltyService {
         return loyaltyPointRepository.save(loyaltyPoint);
     }
 
+    @Transactional
+    public void rewardPointsForReview(User user) {
+        int rewardPoints = Integer.parseInt(systemParameterRepository.findByParamKey("REVIEW_COIN_REWARD")
+                .map(SystemParameter::getParamValue).orElse("500"));
+
+        LoyaltyPoint loyaltyPoint = getMyLoyaltyInfo(user);
+        loyaltyPoint.setCurrentPoints(loyaltyPoint.getCurrentPoints() + rewardPoints);
+        loyaltyPointRepository.save(loyaltyPoint);
+    }
+
     private LoyaltyPoint createInitialLoyalty(User user) {
         LoyaltyPoint lp = LoyaltyPoint.builder()
                 .user(user)

@@ -17,4 +17,5 @@ public class RecommendedDealDTO {
     private long soldCount;
     private double originalPrice;
     private double discountPrice;
+    private double rating;
 }

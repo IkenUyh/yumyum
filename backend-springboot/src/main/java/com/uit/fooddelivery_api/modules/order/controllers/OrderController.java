@@ -156,6 +156,7 @@ public class OrderController {
         return ApiResponse.success(OrderResponseDTO.fromEntity(order));
     }
 
+<<<<<<< HEAD
     // 5. API: Chủ quán hoàn thành trực tiếp đơn hàng (không qua tài xế)
     @PutMapping("/{orderId}/merchant-complete")
     public ApiResponse<OrderResponseDTO> merchantCompleteOrder(
@@ -166,4 +167,15 @@ public class OrderController {
         return ApiResponse.success(OrderResponseDTO.fromEntity(order));
     }
 }
-
+
+
+=======
+    // API: Lấy chi tiết đơn hàng theo ID
+    @GetMapping("/{id}")
+    public ApiResponse<OrderResponseDTO> getOrderById(@PathVariable("id") Long id) {
+        Order order = orderService.getOrderById(id);
+        return ApiResponse.success(OrderResponseDTO.fromEntity(order));
+    }
+}
+
+>>>>>>> develop

@@ -33,6 +33,12 @@ public class OrderDetailActivity extends AppCompatActivity implements com.google
     private View layoutDriverInfo;
     private Toolbar toolbar;
     private com.google.android.gms.maps.GoogleMap mMap;
+    private com.example.uitpayapp.modules.order.OrderRepository orderRepository;
+    private double merchantLat = 10.8800;
+    private double merchantLng = 106.8000;
+    private double customerLat = 10.8750;
+    private double customerLng = 106.7900;
+    private boolean isMapDataLoaded = false;
 
     // 2. Hệ thống nút bấm tương tác
     private ImageButton btnMapBack;
@@ -117,64 +123,39 @@ public class OrderDetailActivity extends AppCompatActivity implements com.google
         // Thiết lập RecyclerView LayoutManager
         rvOrderItems.setLayoutManager(new LinearLayoutManager(this));
 
+        orderRepository = new com.example.uitpayapp.modules.order.OrderRepository();
+
         Intent intent = getIntent();
         if (intent != null) {
-            String orderId = intent.getStringExtra("ORDER_ID");
-            String orderStatus = intent.getStringExtra("ORDER_STATUS");
-            long deliveryFee = intent.getLongExtra("KEY_DELIVERY_FEE", 15000);
-            long discount = intent.getLongExtra("KEY_DISCOUNT", 0);
+            String orderIdStr = intent.getStringExtra("ORDER_ID");
+            if (orderIdStr != null) {
+                try {
+                    long id = Long.parseLong(orderIdStr);
+                    fetchOrderDetail(id);
+                } catch (NumberFormatException e) {
+                    OrderDetail fallback = new OrderDetail();
+                    fallback.setOrderId(orderIdStr);
+                    fallback.setCustomerPhone("+84987301126");
+                    fallback.setMerchantName("UIT FOOD");
+                    fallback.setDestAddress("Ký túc xá khu A, ĐHQG TP.HCM");
+                    fallback.setStatus("COMPLETED");
 
-            OrderDetail mockData = new OrderDetail();
-            mockData.setOrderId(orderId != null ? orderId : "05066-620675729");
-            mockData.setCustomerPhone("+84987301126");
-            mockData.setMerchantName("UIT FOOD");
-            mockData.setDestAddress("Ký túc xá khu A, ĐHQG TP.HCM");
-
-            // Tự động phân giải trạng thái là COMPLETED đối với các đơn hàng Deal đã hoàn tất
-            if ("Hoàn thành".equalsIgnoreCase(orderStatus) 
-                    || "COMPLETED".equalsIgnoreCase(orderStatus)
-                    || "15016-594977098".equals(orderId)) {
-                mockData.setStatus("COMPLETED");
-            } else {
-                mockData.setStatus("DELIVERING");
-            }
-
-            List<CartItem> cartItems = CartManager.getInstance().getLastOrder();
-            List<OrderDetail.CartItem> items = new ArrayList<>();
-            long subtotal = 0;
-            
-            if (cartItems != null && !cartItems.isEmpty()) {
-                for (CartItem ci : cartItems) {
-                    OrderDetail.CartItem item = new OrderDetail.CartItem();
-                    item.itemName = ci.getMenuItem().getName();
-                    item.note = ci.getToppingsString() != null ? ci.getToppingsString() : "";
-                    item.price = ci.getTotalPrice() / ci.getQuantity(); // price per item
-                    item.quantity = ci.getQuantity();
-                    items.add(item);
-                    subtotal += ci.getTotalPrice();
+                    List<OrderDetail.CartItem> items = new ArrayList<>();
+                    OrderDetail.CartItem item1 = new OrderDetail.CartItem();
+                    item1.itemName = "Món ăn mặc định";
+                    item1.note = "Không có";
+                    item1.price = 58000;
+                    item1.quantity = 1;
+                    items.add(item1);
+                    fallback.setItems(items);
+                    fallback.setShippingFee(15000);
+                    fallback.setDiscount(0);
+                    fallback.setTotalPaid(58000 + 15000 - 0 + 3000);
+                    bindOrderData(fallback);
                 }
             } else {
-                OrderDetail.CartItem item1 = new OrderDetail.CartItem();
-                item1.itemName = "Món ăn mặc định";
-                item1.note = "Không có";
-                item1.price = 58000;
-                item1.quantity = 1;
-                items.add(item1);
-                subtotal = 58000;
-            }
-            mockData.setItems(items);
-            mockData.setTotalPaid(subtotal + deliveryFee - discount + 3000); // 3000 is applying fee
-
-            bindOrderData(mockData);
-            
-            // Format fee and discount on UI
-            tvShipFee.setText(String.format("%,.0fđ", (double) deliveryFee));
-            if (discount > 0) {
-                tvDiscount.setText(String.format("-%,.0fđ", (double) discount));
-                tvDiscount.setTextColor(android.graphics.Color.parseColor("#00B159"));
-            } else {
-                tvDiscount.setText("0đ");
-                tvDiscount.setTextColor(android.graphics.Color.parseColor("#777777"));
+                Toast.makeText(this, "Không tìm thấy mã đơn hàng", Toast.LENGTH_SHORT).show();
+                finish();
             }
         }
 
@@ -182,11 +163,96 @@ public class OrderDetailActivity extends AppCompatActivity implements com.google
         toolbar.setNavigationOnClickListener(v -> finish());
     }
 
+    private void fetchOrderDetail(long orderId) {
+        orderRepository.getOrderById(orderId, new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderResponse>() {
+            @Override
+            public void onSuccess(com.example.uitpayapp.modules.order.models.responses.OrderResponse order) {
+                runOnUiThread(() -> {
+                    OrderDetail data = new OrderDetail();
+                    data.setOrderId(String.valueOf(order.getId()));
+                    data.setMerchantName(order.getRestaurantName() != null ? order.getRestaurantName() : "UIT FOOD");
+                    data.setDestAddress(order.getDestAddress() != null ? order.getDestAddress() : "Ký túc xá khu A, ĐHQG TP.HCM");
+                    data.setCustomerPhone(order.getCustomerPhone() != null ? order.getCustomerPhone() : "+84987301126");
+                    data.setStatus(order.getStatus());
+
+                    // Đọc tọa độ thực tế từ backend
+                    merchantLat = order.getRestaurantLatitude() != null ? order.getRestaurantLatitude().doubleValue() : 10.8800;
+                    merchantLng = order.getRestaurantLongitude() != null ? order.getRestaurantLongitude().doubleValue() : 106.8000;
+                    customerLat = order.getDestLatitude() != null ? order.getDestLatitude().doubleValue() : 10.8750;
+                    customerLng = order.getDestLongitude() != null ? order.getDestLongitude().doubleValue() : 106.7900;
+                    isMapDataLoaded = true;
+                    if (mMap != null) {
+                        updateMapMarkers();
+                    }
+
+                    List<OrderDetail.CartItem> items = new ArrayList<>();
+                    long subtotal = 0;
+                    if (order.getItems() != null) {
+                        for (com.example.uitpayapp.modules.order.models.responses.OrderResponse.OrderItemResponse item : order.getItems()) {
+                            OrderDetail.CartItem ci = new OrderDetail.CartItem();
+                            ci.itemName = item.getName();
+                            ci.note = "";
+                            ci.price = item.getPrice() != null ? item.getPrice().doubleValue() : 0;
+                            ci.quantity = item.getQuantity() != null ? item.getQuantity() : 0;
+                            items.add(ci);
+                            subtotal += (ci.price * ci.quantity);
+                        }
+                    }
+                    data.setItems(items);
+                    data.setSubTotal(subtotal);
+
+                    double ship = order.getShippingFee() != null ? order.getShippingFee().doubleValue() : 15000;
+                    double disc = order.getDiscountAmount() != null ? order.getDiscountAmount().doubleValue() : 0;
+                    data.setShippingFee(ship);
+                    data.setDiscount(disc);
+                    data.setTotalPaid(order.getTotalAmount() != null ? order.getTotalAmount().doubleValue() : (subtotal + ship - disc + 3000));
+
+                    bindOrderData(data);
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    Toast.makeText(OrderDetailActivity.this, "Lỗi tải chi tiết đơn hàng: " + errorMessage, Toast.LENGTH_LONG).show();
+                    OrderDetail fallback = new OrderDetail();
+                    fallback.setOrderId(String.valueOf(orderId));
+                    fallback.setCustomerPhone("+84987301126");
+                    fallback.setMerchantName("UIT FOOD");
+                    fallback.setDestAddress("Ký túc xá khu A, ĐHQG TP.HCM");
+                    fallback.setStatus("COMPLETED");
+
+                    List<OrderDetail.CartItem> items = new ArrayList<>();
+                    OrderDetail.CartItem item1 = new OrderDetail.CartItem();
+                    item1.itemName = "Món ăn mặc định";
+                    item1.note = "Không có";
+                    item1.price = 58000;
+                    item1.quantity = 1;
+                    items.add(item1);
+                    fallback.setItems(items);
+                    fallback.setShippingFee(15000);
+                    fallback.setDiscount(0);
+                    fallback.setTotalPaid(58000 + 15000 - 0 + 3000);
+                    bindOrderData(fallback);
+                });
+            }
+        });
+    }
+
     private void bindOrderData(OrderDetail data) {
         tvMerchantName.setText("Từ: " + data.getMerchantName());
         tvDestAddress.setText("Đến: " + data.getDestAddress());
         tvTotalPaid.setText(String.format("%,.0fđ", data.getTotalPaid()));
         tvDetailOrderId.setText(data.getOrderId());
+
+        tvShipFee.setText(String.format("%,.0fđ", data.getShippingFee()));
+        if (data.getDiscount() > 0) {
+            tvDiscount.setText(String.format("-%,.0fđ", data.getDiscount()));
+            tvDiscount.setTextColor(android.graphics.Color.parseColor("#00B159"));
+        } else {
+            tvDiscount.setText("0đ");
+            tvDiscount.setTextColor(android.graphics.Color.parseColor("#777777"));
+        }
 
         if (data.getItems() != null && !data.getItems().isEmpty()) {
             rvOrderItems.setAdapter(new DetailItemAdapter(data.getItems()));
@@ -308,34 +374,48 @@ public class OrderDetailActivity extends AppCompatActivity implements com.google
         }
     }
 
-    @Override
-    public void onMapReady(@NonNull com.google.android.gms.maps.GoogleMap googleMap) {
-        mMap = googleMap;
+    private void updateMapMarkers() {
+        if (mMap == null) return;
+        mMap.clear();
+        drawMarkers(merchantLat, merchantLng, customerLat, customerLng);
+    }
 
-        // Dummy coordinates for Demo
-        com.google.android.gms.maps.model.LatLng merchantLocation = new com.google.android.gms.maps.model.LatLng(10.8800, 106.8000);
-        com.google.android.gms.maps.model.LatLng customerLocation = new com.google.android.gms.maps.model.LatLng(10.8750, 106.7900);
+    private void drawMarkers(double mLat, double mLng, double cLat, double cLng) {
+        com.google.android.gms.maps.model.LatLng merchantLocation = new com.google.android.gms.maps.model.LatLng(mLat, mLng);
+        com.google.android.gms.maps.model.LatLng customerLocation = new com.google.android.gms.maps.model.LatLng(cLat, cLng);
 
         mMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions().position(merchantLocation).title("Quán"));
         mMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions().position(customerLocation).title("Khách hàng"));
 
-        // Move camera
         com.google.android.gms.maps.model.LatLngBounds.Builder builder = new com.google.android.gms.maps.model.LatLngBounds.Builder();
         builder.include(merchantLocation);
         builder.include(customerLocation);
         com.google.android.gms.maps.model.LatLngBounds bounds = builder.build();
 
         mMap.setOnMapLoadedCallback(() -> {
-            mMap.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 100));
+            try {
+                mMap.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 100));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
-        
-        // Draw polyline (Demo direct line, actual route would require Directions API call)
+
         com.google.android.gms.maps.model.PolylineOptions polylineOptions = new com.google.android.gms.maps.model.PolylineOptions()
                 .add(merchantLocation)
                 .add(customerLocation)
                 .width(8)
                 .color(android.graphics.Color.parseColor("#E84A26"));
         mMap.addPolyline(polylineOptions);
+    }
+
+    @Override
+    public void onMapReady(@NonNull com.google.android.gms.maps.GoogleMap googleMap) {
+        mMap = googleMap;
+        if (isMapDataLoaded) {
+            updateMapMarkers();
+        } else {
+            drawMarkers(10.8800, 106.8000, 10.8750, 106.7900);
+        }
     }
 
     // Lớp Adapter nội bộ cập nhật theo class OrderDetail mới

@@ -28,6 +28,11 @@ public interface RestaurantService {
     @GET("api/v1/restaurants")
     Call<ApiResponse<List<RestaurantResponseDTO>>> getAllRestaurants();
 
+    @GET("api/v1/restaurants/{id}")
+    Call<ApiResponse<RestaurantResponseDTO>> getRestaurantById(
+            @Path("id") Long restaurantId
+    );
+
     @GET("api/v1/restaurants/{id}/foods")
     Call<ApiResponse<List<FoodResponse>>> getRestaurantMenu(
             @Path("id") Long restaurantId

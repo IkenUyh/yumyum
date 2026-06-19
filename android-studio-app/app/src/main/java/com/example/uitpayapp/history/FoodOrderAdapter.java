@@ -126,9 +126,15 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
             if ("Hoàn thành".equalsIgnoreCase(order.getStatus())) {
                 holder.tvPickupStatus.setTextColor(0xFF222222);
                 holder.layoutWarningBanner.setVisibility(View.VISIBLE);
+                if (order.isReviewed() || order.isReviewExpired()) {
+                    holder.btnRate.setVisibility(View.GONE);
+                } else {
+                    holder.btnRate.setVisibility(View.VISIBLE);
+                }
             } else {
                 holder.tvPickupStatus.setTextColor(0xFFFF0000);
                 holder.layoutWarningBanner.setVisibility(View.GONE);
+                holder.btnRate.setVisibility(View.GONE);
             }
 
             holder.layoutActiveStatusBlock.setVisibility(View.GONE);
@@ -160,6 +166,15 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
 
                 // Truyền mã ID đơn hàng để phục vụ việc submit dữ liệu lên endpoint API của Spring Boot
                 intent.putExtra("ORDER_ID", order.getOrderId());
+
+                // Truyền danh sách tên món ăn thực tế từ đơn hàng
+                java.util.ArrayList<String> dishNames = new java.util.ArrayList<>();
+                if (order.getSubItems() != null) {
+                    for (FoodOrder.SubItem subItem : order.getSubItems()) {
+                        dishNames.add(subItem.getName());
+                    }
+                }
+                intent.putStringArrayListExtra("DISH_NAMES", dishNames);
 
                 context.startActivity(intent);
             }
