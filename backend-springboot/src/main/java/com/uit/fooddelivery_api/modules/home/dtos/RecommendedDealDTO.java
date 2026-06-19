@@ -11,6 +11,7 @@ public class RecommendedDealDTO {
     private double distance;
     private int deliveryTime;
     private int foodImageResId;
+    private String imageUrl;
     private String discountTag;
     private String foodTitle;
     private long soldCount;
