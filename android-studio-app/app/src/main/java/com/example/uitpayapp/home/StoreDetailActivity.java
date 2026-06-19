@@ -266,6 +266,7 @@ public class StoreDetailActivity extends AppCompatActivity {
             if (btnFavorite != null) btnFavorite.setVisibility(View.GONE);
             return;
         }
+        btnFavorite.setVisibility(View.VISIBLE);
 
         favoriteRepository.getFavoriteStatus(restaurant.getId(), new ApiCallback<FavoriteStatusResponseDTO>() {
             @Override
