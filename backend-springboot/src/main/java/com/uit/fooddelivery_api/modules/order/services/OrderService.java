@@ -794,5 +794,11 @@ public class OrderService {
 
         return orderRepository.save(order);
     }
+
+    public Order getOrderById(Long id) {
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+    }
 }
+
 
