@@ -26,7 +26,8 @@ public class ProfileWebView extends AppCompatActivity {
         View webContainer = findViewById(R.id.webview_page_container);
         ViewCompat.setOnApplyWindowInsetsListener(topBar, (v, insets) -> {
             Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
-            int safeTopPadding = cutout.top + 10;
+            Insets systemBar = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            int safeTopPadding = Math.max(cutout.top, systemBar.top) + 10;
             v.setPadding(v.getPaddingLeft(), safeTopPadding, v.getPaddingRight(), v.getPaddingBottom());
             //thanh duoi
             Insets navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());

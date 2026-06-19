@@ -48,6 +48,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile_screen);
         TextView pagetitle = findViewById(R.id.pagetilte);
@@ -55,7 +56,8 @@ public class ProfileActivity extends AppCompatActivity {
         ConstraintLayout navBottom = findViewById(R.id.bottomNavContainer);
         ViewCompat.setOnApplyWindowInsetsListener(pagetitle, (v, insets) -> {
             Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
-            int safeTopPadding = cutout.top + 10;
+            Insets systemBar = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            int safeTopPadding = Math.max(cutout.top, systemBar.top) + 10;
             v.setPadding(v.getPaddingLeft(), safeTopPadding, v.getPaddingRight(), v.getPaddingBottom());
             //thanh duoi
             Insets navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
