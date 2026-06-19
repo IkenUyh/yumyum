@@ -52,7 +52,39 @@ public class FoodDetailBottomSheetHelper {
         TextView tvFoodDesc = view.findViewById(R.id.tv_food_desc);
         TextView tvFoodPrice = view.findViewById(R.id.tv_food_price);
 
-        ivFoodImage.setImageResource(item.getImageResId());
+        String imageUrl = item.getImageUrl();
+        android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(Color.parseColor("#E0E0E0"));
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            android.view.animation.AlphaAnimation blinkAnimation = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
+            blinkAnimation.setDuration(500);
+            blinkAnimation.setRepeatMode(android.view.animation.Animation.REVERSE);
+            blinkAnimation.setRepeatCount(android.view.animation.Animation.INFINITE);
+            ivFoodImage.startAnimation(blinkAnimation);
+
+            com.bumptech.glide.request.RequestOptions options = new com.bumptech.glide.request.RequestOptions().placeholder(grayPlaceholder);
+            com.bumptech.glide.Glide.with(context)
+                    .load(imageUrl)
+                    .apply(options)
+                    .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                            ivFoodImage.clearAnimation();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                            ivFoodImage.clearAnimation();
+                            return false;
+                        }
+                    })
+                    .into(ivFoodImage);
+        } else if (item.getImageResId() != 0) {
+            ivFoodImage.setImageResource(item.getImageResId());
+        } else {
+            ivFoodImage.setImageDrawable(grayPlaceholder);
+        }
+        
         tvFoodName.setText(item.getName());
         tvFoodDesc.setText(item.getDescription());
         tvFoodPrice.setText(item.getFormattedPrice());

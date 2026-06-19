@@ -39,16 +39,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_alignParentEnd="true">
-                <ImageView
-                    android:id="@+id/btn_share"
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_button_login_rounded"
-                    android:backgroundTint="#40000000"
-                    android:src="@drawable/ic_share_ver2"
-                    app:tint="#ffffff"
-                    android:padding="8dp"/>
                 <FrameLayout
                     android:id="@+id/layout_cart_container"
                     android:layout_width="wrap_content"
