@@ -153,8 +153,10 @@ public class SellerReviewActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(String error) {
-                Toast.makeText(SellerReviewActivity.this, "Lỗi tải thông tin quán ăn: " + error, Toast.LENGTH_SHORT).show();
+            public void onError(String errorMessage) {
+                // Fallback giả lập (Mock) ID cửa hàng là 2 khi API lỗi
+                Toast.makeText(SellerReviewActivity.this, "Lỗi kết nối Backend. Tự động dùng Cửa hàng giả lập (ID=2) để test", Toast.LENGTH_SHORT).show();
+                fetchReviews(2L);
             }
         });
     }

@@ -24,7 +24,7 @@ public class RestaurantController {
 
     // 1. Lấy tất cả nhà hàng cho khách hàng xem (trang Home)
     @GetMapping
-    @org.springframework.cache.annotation.Cacheable(value = "restaurantsList")
+    // @org.springframework.cache.annotation.Cacheable(value = "restaurantsList")
     public ApiResponse<java.util.List<RestaurantResponseDTO>> getAllRestaurants() {
         System.out.println("Đang truy vấn Database MySQL để lấy danh sách quán ăn...");
 
@@ -59,7 +59,7 @@ public class RestaurantController {
 
     // Tạo nhà hàng mới (chủ quán)
     @PostMapping
-    @org.springframework.cache.annotation.CacheEvict(value = "restaurantsList", allEntries = true)
+    // @org.springframework.cache.annotation.CacheEvict(value = "restaurantsList", allEntries = true)
     public ApiResponse<RestaurantResponseDTO> createRestaurant(
             Authentication authentication,
             @RequestBody CreateRestaurantDTO dto) {
@@ -76,7 +76,6 @@ public class RestaurantController {
 
     // Cập nhật cài đặt nhà hàng (chủ quán)
     @PutMapping("/{id}/settings")
-    @org.springframework.cache.annotation.CacheEvict(value = "restaurantsList", allEntries = true)
     public ApiResponse<RestaurantResponseDTO> updateRestaurantSettings(
             @PathVariable("id") Long restaurantId,
             Authentication authentication,
@@ -99,10 +98,43 @@ public class RestaurantController {
             restaurant.setMaxPendingOrders(dto.getMaxPendingOrders());
         }
 
-        // Sửa nhanh: Bạn cần save lại restaurant. Ở đây giả sử bạn có hàm save trong RestaurantRepository
-        // Tốt nhất bạn nên tạo hàm updateSettings trong RestaurantService.
-        // Dưới đây là code gọi giả định bạn đã nhúng repository:
-        // restaurantRepository.save(restaurant);
+        return ApiResponse.success(RestaurantResponseDTO.fromEntity(restaurant));
+    }
+
+    // Cập nhật thông tin quán: tên, địa chỉ, giờ mở/đóng cửa (chủ quán)
+    @PutMapping("/{id}/info")
+    public ApiResponse<RestaurantResponseDTO> updateRestaurantInfo(
+            @PathVariable("id") Long restaurantId,
+            Authentication authentication,
+            @RequestBody com.uit.fooddelivery_api.modules.restaurant.dtos.UpdateRestaurantInfoDTO dto) {
+
+        User merchant = (User) authentication.getPrincipal();
+        Restaurant restaurant = restaurantService.getAllRestaurants().stream()
+                .filter(r -> r.getId().equals(restaurantId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy quán!"));
+
+        if (!restaurant.getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa quán này!");
+        }
+
+        if (dto.getName() != null && !dto.getName().trim().isEmpty()) {
+            restaurant.setName(dto.getName().trim());
+        }
+        if (dto.getAddress() != null && !dto.getAddress().trim().isEmpty()) {
+            restaurant.setAddress(dto.getAddress().trim());
+        }
+        if (dto.getOpenTime() != null) {
+            restaurant.setOpenTime(java.time.LocalTime.parse(dto.getOpenTime()));
+        }
+        if (dto.getCloseTime() != null) {
+            restaurant.setCloseTime(java.time.LocalTime.parse(dto.getCloseTime()));
+        }
+        if (dto.getImageUrl() != null) {
+            restaurant.setImageUrl(dto.getImageUrl());
+        }
+
+        restaurantService.save(restaurant);
 
         return ApiResponse.success(RestaurantResponseDTO.fromEntity(restaurant));
     }

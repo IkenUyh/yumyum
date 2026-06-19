@@ -46,6 +46,7 @@ public interface OrderService {
     @PUT("api/v1/orders/{orderId}/remove-item")
     Call<ApiResponse<OrderResponse>> removeItemFromOrder(@Path("orderId") Long orderId, @Body RemoveItemRequest request);
 
-    @GET("api/v1/orders/{id}")
-    Call<ApiResponse<OrderResponse>> getOrderById(@Path("id") Long orderId);
-}
+    @PUT("api/v1/orders/{orderId}/merchant-complete")
+    Call<ApiResponse<OrderResponse>> merchantCompleteOrder(@Path("orderId") Long orderId);
+}
+

@@ -16,4 +16,9 @@ public interface FoodRepository extends JpaRepository<Food, Long> {
     List<Food> findByCategoryId(Long categoryId);
 
     List<Food> findByCategoryIdAndIsAvailableTrue(Long categoryId);
+
+    @org.springframework.data.jpa.repository.Query(
+        "SELECT DISTINCT f.category FROM Food f WHERE f.restaurant.id = :restaurantId AND f.category IS NOT NULL")
+    List<com.uit.fooddelivery_api.modules.food.entities.Category> findDistinctCategoriesByRestaurantId(
+        @org.springframework.data.repository.query.Param("restaurantId") Long restaurantId);
 }

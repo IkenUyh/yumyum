@@ -20,6 +20,8 @@ public class RestaurantResponseDTO {
     private Boolean isAcceptingOrders;
     private Integer maxPendingOrders;
     private String imageUrl;
+    private java.math.BigDecimal latitude;
+    private java.math.BigDecimal longitude;
 
     // Ham tien ich de chuyen tu Entity sang DTO
     public static RestaurantResponseDTO fromEntity(Restaurant restaurant) {
@@ -29,10 +31,12 @@ public class RestaurantResponseDTO {
                 .address(restaurant.getAddress())
                 .openTime(restaurant.getOpenTime())
                 .closeTime(restaurant.getCloseTime())
-                .merchantId(restaurant.getMerchant().getId()) // Chi lay ID cua chu quan
+                .merchantId(restaurant.getMerchant().getId())
                 .isAcceptingOrders(restaurant.getIsAcceptingOrders())
                 .maxPendingOrders(restaurant.getMaxPendingOrders())
                 .imageUrl(restaurant.getImageUrl())
+                .latitude(restaurant.getLatitude())
+                .longitude(restaurant.getLongitude())
                 .build();
     }
 }
