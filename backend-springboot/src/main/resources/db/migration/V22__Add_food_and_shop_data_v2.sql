@@ -251,7 +251,7 @@ INSERT INTO foods (restaurant_id, category_id, name, description, price) VALUES
 (@r45, @cat5, 'Hồng Trà Sữa Kem Béo Ngậy', 'Trà đen Ceylon pha sữa tươi phủ milkfoam dầy', 58000.00);
 
 -- --- NHÓM 20 CỬA HÀNG SAU (R46 ĐẾN R65 - 8 MÓN MỖI QUÁN = 160 MÓN) ---
-INSERT INTO foods (restaurant_id, category_id, name, description, price) VALUES
+INSERT INTO foods (restaurant_id, category_id, name, description, price, image_url) VALUES
 (@r46, @cat4, 'Gà Nướng Sốt Tiêu Xanh Tây Nguyên', 'Nguyên con gà nướng đất sét đẫm hạt tiêu xanh tươi', 189000.00, 'https://res.cloudinary.com/dmhgfnxh9/image/upload/v1781755153/food/ga_nuong_sot_tieu_xanh_tay_nguyen_1781755150.jpg'),
 (@r46, @cat4, 'Gà Nướng Mật Ong Rừng Giòn Da', 'Gà quay lu quét mật ong rừng vàng ruộm ngọt thịt', 195000.00, 'https://res.cloudinary.com/dmhgfnxh9/image/upload/v1781755157/food/ga_nuong_mat_ong_rung_gion_da_1781755156.jpg'),
 (@r46, @cat1, 'Đĩa Xôi Mỡ Hành Ăn Kèm Gà', 'Xôi nếp nương dẻo quánh rưới mỡ hành tóp mỡ', 20000.00, 'https://res.cloudinary.com/dmhgfnxh9/image/upload/v1781755162/food/dia_xoi_mo_hanh_an_kem_ga_1781755160.jpg'),
