@@ -84,4 +84,19 @@ public class NotificationService {
     public long getUnreadCount(Long userId) {
         return notificationRepository.countByUserIdAndIsReadFalse(userId);
     }
+
+    @Transactional
+    public void markAllAsRead(Long userId) {
+        notificationRepository.markAllAsRead(userId);
+    }
+
+    @Transactional
+    public void markAsRead(Long id, Long userId) {
+        notificationRepository.markAsRead(id, userId);
+    }
+
+    @Transactional
+    public void deleteAllNotifications(Long userId) {
+        notificationRepository.deleteByUserId(userId);
+    }
 }

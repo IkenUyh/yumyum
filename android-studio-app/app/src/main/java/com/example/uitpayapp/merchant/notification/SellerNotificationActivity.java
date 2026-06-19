@@ -33,7 +33,7 @@ public class SellerNotificationActivity extends AppCompatActivity {
 
         initViews();
         setupBottomNav();
-        loadDummyData();
+        loadRealData();
     }
 
     private void initViews() {
@@ -48,28 +48,120 @@ public class SellerNotificationActivity extends AppCompatActivity {
         });
     }
 
-    private void loadDummyData() {
+    private void loadRealData() {
         notificationList = new ArrayList<>();
-        notificationList.add(new SellerNotification("1", "Đơn hàng mới #12345", "Bạn có đơn hàng mới cần xác nhận", "5 phút trước", false, 1));
-        notificationList.add(new SellerNotification("2", "Khuyến mãi mới", "Giảm giá 50% cho tất cả sản phẩm trong tuần này", "1 giờ trước", false, 2));
-        notificationList.add(new SellerNotification("3", "Cập nhật hệ thống", "Phiên bản mới đã được cập nhật với nhiều tính năng mới", "2 giờ trước", false, 3));
-        notificationList.add(new SellerNotification("4", "Đánh giá từ khách hàng", "Khách hàng đã để lại đánh giá 5 sao cho cửa hàng", "Hôm qua", true, 4));
-
         adapter = new SellerNotificationAdapter(notificationList);
         rvNotifications.setLayoutManager(new LinearLayoutManager(this));
         rvNotifications.setAdapter(adapter);
+
+        com.example.uitpayapp.modules.notification.NotificationRepository repository = new com.example.uitpayapp.modules.notification.NotificationRepository();
+        repository.getHistory(new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO>>() {
+            @Override
+            public void onSuccess(List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO> data) {
+                notificationList.clear();
+                for (com.example.uitpayapp.modules.notification.models.NotificationResponseDTO dto : data) {
+                    int typeVal = 3; // default System
+                    if ("ORDER_UPDATE".equalsIgnoreCase(dto.getType())) {
+                        typeVal = 1;
+                    } else if ("PROMOTION".equalsIgnoreCase(dto.getType())) {
+                        typeVal = 2;
+                    } else if ("REVIEW".equalsIgnoreCase(dto.getType())) {
+                        typeVal = 4;
+                    }
+                    notificationList.add(new SellerNotification(
+                            String.valueOf(dto.getId()),
+                            dto.getTitle(),
+                            dto.getMessage(),
+                            formatDateTime(dto.getCreatedAt()),
+                            dto.getIsRead() != null && dto.getIsRead(),
+                            typeVal
+                    ));
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                android.widget.Toast.makeText(SellerNotificationActivity.this, "Lỗi tải thông báo: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void markAllAsRead() {
-        for (SellerNotification n : notificationList) {
-            n.setRead(true);
-        }
-        adapter.notifyDataSetChanged();
+        if (notificationList.isEmpty()) return;
+        com.example.uitpayapp.modules.notification.NotificationRepository repository = new com.example.uitpayapp.modules.notification.NotificationRepository();
+        repository.markAllAsRead(new com.example.uitpayapp.network.ApiCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                for (SellerNotification n : notificationList) {
+                    n.setRead(true);
+                }
+                adapter.notifyDataSetChanged();
+                android.widget.Toast.makeText(SellerNotificationActivity.this, "Đã đánh dấu đọc tất cả", android.widget.Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                android.widget.Toast.makeText(SellerNotificationActivity.this, "Lỗi: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void deleteAll() {
-        notificationList.clear();
-        adapter.notifyDataSetChanged();
+        if (notificationList.isEmpty()) return;
+        com.example.uitpayapp.modules.notification.NotificationRepository repository = new com.example.uitpayapp.modules.notification.NotificationRepository();
+        repository.deleteAllNotifications(new com.example.uitpayapp.network.ApiCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                notificationList.clear();
+                adapter.notifyDataSetChanged();
+                android.widget.Toast.makeText(SellerNotificationActivity.this, "Đã xóa tất cả thông báo", android.widget.Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                android.widget.Toast.makeText(SellerNotificationActivity.this, "Lỗi: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private String formatDateTime(String isoString) {
+        if (isoString == null) return "";
+        try {
+            String cleanStr = isoString;
+            if (cleanStr.contains(".")) {
+                int dotIdx = cleanStr.indexOf(".");
+                int tIdx = cleanStr.indexOf("+");
+                if (tIdx == -1) tIdx = cleanStr.indexOf("-", dotIdx);
+                if (tIdx == -1) tIdx = cleanStr.indexOf("Z", dotIdx);
+                if (tIdx != -1) {
+                    cleanStr = cleanStr.substring(0, dotIdx) + cleanStr.substring(tIdx);
+                } else {
+                    cleanStr = cleanStr.substring(0, dotIdx);
+                }
+            }
+            java.text.SimpleDateFormat inputFormat;
+            if (cleanStr.endsWith("Z")) {
+                inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault());
+                inputFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            } else if (cleanStr.contains("+") || (cleanStr.lastIndexOf("-") > 10)) {
+                try {
+                    inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.getDefault());
+                    java.util.Date date = inputFormat.parse(cleanStr);
+                    java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+                    return outputFormat.format(date);
+                } catch (Exception ex) {
+                    inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+                }
+            } else {
+                inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+            }
+            java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+            java.util.Date date = inputFormat.parse(cleanStr);
+            return outputFormat.format(date);
+        } catch (Exception e) {
+            return isoString;
+        }
     }
 
     private void setupBottomNav() {
