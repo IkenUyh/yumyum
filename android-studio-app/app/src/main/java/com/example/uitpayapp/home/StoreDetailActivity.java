@@ -159,7 +159,7 @@ public class StoreDetailActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                         List<FoodMenuItem> menuItems = new ArrayList<>();
                         for (com.example.uitpayapp.modules.food.models.responses.FoodResponse food : response.body().getData()) {
-                            menuItems.add(new FoodMenuItem(food.getId().intValue(), food.getName(), food.getDescription(), food.getPrice().doubleValue(), R.drawable.img_food_chicken, 0, food.getImageUrl()));
+                            menuItems.add(new FoodMenuItem(String.valueOf(food.getId()), food.getName(), food.getPrice().longValue(), R.drawable.img_food_chicken, food.getDescription(), food.getImageUrl()));
                         }
                         restaurant.getMenu().clear();
                         restaurant.getMenu().addAll(menuItems);
@@ -266,6 +266,7 @@ public class StoreDetailActivity extends AppCompatActivity {
             if (btnFavorite != null) btnFavorite.setVisibility(View.GONE);
             return;
         }
+        btnFavorite.setVisibility(View.VISIBLE);
 
         favoriteRepository.getFavoriteStatus(restaurant.getId(), new ApiCallback<FavoriteStatusResponseDTO>() {
             @Override

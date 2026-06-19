@@ -39,6 +39,10 @@ public class RetrofitClient {
     private static Retrofit retrofit = null;
     private static Context appContext = null; // Lưu trữ context toàn cục kích thước nhỏ gọn
 
+    public static String getBaseUrl() {
+        return BASE_URL;
+    }
+
     // THÊM MỚI: Hàm khởi tạo một lần duy nhất khi chạy App
     public static void initialize(Context context) {
         if (appContext == null) {

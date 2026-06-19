@@ -16,6 +16,7 @@ import com.example.uitpayapp.modules.chat.ChatRepository;
 import com.example.uitpayapp.modules.chat.StompSockJsClient;
 import com.example.uitpayapp.modules.chat.models.responses.ChatMessageResponse;
 import com.example.uitpayapp.network.ApiCallback;
+import com.example.uitpayapp.network.RetrofitClient;
 import com.example.uitpayapp.network.SessionManager;
 
 import java.util.ArrayList;
@@ -153,10 +154,9 @@ public class ChatActivity extends AppCompatActivity {
         if (isChatLocked) return;
 
         String token = SessionManager.getInstance(this).getAuthToken();
-        // Server URL được cấu hình trực tiếp từ endpoint hệ thống
-//        stompClient = new StompSockJsClient("https://kienhuy-dev.name.vn/", token, orderIdLong, new StompSockJsClient.StompListener() {
-        // Dùng URL dưới đây để test local trên máy ảo (Emulator)
-        stompClient = new StompSockJsClient("http://10.0.2.2:8083/", token, orderIdLong, new StompSockJsClient.StompListener() {
+        // Server URL được cấu hình động theo API Endpoint của hệ thống
+        String wsBaseUrl = RetrofitClient.getBaseUrl();
+        stompClient = new StompSockJsClient(wsBaseUrl, token, orderIdLong, new StompSockJsClient.StompListener() {
             @Override
             public void onConnected() {
                 runOnUiThread(() -> {
