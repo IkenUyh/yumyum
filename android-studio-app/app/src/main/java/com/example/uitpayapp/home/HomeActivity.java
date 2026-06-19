@@ -624,7 +624,8 @@ public class HomeActivity extends AppCompatActivity {
                         item.getName(),
                         discountedPrice,
                         item.getImageResId(),
-                        item.getDescription());
+                        item.getDescription(),
+                        item.getImageUrl());
                 showFoodItemDetailPopup(discountedItem, iv);
             });
         }
@@ -1054,7 +1055,8 @@ public class HomeActivity extends AppCompatActivity {
                         item.getName(),
                         discountedPrice,
                         item.getImageResId(),
-                        item.getDescription());
+                        item.getDescription(),
+                        item.getImageUrl());
                 showFoodItemDetailPopup(discountedItem, iv);
             });
         }

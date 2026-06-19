@@ -95,6 +95,8 @@ public class RecommendedDealAdapter extends RecyclerView.Adapter<RecommendedDeal
             intent.putExtra("distance", deal.getDistance());
             intent.putExtra("delivery_time", deal.getDeliveryTime());
             intent.putExtra("food_image", deal.getFoodImageResId());
+            intent.putExtra("image_url", deal.getImageUrl());
+            intent.putExtra("rating", deal.getRating());
             v.getContext().startActivity(intent);
         });
 
@@ -107,6 +109,8 @@ public class RecommendedDealAdapter extends RecyclerView.Adapter<RecommendedDeal
             intent.putExtra("distance", deal.getDistance());
             intent.putExtra("delivery_time", deal.getDeliveryTime());
             intent.putExtra("food_image", deal.getFoodImageResId());
+            intent.putExtra("image_url", deal.getImageUrl());
+            intent.putExtra("rating", deal.getRating());
             v.getContext().startActivity(intent);
         });
     }

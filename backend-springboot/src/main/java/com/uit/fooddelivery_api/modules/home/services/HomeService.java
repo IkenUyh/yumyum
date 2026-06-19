@@ -195,13 +195,17 @@ public class HomeService {
                 }
 
                 List<RecommendedDealDTO> deals = allFoods.stream()
+                                .distinct()
                                 .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
                                 .map(f -> {
-                                        double distance = 0.5 + random.nextDouble() * 5.0;
+                                        java.util.Random itemRandom = new java.util.Random(f.getId() != null ? f.getId().hashCode() : 0);
+                                        double distance = 0.5 + itemRandom.nextDouble() * 5.0;
                                         distance = Math.round(distance * 10.0) / 10.0;
                                         int delTime = (int) (distance * 4 + 10);
                                         double origPrice = f.getPrice().doubleValue();
                                         double discPrice = origPrice * 0.8;
+                                        double rating = 3.5 + itemRandom.nextDouble() * 1.5;
+                                        rating = Math.round(rating * 10.0) / 10.0;
 
                                         return RecommendedDealDTO.builder()
                                                         .storeName(f.getRestaurant().getName())
@@ -211,12 +215,21 @@ public class HomeService {
                                                         .imageUrl(f.getImageUrl())
                                                         .discountTag("-20%")
                                                         .foodTitle(f.getName())
-                                                        .soldCount(10 + random.nextInt(200))
+                                                        .soldCount(10 + itemRandom.nextInt(200))
                                                         .originalPrice(origPrice)
                                                         .discountPrice(discPrice)
+                                                        .rating(rating)
                                                         .build();
                                 })
                                 .collect(Collectors.toList());
+
+                if (tabId == 0) {
+                        deals.sort(java.util.Comparator.comparingDouble(RecommendedDealDTO::getDistance));
+                } else if (tabId == 1) {
+                        deals.sort(java.util.Comparator.comparingLong(RecommendedDealDTO::getSoldCount).reversed());
+                } else if (tabId == 2) {
+                        deals.sort(java.util.Comparator.comparingDouble(RecommendedDealDTO::getRating).reversed());
+                }
 
                 // Simple in-memory pagination
                 int fromIndex = (page - 1) * size;

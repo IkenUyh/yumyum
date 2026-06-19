@@ -11,10 +11,11 @@ public class RecommendedDealModel {
     private double originalPrice;
     private double discountPrice;
     private String imageUrl;
+    private double rating;
 
     public RecommendedDealModel(String storeName, double distance, int deliveryTime, int foodImageResId,
                                String discountTag, String foodTitle, long soldCount,
-                               double originalPrice, double discountPrice, String imageUrl) {
+                               double originalPrice, double discountPrice, String imageUrl, double rating) {
         this.storeName = storeName;
         this.distance = distance;
         this.deliveryTime = deliveryTime;
@@ -25,6 +26,7 @@ public class RecommendedDealModel {
         this.originalPrice = originalPrice;
         this.discountPrice = discountPrice;
         this.imageUrl = imageUrl;
+        this.rating = rating;
     }
 
     public String getStoreName() { return storeName; }
@@ -37,4 +39,5 @@ public class RecommendedDealModel {
     public double getOriginalPrice() { return originalPrice; }
     public double getDiscountPrice() { return discountPrice; }
     public String getImageUrl() { return imageUrl; }
+    public double getRating() { return rating; }
 }
