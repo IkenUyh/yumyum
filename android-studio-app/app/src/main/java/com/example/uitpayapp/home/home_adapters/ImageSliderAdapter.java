@@ -8,30 +8,36 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.uitpayapp.R;
 
 import java.util.List;
 
 public class ImageSliderAdapter extends RecyclerView.Adapter<ImageSliderAdapter.SliderViewHolder> {
 
-    private List<Integer> imageList;
+    private List<String> imageList;
 
-    public ImageSliderAdapter(List<Integer> imageList) {
+    public ImageSliderAdapter(List<String> imageList) {
         this.imageList = imageList;
     }
 
-    //Tao 1 trang moi
+    public void updateData(List<String> newImageList) {
+        this.imageList = newImageList;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public SliderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image_slider, parent, false);
-        //xml->view->layout(co san)->view hoan chinh
         return new SliderViewHolder(view);
     }
-    //gan anh vao tung trang
+
     @Override
     public void onBindViewHolder(@NonNull SliderViewHolder holder, int position) {
-        holder.imageView.setImageResource(imageList.get(position));
+        Glide.with(holder.itemView.getContext())
+                .load(imageList.get(position))
+                .into(holder.imageView);
     }
 
     @Override

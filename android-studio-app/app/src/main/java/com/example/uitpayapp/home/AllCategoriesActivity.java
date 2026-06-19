@@ -53,43 +53,58 @@ public class AllCategoriesActivity extends AppCompatActivity {
             overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
         });
 
-        List<FoodCategory> categories = new ArrayList<>();
-        int defaultIcon = R.drawable.ic_cat_all;
-        int defaultColor = Color.parseColor("#E65100");
-        categories.add(new FoodCategory("Xôi", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Thức ăn khác", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Trà", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Sữa", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Nước ngọt", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Nước ép trái cây - Sinh tố", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Mì ăn liền", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Lẩu", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Hải sản", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Fastfood", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Đồ nướng", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Đồ chay", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Gỏi - Cuốn - Salad", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Cơm", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Cháo", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Cafe", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Bún - Phở - Hủ tiếu", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Bia rượu", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Bánh mì", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Bánh ngọt", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Bánh bao", defaultIcon, defaultColor));
-        categories.add(new FoodCategory("Ăn vặt", defaultIcon, defaultColor));
-
         RecyclerView rv = findViewById(R.id.rv_all_categories);
         rv.setLayoutManager(new GridLayoutManager(this, 2));
-        
-        AllCategoriesAdapter adapter = new AllCategoriesAdapter(categories, category -> {
+
+        AllCategoriesAdapter adapter = new AllCategoriesAdapter(new ArrayList<>(), category -> {
             Intent intent = new Intent(this, CategoryActivity.class);
-            intent.putExtra(CategoryActivity.EXTRA_SELECTED_CATEGORY, category.getName());
+            intent.putExtra(CategoryActivity.EXTRA_SELECTED_CATEGORY, category.getCategoryName());
+            intent.putExtra(CategoryActivity.EXTRA_SELECTED_CATEGORY_ID, category.getCategoryId());
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
-        
         rv.setAdapter(adapter);
+
+        findViewById(R.id.btn_retry).setOnClickListener(v -> loadCategories(adapter));
+
+        loadCategories(adapter);
+    }
+
+    private void loadCategories(AllCategoriesAdapter adapter) {
+        View loadingView = findViewById(R.id.layout_loading);
+        View errorView = findViewById(R.id.layout_error);
+        RecyclerView rv = findViewById(R.id.rv_all_categories);
+
+        loadingView.setVisibility(View.VISIBLE);
+        errorView.setVisibility(View.GONE);
+        rv.setVisibility(View.GONE);
+
+        com.example.uitpayapp.home.network.CategoryApiService apiService = 
+            com.example.uitpayapp.network.RetrofitClient.getCategoryApiService();
+
+        apiService.getCategoryFoodCounts().enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.food.models.responses.CategoryFoodCountResponseDTO>>>() {
+            @Override
+            public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.food.models.responses.CategoryFoodCountResponseDTO>>> call, 
+                                   retrofit2.Response<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.food.models.responses.CategoryFoodCountResponseDTO>>> response) {
+                loadingView.setVisibility(View.GONE);
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    adapter.updateData(response.body().getData());
+                    rv.setVisibility(View.VISIBLE);
+                } else {
+                    errorView.setVisibility(View.VISIBLE);
+                    android.widget.TextView tvError = findViewById(R.id.tv_error_message);
+                    tvError.setText("Không thể lấy dữ liệu (Lỗi: " + response.code() + ")");
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.food.models.responses.CategoryFoodCountResponseDTO>>> call, Throwable t) {
+                loadingView.setVisibility(View.GONE);
+                errorView.setVisibility(View.VISIBLE);
+                android.widget.TextView tvError = findViewById(R.id.tv_error_message);
+                tvError.setText("Không kết nối được server");
+            }
+        });
     }
 
     @Override

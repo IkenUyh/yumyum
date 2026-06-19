@@ -21,6 +21,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import com.bumptech.glide.Glide;
 
 /**
  * Multi-viewtype adapter for the Home deals section.
@@ -38,12 +39,6 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private final List<Object> items; // RecommendedDealModel, BannerItem, or null (loading)
     private final DecimalFormat currencyFormatter;
-
-    private static final int[] BANNER_IMAGES = {
-            R.drawable.img_priority_banner1,
-            R.drawable.img_priority_banner2,
-            R.drawable.img_priority_banner3
-    };
 
     public HomeDealAdapter(List<Object> items) {
         this.items = items;
@@ -81,7 +76,9 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (holder instanceof DealViewHolder && item instanceof RecommendedDealModel) {
             bindDeal((DealViewHolder) holder, (RecommendedDealModel) item);
         } else if (holder instanceof BannerViewHolder && item instanceof BannerItem) {
-            ((BannerViewHolder) holder).ivBanner.setImageResource(((BannerItem) item).imageResId);
+            Glide.with(holder.itemView.getContext())
+                .load(((BannerItem) item).imageUrl)
+                .into(((BannerViewHolder) holder).ivBanner);
         }
         // LoadingViewHolder needs no binding
     }
@@ -91,14 +88,11 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.tvDistance.setText(deal.getDistance() + "km");
         holder.tvDeliveryTime.setText(deal.getDeliveryTime() + " phút");
         int resId = deal.getFoodImageResId();
-        if (resId == 0) {
-            String title = deal.getFoodTitle() != null ? deal.getFoodTitle().toLowerCase() : "";
-            if (title.contains("trà sữa") || title.contains("trà đào") || title.contains("sen")) resId = R.drawable.img_food_bubbletea;
-            else if (title.contains("cà phê") || title.contains("freeze") || title.contains("phin")) resId = R.drawable.img_food_coffee;
-            else if (title.contains("pizza")) resId = R.drawable.img_food_pizza;
-            else resId = R.drawable.img_food_chicken;
+        if (resId != 0) {
+            holder.ivFoodImage.setImageResource(resId);
+        } else {
+            holder.ivFoodImage.setImageDrawable(null);
         }
-        holder.ivFoodImage.setImageResource(resId);
         holder.tvDiscountTag.setText(deal.getDiscountTag());
         holder.tvFoodTitle.setText(deal.getFoodTitle());
         holder.tvSoldCount.setText(deal.getSoldCount() + " Đã bán");
@@ -180,14 +174,10 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     // -- Banner wrapper --
 
     public static class BannerItem {
-        public final int imageResId;
+        public final String imageUrl;
 
-        public BannerItem(int imageResId) {
-            this.imageResId = imageResId;
-        }
-
-        public static BannerItem random() {
-            return new BannerItem(BANNER_IMAGES[new Random().nextInt(BANNER_IMAGES.length)]);
+        public BannerItem(String imageUrl) {
+            this.imageUrl = imageUrl;
         }
     }
 }

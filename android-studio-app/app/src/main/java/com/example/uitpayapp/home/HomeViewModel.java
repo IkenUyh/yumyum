@@ -246,9 +246,9 @@ public class HomeViewModel extends ViewModel {
     private HomeCoreResponse getMockHomeCoreResponse() {
         String json = "{" +
                 "  \"banners\": [" +
-                "    { \"id\": \"b1\", \"imageUrl\": \"img_priority_banner1\", \"link\": \"\" }," +
-                "    { \"id\": \"b2\", \"imageUrl\": \"img_priority_banner2\", \"link\": \"\" }," +
-                "    { \"id\": \"b3\", \"imageUrl\": \"img_priority_banner3\", \"link\": \"\" }" +
+                "    { \"id\": \"b1\", \"imageUrl\": \"https://dummyimage.com/600x300/ff9900/fff&text=Banner+1\", \"link\": \"\" }," +
+                "    { \"id\": \"b2\", \"imageUrl\": \"https://dummyimage.com/600x300/33cc33/fff&text=Banner+2\", \"link\": \"\" }," +
+                "    { \"id\": \"b3\", \"imageUrl\": \"https://dummyimage.com/600x300/3366ff/fff&text=Banner+3\", \"link\": \"\" }" +
                 "  ]," +
                 "  \"categories\": [" +
                 "    { \"name\": \"Cơm\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_com + ", \"bgColor\": -1748736 }," +
