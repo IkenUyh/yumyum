@@ -22,10 +22,18 @@ android {
         manifestPlaceholders = [ MAPS_API_KEY: properties.getProperty('MAPS_API_KEY', "") ]
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     buildTypes {
+        debug {
+            buildConfigField "String", "BASE_URL", "\"http://10.0.2.2:8081/\""
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "BASE_URL", "\"https://kienhuy-dev.name.vn/\""
         }
     }
     compileOptions {

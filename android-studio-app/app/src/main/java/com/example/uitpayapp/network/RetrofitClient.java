@@ -30,12 +30,12 @@ import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import com.example.uitpayapp.BuildConfig;
+
 public class RetrofitClient {
-    private static final String BASE_URL = "https://kienhuy-dev.name.vn/";
-    // Dùng URL dưới đây để test local trên máy ảo (Emulator)
-    // Nếu test trên máy thật (Physical Device) thì đổi thành IP LAN của máy tính
-    // (VD: "http://192.168.x.x:8083/")
-    // private static final String BASE_URL = "http://10.0.2.2:8081/";
+    // Tự động lấy URL dựa trên Build Variant (Debug: local, Release: server)
+    // Cấu hình ở trong file app/build.gradle
+    private static final String BASE_URL = BuildConfig.BASE_URL;
     private static Retrofit retrofit = null;
     private static Context appContext = null; // Lưu trữ context toàn cục kích thước nhỏ gọn
 
