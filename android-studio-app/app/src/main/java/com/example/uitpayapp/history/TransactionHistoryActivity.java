@@ -352,7 +352,12 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         }
 
         for (FoodOrder order : allOrders) {
-            boolean matchTab = order.getCategory().equalsIgnoreCase(currentTab);
+            boolean matchTab = false;
+            if ("Đánh giá".equalsIgnoreCase(currentTab)) {
+                matchTab = "Hoàn thành".equalsIgnoreCase(order.getStatus()) && !order.isReviewed() && !order.isReviewExpired();
+            } else {
+                matchTab = order.getCategory().equalsIgnoreCase(currentTab);
+            }
             boolean matchService = currentService.equals("Tất cả") || order.getService().equalsIgnoreCase(currentService);
             boolean matchStatus = currentStatus.equals("Tất cả") || order.getStatus().equalsIgnoreCase(currentStatus);
 
@@ -543,7 +548,9 @@ public class TransactionHistoryActivity extends AppCompatActivity {
                         "Đồ ăn",
                         false,
                         category,
-                        subItems
+                        subItems,
+                        order.getReviewed(),
+                        order.getReviewExpired()
                     ));
                 }
                 applyFilter();

@@ -90,4 +90,8 @@ public class OrderRepository {
     public void removeItemFromOrder(Long orderId, RemoveItemRequest request, ApiCallback<OrderResponse> callback) {
         enqueueCall(orderService.removeItemFromOrder(orderId, request), callback);
     }
+
+    public void getOrderById(Long orderId, ApiCallback<OrderResponse> callback) {
+        enqueueCall(orderService.getOrderById(orderId), callback);
+    }
 }

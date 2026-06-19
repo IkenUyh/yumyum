@@ -18,8 +18,24 @@ public class OrderDetail {
     private double appFee;
     private double discount;
     private double totalPaid;
+    private double merchantLatitude;
+    private double merchantLongitude;
+    private double destLatitude;
+    private double destLongitude;
 
     // Constructors, Getters and Setters
+
+    public double getMerchantLatitude() { return merchantLatitude; }
+    public void setMerchantLatitude(double merchantLatitude) { this.merchantLatitude = merchantLatitude; }
+
+    public double getMerchantLongitude() { return merchantLongitude; }
+    public void setMerchantLongitude(double merchantLongitude) { this.merchantLongitude = merchantLongitude; }
+
+    public double getDestLatitude() { return destLatitude; }
+    public void setDestLatitude(double destLatitude) { this.destLatitude = destLatitude; }
+
+    public double getDestLongitude() { return destLongitude; }
+    public void setDestLongitude(double destLongitude) { this.destLongitude = destLongitude; }
 
     public static class DriverInfo {
         public String name;

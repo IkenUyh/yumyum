@@ -155,4 +155,11 @@ public class OrderController {
         Order order = orderService.removeItemFromOrder(orderId, dto.getFoodId(), merchant);
         return ApiResponse.success(OrderResponseDTO.fromEntity(order));
     }
+
+    // API: Lấy chi tiết đơn hàng theo ID
+    @GetMapping("/{id}")
+    public ApiResponse<OrderResponseDTO> getOrderById(@PathVariable("id") Long id) {
+        Order order = orderService.getOrderById(id);
+        return ApiResponse.success(OrderResponseDTO.fromEntity(order));
+    }
 }
