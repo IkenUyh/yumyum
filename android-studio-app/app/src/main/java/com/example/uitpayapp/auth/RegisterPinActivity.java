@@ -27,6 +27,7 @@ public class RegisterPinActivity extends AppCompatActivity implements KeypadMana
     private String phoneNumber;
     private String fullName;
     private String referralCode;
+    private String email;
 
     private String firstPin = null;
 
@@ -42,6 +43,7 @@ public class RegisterPinActivity extends AppCompatActivity implements KeypadMana
         phoneNumber = getIntent().getStringExtra("PHONE_NUMBER");
         fullName = getIntent().getStringExtra("FULL_NAME");
         referralCode = getIntent().getStringExtra("REFERRAL_CODE");
+        email = getIntent().getStringExtra("EMAIL");
 
         tvInstruction = findViewById(R.id.tv_instruction);
         tvErrorMessage = findViewById(R.id.tv_error_message);
@@ -124,7 +126,7 @@ public class RegisterPinActivity extends AppCompatActivity implements KeypadMana
         if (loadingDialog != null && !isFinishing()) loadingDialog.show();
         keypadManager.lock();
 
-        userRepository.register(phoneNumber, fullName, "", pin, referralCode, new ApiCallback<UserResponseDTO>() {
+        userRepository.register(phoneNumber, fullName, email != null ? email : "", pin, referralCode, new ApiCallback<UserResponseDTO>() {
             @Override
             public void onSuccess(UserResponseDTO data) {
                 if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();

@@ -170,11 +170,15 @@ public class RegisterActivity extends AppCompatActivity {
         String phone = edtPhoneNumber.getText().toString().trim();
         String name = edtFullName.getText().toString().trim();
         String referral = edtReferralCode.getText().toString().trim();
+        
+        EditText edtEmail = findViewById(R.id.edt_email);
+        String email = edtEmail != null ? edtEmail.getText().toString().trim() : "";
 
         Intent intent = new Intent(this, RegisterPinActivity.class);
         intent.putExtra("PHONE_NUMBER", phone);
         intent.putExtra("FULL_NAME", name);
         intent.putExtra("REFERRAL_CODE", referral);
+        intent.putExtra("EMAIL", email);
         startActivity(intent);
     }
 }

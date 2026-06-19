@@ -44,7 +44,7 @@
                 android:layout_height="match_parent"
                 android:background="#E0E0E0"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_dog_kid" />
+                android:src="@drawable/ic_account_24px" />
 
         </androidx.cardview.widget.CardView>
 

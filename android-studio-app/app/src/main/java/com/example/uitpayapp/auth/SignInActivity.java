@@ -73,7 +73,7 @@ public class SignInActivity extends AppCompatActivity {
         });
 
         btnLogin.setOnClickListener(v -> {
-            String phone = edtPhoneNumber.getText().toString();
+            String phone = edtPhoneNumber.getText().toString().trim();
 
             if(phone.isEmpty()){
                 edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_error);
@@ -84,9 +84,25 @@ public class SignInActivity extends AppCompatActivity {
 
             if (loadingDialog != null && !isFinishing()) loadingDialog.show();
 
-            new android.os.Handler().postDelayed(() -> {
-                proceedToPasscode(phone);
-            }, 500);
+            userRepository.checkPhoneExists(phone, new ApiCallback<com.example.uitpayapp.modules.user.models.responses.CheckPhoneResponseDTO>() {
+                @Override
+                public void onSuccess(com.example.uitpayapp.modules.user.models.responses.CheckPhoneResponseDTO data) {
+                    if (data != null && data.isExists()) {
+                        proceedToPasscode(phone, data.getAvatarUrl(), data.getFullName());
+                    } else {
+                        if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
+                        edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_error);
+                        tvErrorPhone.setText("Số điện thoại không tồn tại");
+                        tvErrorPhone.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
+                    Toast.makeText(SignInActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
         // Nút quay lại
@@ -162,13 +178,15 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
     
-    private void proceedToPasscode(String phone) {
+    private void proceedToPasscode(String phone, String avatarUrl, String fullName) {
         if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
         if (sliderHandler != null && sliderRunnable != null) {
             sliderHandler.removeCallbacks(sliderRunnable);
         }
         android.content.Intent intent = new android.content.Intent(SignInActivity.this, PasscodeActivity.class);
         intent.putExtra("PHONE_NUMBER", phone); // Gói dữ liệu
+        intent.putExtra("AVATAR_URL", avatarUrl);
+        intent.putExtra("FULL_NAME", fullName);
         startActivity(intent);
     }
 }

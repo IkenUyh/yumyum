@@ -34,6 +34,12 @@ public class UserController {
         return ApiResponse.success(authResponse);
     }
 
+    @GetMapping("/check-phone")
+    public ApiResponse<com.uit.fooddelivery_api.modules.user.dtos.CheckPhoneResponseDTO> checkPhone(@RequestParam("phoneNumber") String phoneNumber) {
+        com.uit.fooddelivery_api.modules.user.dtos.CheckPhoneResponseDTO info = userService.checkPhoneInfo(phoneNumber);
+        return ApiResponse.success(info);
+    }
+
     // API lay thong tin dang nhap cua chinh minh tu Token
     @GetMapping("/me")
     public ApiResponse<UserResponseDTO> getProfile(Authentication authentication) {

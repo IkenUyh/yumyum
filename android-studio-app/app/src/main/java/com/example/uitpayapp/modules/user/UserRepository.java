@@ -20,6 +20,20 @@ public class UserRepository {
         this.userService = RetrofitClient.getUserService();
     }
 
+    public void checkPhoneExists(String phoneNumber, ApiCallback<CheckPhoneResponseDTO> callback) {
+        userService.checkPhoneExists(phoneNumber).enqueue(new Callback<ApiResponse<CheckPhoneResponseDTO>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<CheckPhoneResponseDTO>> call, Response<ApiResponse<CheckPhoneResponseDTO>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<CheckPhoneResponseDTO>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
     // 1. Đăng nhập
     public void login(String phoneNumber, String password, ApiCallback<AuthResponseDTO> callback) {
         LoginRequestDTO dto = new LoginRequestDTO(phoneNumber, password);
