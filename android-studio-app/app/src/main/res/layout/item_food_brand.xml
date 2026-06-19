@@ -17,25 +17,18 @@
         android:padding="12dp"
         android:background="?android:attr/selectableItemBackground">
 
-        <FrameLayout
+        <androidx.cardview.widget.CardView
             android:layout_width="60dp"
-            android:layout_height="60dp">
-            
-            <View
-                android:id="@+id/view_brand_bg"
+            android:layout_height="60dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#E0E0E0">
+            <ImageView
+                android:id="@+id/iv_brand_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/bg_food_brand_item" />
-                
-            <TextView
-                android:id="@+id/tv_brand_initial"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-        </FrameLayout>
+                android:scaleType="centerCrop" />
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/tv_brand_name"

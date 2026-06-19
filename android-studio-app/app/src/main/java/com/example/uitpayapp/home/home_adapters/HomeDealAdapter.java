@@ -87,6 +87,9 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.tvStoreName.setText(deal.getStoreName());
         holder.tvDistance.setText(deal.getDistance() + "km");
         holder.tvDeliveryTime.setText(deal.getDeliveryTime() + " phút");
+        if (holder.tvRating != null) {
+            holder.tvRating.setText(String.valueOf(deal.getRating()));
+        }
         holder.ivFoodImage.clearAnimation();
         String imageUrl = deal.getImageUrl();
         android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
@@ -166,7 +169,7 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public static class DealViewHolder extends RecyclerView.ViewHolder {
         TextView tvStoreName, tvDistance, tvDeliveryTime, tvDiscountTag,
-                tvFoodTitle, tvSoldCount, tvOriginalPrice, tvDiscountPrice, btnBuyNow;
+                tvFoodTitle, tvSoldCount, tvOriginalPrice, tvDiscountPrice, btnBuyNow, tvRating;
         ImageView ivFoodImage;
         View layoutStoreInfo;
 
@@ -183,6 +186,7 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             tvOriginalPrice = itemView.findViewById(R.id.tv_original_price);
             tvDiscountPrice = itemView.findViewById(R.id.tv_discount_price);
             btnBuyNow = itemView.findViewById(R.id.btn_buy_now);
+            tvRating = itemView.findViewById(R.id.tv_rating);
         }
     }
 

@@ -41,6 +41,7 @@ import com.example.uitpayapp.network.ApiCallback;
 
 public class StoreDetailActivity extends AppCompatActivity {
     public static final String EXTRA_RESTAURANT_NAME = "extra_restaurant_name";
+    public static final String EXTRA_RESTAURANT_ID = "extra_restaurant_id";
 
     private Restaurant restaurant;
     private ImageView btnFavorite;
@@ -54,40 +55,52 @@ public class StoreDetailActivity extends AppCompatActivity {
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         setContentView(R.layout.activity_store_detail);
 
-        String restName = getIntent().getStringExtra(EXTRA_RESTAURANT_NAME);
-        restaurant = findRestaurantByName(restName);
+        initViews();
+        updateGlobalCartBadge();
 
-        if (restaurant == null) {
+        long restaurantId = getIntent().getLongExtra(EXTRA_RESTAURANT_ID, -1);
+        String restName = getIntent().getStringExtra(EXTRA_RESTAURANT_NAME);
+
+        if (restaurantId != -1) {
+            fetchRestaurantDetails(restaurantId);
+        } else if (restName != null) {
+            // Fallback: try to find the restaurant ID by fetching all
+            com.example.uitpayapp.network.RetrofitClient.getRestaurantService().getAllRestaurants()
+                .enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                            for (com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto : response.body().getData()) {
+                                if (dto.getName().equals(restName) || dto.getName().contains(restName) || restName.contains(dto.getName())) {
+                                    fetchRestaurantDetails(dto.getId());
+                                    return;
+                                }
+                            }
+                        }
+                        Toast.makeText(StoreDetailActivity.this, "Không tìm thấy thông tin cửa hàng", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+
+                    @Override
+                    public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call, Throwable t) {
+                        Toast.makeText(StoreDetailActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                });
+        } else {
             Toast.makeText(this, "Không tìm thấy thông tin cửa hàng", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        initViews();
-        setupData();
-        updateGlobalCartBadge();
-
-        TextView tvToolbarTitle = findViewById(R.id.tv_toolbar_title);
-        if (tvToolbarTitle != null && restaurant != null) {
-            tvToolbarTitle.setText(restaurant.getName());
-        }
-
-        AppBarLayout appBar = findViewById(R.id.appBar);
-        if (appBar != null) {
-            appBar.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
-                float percentage = (float) Math.abs(verticalOffset) / appBarLayout.getTotalScrollRange();
-                if (tvToolbarTitle != null) {
-                    tvToolbarTitle.setAlpha(percentage > 0.2f ? (percentage - 0.2f) * 1.25f : 0f);
-                }
-            });
-        }
         favoriteRepository = new FavoriteRepository();
-        checkFavoriteStatus();
     }
 
     private void initViews() {
         ImageView btnBack = findViewById(R.id.btn_back);
-        btnBack.setOnClickListener(v -> finish());
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
 
         btnFavorite = findViewById(R.id.btn_favorite);
         if (btnFavorite != null) {
@@ -118,67 +131,95 @@ public class StoreDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void setupData() {
-        // Top section
+    private void fetchRestaurantDetails(Long id) {
+        com.example.uitpayapp.network.RetrofitClient.getRestaurantService().getRestaurantById(id)
+            .enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>() {
+                @Override
+                public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                        com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto = response.body().getData();
+                        restaurant = new Restaurant(dto.getId(), dto.getName(), dto.getName().substring(0, 1), Color.RED, "Danh mục", new ArrayList<>(), R.drawable.img_food_chicken, 4.5, 100, 30, dto.getAddress(), dto.getImageUrl());
+                        updateStoreUI(dto);
+                        checkFavoriteStatus();
+                        fetchRestaurantFoods(id);
+                    }
+                }
+
+                @Override
+                public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>> call, Throwable t) {
+                }
+            });
+    }
+
+    private void fetchRestaurantFoods(Long id) {
+        com.example.uitpayapp.network.RetrofitClient.getRestaurantService().getRestaurantMenu(id)
+            .enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.food.models.responses.FoodResponse>>>() {
+                @Override
+                public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.food.models.responses.FoodResponse>>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.food.models.responses.FoodResponse>>> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                        List<FoodMenuItem> menuItems = new ArrayList<>();
+                        for (com.example.uitpayapp.modules.food.models.responses.FoodResponse food : response.body().getData()) {
+                            menuItems.add(new FoodMenuItem(food.getId().intValue(), food.getName(), food.getDescription(), food.getPrice().doubleValue(), R.drawable.img_food_chicken, 0, food.getImageUrl()));
+                        }
+                        restaurant.getMenu().clear();
+                        restaurant.getMenu().addAll(menuItems);
+                        updateMenuUI(menuItems);
+                    }
+                }
+
+                @Override
+                public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.food.models.responses.FoodResponse>>> call, Throwable t) {
+                }
+            });
+    }
+
+    private void updateStoreUI(com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto) {
+        TextView tvToolbarTitle = findViewById(R.id.tv_toolbar_title);
+        if (tvToolbarTitle != null) {
+            tvToolbarTitle.setText(dto.getName());
+        }
+
+        AppBarLayout appBar = findViewById(R.id.appBar);
+        if (appBar != null) {
+            appBar.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
+                float percentage = (float) Math.abs(verticalOffset) / appBarLayout.getTotalScrollRange();
+                if (tvToolbarTitle != null) {
+                    tvToolbarTitle.setAlpha(percentage > 0.2f ? (percentage - 0.2f) * 1.25f : 0f);
+                }
+            });
+        }
+
         ImageView ivBanner = findViewById(R.id.iv_store_banner);
         TextView tvStoreName = findViewById(R.id.tv_store_name);
         TextView tvStoreAddress = findViewById(R.id.tv_store_address);
         TextView tvStoreRating = findViewById(R.id.tv_store_rating);
         TextView tvDeliveryTime = findViewById(R.id.tv_delivery_time);
 
-        ivBanner.setImageResource(restaurant.getImageResId());
-        tvStoreName.setText(restaurant.getName());
-        tvStoreAddress.setText(restaurant.getAddress() != null ? restaurant.getAddress() : "Không có địa chỉ");
-        tvStoreRating.setText(String.format("%s (%s+ Bình luận)", restaurant.getRating(), restaurant.getReviewCount()));
-        tvDeliveryTime.setText(restaurant.getDeliveryTime() + " phút");
-
-        // Vouchers
-        RecyclerView rvVouchers = findViewById(R.id.rv_vouchers);
-        rvVouchers.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        List<String> vouchers = Arrays.asList("Giảm 90% | Đơn từ 99k", "Giảm 50% | Đơn từ 39k", "Freeship | Đơn từ 0đ");
-        rvVouchers.setAdapter(new StoreVoucherAdapter(vouchers));
-
-        // Popular foods (first 3-4 items, shuffled)
-        List<FoodMenuItem> popularFoods = new ArrayList<>(restaurant.getMenu());
-        Collections.shuffle(popularFoods);
-        if (popularFoods.size() > 4)
-            popularFoods = popularFoods.subList(0, 4);
-
-        RecyclerView rvPopularFoods = findViewById(R.id.rv_popular_foods);
-        rvPopularFoods.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rvPopularFoods.setAdapter(new StorePopularFoodAdapter(popularFoods, this::showFoodItemDetailPopup));
-
-        // All menu foods
-        RecyclerView rvAllMenuFoods = findViewById(R.id.rv_all_menu_foods);
-        rvAllMenuFoods.setLayoutManager(new LinearLayoutManager(this));
-        rvAllMenuFoods.setAdapter(new StoreMenuFoodAdapter(restaurant.getMenu(), this::showFoodItemDetailPopup));
+        if (dto.getImageUrl() != null && !dto.getImageUrl().isEmpty()) {
+            com.bumptech.glide.Glide.with(this).load(dto.getImageUrl()).into(ivBanner);
+        }
+        tvStoreName.setText(dto.getName());
+        tvStoreAddress.setText(dto.getAddress() != null ? dto.getAddress() : "Không có địa chỉ");
+        tvStoreRating.setText(String.format("4.5 (100+ Bình luận)"));
+        tvDeliveryTime.setText("30 phút");
     }
 
-    private Restaurant findRestaurantByName(String name) {
-        if (name == null)
-            return null;
-        List<Restaurant> all = HomeActivity.HomeRepository.getInstance().getRestaurants();
+    private void updateMenuUI(List<FoodMenuItem> menuItems) {
+        List<FoodMenuItem> popularFoods = new ArrayList<>(menuItems);
+        Collections.shuffle(popularFoods);
+        if (popularFoods.size() > 4) popularFoods = popularFoods.subList(0, 4);
 
-        // Exact match
-        for (Restaurant r : all) {
-            if (name.equals(r.getName())) {
-                return r;
-            }
+        RecyclerView rvPopularFoods = findViewById(R.id.rv_popular_foods);
+        if (rvPopularFoods != null) {
+            rvPopularFoods.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+            rvPopularFoods.setAdapter(new StorePopularFoodAdapter(popularFoods, this::showFoodItemDetailPopup));
         }
 
-        // Partial match (e.g. "Gà Rán Popeyes" vs "Gà Rán Popeyes - Võ Văn Ngân")
-        for (Restaurant r : all) {
-            if (name.contains(r.getName()) || r.getName().contains(name)) {
-                return r;
-            }
+        RecyclerView rvAllMenuFoods = findViewById(R.id.rv_all_menu_foods);
+        if (rvAllMenuFoods != null) {
+            rvAllMenuFoods.setLayoutManager(new LinearLayoutManager(this));
+            rvAllMenuFoods.setAdapter(new StoreMenuFoodAdapter(menuItems, this::showFoodItemDetailPopup));
         }
-
-        // If not found, create a mock restaurant dynamically so the UI still works
-        Restaurant randomRest = all.get(new java.util.Random().nextInt(all.size()));
-        String shortName = name.length() >= 2 ? name.substring(0, 2).toUpperCase() : "ST";
-        return new Restaurant(name, shortName, randomRest.getBgColor(),
-                "Đồ ăn", randomRest.getMenu(), randomRest.getImageResId(),
-                4.5, 120, 20, "Địa chỉ mẫu, TP.HCM");
     }
 
     private void showFoodItemDetailPopup(FoodMenuItem item) {
