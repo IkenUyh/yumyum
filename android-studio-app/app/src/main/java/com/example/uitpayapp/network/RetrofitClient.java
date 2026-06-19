@@ -31,11 +31,11 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    // private static final String BASE_URL = "https://kienhuy-dev.name.vn/";
+    private static final String BASE_URL = "https://kienhuy-dev.name.vn/";
     // Dùng URL dưới đây để test local trên máy ảo (Emulator)
     // Nếu test trên máy thật (Physical Device) thì đổi thành IP LAN của máy tính
     // (VD: "http://192.168.x.x:8083/")
-    private static final String BASE_URL = "http://10.0.2.2:8081/";
+    // private static final String BASE_URL = "http://10.0.2.2:8081/";
     private static Retrofit retrofit = null;
     private static Context appContext = null; // Lưu trữ context toàn cục kích thước nhỏ gọn
 
