@@ -218,40 +218,7 @@ public class HomeActivity extends AppCompatActivity {
                 if (bannerLoading != null) bannerLoading.setVisibility(View.VISIBLE);
                 if (bannerError != null) bannerError.setVisibility(View.GONE);
                 if (bannerContent != null) bannerContent.setVisibility(View.GONE);
-            } else if (state.isSuccess()) {
-                if (fsLoading != null)
-                    fsLoading.setVisibility(View.GONE);
-                if (fsError != null)
-                    fsError.setVisibility(View.GONE);
-                if (fsSection != null)
-                    fsSection.setVisibility(View.VISIBLE);
 
-                if (t1Loading != null)
-                    t1Loading.setVisibility(View.GONE);
-                if (t1Error != null)
-                    t1Error.setVisibility(View.GONE);
-                if (t1Section != null)
-                    t1Section.setVisibility(View.VISIBLE);
-
-                if (t2Loading != null)
-                    t2Loading.setVisibility(View.GONE);
-                if (t2Error != null)
-                    t2Error.setVisibility(View.GONE);
-                if (t2Section != null)
-                    t2Section.setVisibility(View.VISIBLE);
-
-                if (catLoading != null)
-                    catLoading.setVisibility(View.GONE);
-                if (catError != null)
-                    catError.setVisibility(View.GONE);
-
-                if (fsLoading != null) fsLoading.setVisibility(View.VISIBLE);
-                if (fsError != null) fsError.setVisibility(View.GONE);
-                if (fsSection != null) fsSection.setVisibility(View.GONE);
-
-                if (catLoading != null) catLoading.setVisibility(View.VISIBLE);
-                if (catError != null) catError.setVisibility(View.GONE);
-                if (catContent != null) catContent.setVisibility(View.GONE);
             } else if (state.isSuccess()) {
                 if (fsLoading != null) fsLoading.setVisibility(View.GONE);
                 if (fsError != null) fsError.setVisibility(View.GONE);
@@ -268,21 +235,13 @@ public class HomeActivity extends AppCompatActivity {
                 
                 HomeCoreResponse data = state.getData();
                 if (data != null) {
-                    if (data.getCategories() != null && !data.getCategories().isEmpty()) {
-                        if (catContent != null)
-                            catContent.setVisibility(View.VISIBLE);
-                        if (categoryAdapter != null)
-                            categoryAdapter.updateData(data.getCategories());
-                    } else {
-                        if (catContent != null)
-                            catContent.setVisibility(View.GONE);
-                        if (catError != null) {
-                            catError.setVisibility(View.VISIBLE);
-                            android.widget.TextView tvCatError = findViewById(R.id.tv_categories_error);
-                            if (tvCatError != null)
-                                tvCatError.setText("Chưa có dữ liệu");
-                        }
-                    }
+                    List<FoodCategory> serverCats = data.getCategories();
+                    List<FoodCategory> displayCats = getStaticCategories(serverCats);
+                    if (catContent != null)
+                        catContent.setVisibility(View.VISIBLE);
+                    if (categoryAdapter != null)
+                        categoryAdapter.updateData(displayCats);
+
 
                     if (data.getFlashSales() != null && !data.getFlashSales().isEmpty()) {
                         if (fsError != null)
@@ -615,7 +574,40 @@ public class HomeActivity extends AppCompatActivity {
             android.widget.TextView tvOrigPrice = card.findViewById(origPriceIds[i]);
             android.widget.TextView tvDiscPrice = card.findViewById(discPriceIds[i]);
 
-            iv.setImageResource(item.getImageResId() != 0 ? item.getImageResId() : 0);
+            iv.clearAnimation();
+            String imageUrl = item.getImageUrl();
+            android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
+            
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                android.view.animation.AlphaAnimation blinkAnimation = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
+                blinkAnimation.setDuration(500);
+                blinkAnimation.setRepeatMode(android.view.animation.Animation.REVERSE);
+                blinkAnimation.setRepeatCount(android.view.animation.Animation.INFINITE);
+                iv.startAnimation(blinkAnimation);
+
+                com.bumptech.glide.request.RequestOptions options = new com.bumptech.glide.request.RequestOptions().placeholder(grayPlaceholder);
+                com.bumptech.glide.Glide.with(iv.getContext())
+                        .load(imageUrl)
+                        .apply(options)
+                        .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(@androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                                iv.clearAnimation();
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                                iv.clearAnimation();
+                                return false;
+                            }
+                        })
+                        .into(iv);
+            } else if (item.getImageResId() != 0) {
+                iv.setImageResource(item.getImageResId());
+            } else {
+                iv.setImageDrawable(grayPlaceholder);
+            }
             tvName.setText(item.getName());
 
             long originalPrice = item.getPrice();
@@ -1863,47 +1855,40 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         public java.util.List<com.example.uitpayapp.recommendeddeal.RecommendedDealModel> getRecommendedDeals() {
-            java.util.List<com.example.uitpayapp.recommendeddeal.RecommendedDealModel> allDeals = new java.util.ArrayList<>();
-            allDeals.add(new com.example.uitpayapp.recommendeddeal.RecommendedDealModel(
-                    "Gà Rán Popeyes - Võ Văn Ngân",
-                    9.1, 9,
-                    R.drawable.img_food_chicken,
-                    "-52%",
-                    "1 MIẾNG GÀ RÁN GIÒN + 1 GÀ POPCORN + 1 KHOAI TÂY CHIÊN",
-                    100,
-                    118000.0,
-                    57000.0));
-
-            allDeals.add(new com.example.uitpayapp.recommendeddeal.RecommendedDealModel(
-                    "The Coffee House - Kha Vạn Cân",
-                    1.2, 10,
-                    R.drawable.img_food_bubbletea,
-                    "-30%",
-                    "Trà Đào Cam Sả (L) + Bánh Mì Que",
-                    50,
-                    75000.0,
-                    52000.0));
-
-            allDeals.add(new com.example.uitpayapp.recommendeddeal.RecommendedDealModel(
-                    "Phúc Long Tea & Coffee",
-                    3.5, 25,
-                    R.drawable.img_food_coffee,
-                    "-20%",
-                    "Trà Sữa Phúc Long + Thạch Cafe",
-                    200,
-                    65000.0,
-                    52000.0));
-
-            allDeals.add(new com.example.uitpayapp.recommendeddeal.RecommendedDealModel(
-                    "KFC - Đặng Văn Bi",
-                    0.5, 10,
-                    R.drawable.img_food_chicken,
-                    "-15%",
-                    "Combo Gà Rán Hạnh Phúc",
-                    80,
-                    150000.0,
-                    125000.0));
-            return allDeals;
+            return new java.util.ArrayList<>();
         }
+    }
+
+    private List<FoodCategory> getStaticCategories(List<FoodCategory> serverCategories) {
+        List<FoodCategory> list = new ArrayList<>();
+        list.add(new FoodCategory("Cơm", R.drawable.ic_cat_com, 0));
+        list.add(new FoodCategory("Bún Phở", R.drawable.ic_cat_bun_pho, 0));
+        list.add(new FoodCategory("Bánh mì", R.drawable.ic_cat_banh_mi, 0));
+        list.add(new FoodCategory("Fastfood", R.drawable.ic_cat_fastfood, 0));
+        list.add(new FoodCategory("Lẩu", R.drawable.ic_cat_lau, 0));
+        list.add(new FoodCategory("Đồ nướng", R.drawable.ic_cat_bbq, 0));
+        list.add(new FoodCategory("Cà Phê", R.drawable.ic_cat_ca_phe, 0));
+        list.add(new FoodCategory("Trà sữa", R.drawable.ic_cat_tra_sua, 0));
+        list.add(new FoodCategory("Ăn vặt", R.drawable.ic_cat_an_vat, 0));
+        list.add(new FoodCategory("Danh mục", R.drawable.ic_cat_all, 0, true));
+
+        if (serverCategories != null) {
+            for (FoodCategory staticCat : list) {
+                String matchStr = staticCat.getName().toLowerCase();
+                if (matchStr.equals("bún phở")) matchStr = "bún";
+                if (matchStr.equals("cà phê")) matchStr = "phê";
+                if (matchStr.equals("đồ nướng")) matchStr = "nướng";
+                
+                for (FoodCategory serverCat : serverCategories) {
+                    if (serverCat.getName() != null) {
+                        if (serverCat.getName().toLowerCase().contains(matchStr)) {
+                            staticCat.setId(serverCat.getId());
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return list;
     }
 }

@@ -41,8 +41,47 @@ public class TopicStoreAdapter extends RecyclerView.Adapter<TopicStoreAdapter.Vi
         FoodMenuItem food = foods.get(position);
         holder.tvName.setText(food.getName());
         holder.tvPrice.setText(food.getFormattedPrice());
-        int resId = food.getImageResId();
-        holder.ivImage.setImageResource(resId != 0 ? resId : 0);
+        
+        holder.ivImage.clearAnimation();
+        String imageUrl = food.getImageUrl();
+        android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
+        
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            android.view.animation.AlphaAnimation blinkAnimation = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
+            blinkAnimation.setDuration(500);
+            blinkAnimation.setRepeatMode(android.view.animation.Animation.REVERSE);
+            blinkAnimation.setRepeatCount(android.view.animation.Animation.INFINITE);
+            holder.ivImage.startAnimation(blinkAnimation);
+
+            com.bumptech.glide.RequestBuilder<android.graphics.drawable.Drawable> request = com.bumptech.glide.Glide.with(holder.itemView.getContext())
+                    .load(imageUrl)
+                    .placeholder(grayPlaceholder)
+                    .centerCrop()
+                    .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                            holder.ivImage.clearAnimation();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                            holder.ivImage.clearAnimation();
+                            return false;
+                        }
+                    });
+            
+            if (food.getImageResId() != 0) {
+                request = request.error(food.getImageResId());
+            } else {
+                request = request.error(grayPlaceholder);
+            }
+            request.into(holder.ivImage);
+        } else if (food.getImageResId() != 0) {
+            holder.ivImage.setImageResource(food.getImageResId());
+        } else {
+            holder.ivImage.setImageDrawable(grayPlaceholder);
+        }
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onFoodClick(food, holder);

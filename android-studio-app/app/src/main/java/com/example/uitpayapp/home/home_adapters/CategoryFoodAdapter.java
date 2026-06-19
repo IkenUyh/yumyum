@@ -49,18 +49,45 @@ public class CategoryFoodAdapter extends RecyclerView.Adapter<CategoryFoodAdapte
         holder.tvPrice.setText(item.getFormattedPrice());
 
         // Ưu tiên load ảnh từ URL (server), fallback sang imageResId (local)
+        holder.ivImage.clearAnimation();
         String imageUrl = item.getImageUrl();
+        android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
+        
         if (imageUrl != null && !imageUrl.isEmpty()) {
-            com.bumptech.glide.Glide.with(holder.itemView.getContext())
+            android.view.animation.AlphaAnimation blinkAnimation = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
+            blinkAnimation.setDuration(500);
+            blinkAnimation.setRepeatMode(android.view.animation.Animation.REVERSE);
+            blinkAnimation.setRepeatCount(android.view.animation.Animation.INFINITE);
+            holder.ivImage.startAnimation(blinkAnimation);
+
+            com.bumptech.glide.RequestBuilder<android.graphics.drawable.Drawable> request = com.bumptech.glide.Glide.with(holder.itemView.getContext())
                     .load(imageUrl)
-                    .placeholder(R.drawable.img_food_chicken)
-                    .error(item.getImageResId() != 0 ? item.getImageResId() : R.drawable.img_food_chicken)
+                    .placeholder(grayPlaceholder)
                     .centerCrop()
-                    .into(holder.ivImage);
+                    .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                            holder.ivImage.clearAnimation();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                            holder.ivImage.clearAnimation();
+                            return false;
+                        }
+                    });
+            
+            if (item.getImageResId() != 0) {
+                request = request.error(item.getImageResId());
+            } else {
+                request = request.error(grayPlaceholder);
+            }
+            request.into(holder.ivImage);
         } else if (item.getImageResId() != 0) {
             holder.ivImage.setImageResource(item.getImageResId());
         } else {
-            holder.ivImage.setImageResource(R.drawable.img_food_chicken);
+            holder.ivImage.setImageDrawable(grayPlaceholder);
         }
 
         holder.itemView.setOnClickListener(v -> {

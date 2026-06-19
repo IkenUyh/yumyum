@@ -42,7 +42,40 @@ public class RecommendedDealAdapter extends RecyclerView.Adapter<RecommendedDeal
         holder.tvStoreName.setText(deal.getStoreName());
         holder.tvDistance.setText(deal.getDistance() + "km");
         holder.tvDeliveryTime.setText(deal.getDeliveryTime() + " phút");
-        holder.ivFoodImage.setImageResource(deal.getFoodImageResId());
+        holder.ivFoodImage.clearAnimation();
+        String imageUrl = deal.getImageUrl();
+        android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
+        
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            android.view.animation.AlphaAnimation blinkAnimation = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
+            blinkAnimation.setDuration(500);
+            blinkAnimation.setRepeatMode(android.view.animation.Animation.REVERSE);
+            blinkAnimation.setRepeatCount(android.view.animation.Animation.INFINITE);
+            holder.ivFoodImage.startAnimation(blinkAnimation);
+
+            com.bumptech.glide.request.RequestOptions options = new com.bumptech.glide.request.RequestOptions().placeholder(grayPlaceholder);
+            com.bumptech.glide.Glide.with(holder.itemView.getContext())
+                    .load(imageUrl)
+                    .apply(options)
+                    .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                            holder.ivFoodImage.clearAnimation();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                            holder.ivFoodImage.clearAnimation();
+                            return false;
+                        }
+                    })
+                    .into(holder.ivFoodImage);
+        } else if (deal.getFoodImageResId() != 0) {
+            holder.ivFoodImage.setImageResource(deal.getFoodImageResId());
+        } else {
+            holder.ivFoodImage.setImageDrawable(grayPlaceholder);
+        }
         holder.tvDiscountTag.setText(deal.getDiscountTag());
         holder.tvFoodTitle.setText(deal.getFoodTitle());
 

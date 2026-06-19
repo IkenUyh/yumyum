@@ -218,15 +218,20 @@ public class HomeViewModel extends ViewModel {
 
     private synchronized void handleFoodResponse(CategoryResponse cat, Response<ApiResponse<List<FoodResponse>>> response, List<TopicResponse> result, java.util.concurrent.atomic.AtomicInteger pendingCalls) {
         if (response != null && response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-            List<FoodResponse> foods = response.body().getData();
+            List<FoodResponse> foods = new ArrayList<>(response.body().getData());
+            if (foods.size() > 10) {
+                java.util.Collections.shuffle(foods);
+                foods = foods.subList(0, 10);
+            }
             List<com.example.uitpayapp.home.home_models.FoodMenuItem> items = new ArrayList<>();
             for (FoodResponse f : foods) {
                 items.add(new com.example.uitpayapp.home.home_models.FoodMenuItem(
                         "f_" + f.getId(),
                         f.getName(),
                         f.getPrice() != null ? f.getPrice().longValue() : 0,
-                        com.example.uitpayapp.R.drawable.img_food_chicken,
-                        f.getDescription() != null ? f.getDescription() : ""
+                        0,
+                        f.getDescription() != null ? f.getDescription() : "",
+                        f.getImageUrl()
                 ));
             }
             if (!items.isEmpty()) {
