@@ -38,6 +38,14 @@ public class OrderResponse {
     @SerializedName("items")
     private List<OrderItemResponse> items;
 
+    // Thông tin khách hàng (dùng cho màn hình Seller)
+    @SerializedName("customerName")
+    private String customerName;
+
+    @SerializedName("customerPhone")
+    private String customerPhone;
+
+
     public static class OrderItemResponse {
         @SerializedName("name")
         private String name;
@@ -98,4 +106,10 @@ public class OrderResponse {
 
     public List<OrderItemResponse> getItems() { return items; }
     public void setItems(List<OrderItemResponse> items) { this.items = items; }
-}
+
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
+
+    public String getCustomerPhone() { return customerPhone; }
+    public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
+}

@@ -1,7 +1,8 @@
 package com.example.uitpayapp.merchant.home.home_model;
 
 public class SellerHistoryOrder {
-    private String id;
+    private Long orderId;      // ID thực từ API
+    private String id;         // Chuỗi hiển thị "#20240004"
     private String customerName;
     private String status;
     private String pickupTime;
@@ -11,7 +12,10 @@ public class SellerHistoryOrder {
     private String finishTime;
     private String totalPrice;
 
-    public SellerHistoryOrder(String id, String customerName, String status, String pickupTime, int itemCount, String distance, String orderDate, String finishTime, String totalPrice) {
+    public SellerHistoryOrder(Long orderId, String id, String customerName, String status,
+                              String pickupTime, int itemCount, String distance,
+                              String orderDate, String finishTime, String totalPrice) {
+        this.orderId = orderId;
         this.id = id;
         this.customerName = customerName;
         this.status = status;
@@ -23,6 +27,7 @@ public class SellerHistoryOrder {
         this.totalPrice = totalPrice;
     }
 
+    public Long getOrderId() { return orderId; }
     public String getId() { return id; }
     public String getCustomerName() { return customerName; }
     public String getStatus() { return status; }

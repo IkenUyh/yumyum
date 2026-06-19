@@ -144,4 +144,15 @@ public class OrderController {
         Order order = orderService.completeOrderSecure(orderId, driver, dto.getDeliveryPin());
         return ApiResponse.success(OrderResponseDTO.fromEntity(order));
     }
-}
+
+    // 4. API: Chủ quán xóa 1 món khỏi đơn hàng đang xử lý
+    @PutMapping("/{orderId}/remove-item")
+    public ApiResponse<OrderResponseDTO> removeItem(
+            @PathVariable Long orderId,
+            @RequestBody com.uit.fooddelivery_api.modules.order.dtos.RemoveItemDTO dto,
+            Authentication authentication) {
+        User merchant = (User) authentication.getPrincipal();
+        Order order = orderService.removeItemFromOrder(orderId, dto.getFoodId(), merchant);
+        return ApiResponse.success(OrderResponseDTO.fromEntity(order));
+    }
+}

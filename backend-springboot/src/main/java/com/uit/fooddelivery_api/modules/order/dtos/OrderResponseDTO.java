@@ -27,6 +27,8 @@ public class OrderResponseDTO {
     private java.time.LocalDateTime createdAt;
     private Integer itemCount;
     private List<OrderItemDTO> items;
+    private String customerName;
+    private String customerPhone;
 
     @Getter
     @Setter
@@ -67,6 +69,8 @@ public class OrderResponseDTO {
                 .createdAt(order.getCreatedAt())
                 .itemCount(totalItems)
                 .items(itemDTOs)
+                .customerName(order.getUser() != null ? order.getUser().getFullName() : null)
+                .customerPhone(order.getUser() != null ? order.getUser().getPhoneNumber() : null)
                 .build();
     }
 }
