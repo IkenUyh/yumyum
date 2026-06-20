@@ -43,6 +43,8 @@ services:
       - SPRING_DATA_REDIS_HOST=redis-db
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200
+      - MAIL_USERNAME=huykiento@gmail.com
+      - MAIL_PASSWORD=kzibyvfluqxbztcx
 
 
   reverse-proxy:
