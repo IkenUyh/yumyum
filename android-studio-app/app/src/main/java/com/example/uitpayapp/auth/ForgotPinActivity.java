@@ -125,21 +125,42 @@ public class ForgotPinActivity extends AppCompatActivity {
         isChecking = true;
         if (loadingDialog != null && !isFinishing()) loadingDialog.show();
 
-        // Mock API call: Delay 1s then show success
-        new Handler().postDelayed(() -> {
-            if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
-            
-            new androidx.appcompat.app.AlertDialog.Builder(ForgotPinActivity.this)
-                    .setTitle("Thành công")
-                    .setMessage("Mã PIN của bạn đã được đặt lại thành công. Vui lòng đăng nhập lại.")
-                    .setPositiveButton("Đăng nhập ngay", (dialog, which) -> {
-                        Intent intent = new Intent(ForgotPinActivity.this, SignInActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
-                    })
-                    .setCancelable(false)
-                    .show();
-        }, 1000);
+        String otp = getIntent().getStringExtra("OTP");
+        if (otp == null) otp = "";
+
+        com.example.uitpayapp.modules.user.UserRepository userRepository = new com.example.uitpayapp.modules.user.UserRepository();
+        
+        userRepository.forgotPasswordReset(phoneNumber, otp, firstPin, passcode, new com.example.uitpayapp.network.ApiCallback<String>() {
+            @Override
+            public void onSuccess(String data) {
+                if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
+                
+                new androidx.appcompat.app.AlertDialog.Builder(ForgotPinActivity.this)
+                        .setTitle("Thành công")
+                        .setMessage("Mã PIN của bạn đã được đặt lại thành công. Vui lòng đăng nhập lại.")
+                        .setPositiveButton("Đăng nhập ngay", (dialog, which) -> {
+                            Intent intent = new Intent(ForgotPinActivity.this, SignInActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finish();
+                        })
+                        .setCancelable(false)
+                        .show();
+            }
+
+            @Override
+            public void onError(String error) {
+                isChecking = false;
+                if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
+                tvErrorMessage.setText(error != null ? error : "Có lỗi xảy ra");
+                tvErrorMessage.setVisibility(View.VISIBLE);
+                
+                // Reset giao diện để nhập lại
+                firstPin = null;
+                passcode = "";
+                tvInstruction.setText("Thiết lập mã PIN mới");
+                updateDots();
+            }
+        });
     }
 }

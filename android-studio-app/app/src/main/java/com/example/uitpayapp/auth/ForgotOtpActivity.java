@@ -98,20 +98,13 @@ public class ForgotOtpActivity extends AppCompatActivity {
 
     private void verifyOtp() {
         isChecking = true;
-        if (loadingDialog != null && !isFinishing()) loadingDialog.show();
-
-        // Mock API call: Delay 0.5s then succeed
-        new Handler().postDelayed(() -> {
-            if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
-            
-            // Navigate to ForgotPinActivity
-            Intent intent = new Intent(ForgotOtpActivity.this, ForgotPinActivity.class);
-            intent.putExtra("PHONE_NUMBER", phoneNumber);
-            startActivity(intent);
-            
-            // Không finish() ngay để nếu user bấm back từ màn kia có thể nhập lại OTP, 
-            // hoặc có thể finish tùy thiết kế. Ở đây finish luôn cho gọn luồng.
-            finish();
-        }, 500);
+        
+        // Chuyển sang màn hình nhập PIN mới và truyền OTP theo
+        Intent intent = new Intent(ForgotOtpActivity.this, ForgotPinActivity.class);
+        intent.putExtra("PHONE_NUMBER", phoneNumber); // Thực chất là email
+        intent.putExtra("OTP", passcode);
+        startActivity(intent);
+        
+        finish();
     }
 }
