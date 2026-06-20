@@ -143,6 +143,8 @@ public class OrderService {
                     throw new RuntimeException("Món [" + item.getFood().getName() + "] đã hết suất Flashsale! Vui lòng giảm số lượng hoặc đợi đợt sau.");
                 }
                 currentFoodPrice = fsItem.getSalePrice();
+            } else {
+                currentFoodPrice = currentFoodPrice.multiply(BigDecimal.valueOf(0.8));
             }
 
             BigDecimal pricePerItem = currentFoodPrice.add(optionsPrice);
@@ -343,6 +345,8 @@ public class OrderService {
                 // Tăng số lượng đã bán. NHỜ CÓ @Version, DATABASE SẼ TỰ ĐỘNG CHẶN NẾU CÓ 2 NGƯỜI CÙNG GHI ĐÈ LÊN SỐ LƯỢNG NÀY
                 fsItem.setSoldQuantity(fsItem.getSoldQuantity() + item.getQuantity());
                 flashSaleItemRepository.save(fsItem);
+            } else {
+                currentFoodPrice = currentFoodPrice.multiply(BigDecimal.valueOf(0.8));
             }
             // ==========================================
 

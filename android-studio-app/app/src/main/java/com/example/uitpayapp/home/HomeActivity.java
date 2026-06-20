@@ -740,8 +740,8 @@ public class HomeActivity extends AppCompatActivity {
             }
             tvName.setText(item.getName());
 
-            long originalPrice = item.getPrice();
-            long discountedPrice = originalPrice / 2;
+            long discountedPrice = item.getPrice();
+            long originalPrice = discountedPrice * 2;
 
             tvOrigPrice.setText(String.format("%,dđ", originalPrice).replace(',', '.'));
             tvOrigPrice.setPaintFlags(tvOrigPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
