@@ -102,13 +102,19 @@ public class SearchStoreFragment extends Fragment {
     }
 
     private void setupSearchResults() {
-        allStores = HomeActivity.HomeRepository.getInstance().getRestaurants();
+        allStores = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            allStores.add(new Restaurant((long) i, "Cửa hàng tìm kiếm " + i, "CH" + i, 0, "Danh mục", new ArrayList<>(), 0, 4.5, 100, 20, "Địa chỉ " + i));
+        }
         filteredStores = new ArrayList<>(allStores);
 
         rvSearchResults.setLayoutManager(new LinearLayoutManager(getContext()));
         searchAdapter = new SearchStoreAdapter(filteredStores, restaurant -> {
             Intent intent = new Intent(getContext(), StoreDetailActivity.class);
             intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, restaurant.getName());
+            if (restaurant.getId() != null) {
+                intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_ID, restaurant.getId());
+            }
             startActivity(intent);
         });
         rvSearchResults.setAdapter(searchAdapter);

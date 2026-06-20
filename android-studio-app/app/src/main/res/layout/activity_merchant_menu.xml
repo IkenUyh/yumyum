@@ -6,6 +6,7 @@
     android:background="#FFFFFF"
     android:orientation="vertical"
     android:id="@+id/merchant_menu_container">
+
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_add_dish_and_topping"
         android:layout_width="match_parent"
@@ -13,15 +14,19 @@
         android:background="@drawable/bg_button_login_rounded"
         android:layout_margin="16dp"
         android:text="Thêm"
+        android:textAllCaps="false"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:layout_alignParentBottom="true"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_alignParentTop="true"
         android:layout_above="@id/btn_add_dish_and_topping">
+
+        <!-- Header -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
@@ -43,17 +48,22 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
         </RelativeLayout>
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#EEEEEE" />
+
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
+                <!-- Search bar -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
@@ -84,6 +94,8 @@
                         android:imeOptions="actionSearch"
                         android:importantForAutofill="no" />
                 </LinearLayout>
+
+                <!-- Tabs -->
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/tab_layout"
                     android:layout_width="match_parent"
@@ -102,13 +114,61 @@
                         android:layout_height="wrap_content"
                         android:text="Nhóm Topping" />
                 </com.google.android.material.tabs.TabLayout>
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_merchant_menu"
+                <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
-                    android:backgroundTint="#f5f7fa"
-                    android:padding="16dp"/>
+                    android:minHeight="200dp">
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_merchant_menu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:padding="16dp"/>
+                    <ProgressBar
+                        android:id="@+id/pb_loading"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="48dp"
+                        android:indeterminateTint="#f24405"
+                        android:visibility="gone"/>
+                    <LinearLayout
+                        android:id="@+id/layout_empty_state"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="48dp"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        android:padding="24dp">
+                        <ImageView
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:src="@drawable/ic_search"
+                            app:tint="#CCCCCC"
+                            android:alpha="0.6"/>
+                        <TextView
+                            android:id="@+id/tv_empty_message"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="Chưa có món ăn nào"
+                            android:textColor="#AAAAAA"
+                            android:textSize="15sp"
+                            android:gravity="center"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Nhấn nút Thêm để bắt đầu tạo thực đơn"
+                            android:textColor="#CCCCCC"
+                            android:textSize="13sp"
+                            android:gravity="center"/>
+                    </LinearLayout>
+
+                </FrameLayout>
+
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
     </LinearLayout>

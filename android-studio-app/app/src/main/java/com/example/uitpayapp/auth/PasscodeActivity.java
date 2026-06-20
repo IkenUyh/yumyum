@@ -74,9 +74,23 @@ public class PasscodeActivity extends AppCompatActivity {
             }
         }
 
-        if (avatarUrl != null && !avatarUrl.isEmpty() && ivAvatar != null) {
+        if (avatarUrl != null && !avatarUrl.isEmpty() && !avatarUrl.equals("null") && ivAvatar != null) {
+            String finalAvatarUrl = avatarUrl;
+            if (!finalAvatarUrl.startsWith("http")) {
+                if (finalAvatarUrl.startsWith("/")) {
+                    finalAvatarUrl = finalAvatarUrl.substring(1);
+                }
+                // Nếu backend trả về domain không có http
+                if (!finalAvatarUrl.contains("kienhuy-dev.name.vn")) {
+                    finalAvatarUrl = com.example.uitpayapp.network.RetrofitClient.getBaseUrl() + finalAvatarUrl;
+                } else {
+                    finalAvatarUrl = "https://" + finalAvatarUrl;
+                }
+            }
             com.bumptech.glide.Glide.with(this)
-                    .load(avatarUrl)
+                    .load(finalAvatarUrl)
+                    .placeholder(R.drawable.bg_circle_gray)
+                    .error(R.drawable.yumyum_demo_logo)
                     .circleCrop()
                     .into(ivAvatar);
         }
@@ -179,6 +193,7 @@ public class PasscodeActivity extends AppCompatActivity {
 
                     Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     finish();
                 } else {
@@ -189,7 +204,11 @@ public class PasscodeActivity extends AppCompatActivity {
             @Override
             public void onError(String error) {
                 isChecking = false;
-                showLoginError(error != null ? error : "Mật khẩu không chính xác!");
+                if (error != null && error.contains("Bad credentials")) {
+                    showLoginError("Mật khẩu không đúng");
+                } else {
+                    showLoginError(error != null ? error : "Mật khẩu không đúng");
+                }
             }
         });
     }

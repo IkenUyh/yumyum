@@ -98,8 +98,9 @@ public class SearchFoodFragment extends Fragment {
 
     private void setupSearchResults() {
         allFoods = new ArrayList<>();
-        allFoods.addAll(HomeActivity.HomeRepository.getInstance().getDealFoods());
-        allFoods.addAll(HomeActivity.HomeRepository.getInstance().getPopularFoods());
+        for (int i = 1; i <= 5; i++) {
+            allFoods.add(new FoodMenuItem("f" + i, "Món ăn tìm kiếm " + i, 50000, 0, "Mô tả"));
+        }
         
         filteredFoods = new ArrayList<>(allFoods);
 

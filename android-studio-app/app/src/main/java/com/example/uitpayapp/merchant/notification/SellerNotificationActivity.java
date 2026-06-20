@@ -50,12 +50,12 @@ public class SellerNotificationActivity extends AppCompatActivity {
 
     private void loadRealData() {
         notificationList = new ArrayList<>();
-        adapter = new SellerNotificationAdapter(notificationList);
+        adapter = new SellerNotificationAdapter(notificationList, position -> onItemClick(position));
         rvNotifications.setLayoutManager(new LinearLayoutManager(this));
         rvNotifications.setAdapter(adapter);
 
         com.example.uitpayapp.modules.notification.NotificationRepository repository = new com.example.uitpayapp.modules.notification.NotificationRepository();
-        repository.getHistory(new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO>>() {
+        repository.getHistory(null, null, new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO>>() {
             @Override
             public void onSuccess(List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO> data) {
                 notificationList.clear();
@@ -77,12 +77,34 @@ public class SellerNotificationActivity extends AppCompatActivity {
                             typeVal
                     ));
                 }
-                adapter.notifyDataSetChanged();
+                runOnUiThread(() -> adapter.notifyDataSetChanged());
             }
 
             @Override
             public void onError(String errorMessage) {
-                android.widget.Toast.makeText(SellerNotificationActivity.this, "Lỗi tải thông báo: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                runOnUiThread(() -> android.widget.Toast.makeText(SellerNotificationActivity.this, "Lỗi tải thông báo: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private void onItemClick(int position) {
+        if (notificationList == null || position >= notificationList.size()) return;
+        SellerNotification item = notificationList.get(position);
+        if (item.isRead()) return;
+
+        Long id = Long.parseLong(item.getId());
+        com.example.uitpayapp.modules.notification.NotificationRepository repository = new com.example.uitpayapp.modules.notification.NotificationRepository();
+        repository.markAsRead(id, new com.example.uitpayapp.network.ApiCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                item.setRead(true);
+                runOnUiThread(() -> adapter.notifyItemChanged(position));
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                item.setRead(true);
+                runOnUiThread(() -> adapter.notifyItemChanged(position));
             }
         });
     }

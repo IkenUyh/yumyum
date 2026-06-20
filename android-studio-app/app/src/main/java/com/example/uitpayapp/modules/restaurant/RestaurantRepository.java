@@ -7,6 +7,7 @@ import com.example.uitpayapp.modules.restaurant.models.DashboardResponseDTO;
 import com.example.uitpayapp.modules.restaurant.models.RestaurantDistanceViewDTO;
 import com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO;
 import com.example.uitpayapp.modules.restaurant.models.RestaurantSettingsDTO;
+import com.example.uitpayapp.modules.restaurant.models.UpdateRestaurantInfoDTO;
 import com.example.uitpayapp.network.ApiCallback;
 import com.example.uitpayapp.network.RetrofitClient;
 
@@ -91,6 +92,45 @@ public class RestaurantRepository {
         });
     }
 
+    public void getRestaurantById(Long restaurantId, final ApiCallback<RestaurantResponseDTO> callback) {
+        restaurantService.getRestaurantById(restaurantId).enqueue(new Callback<ApiResponse<RestaurantResponseDTO>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<RestaurantResponseDTO>> call, Response<ApiResponse<RestaurantResponseDTO>> response) {
+                handleResponse(response, callback);
+            }
+            @Override
+            public void onFailure(Call<ApiResponse<RestaurantResponseDTO>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void updateRestaurantInfo(Long restaurantId, UpdateRestaurantInfoDTO dto, final ApiCallback<RestaurantResponseDTO> callback) {
+        restaurantService.updateRestaurantInfo(restaurantId, dto).enqueue(new Callback<ApiResponse<RestaurantResponseDTO>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<RestaurantResponseDTO>> call, Response<ApiResponse<RestaurantResponseDTO>> response) {
+                handleResponse(response, callback);
+            }
+            @Override
+            public void onFailure(Call<ApiResponse<RestaurantResponseDTO>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void uploadRestaurantImage(Long restaurantId, okhttp3.MultipartBody.Part file, final ApiCallback<String> callback) {
+        restaurantService.uploadRestaurantImage(restaurantId, file).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
     // Search
     public void getNearbyRestaurants(double lat, double lng, double radiusKm, final ApiCallback<List<RestaurantDistanceViewDTO>> callback) {
         restaurantSearchService.getNearbyRestaurants(lat, lng, radiusKm).enqueue(new Callback<ApiResponse<List<RestaurantDistanceViewDTO>>>() {
@@ -129,7 +169,20 @@ public class RestaurantRepository {
                 callback.onError("Không nhận được phản hồi dữ liệu hợp lệ.");
             }
         } else {
-            callback.onError("Lỗi kết nối hệ thống: " + response.code());
+            String errorMessage = "Lỗi kết nối hệ thống: " + response.code();
+            try {
+                if (response.errorBody() != null) {
+                    String errorBodyStr = response.errorBody().string();
+                    com.google.gson.Gson gson = new com.google.gson.Gson();
+                    ApiResponse<?> errorResponse = gson.fromJson(errorBodyStr, ApiResponse.class);
+                    if (errorResponse != null && errorResponse.getMessage() != null) {
+                        errorMessage = errorResponse.getMessage();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            callback.onError(errorMessage);
         }
     }
 }

@@ -31,7 +31,7 @@ public class RestaurantResponseDTO {
                 .address(restaurant.getAddress())
                 .openTime(restaurant.getOpenTime())
                 .closeTime(restaurant.getCloseTime())
-                .merchantId(restaurant.getMerchant().getId()) // Chi lay ID cua chu quan
+                .merchantId(restaurant.getMerchant().getId())
                 .isAcceptingOrders(restaurant.getIsAcceptingOrders())
                 .maxPendingOrders(restaurant.getMaxPendingOrders())
                 .imageUrl(restaurant.getImageUrl())

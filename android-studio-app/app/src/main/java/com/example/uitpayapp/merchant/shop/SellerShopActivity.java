@@ -1,6 +1,7 @@
 package com.example.uitpayapp.merchant.shop;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -20,7 +21,12 @@ import com.example.uitpayapp.merchant.marketing.SellerMarketingActivity;
 import com.example.uitpayapp.merchant.notification.SellerNotificationActivity;
 import com.example.uitpayapp.profile.ProfileActivity;
 import com.example.uitpayapp.profile.ProfileWebView;
+import com.example.uitpayapp.modules.statistic.StatisticRepository;
+import com.example.uitpayapp.modules.statistic.models.responses.MerchantDailyStatisticResponse;
+import com.example.uitpayapp.network.ApiCallback;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -38,6 +44,53 @@ public class SellerShopActivity extends AppCompatActivity {
 
         initViews();
         setupBottomNavigation();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateShopHeader();
+        loadDailyStatistics();
+    }
+
+    private void loadDailyStatistics() {
+        SharedPreferences sellerPrefs = getSharedPreferences("SellerPrefs", MODE_PRIVATE);
+        long storeId = sellerPrefs.getLong("current_store_id", -1L);
+        if (storeId == -1L) {
+            tvRevenue.setText("0đ");
+            tvTransactions.setText("0");
+            return;
+        }
+
+        Date date = new Date();
+        SimpleDateFormat apiDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String apiDateStr = apiDateFormat.format(date);
+
+        StatisticRepository statisticRepository = new StatisticRepository();
+        statisticRepository.getMerchantDailyStatistic(storeId, apiDateStr, new ApiCallback<MerchantDailyStatisticResponse>() {
+            @Override
+            public void onSuccess(MerchantDailyStatisticResponse data) {
+                if (data != null) {
+                    java.math.BigDecimal revenue = data.getTotalRevenue();
+                    if (revenue == null) {
+                        revenue = java.math.BigDecimal.ZERO;
+                    }
+                    DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("vi", "VN"));
+                    DecimalFormat currencyFormatter = new DecimalFormat("#,###đ", symbols);
+                    tvRevenue.setText(currencyFormatter.format(revenue));
+
+                    Long transactions = data.getTransactionCount();
+                    tvTransactions.setText(transactions != null ? String.valueOf(transactions) : "0");
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                tvRevenue.setText("0đ");
+                tvTransactions.setText("0");
+                Toast.makeText(SellerShopActivity.this, "Lỗi tải thống kê: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void initViews() {
@@ -59,12 +112,17 @@ public class SellerShopActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        
         Date date = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         String formattedDate = dateFormat.format(date);
         tvToday.setText(formattedDate);
-        tvRevenue.setText("2.450.000đ");
-        tvTransactions.setText("24");
+        
+        // Cập nhật thông tin quán từ Prefs
+        updateShopHeader();
+        
+        tvRevenue.setText("0đ");
+        tvTransactions.setText("0");
 
         if (btnReview != null) {
             btnReview.setOnClickListener(v -> {
@@ -89,6 +147,14 @@ public class SellerShopActivity extends AppCompatActivity {
             intentAccount.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intentAccount);
         });
+    }
+
+    private void updateShopHeader() {
+        SharedPreferences sellerPrefs = getSharedPreferences("SellerPrefs", MODE_PRIVATE);
+        String storeName = sellerPrefs.getString("current_store_name", "Cửa hàng của tôi");
+        if (tvShopName != null) {
+            tvShopName.setText(storeName);
+        }
     }
 
     private void setupBottomNavigation() {

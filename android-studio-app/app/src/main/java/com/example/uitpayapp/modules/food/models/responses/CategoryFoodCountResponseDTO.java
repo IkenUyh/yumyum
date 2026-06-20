@@ -6,7 +6,7 @@ public class CategoryFoodCountResponseDTO {
     @SerializedName("categoryId")
     private Long categoryId;
 
-    @SerializedName("categoryName")
+    @SerializedName(value = "categoryName", alternate = {"name"})
     private String categoryName;
 
     @SerializedName("foodCount")

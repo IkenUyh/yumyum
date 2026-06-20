@@ -89,7 +89,7 @@ public class NotificationActivity extends AppCompatActivity {
 
         // B. Load Notification History for "Khuyến mãi" list, "Đơn hàng" row sub-text, and unread badge
         com.example.uitpayapp.modules.notification.NotificationRepository notificationRepository = new com.example.uitpayapp.modules.notification.NotificationRepository();
-        notificationRepository.getHistory(new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO>>() {
+        notificationRepository.getHistory(null, null, new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO>>() {
             @Override
             public void onSuccess(List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO> data) {
                 List<PromoNotification> promos = new ArrayList<>();

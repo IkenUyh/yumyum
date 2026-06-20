@@ -6,11 +6,12 @@ import com.uit.fooddelivery_api.modules.notification.services.NotificationServic
 import com.uit.fooddelivery_api.modules.user.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -31,12 +32,13 @@ public class NotificationController {
         User currentUser = (User) authentication.getPrincipal();
         return notificationService.subscribe(currentUser.getId());
     }
-
-    // API 2: Lấy lịch sử thông báo
     @GetMapping("/history")
-    public ApiResponse<List<NotificationResponseDTO>> getHistory(Authentication authentication) {
+    public ApiResponse<List<NotificationResponseDTO>> getHistory(
+            @RequestParam(value = "month", required = false) Integer month,
+            @RequestParam(value = "year", required = false) Integer year,
+            Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
-        List<NotificationResponseDTO> list = notificationService.getMyHistory(currentUser.getId())
+        List<NotificationResponseDTO> list = notificationService.getMyHistory(currentUser.getId(), month, year)
                 .stream()
                 .map(NotificationResponseDTO::fromEntity)
                 .toList();
@@ -51,27 +53,35 @@ public class NotificationController {
         return ApiResponse.success(Map.of("unreadCount", count));
     }
 
-    // API 4: Đánh dấu đọc tất cả
-    @PutMapping("/read-all")
+    // API 4: Đánh dấu 1 thông báo là đã đọc
+    @PatchMapping("/mark-read/{id}")
+    public ApiResponse<String> markAsRead(@PathVariable Long id, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        notificationService.markAsRead(id, currentUser.getId());
+        return ApiResponse.success("Cập nhật thành công");
+    }
+
+    // API 5: Đánh dấu tất cả là đã đọc
+    @PatchMapping("/mark-all-read")
     public ApiResponse<String> markAllAsRead(Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
         notificationService.markAllAsRead(currentUser.getId());
-        return ApiResponse.success("Đã đánh dấu đọc tất cả thông báo");
+        return ApiResponse.success("Đã đánh dấu tất cả là đã đọc");
     }
 
-    // API 5: Đánh dấu đọc một thông báo
-    @PutMapping("/{id}/read")
-    public ApiResponse<String> markAsRead(@PathVariable("id") Long id, Authentication authentication) {
+    // API 6: Xóa 1 thông báo
+    @DeleteMapping("/{id}")
+    public ApiResponse<String> deleteNotification(@PathVariable Long id, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
-        notificationService.markAsRead(id, currentUser.getId());
-        return ApiResponse.success("Đã đánh dấu đọc thông báo");
+        notificationService.deleteNotification(id, currentUser.getId());
+        return ApiResponse.success("Đã xóa thông báo thành công");
     }
 
-    // API 6: Xóa tất cả thông báo
+    // API 7: Xóa tất cả thông báo
     @DeleteMapping("/all")
     public ApiResponse<String> deleteAllNotifications(Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
         notificationService.deleteAllNotifications(currentUser.getId());
-        return ApiResponse.success("Đã xóa tất cả thông báo");
+        return ApiResponse.success("Đã xóa toàn bộ thông báo thành công");
     }
 }

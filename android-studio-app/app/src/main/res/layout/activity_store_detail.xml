@@ -32,7 +32,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:src="@drawable/img_food_chicken"
+                android:src="#E0E0E0"
                 android:fitsSystemWindows="true"
                 app:layout_collapseMode="parallax" />
                 
@@ -205,16 +205,20 @@
                         android:textColor="#BDBDBD" />
                         
                     <View
+                        android:id="@+id/view_delivery_separator"
                         android:layout_width="1dp"
                         android:layout_height="12dp"
                         android:layout_marginHorizontal="12dp"
-                        android:background="#E0E0E0" />
+                        android:background="#E0E0E0"
+                        android:visibility="gone" />
                         
                     <ImageView
+                        android:id="@+id/iv_delivery_icon"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@android:drawable/ic_menu_recent_history"
-                        app:tint="#757575" />
+                        app:tint="#757575"
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/tv_delivery_time"
@@ -223,7 +227,8 @@
                         android:layout_marginStart="4dp"
                         android:text="27 phút"
                         android:textColor="#757575"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:visibility="gone" />
                 </LinearLayout>
             </LinearLayout>
 

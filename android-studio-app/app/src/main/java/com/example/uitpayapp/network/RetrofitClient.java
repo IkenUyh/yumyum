@@ -72,9 +72,10 @@ public class RetrofitClient {
                             }
 
                             // Lấy token thông qua appContext đã được khởi tạo trước đó
-                            String token = SessionManager.getInstance(appContext).getAuthToken();
+                            SessionManager sessionManager = SessionManager.getInstance(appContext);
+                            String token = sessionManager.getAuthToken();
 
-                            if (token != null && !token.isEmpty()) {
+                            if (token != null && !token.isEmpty() && !sessionManager.isTokenExpired(token)) {
                                 Request newRequest = originalRequest.newBuilder()
                                         .header("Authorization", "Bearer " + token)
                                         .build();
@@ -135,6 +136,10 @@ public class RetrofitClient {
 
     public static FoodService getFoodService() {
         return getClient().create(FoodService.class);
+    }
+
+    public static com.example.uitpayapp.modules.food.CategoryService getCategoryService() {
+        return getClient().create(com.example.uitpayapp.modules.food.CategoryService.class);
     }
 
     public static CartService getCartService() {

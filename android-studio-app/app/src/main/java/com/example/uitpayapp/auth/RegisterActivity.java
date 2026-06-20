@@ -81,12 +81,21 @@ public class RegisterActivity extends AppCompatActivity {
             String phone = edtPhoneNumber.getText().toString().trim();
             String name = edtFullName.getText().toString().trim();
             String referral = edtReferralCode.getText().toString().trim();
+            
+            EditText edtEmail = findViewById(R.id.edt_email);
+            TextView tvErrorEmail = findViewById(R.id.tv_error_email);
+            String email = edtEmail != null ? edtEmail.getText().toString().trim() : "";
 
             boolean isValid = true;
 
             if (phone.isEmpty()) {
                 edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_error);
                 tvErrorPhone.setText("Vui lòng nhập số điện thoại");
+                tvErrorPhone.setVisibility(View.VISIBLE);
+                isValid = false;
+            } else if (phone.length() != 10) {
+                edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_error);
+                tvErrorPhone.setText("Số điện thoại phải bao gồm 10 chữ số");
                 tvErrorPhone.setVisibility(View.VISIBLE);
                 isValid = false;
             } else {
@@ -101,6 +110,25 @@ public class RegisterActivity extends AppCompatActivity {
             } else {
                 edtFullName.setBackgroundResource(R.drawable.bg_edittext_rounded);
                 tvErrorName.setVisibility(View.GONE);
+            }
+
+            if (email.isEmpty()) {
+                if (edtEmail != null) edtEmail.setBackgroundResource(R.drawable.bg_edittext_error);
+                if (tvErrorEmail != null) {
+                    tvErrorEmail.setText("Vui lòng nhập email");
+                    tvErrorEmail.setVisibility(View.VISIBLE);
+                }
+                isValid = false;
+            } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                if (edtEmail != null) edtEmail.setBackgroundResource(R.drawable.bg_edittext_error);
+                if (tvErrorEmail != null) {
+                    tvErrorEmail.setText("Email không hợp lệ");
+                    tvErrorEmail.setVisibility(View.VISIBLE);
+                }
+                isValid = false;
+            } else {
+                if (edtEmail != null) edtEmail.setBackgroundResource(R.drawable.bg_edittext_rounded);
+                if (tvErrorEmail != null) tvErrorEmail.setVisibility(View.GONE);
             }
 
             if (!isValid) return;

@@ -56,11 +56,24 @@ public class SellerOrderViewModel extends AndroidViewModel {
      */
     public void loadData() {
         isLoading.setValue(true);
+
+        // Lấy store_id hiện tại từ SellerPrefs để lọc đơn hàng
+        android.content.SharedPreferences prefs = getApplication()
+                .getSharedPreferences("SellerPrefs", android.content.Context.MODE_PRIVATE);
+        long currentStoreId = prefs.getLong("current_store_id", -1L);
+
         orderRepository.getMerchantHistory(new ApiCallback<List<OrderResponse>>() {
             @Override
             public void onSuccess(List<OrderResponse> result) {
                 isLoading.setValue(false);
-                classifyOrders(result);
+                // Lọc chỉ lấy đơn của quán đang chọn
+                List<OrderResponse> filtered = new ArrayList<>();
+                for (OrderResponse o : result) {
+                    if (currentStoreId == -1L || (o.getRestaurantId() != null && o.getRestaurantId() == currentStoreId)) {
+                        filtered.add(o);
+                    }
+                }
+                classifyOrders(filtered);
             }
 
             @Override
@@ -280,7 +293,7 @@ public class SellerOrderViewModel extends AndroidViewModel {
     }
 
     /**
-     * Chuyển đơn đã xác nhận sang lịch sử (giao đơn).
+     * Chuyển đơn đã xác nhận sang lịch sử (giao đơn). Dùng local fallback.
      */
     public void moveToHistory(SellerHistoryOrder historyOrder, SellerOrder originalOrder) {
         List<SellerOrder> currentConfirmed = new ArrayList<>(confirmedOrders.getValue());
@@ -290,6 +303,33 @@ public class SellerOrderViewModel extends AndroidViewModel {
         List<SellerHistoryOrder> currentHistory = new ArrayList<>(historyOrders.getValue());
         currentHistory.add(0, historyOrder);
         historyOrders.setValue(currentHistory);
+    }
+
+    /**
+     * Hoàn thành đơn hàng PREPARING → gọi API merchant-complete để cập nhật trên server.
+     */
+    public void completeOrder(SellerOrder order) {
+        if (order.getOrderId() == null) {
+            // Không có orderId, fallback local
+            moveLocalOrderToCancelled(order);
+            return;
+        }
+
+        isLoading.setValue(true);
+        orderRepository.merchantCompleteOrder(order.getOrderId(), new ApiCallback<OrderResponse>() {
+            @Override
+            public void onSuccess(OrderResponse result) {
+                isLoading.setValue(false);
+                successMessage.setValue("Đơn hàng đã hoàn thành!");
+                loadData(); // Reload toàn bộ từ server
+            }
+
+            @Override
+            public void onError(String message) {
+                isLoading.setValue(false);
+                errorMessage.setValue("Hoàn thành đơn thất bại: " + message);
+            }
+        });
     }
 
     public void notifyOrderUpdated() {

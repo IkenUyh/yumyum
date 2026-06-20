@@ -48,6 +48,7 @@ public class MerchantToppingAdapter extends RecyclerView.Adapter<MerchantTopping
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), ToppingGroupDetailActivity.class);
+            intent.putExtra("group_id", group.getId());
             intent.putExtra("group_name", group.getName());
             intent.putExtra("toppings", (Serializable) group.getToppings());
             v.getContext().startActivity(intent);

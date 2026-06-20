@@ -32,7 +32,7 @@ public class NotificationOrderActivity extends AppCompatActivity {
         rv.setLayoutManager(new LinearLayoutManager(this));
 
         com.example.uitpayapp.modules.notification.NotificationRepository notificationRepository = new com.example.uitpayapp.modules.notification.NotificationRepository();
-        notificationRepository.getHistory(new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO>>() {
+        notificationRepository.getHistory(null, null, new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO>>() {
             @Override
             public void onSuccess(List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO> data) {
                 List<OrderNotification> list = new ArrayList<>();

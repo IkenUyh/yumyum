@@ -2,6 +2,10 @@ package com.example.uitpayapp.network;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Base64;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import java.nio.charset.StandardCharsets;
 
 public class SessionManager {
     // Tên của file SharedPreferences lưu trên thiết bị
@@ -15,6 +19,11 @@ public class SessionManager {
     private static final String KEY_USER_AVATAR = "user_avatar_url";
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_USER_EMAIL = "user_email";
+    
+    // Address storage
+    private static final String KEY_DELIVERY_ADDRESS_ID = "delivery_address_id";
+    private static final String KEY_DELIVERY_ADDRESS_TEXT = "delivery_address_text";
+    
     private static SessionManager instance;
     private final SharedPreferences sharedPreferences;
     private final SharedPreferences.Editor editor;
@@ -62,11 +71,34 @@ public class SessionManager {
         return sharedPreferences.getString(KEY_USER_NAME, "Khách hàng");
     }
 
-    /**
-     * KIỂM TRA TRẠNG THÁI ĐĂNG NHẬP
-     */
     public boolean isLoggedIn() {
+        String token = getAuthToken();
+        if (token == null || token.isEmpty() || isTokenExpired(token)) {
+            if (token != null) {
+                clearSession();
+            }
+            return false;
+        }
         return sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false);
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length < 2) return true;
+            String payload = parts[1];
+            byte[] decodedBytes = Base64.decode(payload, Base64.DEFAULT);
+            String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
+            JsonObject jsonObject = new Gson().fromJson(decodedString, JsonObject.class);
+            if (jsonObject.has("exp")) {
+                long exp = jsonObject.get("exp").getAsLong();
+                long currentTimeSec = System.currentTimeMillis() / 1000;
+                return currentTimeSec >= exp;
+            }
+        } catch (Exception e) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -107,5 +139,36 @@ public class SessionManager {
 
     public String getUserEmail() {
         return sharedPreferences.getString(KEY_USER_EMAIL, "");
+    }
+
+    /**
+     * LƯU ĐỊA CHỈ GIAO HÀNG ĐANG CHỌN
+     */
+    public void saveDeliveryAddress(Long addressId, String addressText) {
+        if (addressId == null) {
+            editor.remove(KEY_DELIVERY_ADDRESS_ID);
+        } else {
+            editor.putLong(KEY_DELIVERY_ADDRESS_ID, addressId);
+        }
+        
+        if (addressText == null) {
+            editor.remove(KEY_DELIVERY_ADDRESS_TEXT);
+        } else {
+            editor.putString(KEY_DELIVERY_ADDRESS_TEXT, addressText);
+        }
+        editor.apply();
+    }
+
+    /**
+     * LẤY ĐỊA CHỈ GIAO HÀNG ĐANG CHỌN
+     * @return chuỗi địa chỉ hoặc null
+     */
+    public String getDeliveryAddressText() {
+        return sharedPreferences.getString(KEY_DELIVERY_ADDRESS_TEXT, null);
+    }
+    
+    public Long getDeliveryAddressId() {
+        long id = sharedPreferences.getLong(KEY_DELIVERY_ADDRESS_ID, -1L);
+        return id == -1L ? null : id;
     }
 }

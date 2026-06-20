@@ -48,6 +48,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile_screen);
         TextView pagetitle = findViewById(R.id.pagetilte);
@@ -55,7 +56,8 @@ public class ProfileActivity extends AppCompatActivity {
         ConstraintLayout navBottom = findViewById(R.id.bottomNavContainer);
         ViewCompat.setOnApplyWindowInsetsListener(pagetitle, (v, insets) -> {
             Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
-            int safeTopPadding = cutout.top + 10;
+            Insets systemBar = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            int safeTopPadding = Math.max(cutout.top, systemBar.top) + 10;
             v.setPadding(v.getPaddingLeft(), safeTopPadding, v.getPaddingRight(), v.getPaddingBottom());
             //thanh duoi
             Insets navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
@@ -172,6 +174,11 @@ public class ProfileActivity extends AppCompatActivity {
             editor.apply();
             checkLoginStatus();
             Toast.makeText(this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(this, com.example.uitpayapp.home.HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
         });
         findViewById(R.id.btn_login_profile).setOnClickListener(v->
         {
@@ -282,8 +289,7 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(intentLocation);
                 break;
             case "Cửa hàng của bạn":
-                Intent intentStore=new Intent(this, SellerHomeActivity.class);
-                startActivity(intentStore);
+                showStoreSelectionDialog();
                 break;
         }
     }
@@ -518,5 +524,89 @@ public class ProfileActivity extends AppCompatActivity {
         
         builder.setNegativeButton("Đóng", (dialog, which) -> dialog.cancel());
         builder.show();
+    }
+
+    private void showStoreSelectionDialog() {
+        com.example.uitpayapp.modules.restaurant.RestaurantRepository restaurantRepository = new com.example.uitpayapp.modules.restaurant.RestaurantRepository();
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+        progressDialog.setMessage("Đang tải danh sách cửa hàng...");
+        progressDialog.show();
+
+        // Lấy ID của user hiện tại để lọc chỉ quán của họ
+        Long currentUserId = com.example.uitpayapp.network.SessionManager.getInstance(ProfileActivity.this).getUserId();
+
+        restaurantRepository.getAllRestaurants(new com.example.uitpayapp.network.ApiCallback<java.util.List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>() {
+            @Override
+            public void onSuccess(java.util.List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO> data) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+
+                    // Chỉ lấy các quán thuộc user hiện tại
+                    java.util.List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO> myRestaurants = new java.util.ArrayList<>();
+                    if (data != null) {
+                        for (com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO r : data) {
+                            if (r.getMerchantId() != null && r.getMerchantId().equals(currentUserId)) {
+                                myRestaurants.add(r);
+                            }
+                        }
+                    }
+
+                    if (myRestaurants.isEmpty()) {
+                        Toast.makeText(ProfileActivity.this, "Bạn chưa quản lý cửa hàng nào", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    
+                    String[] storeNames = new String[myRestaurants.size()];
+                    for (int i = 0; i < myRestaurants.size(); i++) {
+                        storeNames[i] = myRestaurants.get(i).getName() != null ? myRestaurants.get(i).getName() : "Cửa hàng chưa có tên";
+                    }
+
+                    android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(ProfileActivity.this);
+                    builder.setTitle("Chọn cửa hàng");
+                    builder.setItems(storeNames, (dialog, which) -> {
+                        com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO selectedStore = myRestaurants.get(which);
+                        Intent intentStore = new Intent(ProfileActivity.this, SellerHomeActivity.class);
+                        if (selectedStore.getId() != null) {
+                            intentStore.putExtra("store_id", selectedStore.getId());
+                        }
+                        intentStore.putExtra("store_name", selectedStore.getName());
+                        
+                        // Cập nhật SharedPreferences để các màn hình khác trong Seller có thể dùng
+                        SharedPreferences.Editor editor = getSharedPreferences("SellerPrefs", MODE_PRIVATE).edit();
+                        if (selectedStore.getId() != null) {
+                            editor.putLong("current_store_id", selectedStore.getId());
+                        }
+                        editor.putString("current_store_name", selectedStore.getName());
+                        editor.putString("current_store_address", selectedStore.getAddress());
+                        editor.apply();
+
+                        startActivity(intentStore);
+                    });
+                    builder.setNegativeButton("Đóng", (dialog, which) -> dialog.dismiss());
+                    builder.show();
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(ProfileActivity.this, "Lỗi API: " + errorMessage + ". Đang dùng dữ liệu cửa hàng giả lập (ID=2)...", Toast.LENGTH_LONG).show();
+                    
+                    // Giả lập dữ liệu cửa hàng ID = 2
+                    Intent intentStore = new Intent(ProfileActivity.this, SellerHomeActivity.class);
+                    intentStore.putExtra("store_id", 2L);
+                    intentStore.putExtra("store_name", "Cửa hàng Test (ID: 2)");
+                    
+                    SharedPreferences.Editor editor = getSharedPreferences("SellerPrefs", MODE_PRIVATE).edit();
+                    editor.putLong("current_store_id", 2L);
+                    editor.putString("current_store_name", "Cửa hàng Test (ID: 2)");
+                    editor.putString("current_store_address", "Địa chỉ giả lập (Test)");
+                    editor.apply();
+
+                    startActivity(intentStore);
+                });
+            }
+        });
     }
 }

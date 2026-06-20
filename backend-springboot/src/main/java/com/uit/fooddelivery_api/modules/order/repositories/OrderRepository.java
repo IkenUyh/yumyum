@@ -19,10 +19,28 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "WHERE o.restaurant.merchant.id = :merchantId AND o.status = 'COMPLETED'")
     java.math.BigDecimal calculateTotalRevenueByMerchant(@org.springframework.data.repository.query.Param("merchantId") Long merchantId);
 
+    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(o.totalAmount), 0) " +
+            "FROM Order o " +
+            "WHERE o.restaurant.id = :restaurantId AND o.status = 'COMPLETED' " +
+            "AND o.createdAt >= :startOfDay AND o.createdAt <= :endOfDay")
+    java.math.BigDecimal calculateRevenueByRestaurantAndDate(
+            @org.springframework.data.repository.query.Param("restaurantId") Long restaurantId,
+            @org.springframework.data.repository.query.Param("startOfDay") java.time.LocalDateTime startOfDay,
+            @org.springframework.data.repository.query.Param("endOfDay") java.time.LocalDateTime endOfDay);
+
     @org.springframework.data.jpa.repository.Query("SELECT COUNT(o) " +
             "FROM Order o " +
             "WHERE o.restaurant.merchant.id = :merchantId AND o.status = 'COMPLETED'")
     Long countCompletedOrdersByMerchant(@org.springframework.data.repository.query.Param("merchantId") Long merchantId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(o) " +
+            "FROM Order o " +
+            "WHERE o.restaurant.id = :restaurantId AND o.status = 'COMPLETED' " +
+            "AND o.createdAt >= :startOfDay AND o.createdAt <= :endOfDay")
+    Long countCompletedOrdersByRestaurantAndDate(
+            @org.springframework.data.repository.query.Param("restaurantId") Long restaurantId,
+            @org.springframework.data.repository.query.Param("startOfDay") java.time.LocalDateTime startOfDay,
+            @org.springframework.data.repository.query.Param("endOfDay") java.time.LocalDateTime endOfDay);
 
     // Tính tổng số lượng bán ra của từng món, xếp giảm dần
     @org.springframework.data.jpa.repository.Query("SELECT oi.food.id, oi.food.name, SUM(oi.quantity) " +
@@ -37,6 +55,19 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "FROM Order o JOIN FETCH o.user JOIN FETCH o.restaurant " +
             "WHERE o.status = 'PENDING' AND o.createdAt <= :cutoffTime")
     java.util.List<Order> findStalePendingOrders(@org.springframework.data.repository.query.Param("cutoffTime") java.time.LocalDateTime cutoffTime);
+
+    // Lấy doanh thu theo từng ngày trong tháng cho một cửa hàng
+    @org.springframework.data.jpa.repository.Query(
+            "SELECT DAY(o.createdAt), COALESCE(SUM(o.totalAmount), 0), COUNT(o) " +
+            "FROM Order o " +
+            "WHERE o.restaurant.id = :restaurantId AND o.status = 'COMPLETED' " +
+            "AND MONTH(o.createdAt) = :month AND YEAR(o.createdAt) = :year " +
+            "GROUP BY DAY(o.createdAt) " +
+            "ORDER BY DAY(o.createdAt)")
+    java.util.List<Object[]> getRevenueByDayInMonth(
+            @org.springframework.data.repository.query.Param("restaurantId") Long restaurantId,
+            @org.springframework.data.repository.query.Param("month") int month,
+            @org.springframework.data.repository.query.Param("year") int year);
 
     // Đếm xem quán này đang có bao nhiêu đơn ở trạng thái CHỜ XỬ LÝ hoặc ĐANG NẤU
     @org.springframework.data.jpa.repository.Query("SELECT COUNT(o) " +

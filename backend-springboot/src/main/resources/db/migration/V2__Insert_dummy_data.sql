@@ -1,14 +1,14 @@
-INSERT INTO users (phone_number, password, full_name)
-VALUES ('0987301126', '123456', 'Huy Onii-chan');
+INSERT INTO users (phone_number, password, full_name, email)
+VALUES ('0987301126', '123456', 'Huy Onii-chan', 'huykiento@gmail.com');
 
-INSERT INTO users (phone_number, password, full_name)
-VALUES ('0376171242', '111111', 'Cao Dat');
+INSERT INTO users (phone_number, password, full_name, email)
+VALUES ('0376171242', '111111', 'Cao Dat', 'charafrisksans024@gmail.com');
 
-INSERT INTO users (phone_number, password, full_name)
-VALUES ('0329815572', '555555', 'pbqhuy');
+INSERT INTO users (phone_number, password, full_name, email)
+VALUES ('0329815572', '555555', 'pbqhuy', 'pbqhuy@gmail.com');
 
-INSERT INTO users (phone_number, password, full_name)
-VALUES ('6767676767', '666666', 'Trần Thanh Dân');
+INSERT INTO users (phone_number, password, full_name, email)
+VALUES ('6767676767', '666666', 'Trần Thanh Dân', 'thanhdan020809@gmail.com');
 
 -- Thêm ảnh cho Cao Dat
 UPDATE users

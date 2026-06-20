@@ -19,24 +19,33 @@ public class NotificationRepository {
         this.notificationService = RetrofitClient.getNotificationService();
     }
 
-    public void getHistory(final ApiCallback<List<NotificationResponseDTO>> callback) {
-        notificationService.getHistory().enqueue(new Callback<ApiResponse<List<NotificationResponseDTO>>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<List<NotificationResponseDTO>>> call, Response<ApiResponse<List<NotificationResponseDTO>>> response) {
-                handleResponse(response, callback);
-            }
+    /**
+     * Lấy lịch sử thông báo.
+     * @param month tháng cần lọc (null = mặc định 30 ngày gần nhất)
+     * @param year  năm cần lọc  (null = mặc định 30 ngày gần nhất)
+     */
+    public void getHistory(Integer month, Integer year,
+                           final ApiCallback<List<NotificationResponseDTO>> callback) {
+        notificationService.getHistory(month, year)
+                .enqueue(new Callback<ApiResponse<List<NotificationResponseDTO>>>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<List<NotificationResponseDTO>>> call,
+                                           Response<ApiResponse<List<NotificationResponseDTO>>> response) {
+                        handleResponse(response, callback);
+                    }
 
-            @Override
-            public void onFailure(Call<ApiResponse<List<NotificationResponseDTO>>> call, Throwable t) {
-                callback.onError(t.getMessage());
-            }
-        });
+                    @Override
+                    public void onFailure(Call<ApiResponse<List<NotificationResponseDTO>>> call, Throwable t) {
+                        callback.onError(t.getMessage());
+                    }
+                });
     }
 
     public void getUnreadCount(final ApiCallback<Map<String, Long>> callback) {
         notificationService.getUnreadCount().enqueue(new Callback<ApiResponse<Map<String, Long>>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Map<String, Long>>> call, Response<ApiResponse<Map<String, Long>>> response) {
+            public void onResponse(Call<ApiResponse<Map<String, Long>>> call,
+                                   Response<ApiResponse<Map<String, Long>>> response) {
                 handleResponse(response, callback);
             }
 
@@ -47,10 +56,11 @@ public class NotificationRepository {
         });
     }
 
-    public void markAllAsRead(final ApiCallback<String> callback) {
-        notificationService.markAllAsRead().enqueue(new Callback<ApiResponse<String>>() {
+    public void markAsRead(Long id, final ApiCallback<String> callback) {
+        notificationService.markAsRead(id).enqueue(new Callback<ApiResponse<String>>() {
             @Override
-            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+            public void onResponse(Call<ApiResponse<String>> call,
+                                   Response<ApiResponse<String>> response) {
                 handleResponse(response, callback);
             }
 
@@ -61,10 +71,11 @@ public class NotificationRepository {
         });
     }
 
-    public void markAsRead(Long id, final ApiCallback<String> callback) {
-        notificationService.markAsRead(id).enqueue(new Callback<ApiResponse<String>>() {
+    public void markAllAsRead(final ApiCallback<String> callback) {
+        notificationService.markAllAsRead().enqueue(new Callback<ApiResponse<String>>() {
             @Override
-            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+            public void onResponse(Call<ApiResponse<String>> call,
+                                   Response<ApiResponse<String>> response) {
                 handleResponse(response, callback);
             }
 
@@ -77,6 +88,20 @@ public class NotificationRepository {
 
     public void deleteAllNotifications(final ApiCallback<String> callback) {
         notificationService.deleteAllNotifications().enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void deleteNotification(Long id, final ApiCallback<String> callback) {
+        notificationService.deleteNotification(id).enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 handleResponse(response, callback);

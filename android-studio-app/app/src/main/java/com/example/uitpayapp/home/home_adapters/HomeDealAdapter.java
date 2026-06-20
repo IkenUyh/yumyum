@@ -131,14 +131,14 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         holder.tvDiscountPrice.setText(currencyFormatter.format(deal.getDiscountPrice()));
 
-         View.OnClickListener storeClickListener = v -> {
-             Intent intent = new Intent(v.getContext(), StoreDetailActivity.class);
-             intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, deal.getStoreName());
-             if (deal.getRestaurantId() != null) {
-                 intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_ID, deal.getRestaurantId());
-             }
-             v.getContext().startActivity(intent);
-         };
+        View.OnClickListener storeClickListener = v -> {
+            Intent intent = new Intent(v.getContext(), StoreDetailActivity.class);
+            intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, deal.getStoreName());
+            if (deal.getRestaurantId() != null) {
+                intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_ID, deal.getRestaurantId());
+            }
+            v.getContext().startActivity(intent);
+        };
 
         if (holder.layoutStoreInfo != null) {
             holder.layoutStoreInfo.setOnClickListener(storeClickListener);
@@ -189,7 +189,6 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             tvOriginalPrice = itemView.findViewById(R.id.tv_original_price);
             tvDiscountPrice = itemView.findViewById(R.id.tv_discount_price);
             btnBuyNow = itemView.findViewById(R.id.btn_buy_now);
-            tvRating = itemView.findViewById(R.id.tv_rating);
         }
     }
 

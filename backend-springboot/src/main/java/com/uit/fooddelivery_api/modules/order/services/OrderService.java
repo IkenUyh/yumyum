@@ -297,7 +297,6 @@ public class OrderService {
         Order order = Order.builder()
                 .user(customer)
                 .restaurant(restaurant)
-                .address(address)
                 .status("PENDING")
                 .shippingFee(shippingFee)
                 .deliveryMode(deliveryMode)
@@ -759,8 +758,47 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    public Order getOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
+    // 5. CHỦ QUÁN: Hoàn thành trực tiếp đơn hàng (không qua tài xế)
+    @Transactional
+    public Order merchantCompleteOrder(Long orderId, User merchant) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+
+        if (!order.getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền hoàn thành đơn hàng của quán khác!");
+        }
+
+        if (!"PREPARING".equals(order.getStatus()) && !"PENDING".equals(order.getStatus())) {
+            throw new RuntimeException("Chỉ có thể hoàn thành đơn hàng ở trạng thái ĐANG CHUẨN BỊ hoặc CHỜ XỬ LÝ!");
+        }
+
+        order.setStatus("COMPLETED");
+
+        // Bắn tiền doanh thu về ví chủ quán
+        BigDecimal revenue = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
+        BigDecimal shipping = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
+        walletService.processTransaction(
+                order.getRestaurant().getMerchant().getId(),
+                revenue.subtract(shipping),
+                "REVENUE",
+                "ORDER_" + order.getId(),
+                "Doanh thu bán hàng đơn #" + order.getId()
+        );
+
+        notificationService.pushNotification(
+                order.getUser().getId(),
+                "Đơn hàng hoàn tất 🎉",
+                "Đơn hàng #" + order.getId() + " từ " + order.getRestaurant().getName() + " đã hoàn tất!",
+                "ORDER_UPDATE"
+        );
+
+        return orderRepository.save(order);
+    }
+
+    public Order getOrderById(Long id) {
+        return orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
     }
-}
+}
+
+

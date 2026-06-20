@@ -145,7 +145,6 @@ public class RecommendedDealAdapter extends RecyclerView.Adapter<RecommendedDeal
             tvOriginalPrice = itemView.findViewById(R.id.tv_original_price);
             tvDiscountPrice = itemView.findViewById(R.id.tv_discount_price);
             btnBuyNow = itemView.findViewById(R.id.btn_buy_now);
-            tvRating = itemView.findViewById(R.id.tv_rating);
         }
     }
 }

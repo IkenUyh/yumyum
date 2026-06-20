@@ -36,6 +36,16 @@ public class SignInActivity extends AppCompatActivity {
     private UserRepository userRepository;
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // Hide error message when returning to this screen
+        if (tvErrorPhone != null && edtPhoneNumber != null && tvErrorPhone.getVisibility() == View.VISIBLE) {
+            tvErrorPhone.setVisibility(View.GONE);
+            edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_rounded);
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
@@ -94,6 +104,14 @@ public class SignInActivity extends AppCompatActivity {
                         edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_error);
                         tvErrorPhone.setText("Số điện thoại không tồn tại");
                         tvErrorPhone.setVisibility(View.VISIBLE);
+                        
+                        // Ẩn cảnh báo sau 3 giây
+                        tvErrorPhone.postDelayed(() -> {
+                            if (tvErrorPhone.getVisibility() == View.VISIBLE) {
+                                tvErrorPhone.setVisibility(View.GONE);
+                                edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_rounded);
+                            }
+                        }, 3000);
                     }
                 }
 
