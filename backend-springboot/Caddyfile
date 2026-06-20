@@ -1,3 +1,6 @@
 kienhuy-dev.name.vn {
+    tls {
+        issuer zerossl
+    }
     reverse_proxy backend-app:8081
 }
