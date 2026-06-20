@@ -54,13 +54,15 @@
                         android:layout_alignParentStart="true"
                         android:layout_toStartOf="@+id/imgStatus">
                         <TextView
+                            android:id="@+id/txtStatusHeader"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Đã sử dụng Deal"
+                            android:text="Mua món ăn thành công"
                             android:textColor="#212121"
                             android:textSize="18sp"
                             android:textStyle="bold"/>
                         <TextView
+                            android:id="@+id/txtStatusDesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"

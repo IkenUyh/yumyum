@@ -19,4 +19,5 @@ public class DealHistoryResponseDTO {
     private String quantityText;
     private String statusText;
     private String appliedOrderId;
+    private String imageUrl;
 }
