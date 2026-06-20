@@ -41,7 +41,6 @@ import com.example.uitpayapp.home.home_models.FoodMenuItem;
 import com.example.uitpayapp.home.home_models.Restaurant;
 import com.example.uitpayapp.home.home_models.TopicStore;
 import com.example.uitpayapp.network.RetrofitClient;
-import com.example.uitpayapp.recommendeddeal.RecommendedDealActivity;
 import com.example.uitpayapp.recommendeddeal.RecommendedDealModel;
 import com.example.uitpayapp.utils.CartAnimationHelper;
 import com.example.uitpayapp.home.home_adapters.TopicStoreAdapter;
@@ -740,8 +739,8 @@ public class HomeActivity extends AppCompatActivity {
             }
             tvName.setText(item.getName());
 
-            long originalPrice = item.getPrice();
-            long discountedPrice = originalPrice / 2;
+            long discountedPrice = item.getPrice();
+            long originalPrice = discountedPrice * 2;
 
             tvOrigPrice.setText(String.format("%,dđ", originalPrice).replace(',', '.'));
             tvOrigPrice.setPaintFlags(tvOrigPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);

@@ -24,6 +24,12 @@ public interface AddressService {
             @Body CreateAddressDTO dto
     );
 
+    @PUT("api/v1/addresses/{id}")
+    Call<ApiResponse<AddressResponseDTO>> updateAddress(
+            @Path("id") Long id,
+            @Body CreateAddressDTO dto
+    );
+
     @PUT("api/v1/addresses/{id}/set-default")
     Call<ApiResponse<AddressResponseDTO>> setDefaultAddress(
             @Path("id") Long addressId

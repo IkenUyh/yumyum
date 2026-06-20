@@ -48,6 +48,21 @@ public class AddressRepository {
         });
     }
 
+    // Cập nhật địa chỉ
+    public void updateAddress(Long addressId, CreateAddressDTO dto, ApiCallback<AddressResponseDTO> callback) {
+        addressService.updateAddress(addressId, dto).enqueue(new Callback<ApiResponse<AddressResponseDTO>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<AddressResponseDTO>> call, Response<ApiResponse<AddressResponseDTO>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<AddressResponseDTO>> call, Throwable t) {
+                callback.onError("Mất kết nối máy chủ: " + t.getMessage());
+            }
+        });
+    }
+
     // 3. Đặt địa chỉ mặc định
     public void setDefaultAddress(Long addressId, ApiCallback<AddressResponseDTO> callback) {
         addressService.setDefaultAddress(addressId).enqueue(new Callback<ApiResponse<AddressResponseDTO>>() {

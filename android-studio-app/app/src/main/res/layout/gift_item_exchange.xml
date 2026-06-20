@@ -42,7 +42,7 @@
             <ImageView
                 android:layout_width="16dp"
                 android:layout_height="16dp"
-                android:src="@drawable/img_coin"
+                android:src="@drawable/ic_coin"
                 android:layout_marginEnd="4dp"/>
             <TextView
                 android:id="@+id/tvCoin"

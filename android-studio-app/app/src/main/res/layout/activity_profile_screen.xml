@@ -21,11 +21,12 @@
             android:textColor="#FFFFFF"
             android:background="#f24405"/>
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
             android:layout_below="@id/pagetilte"
             android:layout_above="@+id/bottomNavContainer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:scrollbars="none">
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -144,6 +145,7 @@
                             android:id="@+id/main_menu"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"
                             android:orientation="vertical">
                         </androidx.recyclerview.widget.RecyclerView>
                         <androidx.cardview.widget.CardView
@@ -178,7 +180,7 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
             </RelativeLayout>
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/bottomNavContainer"

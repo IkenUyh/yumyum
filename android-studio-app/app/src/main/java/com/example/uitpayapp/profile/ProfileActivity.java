@@ -27,7 +27,7 @@ import com.example.uitpayapp.YumYumPriority.PriorityYumYumActivity;
 import com.example.uitpayapp.auth.SignInActivity;
 import com.example.uitpayapp.giftexchange.GiftExchangeActivity;
 import com.example.uitpayapp.merchant.home.SellerHomeActivity;
-import com.example.uitpayapp.profile.accountPaymentManage.AccountManagementActivity;
+
 import com.example.uitpayapp.voucher.VoucherActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
@@ -42,6 +42,7 @@ public class ProfileActivity extends AppCompatActivity {
     RecyclerView mainMenu;
     View rlLoginProfile,llUserInfo;
     boolean isLogin = false;
+    private long currentCoins = 0;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -194,14 +195,13 @@ public class ProfileActivity extends AppCompatActivity {
         //Nhóm 1: Ưu đãi
         List<MenuItemData> ListItems_uudai = new ArrayList<>();
         ListItems_uudai.add(new MenuItemData("YumYum Priority","Thành viên",R.drawable.ic_priority_yumyum,false));
-        ListItems_uudai.add(new MenuItemData("Deal hời cho bạn","",R.drawable.ic_your_deal,false));
         ListItems_uudai.add(new MenuItemData("Ví Voucher", "0 ưu đãi", R.drawable.ic_my_gift,false));
-        ListItems_uudai.add(new MenuItemData("Xu tích lũy", "0 xu", R.drawable.ic_my_coin,false));
+        ListItems_uudai.add(new MenuItemData("Xu tích lũy", currentCoins + " xu", R.drawable.ic_my_coin,false));
         ListGroupItem.add(new GroupItemData("Ưu đãi", ListItems_uudai));
         //Nhóm 2: Quản lý tài chính (Mục đặc chứa thành phần đặc biệt)
         List<MenuItemData> ListItems_finance = new ArrayList<>();
-        ListItems_finance.add(new MenuItemData("Tài khoản/thẻ liên kết", "", R.drawable.ic_account_card_payment,true));
-        ListItems_finance.add(new MenuItemData("Vị trí", "Thêm và sắp xếp các địa chỉ giao hàng của bạn", R.drawable.ic_location,false));
+        ListItems_finance.add(new MenuItemData("Nguồn tiền", "", R.drawable.ic_account_card_payment,true));
+        ListItems_finance.add(new MenuItemData("Vị trí", "", R.drawable.ic_location,false));
         ListGroupItem.add(new GroupItemData("Quản lý thông tin đơn hàng", ListItems_finance));
         //Nhóm 3: Tiện ích
         List<MenuItemData> ListItems_tienich = new ArrayList<>();
@@ -237,8 +237,6 @@ public class ProfileActivity extends AppCompatActivity {
         List<MenuItemData> ListItems = new ArrayList<>();
         if (item.IsSpecialItem)
         {
-            Intent intent=new Intent(this, AccountManagementActivity.class);
-            startActivity(intent);
             return;
         }
         switch (item.getTitle()) {
@@ -272,10 +270,6 @@ public class ProfileActivity extends AppCompatActivity {
             case "Xu tích lũy":
                 Intent intentCoin=new Intent(this, GiftExchangeActivity.class);
                 startActivity(intentCoin);
-                break;
-            case "Deal hời cho bạn":
-                Intent intentDeal=new Intent(this, com.example.uitpayapp.recommendeddeal.RecommendedDealActivity.class);
-                startActivity(intentDeal);
                 break;
             case "Mời bạn bè":
                 ListItems.add(new MenuItemData("Gửi qua SMS","",R.drawable.ic_bold_check,false));
@@ -403,6 +397,30 @@ public class ProfileActivity extends AppCompatActivity {
         super.onResume();
         checkLoginStatus();
         updateNotificationBadge();
+        fetchLoyaltyData();
+    }
+
+    private void fetchLoyaltyData() {
+        if (!isLogin) {
+            currentCoins = 0;
+            return;
+        }
+        new com.example.uitpayapp.modules.loyalty.LoyaltyRepository().getMyLoyaltyInfo(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO>() {
+            @Override
+            public void onSuccess(com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO data) {
+                if (data != null && data.getCurrentPoints() != null) {
+                    runOnUiThread(() -> {
+                        currentCoins = data.getCurrentPoints();
+                        SetDataMainMenu(mainMenu);
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Fail silently
+            }
+        });
     }
 
     private void updateNotificationBadge() {

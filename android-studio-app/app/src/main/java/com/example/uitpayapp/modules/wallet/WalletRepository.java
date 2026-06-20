@@ -3,6 +3,8 @@ package com.example.uitpayapp.modules.wallet;
 import com.example.uitpayapp.models.ApiResponse;
 import com.example.uitpayapp.network.ApiCallback;
 import com.example.uitpayapp.network.RetrofitClient;
+import com.example.uitpayapp.modules.wallet.models.requests.MerchantWalletTransferRequest;
+import com.example.uitpayapp.modules.wallet.models.requests.MerchantWalletWithdrawRequest;
 import com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse;
 import com.example.uitpayapp.modules.wallet.models.responses.TransactionResponse;
 
@@ -128,6 +130,64 @@ public class WalletRepository {
             @Override
             public void onFailure(Call<ApiResponse<java.util.Map<String, Object>>> call, Throwable t) {
                 callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
+    // Hàm gọi lấy số dư ví cửa hàng
+    public void getMerchantBalance(final ApiCallback<BalanceResponse> callback) {
+        walletService.getMerchantBalance().enqueue(new Callback<ApiResponse<BalanceResponse>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<BalanceResponse>> call, Response<ApiResponse<BalanceResponse>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body().getData());
+                } else {
+                    callback.onError("Không thể lấy thông tin số dư cửa hàng: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<BalanceResponse>> call, Throwable t) {
+                callback.onError("Lỗi kết nối hệ thống: " + t.getMessage());
+            }
+        });
+
+
+    // Hàm chuyển tiền từ ví cửa hàng về ví cá nhân
+    public void transferMerchantToPersonal(MerchantWalletTransferRequest request, final ApiCallback<String> callback) {
+        walletService.transferToPersonalWallet(request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body().getMessage());
+                } else {
+                    callback.onError("Không thể chuyển tiền: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                callback.onError("Lỗi kết nối hệ thống: " + t.getMessage());
+            }
+        });
+    }
+
+    // Hàm rút tiền từ ví cửa hàng ra ngoài
+    public void withdrawMerchantBalance(MerchantWalletWithdrawRequest request, final ApiCallback<String> callback) {
+        walletService.withdrawMerchantBalance(request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body().getMessage());
+                } else {
+                    callback.onError("Không thể rút tiền: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                callback.onError("Lỗi kết nối hệ thống: " + t.getMessage());
+>>>>>>> origin/develop
             }
         });
     }

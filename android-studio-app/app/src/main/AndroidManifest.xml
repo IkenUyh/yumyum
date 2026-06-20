@@ -120,9 +120,7 @@
         <activity
             android:name=".giftexchange.GiftExchangeActivity"
             android:exported="false" />
-        <activity
-            android:name=".profile.accountPaymentManage.AccountManagementActivity"
-            android:exported="false" />
+
         <activity
             android:name=".profile.AccountDetailActivity"
             android:exported="false"
@@ -130,9 +128,7 @@
         <activity
             android:name=".deliveryaddressorder.AddressOrderActivity"
             android:exported="false" />
-        <activity
-            android:name=".recommendeddeal.RecommendedDealActivity"
-            android:exported="false" />
+
         <activity
             android:name=".recommendeddeal.RecommendedDealDetailActivity"
             android:exported="false" />

@@ -11,22 +11,27 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.uitpayapp.R;
 
-import java.util.Collections;
+import com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO;
+
 import java.util.List;
 
 public class DeliveryAddressAdapter extends RecyclerView.Adapter<DeliveryAddressAdapter.ViewHolder> {
 
-    private List<DeliveryAddress> addressList;
+    private List<AddressResponseDTO> addressList;
     private OnAddressActionListener actionListener;
 
     public interface OnAddressActionListener {
-        void onStartDrag(RecyclerView.ViewHolder viewHolder);
-        void onEditClick(DeliveryAddress address, int position);
+        void onEditClick(AddressResponseDTO address, int position);
     }
 
-    public DeliveryAddressAdapter(List<DeliveryAddress> list, OnAddressActionListener listener) {
+    public DeliveryAddressAdapter(List<AddressResponseDTO> list, OnAddressActionListener listener) {
         this.addressList = list;
         this.actionListener = listener;
+    }
+
+    public void updateData(List<AddressResponseDTO> list) {
+        this.addressList = list;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -36,24 +41,30 @@ public class DeliveryAddressAdapter extends RecyclerView.Adapter<DeliveryAddress
         return new ViewHolder(view);
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        DeliveryAddress item = addressList.get(position);
-        DeliveryAddress.AddressType addressType = item.getAddressType();
+        AddressResponseDTO item = addressList.get(position);
+        
         holder.tvOrderIndex.setText(String.valueOf(position + 1));
-        holder.tvTypeAddressTitle.setText(addressType.getDisplayName());
-        holder.tvDetailAddress.setText(item.getAddressDetail());
-        holder.tvNameReceiver.setText(item.getReceiverName());
-        holder.tvPhoneNumber.setText(item.getPhoneNumber());
-        holder.ivTypeAddress.setImageResource(addressType.getIconResId());
-
-        holder.ivDragHandle.setOnTouchListener((v, event) -> {
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                actionListener.onStartDrag(holder);
-            }
-            return false;
-        });
+        
+        String typeName = item.getAddressName() != null ? item.getAddressName() : "Nhà";
+        holder.tvTypeAddressTitle.setText(typeName);
+        
+        if ("Công ty".equalsIgnoreCase(typeName) || "WORK".equalsIgnoreCase(typeName)) {
+            holder.ivTypeAddress.setImageResource(R.drawable.ic_location);
+        } else {
+            holder.ivTypeAddress.setImageResource(R.drawable.ic_home_24px);
+        }
+        
+        holder.tvDetailAddress.setText(item.getDetailedAddress() != null ? item.getDetailedAddress() : "");
+        holder.tvNameReceiver.setText(item.getRecipientName() != null ? item.getRecipientName() : "");
+        holder.tvPhoneNumber.setText(item.getPhoneNumber() != null ? item.getPhoneNumber() : "");
+        
+        if (item.getIsDefault() != null && item.getIsDefault()) {
+            holder.tvDefaultBadge.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvDefaultBadge.setVisibility(View.GONE);
+        }
 
         holder.tvEditAddress.setOnClickListener(v -> {
             if (actionListener != null) {
@@ -62,21 +73,14 @@ public class DeliveryAddressAdapter extends RecyclerView.Adapter<DeliveryAddress
         });
     }
 
-    public void onItemMove(int fromPosition, int toPosition) {
-        Collections.swap(addressList, fromPosition, toPosition);
-        notifyItemMoved(fromPosition, toPosition);
-        notifyItemRangeChanged(Math.min(fromPosition, toPosition), Math.abs(fromPosition - toPosition) + 1);
-    }
-
-
     @Override
     public int getItemCount() {
-        return addressList.size();
+        return addressList == null ? 0 : addressList.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvOrderIndex, tvTypeAddressTitle, tvDetailAddress, tvNameReceiver, tvPhoneNumber, tvEditAddress;
-        ImageView ivTypeAddress, ivDragHandle;
+        TextView tvOrderIndex, tvTypeAddressTitle, tvDetailAddress, tvNameReceiver, tvPhoneNumber, tvEditAddress, tvDefaultBadge;
+        ImageView ivTypeAddress;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -87,7 +91,7 @@ public class DeliveryAddressAdapter extends RecyclerView.Adapter<DeliveryAddress
             tvPhoneNumber = itemView.findViewById(R.id.tv_phone_number);
             tvEditAddress = itemView.findViewById(R.id.tv_edit_address);
             ivTypeAddress = itemView.findViewById(R.id.iv_type_address);
-            ivDragHandle = itemView.findViewById(R.id.ivDragHandle);
+            tvDefaultBadge = itemView.findViewById(R.id.tv_default_badge);
         }
     }
 }
