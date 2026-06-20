@@ -82,16 +82,24 @@ public class StoreDetailActivity extends AppCompatActivity {
         if (btnFavorite != null) {
             btnFavorite.setOnClickListener(v -> {
                 if (restaurant == null || restaurant.getId() == null) return;
+                
+                // Optimistic UI update
+                isFavorited = !isFavorited;
+                updateFavoriteHeartIcon();
+                
                 favoriteRepository.toggleFavorite(restaurant.getId(), new ApiCallback<ToggleFavoriteResponseDTO>() {
                     @Override
                     public void onSuccess(ToggleFavoriteResponseDTO result) {
-                        isFavorited = result.isFavorited();
-                        updateFavoriteHeartIcon();
-                        Toast.makeText(StoreDetailActivity.this, result.getMessage(), Toast.LENGTH_SHORT).show();
+                        // Keep optimistic update, just show success message if any
+                        String msg = (result != null && result.getMessage() != null) ? result.getMessage() : (isFavorited ? "Đã thêm vào yêu thích" : "Đã bỏ yêu thích");
+                        Toast.makeText(StoreDetailActivity.this, msg, Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onError(String errorMessage) {
+                        // Revert on error
+                        isFavorited = !isFavorited;
+                        updateFavoriteHeartIcon();
                         Toast.makeText(StoreDetailActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -120,7 +128,7 @@ public class StoreDetailActivity extends AppCompatActivity {
                         com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto = response.body().getData();
                         double ratingVal = dto.getRatingAverage() != null ? dto.getRatingAverage() : 0.0;
                         int reviewsVal = dto.getReviewCount() != null ? dto.getReviewCount() : 0;
-                        restaurant = new Restaurant(dto.getId(), dto.getName(), dto.getName().substring(0, 1), Color.RED, "Danh mục", new ArrayList<>(), R.drawable.img_food_chicken, ratingVal, reviewsVal, 30, dto.getAddress(), dto.getImageUrl());
+                        restaurant = new Restaurant(dto.getId(), dto.getName(), dto.getName().substring(0, 1), Color.RED, "Danh mục", new ArrayList<>(), R.drawable.ic_food, ratingVal, reviewsVal, 30, dto.getAddress(), dto.getImageUrl());
                         updateStoreUI(dto);
                         checkFavoriteStatus();
                         fetchRestaurantFoods(id);
