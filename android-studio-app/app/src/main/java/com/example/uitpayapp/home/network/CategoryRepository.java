@@ -53,6 +53,7 @@ public class CategoryRepository {
                                     fr.getDescription() != null ? fr.getDescription() : "",
                                     fr.getImageUrl() != null ? fr.getImageUrl() : ""
                             );
+                            item.setRestaurantId(fr.getRestaurantId());
                             foods.add(item);
                         }
                         callback.onSuccess(foods);

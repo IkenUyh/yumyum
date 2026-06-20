@@ -71,6 +71,7 @@ public class HomeService {
                                                         .imageResId(0)
                                                         .imageUrl(fs.getFood().getImageUrl())
                                                         .description(fs.getFood().getDescription())
+                                                        .restaurantId(fs.getFood().getRestaurant() != null ? fs.getFood().getRestaurant().getId() : null)
                                                         .build())
                                         .limit(5)
                                         .collect(Collectors.toList());
@@ -86,6 +87,7 @@ public class HomeService {
                                                         .imageResId(0)
                                                         .imageUrl(f.getImageUrl())
                                                         .description(f.getDescription())
+                                                        .restaurantId(f.getRestaurant() != null ? f.getRestaurant().getId() : null)
                                                         .build())
                                         .limit(3)
                                         .collect(Collectors.toList());
@@ -101,6 +103,7 @@ public class HomeService {
                                                 .imageResId(0)
                                                 .imageUrl(f.getImageUrl())
                                                 .description(f.getDescription())
+                                                .restaurantId(f.getRestaurant() != null ? f.getRestaurant().getId() : null)
                                                 .build())
                                 .limit(4)
                                 .collect(Collectors.toList());
@@ -115,6 +118,7 @@ public class HomeService {
                                                 .imageResId(0)
                                                 .imageUrl(f.getImageUrl())
                                                 .description(f.getDescription())
+                                                .restaurantId(f.getRestaurant() != null ? f.getRestaurant().getId() : null)
                                                 .build())
                                 .limit(4)
                                 .collect(Collectors.toList());
@@ -159,11 +163,13 @@ public class HomeService {
                                                                         .imageResId(0)
                                                                         .imageUrl(f.getImageUrl())
                                                                         .description(f.getDescription())
+                                                                        .restaurantId(f.getRestaurant() != null ? f.getRestaurant().getId() : null)
                                                                         .build())
                                                         .limit(4)
                                                         .collect(Collectors.toList());
 
                                         return RestaurantHomeDTO.builder()
+                                                        .id(r.getId())
                                                         .name(r.getName())
                                                         .shortName(r.getName().split(" ")[0])
                                                         .bgColor(0)
@@ -220,6 +226,7 @@ public class HomeService {
                                                         .originalPrice(origPrice)
                                                         .discountPrice(discPrice)
                                                         .rating(rating)
+                                                        .restaurantId(f.getRestaurant() != null ? f.getRestaurant().getId() : null)
                                                         .build();
                                 })
                                 .collect(Collectors.toList());

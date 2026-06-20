@@ -626,6 +626,7 @@ public class HomeActivity extends AppCompatActivity {
                         item.getImageResId(),
                         item.getDescription(),
                         item.getImageUrl());
+                discountedItem.setRestaurantId(item.getRestaurantId());
                 showFoodItemDetailPopup(discountedItem, iv);
             });
         }
@@ -709,6 +710,9 @@ public class HomeActivity extends AppCompatActivity {
         BrandAdapter brandAdapter = new BrandAdapter(brands, restaurant -> {
             Intent intent = new Intent(this, StoreDetailActivity.class);
             intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, restaurant.getName());
+            if (restaurant.getId() != null) {
+                intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_ID, restaurant.getId());
+            }
             startActivity(intent);
         });
         rvStores.setAdapter(brandAdapter);
@@ -1082,6 +1086,7 @@ public class HomeActivity extends AppCompatActivity {
                         item.getImageResId(),
                         item.getDescription(),
                         item.getImageUrl());
+                discountedItem.setRestaurantId(item.getRestaurantId());
                 showFoodItemDetailPopup(discountedItem, iv);
             });
         }

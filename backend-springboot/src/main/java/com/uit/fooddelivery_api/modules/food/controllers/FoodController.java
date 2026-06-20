@@ -3,6 +3,7 @@ package com.uit.fooddelivery_api.modules.food.controllers;
 import com.uit.fooddelivery_api.common.responses.ApiResponse;
 import com.uit.fooddelivery_api.modules.food.dtos.CreateFoodDTO;
 import com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO;
+import com.uit.fooddelivery_api.modules.food.dtos.FoodDetailResponseDTO;
 import com.uit.fooddelivery_api.modules.food.entities.Food;
 import com.uit.fooddelivery_api.modules.food.services.FoodService;
 import com.uit.fooddelivery_api.modules.user.entities.User;
@@ -29,6 +30,18 @@ public class FoodController {
                 .map(FoodResponseDTO::fromEntity)
                 .toList();
         return ApiResponse.success(list);
+    }
+
+    // Tìm kiếm chi tiết 1 món ăn theo food_id hoặc foodId
+    @GetMapping("/search")
+    public ApiResponse<FoodDetailResponseDTO> getFoodDetailBySearch(
+            @RequestParam(value = "food_id", required = false) Long foodId1,
+            @RequestParam(value = "foodId", required = false) Long foodId2) {
+        Long foodId = foodId1 != null ? foodId1 : foodId2;
+        if (foodId == null) {
+            throw new RuntimeException("Vui lòng truyền tham số food_id hoặc foodId!");
+        }
+        return ApiResponse.success(foodService.getFoodDetailById(foodId));
     }
 
     // Lấy chi tiết 1 món ăn (public - không cần đăng nhập)
