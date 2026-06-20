@@ -30,6 +30,12 @@ public class RestaurantResponseDTO {
     @SerializedName("imageUrl")
     private String imageUrl;
 
+    @SerializedName("ratingAverage")
+    private Double ratingAverage;
+
+    @SerializedName("reviewCount")
+    private Integer reviewCount;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
@@ -48,4 +54,8 @@ public class RestaurantResponseDTO {
     public void setMaxPendingOrders(Integer maxPendingOrders) { this.maxPendingOrders = maxPendingOrders; }
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public Double getRatingAverage() { return ratingAverage; }
+    public void setRatingAverage(Double ratingAverage) { this.ratingAverage = ratingAverage; }
+    public Integer getReviewCount() { return reviewCount; }
+    public void setReviewCount(Integer reviewCount) { this.reviewCount = reviewCount; }
 }

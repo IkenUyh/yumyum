@@ -20,6 +20,8 @@ public class RestaurantResponseDTO {
     private Boolean isAcceptingOrders;
     private Integer maxPendingOrders;
     private String imageUrl;
+    private java.math.BigDecimal ratingAverage;
+    private Integer reviewCount;
 
     // Ham tien ich de chuyen tu Entity sang DTO
     public static RestaurantResponseDTO fromEntity(Restaurant restaurant) {
@@ -33,6 +35,8 @@ public class RestaurantResponseDTO {
                 .isAcceptingOrders(restaurant.getIsAcceptingOrders())
                 .maxPendingOrders(restaurant.getMaxPendingOrders())
                 .imageUrl(restaurant.getImageUrl())
+                .ratingAverage(restaurant.getRatingAverage())
+                .reviewCount(restaurant.getReviewCount())
                 .build();
     }
 }

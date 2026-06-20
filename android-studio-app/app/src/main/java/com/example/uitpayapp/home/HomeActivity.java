@@ -1020,11 +1020,13 @@ public class HomeActivity extends AppCompatActivity {
                     List<com.example.uitpayapp.home.home_models.Restaurant> mappedRestaurants = new ArrayList<>();
                     for (com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto : response.body().getData()) {
                         String shortName = dto.getName() != null && dto.getName().length() > 0 ? dto.getName().substring(0, 1) : "A";
+                        double ratingVal = dto.getRatingAverage() != null ? dto.getRatingAverage() : 0.0;
+                        int reviewsVal = dto.getReviewCount() != null ? dto.getReviewCount() : 0;
                         mappedRestaurants.add(new com.example.uitpayapp.home.home_models.Restaurant(
                                 dto.getId(), dto.getName(), shortName, 
                                 android.graphics.Color.parseColor("#E4002B"), "Danh mục", 
                                 new ArrayList<>(), R.drawable.img_food_chicken, 
-                                4.5, 100, 30, dto.getAddress(), dto.getImageUrl()));
+                                ratingVal, reviewsVal, 30, dto.getAddress(), dto.getImageUrl()));
                     }
                     brandAdapter.updateData(mappedRestaurants);
                 }
@@ -1124,7 +1126,6 @@ public class HomeActivity extends AppCompatActivity {
                             new com.example.uitpayapp.network.ApiCallback<String>() {
                                 @Override
                                 public void onSuccess(String data) {
-                                    CartManager.getInstance().addItem(newItem);
                                     runOnUiThread(() -> {
                                         View btnCart = findViewById(R.id.btn_cart);
                                         CartAnimationHelper.animateFlyToCart(HomeActivity.this,

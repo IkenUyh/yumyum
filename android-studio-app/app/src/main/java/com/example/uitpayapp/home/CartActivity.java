@@ -202,13 +202,13 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
 
     private void showEditFoodPopup(CartItem item, int position) {
         com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(this, item.getMenuItem(), item, (selectedItem, quantity, selectedToppings) -> {
-            cartManager.updateQuantitySync(position, quantity, new com.example.uitpayapp.network.ApiCallback<String>() {
+            CartItem updatedItem = new CartItem(item.getDbId(), selectedItem, quantity, new java.util.ArrayList<>(selectedToppings));
+            cartManager.updateItemSync(position, updatedItem, new com.example.uitpayapp.network.ApiCallback<String>() {
                 @Override
                 public void onSuccess(String data) {
                     runOnUiThread(() -> {
-                        CartItem updatedItem = new CartItem(item.getDbId(), selectedItem, quantity, new java.util.ArrayList<>(selectedToppings));
-                        cartManager.updateItem(position, updatedItem);
-                        cartAdapter.notifyDataSetChanged();
+                        cartAdapter = new CartAdapter(cartManager.getCart(), CartActivity.this);
+                        rvCartItems.setAdapter(cartAdapter);
                         updateCartUI();
                         showCustomSnackbar("Cập nhật thành công");
                     });

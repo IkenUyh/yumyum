@@ -141,25 +141,41 @@ public class CategoryTabFragment extends Fragment {
         if (getContext() == null) return;
 
         com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(getContext(), item, null, (selectedItem, quantity, selectedToppings) -> {
-            CartManager.getInstance().addItem(new CartItem(selectedItem, quantity, selectedToppings));
-
-            // Fly-to-cart animation giống Home
-            if (getActivity() != null) {
-                View btnCart = getActivity().findViewById(R.id.btn_cart);
-                if (btnCart != null) {
-                    CartAnimationHelper.animateFlyToCart(getActivity(), sourceImage != null ? sourceImage : getActivity().findViewById(android.R.id.content), btnCart, () -> {
-                        // Update cart badge
-                        if (getActivity() instanceof CategoryActivity) {
-                            TextView tvBadge = getActivity().findViewById(R.id.tv_global_cart_badge);
-                            int count = CartManager.getInstance().getTotalItemCount();
-                            if (count > 0) {
-                                tvBadge.setVisibility(View.VISIBLE);
-                                tvBadge.setText(String.valueOf(count));
+            CartItem newItem = new CartItem(selectedItem, quantity, selectedToppings);
+            CartManager.getInstance().addItemSync(newItem, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String data) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            View btnCart = getActivity().findViewById(R.id.btn_cart);
+                            if (btnCart != null) {
+                                CartAnimationHelper.animateFlyToCart(getActivity(), sourceImage != null ? sourceImage : getActivity().findViewById(android.R.id.content), btnCart, () -> {
+                                    // Update cart badge
+                                    if (getActivity() instanceof CategoryActivity) {
+                                        TextView tvBadge = getActivity().findViewById(R.id.tv_global_cart_badge);
+                                        int count = CartManager.getInstance().getTotalItemCount();
+                                        if (count > 0) {
+                                            tvBadge.setVisibility(View.VISIBLE);
+                                            tvBadge.setText(String.valueOf(count));
+                                        } else {
+                                            tvBadge.setVisibility(View.GONE);
+                                        }
+                                    }
+                                });
                             }
-                        }
-                    });
+                        });
+                    }
                 }
-            }
+
+                @Override
+                public void onError(String errorMessage) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            android.widget.Toast.makeText(getContext(), "Không thể thêm vào giỏ hàng: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                }
+            });
         });
     }
 }

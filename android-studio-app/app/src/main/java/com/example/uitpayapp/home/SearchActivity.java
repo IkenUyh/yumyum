@@ -73,7 +73,7 @@ public class SearchActivity extends AppCompatActivity {
         updateGlobalCartBadge();
     }
 
-    private void updateGlobalCartBadge() {
+    public void updateGlobalCartBadge() {
         TextView tvBadge = findViewById(R.id.tv_global_cart_badge);
         int count = CartManager.getInstance().getTotalItemCount();
         if (count > 0) {
