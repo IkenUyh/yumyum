@@ -13,10 +13,16 @@ import java.util.List;
 
 public class SellerNotificationAdapter extends RecyclerView.Adapter<SellerNotificationAdapter.NotificationViewHolder> {
 
-    private List<SellerNotification> notifications;
+    public interface OnItemClickListener {
+        void onItemClick(int position);
+    }
 
-    public SellerNotificationAdapter(List<SellerNotification> notifications) {
+    private final List<SellerNotification> notifications;
+    private final OnItemClickListener listener;
+
+    public SellerNotificationAdapter(List<SellerNotification> notifications, OnItemClickListener listener) {
         this.notifications = notifications;
+        this.listener = listener;
     }
 
     @NonNull
@@ -41,7 +47,7 @@ public class SellerNotificationAdapter extends RecyclerView.Adapter<SellerNotifi
             holder.rootLayout.setBackgroundColor(Color.parseColor("#FDF2F0"));
         }
 
-        // Set icons based on type
+        // Set icon dựa theo loại thông báo
         switch (notification.getType()) {
             case 1: // Order
                 holder.ivIcon.setImageResource(R.drawable.list_alt_24px);
@@ -52,30 +58,21 @@ public class SellerNotificationAdapter extends RecyclerView.Adapter<SellerNotifi
             case 4: // Review
                 holder.ivIcon.setImageResource(android.R.drawable.btn_star_big_on);
                 break;
-            default:
+            default: // System
                 holder.ivIcon.setImageResource(R.drawable.notifications_24px);
                 break;
         }
 
         holder.itemView.setOnClickListener(v -> {
-            if (!notification.isRead()) {
-                new com.example.uitpayapp.modules.notification.NotificationRepository().markAsRead(Long.parseLong(notification.getId()), new com.example.uitpayapp.network.ApiCallback<String>() {
-                    @Override
-                    public void onSuccess(String result) {
-                        notification.setRead(true);
-                        notifyItemChanged(holder.getAdapterPosition());
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {}
-                });
+            if (listener != null) {
+                listener.onItemClick(holder.getAdapterPosition());
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return notifications.size();
+        return notifications == null ? 0 : notifications.size();
     }
 
     static class NotificationViewHolder extends RecyclerView.ViewHolder {

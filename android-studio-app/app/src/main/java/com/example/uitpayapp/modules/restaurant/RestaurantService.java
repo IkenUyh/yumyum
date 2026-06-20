@@ -44,11 +44,6 @@ public interface RestaurantService {
             @Body RestaurantSettingsDTO dto
     );
 
-    @GET("api/v1/restaurants/{id}")
-    Call<ApiResponse<RestaurantResponseDTO>> getRestaurantById(
-            @Path("id") Long restaurantId
-    );
-
     @PUT("api/v1/restaurants/{id}/info")
     Call<ApiResponse<RestaurantResponseDTO>> updateRestaurantInfo(
             @Path("id") Long restaurantId,
@@ -57,4 +52,11 @@ public interface RestaurantService {
 
     @GET("api/v1/dashboard/merchant")
     Call<ApiResponse<DashboardResponseDTO>> getMerchantDashboard();
+
+    @retrofit2.http.Multipart
+    @POST("api/v1/restaurants/{id}/upload-image")
+    Call<ApiResponse<String>> uploadRestaurantImage(
+            @Path("id") Long restaurantId,
+            @retrofit2.http.Part okhttp3.MultipartBody.Part file
+    );
 }

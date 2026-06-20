@@ -20,19 +20,28 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.uitpayapp.R;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+
 import java.util.ArrayList;
 import java.util.List;
 import com.example.uitpayapp.home.home_models.CartManager;
 import com.example.uitpayapp.home.home_models.CartItem;
 
-public class OrderDetailActivity extends AppCompatActivity implements com.google.android.gms.maps.OnMapReadyCallback {
+public class OrderDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     // 1. Hệ thống điều khiển & Giao diện trượt
     private BottomSheetBehavior<View> bottomSheetBehavior;
     private View mapContainer;
     private View layoutDriverInfo;
     private Toolbar toolbar;
-    private com.google.android.gms.maps.GoogleMap mMap;
+    private GoogleMap mMap;
     private com.example.uitpayapp.modules.order.OrderRepository orderRepository;
     private double merchantLat = 10.8800;
     private double merchantLng = 106.8000;
@@ -86,7 +95,7 @@ public class OrderDetailActivity extends AppCompatActivity implements com.google
         toolbar = findViewById(R.id.toolbar);
         btnMapBack = findViewById(R.id.btnMapBack);
         
-        com.google.android.gms.maps.SupportMapFragment mapFragment = (com.google.android.gms.maps.SupportMapFragment) getSupportFragmentManager()
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapFragment);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
@@ -381,26 +390,26 @@ public class OrderDetailActivity extends AppCompatActivity implements com.google
     }
 
     private void drawMarkers(double mLat, double mLng, double cLat, double cLng) {
-        com.google.android.gms.maps.model.LatLng merchantLocation = new com.google.android.gms.maps.model.LatLng(mLat, mLng);
-        com.google.android.gms.maps.model.LatLng customerLocation = new com.google.android.gms.maps.model.LatLng(cLat, cLng);
+        LatLng merchantLocation = new LatLng(mLat, mLng);
+        LatLng customerLocation = new LatLng(cLat, cLng);
 
-        mMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions().position(merchantLocation).title("Quán"));
-        mMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions().position(customerLocation).title("Khách hàng"));
+        mMap.addMarker(new MarkerOptions().position(merchantLocation).title("Quán"));
+        mMap.addMarker(new MarkerOptions().position(customerLocation).title("Khách hàng"));
 
-        com.google.android.gms.maps.model.LatLngBounds.Builder builder = new com.google.android.gms.maps.model.LatLngBounds.Builder();
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
         builder.include(merchantLocation);
         builder.include(customerLocation);
-        com.google.android.gms.maps.model.LatLngBounds bounds = builder.build();
+        LatLngBounds bounds = builder.build();
 
         mMap.setOnMapLoadedCallback(() -> {
             try {
-                mMap.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 100));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
 
-        com.google.android.gms.maps.model.PolylineOptions polylineOptions = new com.google.android.gms.maps.model.PolylineOptions()
+        PolylineOptions polylineOptions = new PolylineOptions()
                 .add(merchantLocation)
                 .add(customerLocation)
                 .width(8)
@@ -409,7 +418,7 @@ public class OrderDetailActivity extends AppCompatActivity implements com.google
     }
 
     @Override
-    public void onMapReady(@NonNull com.google.android.gms.maps.GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
         if (isMapDataLoaded) {
             updateMapMarkers();

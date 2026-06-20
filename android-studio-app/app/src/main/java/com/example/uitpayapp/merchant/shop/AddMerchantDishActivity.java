@@ -36,10 +36,12 @@ public class AddMerchantDishActivity extends AppCompatActivity {
     private Long categoryId;
     private final List<MerchantMenuCategory> categoriesList = new java.util.ArrayList<>();
     private MerchantMenuViewModel viewModel;
+    private android.net.Uri selectedImageUri;
 
     private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
                 if (uri != null) {
+                    selectedImageUri = uri;
                     if (ivDishImage != null) {
                         ivDishImage.setImageTintList(null);
                         Glide.with(this)
@@ -79,11 +81,23 @@ public class AddMerchantDishActivity extends AppCompatActivity {
             }
         });
 
-        viewModel.getOperationStatus().observe(this, state -> {
+        viewModel.getFoodOperationSuccess().observe(this, state -> {
             if (state != null) {
                 if (state.isSuccess()) {
-                    Toast.makeText(this, state.getData(), Toast.LENGTH_SHORT).show();
-                    finish();
+                    com.example.uitpayapp.modules.food.models.responses.FoodResponse food = state.getData();
+                    if (selectedImageUri != null) {
+                        java.io.File file = getFileFromUri(selectedImageUri);
+                        if (file != null) {
+                            selectedImageUri = null;
+                            viewModel.uploadFoodImage(food.getId(), file);
+                        } else {
+                            Toast.makeText(this, "Đã lưu món ăn thành công, lỗi đọc file ảnh!", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    } else {
+                        Toast.makeText(this, "Đã lưu món ăn thành công!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
                 } else if (state.isError()) {
                     Toast.makeText(this, state.getMessage(), Toast.LENGTH_SHORT).show();
                 }
@@ -185,5 +199,25 @@ public class AddMerchantDishActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private java.io.File getFileFromUri(android.net.Uri uri) {
+        try {
+            java.io.File tempFile = new java.io.File(getCacheDir(), "temp_dish_image.jpg");
+            java.io.InputStream inputStream = getContentResolver().openInputStream(uri);
+            java.io.FileOutputStream outputStream = new java.io.FileOutputStream(tempFile);
+            byte[] buffer = new byte[4096];
+            int read;
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            outputStream.flush();
+            outputStream.close();
+            inputStream.close();
+            return tempFile;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

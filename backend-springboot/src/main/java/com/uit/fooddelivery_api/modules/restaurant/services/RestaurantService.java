@@ -14,6 +14,23 @@ import java.util.List;
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
+    private final com.uit.fooddelivery_api.modules.user.services.CloudinaryService cloudinaryService;
+
+    @jakarta.transaction.Transactional
+    public String updateRestaurantImage(Long restaurantId, org.springframework.web.multipart.MultipartFile file, User merchant) throws java.io.IOException {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy quán ăn!"));
+
+        if (!restaurant.getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền đổi ảnh của nhà hàng khác!");
+        }
+
+        String imageUrl = cloudinaryService.uploadAvatar(file);
+        restaurant.setImageUrl(imageUrl);
+        restaurantRepository.save(restaurant);
+
+        return imageUrl;
+    }
 
     public Restaurant createRestaurant(CreateRestaurantDTO dto, User merchant) {
         // Tao object Restaurant tu DTO va gan chu quan

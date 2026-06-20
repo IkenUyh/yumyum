@@ -138,4 +138,19 @@ public class RestaurantController {
 
         return ApiResponse.success(RestaurantResponseDTO.fromEntity(restaurant));
     }
+
+    // Upload ảnh nhà hàng (chủ quán)
+    @PostMapping(value = "/{id}/upload-image", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<String> uploadRestaurantImage(
+            @PathVariable("id") Long restaurantId,
+            Authentication authentication,
+            @RequestParam("restaurantFile") org.springframework.web.multipart.MultipartFile file) {
+        try {
+            User merchant = (User) authentication.getPrincipal();
+            String imageUrl = restaurantService.updateRestaurantImage(restaurantId, file, merchant);
+            return ApiResponse.success(imageUrl);
+        } catch (Exception e) {
+            throw new RuntimeException("Tải ảnh nhà hàng thất bại: " + e.getMessage());
+        }
+    }
 }

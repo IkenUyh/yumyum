@@ -21,7 +21,12 @@ import com.example.uitpayapp.merchant.marketing.SellerMarketingActivity;
 import com.example.uitpayapp.merchant.notification.SellerNotificationActivity;
 import com.example.uitpayapp.profile.ProfileActivity;
 import com.example.uitpayapp.profile.ProfileWebView;
+import com.example.uitpayapp.modules.statistic.StatisticRepository;
+import com.example.uitpayapp.modules.statistic.models.responses.MerchantDailyStatisticResponse;
+import com.example.uitpayapp.network.ApiCallback;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -45,6 +50,47 @@ public class SellerShopActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateShopHeader();
+        loadDailyStatistics();
+    }
+
+    private void loadDailyStatistics() {
+        SharedPreferences sellerPrefs = getSharedPreferences("SellerPrefs", MODE_PRIVATE);
+        long storeId = sellerPrefs.getLong("current_store_id", -1L);
+        if (storeId == -1L) {
+            tvRevenue.setText("0đ");
+            tvTransactions.setText("0");
+            return;
+        }
+
+        Date date = new Date();
+        SimpleDateFormat apiDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String apiDateStr = apiDateFormat.format(date);
+
+        StatisticRepository statisticRepository = new StatisticRepository();
+        statisticRepository.getMerchantDailyStatistic(storeId, apiDateStr, new ApiCallback<MerchantDailyStatisticResponse>() {
+            @Override
+            public void onSuccess(MerchantDailyStatisticResponse data) {
+                if (data != null) {
+                    java.math.BigDecimal revenue = data.getTotalRevenue();
+                    if (revenue == null) {
+                        revenue = java.math.BigDecimal.ZERO;
+                    }
+                    DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("vi", "VN"));
+                    DecimalFormat currencyFormatter = new DecimalFormat("#,###đ", symbols);
+                    tvRevenue.setText(currencyFormatter.format(revenue));
+
+                    Long transactions = data.getTransactionCount();
+                    tvTransactions.setText(transactions != null ? String.valueOf(transactions) : "0");
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                tvRevenue.setText("0đ");
+                tvTransactions.setText("0");
+                Toast.makeText(SellerShopActivity.this, "Lỗi tải thống kê: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void initViews() {
@@ -75,8 +121,8 @@ public class SellerShopActivity extends AppCompatActivity {
         // Cập nhật thông tin quán từ Prefs
         updateShopHeader();
         
-        tvRevenue.setText("2.450.000đ");
-        tvTransactions.setText("24");
+        tvRevenue.setText("0đ");
+        tvTransactions.setText("0");
 
         if (btnReview != null) {
             btnReview.setOnClickListener(v -> {
