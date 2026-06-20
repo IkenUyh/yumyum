@@ -67,10 +67,8 @@ public class FavoriteRepository {
             ApiResponse<T> apiResponse = response.body();
             if (apiResponse.getData() != null) {
                 callback.onSuccess(apiResponse.getData());
-            } else if (apiResponse.getMessage() != null) {
-                callback.onSuccess((T) apiResponse.getMessage());
             } else {
-                callback.onError("Không nhận được phản hồi dữ liệu hợp lệ.");
+                callback.onError(apiResponse.getMessage() != null ? apiResponse.getMessage() : "Thành công nhưng không có dữ liệu trả về.");
             }
         } else {
             callback.onError("Lỗi kết nối hệ thống: " + response.code());
