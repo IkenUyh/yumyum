@@ -86,7 +86,7 @@ public class HomeActivity extends AppCompatActivity {
     private int nextBannerAt = 5; // Insert banner after this many deal items
     private final Random bannerRandom = new Random();
 
-    private final String[] RANDOM_SUBTITLES = {"Khám phá ngay", "Gợi ý cho bạn", "Đừng bỏ lỡ"};
+    private final String[] RANDOM_SUBTITLES = { "Khám phá ngay", "Gợi ý cho bạn", "Đừng bỏ lỡ" };
 
     private String selectedCategory = null;
     private String currentSearchQuery = "";
@@ -97,19 +97,18 @@ public class HomeActivity extends AppCompatActivity {
     private ImageSliderAdapter bannerAdapter;
     private List<String> loadedBannerUrls = new ArrayList<>();
     private String currentDeliveryAddress = "";
-    
+
     private android.os.Handler searchHintHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     private Runnable searchHintRunnable;
     private final String[] SEARCH_HINTS = {
-            "Hôm nay ăn gì?", 
-            "Thèm Trà Sữa?", 
-            "Bún Bò nóng hổi", 
-            "Ăn vặt không?", 
+            "Hôm nay ăn gì?",
+            "Thèm Trà Sữa?",
+            "Bún Bò nóng hổi",
+            "Ăn vặt không?",
             "Pizza béo ngậy"
     };
 
     private android.os.CountDownTimer flashSaleTimer;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -170,30 +169,34 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void loadInitialAddress() {
-        com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager
+                .getInstance(this);
         if (sessionManager.getAuthToken() != null && !sessionManager.getAuthToken().isEmpty()) {
             String savedAddress = sessionManager.getDeliveryAddressText();
             if (savedAddress != null && !savedAddress.isEmpty()) {
                 updateAddressUI(savedAddress);
             } else {
-                new com.example.uitpayapp.modules.user.AddressRepository().getDefaultAddress(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>() {
-                    @Override
-                    public void onSuccess(com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO result) {
-                        if (result != null) {
-                            String addr = result.getDetailedAddress();
-                            if (addr == null || addr.isEmpty()) addr = "Hiện chưa có địa chỉ";
-                            sessionManager.saveDeliveryAddress(result.getId(), addr);
-                            updateAddressUI(addr);
-                        } else {
-                            updateAddressUI("Hiện chưa có địa chỉ");
-                        }
-                    }
+                new com.example.uitpayapp.modules.user.AddressRepository().getDefaultAddress(
+                        new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>() {
+                            @Override
+                            public void onSuccess(
+                                    com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO result) {
+                                if (result != null) {
+                                    String addr = result.getDetailedAddress();
+                                    if (addr == null || addr.isEmpty())
+                                        addr = "Hiện chưa có địa chỉ";
+                                    sessionManager.saveDeliveryAddress(result.getId(), addr);
+                                    updateAddressUI(addr);
+                                } else {
+                                    updateAddressUI("Hiện chưa có địa chỉ");
+                                }
+                            }
 
-                    @Override
-                    public void onError(String errorMessage) {
-                        updateAddressUI("Hiện chưa có địa chỉ");
-                    }
-                });
+                            @Override
+                            public void onError(String errorMessage) {
+                                updateAddressUI("Hiện chưa có địa chỉ");
+                            }
+                        });
             }
         } else {
             updateAddressUI("Vui lòng đăng nhập");
@@ -202,32 +205,46 @@ public class HomeActivity extends AppCompatActivity {
 
     private void updateAddressUI(String address) {
         currentDeliveryAddress = address;
-        if (tvDeliveryAddress != null) tvDeliveryAddress.setText(address);
+        if (tvDeliveryAddress != null)
+            tvDeliveryAddress.setText(address);
         TextView tvDummy = findViewById(R.id.tv_delivery_address_dummy);
-        if (tvDummy != null) tvDummy.setText(address);
-        
+        if (tvDummy != null)
+            tvDummy.setText(address);
+
         TextView tvLabel = findViewById(R.id.tv_delivery_label);
         TextView tvLabelDummy = findViewById(R.id.tv_delivery_label_dummy);
         TextView tvArrow = findViewById(R.id.tv_delivery_arrow);
         View addressBar = findViewById(R.id.layout_address_bar);
         View addressBarDummy = findViewById(R.id.layout_address_bar_dummy);
-        
+
         if ("Vui lòng đăng nhập".equals(address)) {
-            if (tvLabel != null) tvLabel.setVisibility(View.GONE);
-            if (tvLabelDummy != null) tvLabelDummy.setVisibility(View.GONE);
-            if (tvArrow != null) tvArrow.setVisibility(View.GONE);
-            if (addressBar != null) addressBar.setClickable(false);
-            if (addressBarDummy != null) addressBarDummy.setClickable(false);
-            if (tvDeliveryAddress != null) tvDeliveryAddress.setText("Vui lòng đăng nhập để chọn địa chỉ");
-            if (tvDummy != null) tvDummy.setText("Vui lòng đăng nhập để chọn địa chỉ");
+            if (tvLabel != null)
+                tvLabel.setVisibility(View.GONE);
+            if (tvLabelDummy != null)
+                tvLabelDummy.setVisibility(View.GONE);
+            if (tvArrow != null)
+                tvArrow.setVisibility(View.GONE);
+            if (addressBar != null)
+                addressBar.setClickable(false);
+            if (addressBarDummy != null)
+                addressBarDummy.setClickable(false);
+            if (tvDeliveryAddress != null)
+                tvDeliveryAddress.setText("Vui lòng đăng nhập để chọn địa chỉ");
+            if (tvDummy != null)
+                tvDummy.setText("Vui lòng đăng nhập để chọn địa chỉ");
         } else {
-            if (tvLabel != null) tvLabel.setVisibility(View.VISIBLE);
-            if (tvLabelDummy != null) tvLabelDummy.setVisibility(View.VISIBLE);
-            if (tvArrow != null) tvArrow.setVisibility(View.VISIBLE);
-            if (addressBar != null) addressBar.setClickable(true);
-            if (addressBarDummy != null) addressBarDummy.setClickable(true);
+            if (tvLabel != null)
+                tvLabel.setVisibility(View.VISIBLE);
+            if (tvLabelDummy != null)
+                tvLabelDummy.setVisibility(View.VISIBLE);
+            if (tvArrow != null)
+                tvArrow.setVisibility(View.VISIBLE);
+            if (addressBar != null)
+                addressBar.setClickable(true);
+            if (addressBarDummy != null)
+                addressBarDummy.setClickable(true);
         }
-        
+
         viewModel.setAddressAndRefresh(address);
     }
 
@@ -245,7 +262,6 @@ public class HomeActivity extends AppCompatActivity {
             View t2Error = findViewById(R.id.layout_topic2_error);
             View t2Section = findViewById(R.id.random_topic_section_2);
 
-            
             View catLoading = findViewById(R.id.layout_categories_loading);
             View catError = findViewById(R.id.layout_categories_error);
             View catContent = findViewById(R.id.layout_categories_content);
@@ -278,28 +294,38 @@ public class HomeActivity extends AppCompatActivity {
                     catError.setVisibility(View.GONE);
                 if (catContent != null)
                     catContent.setVisibility(View.GONE);
-                    
+
                 View bannerLoading = findViewById(R.id.layout_banner_loading);
                 View bannerError = findViewById(R.id.layout_banner_error);
                 View bannerContent = findViewById(R.id.imgAdvertisement);
-                if (bannerLoading != null) bannerLoading.setVisibility(View.VISIBLE);
-                if (bannerError != null) bannerError.setVisibility(View.GONE);
-                if (bannerContent != null) bannerContent.setVisibility(View.GONE);
+                if (bannerLoading != null)
+                    bannerLoading.setVisibility(View.VISIBLE);
+                if (bannerError != null)
+                    bannerError.setVisibility(View.GONE);
+                if (bannerContent != null)
+                    bannerContent.setVisibility(View.GONE);
 
             } else if (state.isSuccess()) {
-                if (fsLoading != null) fsLoading.setVisibility(View.GONE);
-                if (fsError != null) fsError.setVisibility(View.GONE);
-                if (fsSection != null) fsSection.setVisibility(View.VISIBLE);
+                if (fsLoading != null)
+                    fsLoading.setVisibility(View.GONE);
+                if (fsError != null)
+                    fsError.setVisibility(View.GONE);
+                if (fsSection != null)
+                    fsSection.setVisibility(View.VISIBLE);
 
-                if (catLoading != null) catLoading.setVisibility(View.GONE);
-                if (catError != null) catError.setVisibility(View.GONE);
-                
+                if (catLoading != null)
+                    catLoading.setVisibility(View.GONE);
+                if (catError != null)
+                    catError.setVisibility(View.GONE);
+
                 View bannerLoading = findViewById(R.id.layout_banner_loading);
                 View bannerError = findViewById(R.id.layout_banner_error);
                 View bannerContent = findViewById(R.id.imgAdvertisement);
-                if (bannerLoading != null) bannerLoading.setVisibility(View.GONE);
-                if (bannerError != null) bannerError.setVisibility(View.GONE);
-                
+                if (bannerLoading != null)
+                    bannerLoading.setVisibility(View.GONE);
+                if (bannerError != null)
+                    bannerError.setVisibility(View.GONE);
+
                 HomeCoreResponse data = state.getData();
                 if (data != null) {
                     List<FoodCategory> serverCats = data.getCategories();
@@ -308,7 +334,6 @@ public class HomeActivity extends AppCompatActivity {
                         catContent.setVisibility(View.VISIBLE);
                     if (categoryAdapter != null)
                         categoryAdapter.updateData(displayCats);
-
 
                     if (data.getFlashSales() != null && !data.getFlashSales().isEmpty()) {
                         if (fsError != null)
@@ -338,7 +363,7 @@ public class HomeActivity extends AppCompatActivity {
                         if (t2Section != null)
                             t2Section.setVisibility(View.VISIBLE);
                         updateTopicUI(findViewById(R.id.random_topic_section_2), data.getTopics().get(1));
-                        
+
                         applyRandomSubtitles();
                     } else {
                         if (t1Section != null)
@@ -359,22 +384,25 @@ public class HomeActivity extends AppCompatActivity {
                                 tvT2Error.setText("Chưa có dữ liệu");
                         }
                     }
-                    
+
                     if (data.getBanners() != null && !data.getBanners().isEmpty()) {
-                        if (bannerError != null) bannerError.setVisibility(View.GONE);
-                        if (bannerContent != null) bannerContent.setVisibility(View.VISIBLE);
+                        if (bannerError != null)
+                            bannerError.setVisibility(View.GONE);
+                        if (bannerContent != null)
+                            bannerContent.setVisibility(View.VISIBLE);
                         List<String> bannerUrls = new ArrayList<>();
                         for (com.example.uitpayapp.home.network.Banner b : data.getBanners()) {
                             bannerUrls.add(b.getImageUrl());
                         }
                         loadedBannerUrls.clear();
                         loadedBannerUrls.addAll(bannerUrls);
-                        
+
                         if (bannerAdapter != null) {
                             bannerAdapter.updateData(bannerUrls);
                         }
                     } else {
-                        if (bannerContent != null) bannerContent.setVisibility(View.GONE);
+                        if (bannerContent != null)
+                            bannerContent.setVisibility(View.GONE);
                         if (bannerError != null) {
                             bannerError.setVisibility(View.VISIBLE);
                             android.widget.TextView tvBannerError = findViewById(R.id.tv_banner_error);
@@ -427,12 +455,14 @@ public class HomeActivity extends AppCompatActivity {
                     if (tvT2Error != null)
                         tvT2Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
                 }
-                
+
                 View bannerLoading = findViewById(R.id.layout_banner_loading);
                 View bannerError = findViewById(R.id.layout_banner_error);
                 View bannerContent = findViewById(R.id.imgAdvertisement);
-                if (bannerLoading != null) bannerLoading.setVisibility(View.GONE);
-                if (bannerContent != null) bannerContent.setVisibility(View.GONE);
+                if (bannerLoading != null)
+                    bannerLoading.setVisibility(View.GONE);
+                if (bannerContent != null)
+                    bannerContent.setVisibility(View.GONE);
                 if (bannerError != null) {
                     bannerError.setVisibility(View.VISIBLE);
                     android.widget.TextView tvBannerError = findViewById(R.id.tv_banner_error);
@@ -452,63 +482,87 @@ public class HomeActivity extends AppCompatActivity {
             View t2Section = findViewById(R.id.random_topic_section_2);
 
             if (state.isLoading()) {
-                if (t1Loading != null) t1Loading.setVisibility(View.VISIBLE);
-                if (t1Error != null) t1Error.setVisibility(View.GONE);
-                if (t1Section != null) t1Section.setVisibility(View.GONE);
+                if (t1Loading != null)
+                    t1Loading.setVisibility(View.VISIBLE);
+                if (t1Error != null)
+                    t1Error.setVisibility(View.GONE);
+                if (t1Section != null)
+                    t1Section.setVisibility(View.GONE);
 
-                if (t2Loading != null) t2Loading.setVisibility(View.VISIBLE);
-                if (t2Error != null) t2Error.setVisibility(View.GONE);
-                if (t2Section != null) t2Section.setVisibility(View.GONE);
+                if (t2Loading != null)
+                    t2Loading.setVisibility(View.VISIBLE);
+                if (t2Error != null)
+                    t2Error.setVisibility(View.GONE);
+                if (t2Section != null)
+                    t2Section.setVisibility(View.GONE);
             } else if (state.isSuccess()) {
-                if (t1Loading != null) t1Loading.setVisibility(View.GONE);
-                if (t2Loading != null) t2Loading.setVisibility(View.GONE);
-                
+                if (t1Loading != null)
+                    t1Loading.setVisibility(View.GONE);
+                if (t2Loading != null)
+                    t2Loading.setVisibility(View.GONE);
+
                 java.util.List<com.example.uitpayapp.home.network.TopicResponse> data = state.getData();
                 if (data != null) {
                     if (data.size() >= 1) {
-                        if (t1Error != null) t1Error.setVisibility(View.GONE);
-                        if (t1Section != null) t1Section.setVisibility(View.VISIBLE);
+                        if (t1Error != null)
+                            t1Error.setVisibility(View.GONE);
+                        if (t1Section != null)
+                            t1Section.setVisibility(View.VISIBLE);
                         com.example.uitpayapp.home.network.TopicResponse t1 = data.get(0);
-                        setupTopicSection(t1Section, t1.getTitle(), t1.getSubtitle(), t1.getCategoryId(), t1.getItems());
+                        setupTopicSection(t1Section, t1.getTitle(), t1.getSubtitle(), t1.getCategoryId(),
+                                t1.getItems());
                     } else {
-                        if (t1Section != null) t1Section.setVisibility(View.GONE);
+                        if (t1Section != null)
+                            t1Section.setVisibility(View.GONE);
                         if (t1Error != null) {
                             t1Error.setVisibility(View.VISIBLE);
                             android.widget.TextView tvTopic1Error = findViewById(R.id.tv_topic1_error);
-                            if (tvTopic1Error != null) tvTopic1Error.setText("Chưa có dữ liệu");
+                            if (tvTopic1Error != null)
+                                tvTopic1Error.setText("Chưa có dữ liệu");
                         }
                     }
 
                     if (data.size() >= 2) {
-                        if (t2Error != null) t2Error.setVisibility(View.GONE);
-                        if (t2Section != null) t2Section.setVisibility(View.VISIBLE);
+                        if (t2Error != null)
+                            t2Error.setVisibility(View.GONE);
+                        if (t2Section != null)
+                            t2Section.setVisibility(View.VISIBLE);
                         com.example.uitpayapp.home.network.TopicResponse t2 = data.get(1);
-                        setupTopicSection(t2Section, t2.getTitle(), t2.getSubtitle(), t2.getCategoryId(), t2.getItems());
+                        setupTopicSection(t2Section, t2.getTitle(), t2.getSubtitle(), t2.getCategoryId(),
+                                t2.getItems());
                     } else {
-                        if (t2Section != null) t2Section.setVisibility(View.GONE);
+                        if (t2Section != null)
+                            t2Section.setVisibility(View.GONE);
                         if (t2Error != null) {
                             t2Error.setVisibility(View.VISIBLE);
                             android.widget.TextView tvTopic2Error = findViewById(R.id.tv_topic2_error);
-                            if (tvTopic2Error != null) tvTopic2Error.setText("Chưa có dữ liệu");
+                            if (tvTopic2Error != null)
+                                tvTopic2Error.setText("Chưa có dữ liệu");
                         }
                     }
                     applyRandomSubtitles();
                 }
             } else if (state.isError() || state.isEmpty()) {
-                if (t1Loading != null) t1Loading.setVisibility(View.GONE);
-                if (t1Section != null) t1Section.setVisibility(View.GONE);
+                if (t1Loading != null)
+                    t1Loading.setVisibility(View.GONE);
+                if (t1Section != null)
+                    t1Section.setVisibility(View.GONE);
                 if (t1Error != null) {
                     t1Error.setVisibility(View.VISIBLE);
                     android.widget.TextView tvTopic1Error = findViewById(R.id.tv_topic1_error);
-                    if (tvTopic1Error != null) tvTopic1Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
+                    if (tvTopic1Error != null)
+                        tvTopic1Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
                 }
 
-                if (t2Loading != null) t2Loading.setVisibility(View.GONE);
-                if (t2Section != null) t2Section.setVisibility(View.GONE);
+                if (t2Loading != null)
+                    t2Loading.setVisibility(View.GONE);
+                if (t2Section != null)
+                    t2Section.setVisibility(View.GONE);
                 if (t2Error != null) {
                     t2Error.setVisibility(View.VISIBLE);
                     android.widget.TextView tvTopic2Error = findViewById(R.id.tv_topic2_error);
-                    if (tvTopic2Error != null) tvTopic2Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
+                    if (tvTopic2Error != null)
+                        tvTopic2Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
                 }
             }
         });
@@ -643,28 +697,37 @@ public class HomeActivity extends AppCompatActivity {
 
             iv.clearAnimation();
             String imageUrl = item.getImageUrl();
-            android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
-            
+            android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(
+                    android.graphics.Color.parseColor("#E0E0E0"));
+
             if (imageUrl != null && !imageUrl.isEmpty()) {
-                android.view.animation.AlphaAnimation blinkAnimation = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
+                android.view.animation.AlphaAnimation blinkAnimation = new android.view.animation.AlphaAnimation(0.5f,
+                        1.0f);
                 blinkAnimation.setDuration(500);
                 blinkAnimation.setRepeatMode(android.view.animation.Animation.REVERSE);
                 blinkAnimation.setRepeatCount(android.view.animation.Animation.INFINITE);
                 iv.startAnimation(blinkAnimation);
 
-                com.bumptech.glide.request.RequestOptions options = new com.bumptech.glide.request.RequestOptions().placeholder(grayPlaceholder);
+                com.bumptech.glide.request.RequestOptions options = new com.bumptech.glide.request.RequestOptions()
+                        .placeholder(grayPlaceholder);
                 com.bumptech.glide.Glide.with(iv.getContext())
                         .load(imageUrl)
                         .apply(options)
                         .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
                             @Override
-                            public boolean onLoadFailed(@androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                            public boolean onLoadFailed(
+                                    @androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e,
+                                    Object model,
+                                    com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target,
+                                    boolean isFirstResource) {
                                 iv.clearAnimation();
                                 return false;
                             }
 
                             @Override
-                            public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                            public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model,
+                                    com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target,
+                                    com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
                                 iv.clearAnimation();
                                 return false;
                             }
@@ -697,7 +760,7 @@ public class HomeActivity extends AppCompatActivity {
                 showFoodItemDetailPopup(discountedItem, iv);
             });
         }
-        
+
         startFlashSaleTimer();
     }
 
@@ -706,16 +769,17 @@ public class HomeActivity extends AppCompatActivity {
         TextView tvMinutes = findViewById(R.id.tv_countdown_minutes);
         TextView tvSeconds = findViewById(R.id.tv_countdown_seconds);
 
-        if (tvHours == null || tvMinutes == null || tvSeconds == null) return;
+        if (tvHours == null || tvMinutes == null || tvSeconds == null)
+            return;
 
         java.util.Calendar calendar = java.util.Calendar.getInstance();
         long now = calendar.getTimeInMillis();
-        
+
         calendar.set(java.util.Calendar.MINUTE, 0);
         calendar.set(java.util.Calendar.SECOND, 0);
         calendar.set(java.util.Calendar.MILLISECOND, 0);
         calendar.add(java.util.Calendar.HOUR_OF_DAY, 1);
-        
+
         long nextHour = calendar.getTimeInMillis();
         long timeLeft = nextHour - now;
 
@@ -786,7 +850,7 @@ public class HomeActivity extends AppCompatActivity {
     private void applyRandomSubtitles() {
         List<String> subs = new ArrayList<>(Arrays.asList(RANDOM_SUBTITLES));
         java.util.Collections.shuffle(subs);
-        
+
         View t1 = findViewById(R.id.random_topic_section_1);
         if (t1 != null) {
             TextView tvSub1 = t1.findViewById(R.id.tv_topic_subtitle);
@@ -795,7 +859,7 @@ public class HomeActivity extends AppCompatActivity {
                 tvSub1.setVisibility(View.VISIBLE);
             }
         }
-        
+
         View t2 = findViewById(R.id.random_topic_section_2);
         if (t2 != null) {
             TextView tvSub2 = t2.findViewById(R.id.tv_topic_subtitle);
@@ -932,33 +996,38 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void showAddressSelection() {
-        com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager
+                .getInstance(this);
         if (sessionManager.getAuthToken() == null || sessionManager.getAuthToken().isEmpty()) {
-            android.widget.Toast.makeText(this, "Vui lòng đăng nhập để chọn địa chỉ", android.widget.Toast.LENGTH_SHORT).show();
+            android.widget.Toast.makeText(this, "Vui lòng đăng nhập để chọn địa chỉ", android.widget.Toast.LENGTH_SHORT)
+                    .show();
             // Optional: Chuyển sang màn đăng nhập
             return;
         }
 
-        new com.example.uitpayapp.modules.user.AddressRepository().getMyAddresses(new com.example.uitpayapp.network.ApiCallback<java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>>() {
-            @Override
-            public void onSuccess(java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO> result) {
-                Long currentId = sessionManager.getDeliveryAddressId();
-                com.example.uitpayapp.utils.AddressBottomSheetHelper.showAddressBottomSheet(
-                        HomeActivity.this,
-                        result,
-                        currentId,
-                        selectedAddress -> {
-                            sessionManager.saveDeliveryAddress(selectedAddress.getId(), selectedAddress.getDetailedAddress());
-                            updateAddressUI(selectedAddress.getDetailedAddress());
-                        }
-                );
-            }
+        new com.example.uitpayapp.modules.user.AddressRepository().getMyAddresses(
+                new com.example.uitpayapp.network.ApiCallback<java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>>() {
+                    @Override
+                    public void onSuccess(
+                            java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO> result) {
+                        Long currentId = sessionManager.getDeliveryAddressId();
+                        com.example.uitpayapp.utils.AddressBottomSheetHelper.showAddressBottomSheet(
+                                HomeActivity.this,
+                                result,
+                                currentId,
+                                selectedAddress -> {
+                                    sessionManager.saveDeliveryAddress(selectedAddress.getId(),
+                                            selectedAddress.getDetailedAddress());
+                                    updateAddressUI(selectedAddress.getDetailedAddress());
+                                });
+                    }
 
-            @Override
-            public void onError(String errorMessage) {
-                android.widget.Toast.makeText(HomeActivity.this, errorMessage, android.widget.Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onError(String errorMessage) {
+                        android.widget.Toast
+                                .makeText(HomeActivity.this, errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void setupSearch() {
@@ -967,25 +1036,27 @@ public class HomeActivity extends AppCompatActivity {
         if (etSearch != null && searchContainer != null) {
             etSearch.setOnClickListener(v -> {
                 Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
-                androidx.core.app.ActivityOptionsCompat options = androidx.core.app.ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        HomeActivity.this,
-                        searchContainer,
-                        "search_bar_transition");
+                androidx.core.app.ActivityOptionsCompat options = androidx.core.app.ActivityOptionsCompat
+                        .makeSceneTransitionAnimation(
+                                HomeActivity.this,
+                                searchContainer,
+                                "search_bar_transition");
                 startActivity(intent, options.toBundle());
             });
-            
+
             searchHintRunnable = new Runnable() {
                 int hintIndex = 0;
+
                 @Override
                 public void run() {
                     hintIndex = (hintIndex + 1) % SEARCH_HINTS.length;
                     String nextHint = SEARCH_HINTS[hintIndex];
-                    
+
                     etSearch.animate().alpha(0.3f).setDuration(300).withEndAction(() -> {
                         etSearch.setHint(nextHint);
                         etSearch.animate().alpha(1f).setDuration(300).start();
                     }).start();
-                    
+
                     searchHintHandler.postDelayed(this, 5000);
                 }
             };
@@ -1069,7 +1140,6 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-
     private void setupBrands() {
         View sectionView = findViewById(R.id.topic_brand_section);
         if (sectionView == null)
@@ -1092,31 +1162,39 @@ public class HomeActivity extends AppCompatActivity {
         });
         rvStores.setAdapter(brandAdapter);
 
-        com.example.uitpayapp.network.RetrofitClient.getRestaurantService().getAllRestaurants().enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>>() {
-            @Override
-            public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    List<com.example.uitpayapp.home.home_models.Restaurant> mappedRestaurants = new ArrayList<>();
-                    for (com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto : response.body().getData()) {
-                        String shortName = dto.getName() != null && dto.getName().length() > 0 ? dto.getName().substring(0, 1) : "A";
-                        double ratingVal = dto.getRatingAverage() != null ? dto.getRatingAverage() : 0.0;
-                        int reviewsVal = dto.getReviewCount() != null ? dto.getReviewCount() : 0;
-                        mappedRestaurants.add(new com.example.uitpayapp.home.home_models.Restaurant(
-                                dto.getId(), dto.getName(), shortName, 
-                                android.graphics.Color.parseColor("#E4002B"), "Danh mục", 
-                                new ArrayList<>(), R.drawable.ic_food, 
-                                ratingVal, reviewsVal, 30, dto.getAddress(), dto.getImageUrl()));
+        com.example.uitpayapp.network.RetrofitClient.getRestaurantService().getAllRestaurants().enqueue(
+                new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>>() {
+                    @Override
+                    public void onResponse(
+                            retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call,
+                            retrofit2.Response<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                            List<com.example.uitpayapp.home.home_models.Restaurant> mappedRestaurants = new ArrayList<>();
+                            for (com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto : response
+                                    .body().getData()) {
+                                String shortName = dto.getName() != null && dto.getName().length() > 0
+                                        ? dto.getName().substring(0, 1)
+                                        : "A";
+                                double ratingVal = dto.getRatingAverage() != null ? dto.getRatingAverage() : 0.0;
+                                int reviewsVal = dto.getReviewCount() != null ? dto.getReviewCount() : 0;
+                                mappedRestaurants.add(new com.example.uitpayapp.home.home_models.Restaurant(
+                                        dto.getId(), dto.getName(), shortName,
+                                        android.graphics.Color.parseColor("#E4002B"), "Danh mục",
+                                        new ArrayList<>(), R.drawable.ic_food,
+                                        ratingVal, reviewsVal, 30, dto.getAddress(), dto.getImageUrl()));
+                            }
+                            brandAdapter.updateData(mappedRestaurants);
+                        }
                     }
-                    brandAdapter.updateData(mappedRestaurants);
-                }
-            }
 
-            @Override
-            public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call, Throwable t) {
-                // Fallback to mock data on error
-                brandAdapter.updateData(new ArrayList<>());
-            }
-        });
+                    @Override
+                    public void onFailure(
+                            retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call,
+                            Throwable t) {
+                        // Fallback to mock data on error
+                        brandAdapter.updateData(new ArrayList<>());
+                    }
+                });
 
         tvSeeMore.setOnClickListener(v -> {
             Intent intent = new Intent(this, AllBrandsActivity.class);
@@ -1124,8 +1202,8 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-
-    private void setupTopicSection(View sectionView, String title, String subtitle, Long categoryId, List<FoodMenuItem> foods) {
+    private void setupTopicSection(View sectionView, String title, String subtitle, Long categoryId,
+            List<FoodMenuItem> foods) {
         TextView tvTitle = sectionView.findViewById(R.id.tv_topic_title);
         TextView tvSubtitle = sectionView.findViewById(R.id.tv_topic_subtitle);
         TextView tvSeeMore = sectionView.findViewById(R.id.tv_topic_see_more);
@@ -1135,14 +1213,16 @@ public class HomeActivity extends AppCompatActivity {
         tvSubtitle.setText(subtitle);
         tvSubtitle.setVisibility(View.GONE); // Hide subtitle as requested
 
-        rvStores.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false));
+        rvStores.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this,
+                androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false));
         TopicStoreAdapter adapter = new TopicStoreAdapter(foods, (item, holder) -> {
             showFoodItemDetailPopup(item, holder.ivImage);
         });
         rvStores.setAdapter(adapter);
 
         tvSeeMore.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.home.CategoryActivity.class);
+            android.content.Intent intent = new android.content.Intent(this,
+                    com.example.uitpayapp.home.CategoryActivity.class);
             intent.putExtra(com.example.uitpayapp.home.CategoryActivity.EXTRA_SELECTED_CATEGORY, title);
             intent.putExtra(com.example.uitpayapp.home.CategoryActivity.EXTRA_SELECTED_CATEGORY_ID, categoryId);
             startActivity(intent);
@@ -1392,7 +1472,6 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-
     private List<FoodCategory> getStaticCategories(List<FoodCategory> serverCategories) {
         List<FoodCategory> list = new ArrayList<>();
         list.add(new FoodCategory("Cơm", R.drawable.ic_cat_com, 0));
@@ -1409,10 +1488,13 @@ public class HomeActivity extends AppCompatActivity {
         if (serverCategories != null) {
             for (FoodCategory staticCat : list) {
                 String matchStr = staticCat.getName().toLowerCase();
-                if (matchStr.equals("bún phở")) matchStr = "bún";
-                if (matchStr.equals("cà phê")) matchStr = "phê";
-                if (matchStr.equals("đồ nướng")) matchStr = "nướng";
-                
+                if (matchStr.equals("bún phở"))
+                    matchStr = "bún";
+                if (matchStr.equals("cà phê"))
+                    matchStr = "phê";
+                if (matchStr.equals("đồ nướng"))
+                    matchStr = "nướng";
+
                 for (FoodCategory serverCat : serverCategories) {
                     if (serverCat.getName() != null) {
                         if (serverCat.getName().toLowerCase().contains(matchStr)) {

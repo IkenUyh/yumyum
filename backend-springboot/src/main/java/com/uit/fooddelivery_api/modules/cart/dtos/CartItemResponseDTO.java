@@ -25,7 +25,18 @@ public class CartItemResponseDTO {
     private BigDecimal itemTotal;
 
     public static CartItemResponseDTO fromEntity(CartItem cartItem) {
+        return fromEntity(cartItem, null);
+    }
+
+    public static CartItemResponseDTO fromEntity(CartItem cartItem, com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository) {
         BigDecimal basePrice = cartItem.getFood().getPrice();
+        if (flashSaleItemRepository != null) {
+            java.util.Optional<com.uit.fooddelivery_api.modules.flashsale.entities.FlashSaleItem> flashSaleOpt =
+                    flashSaleItemRepository.findActiveFlashSaleItemByFoodId(cartItem.getFood().getId(), java.time.LocalDateTime.now());
+            if (flashSaleOpt.isPresent()) {
+                basePrice = flashSaleOpt.get().getSalePrice();
+            }
+        }
         Integer qty = cartItem.getQuantity();
         BigDecimal optionsTotal = BigDecimal.ZERO;
         List<Map<String, Object>> parsedOptions = null;
@@ -34,7 +45,9 @@ public class CartItemResponseDTO {
         if (cartItem.getSelectedOptions() != null && !cartItem.getSelectedOptions().isEmpty()) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
-                parsedOptions = mapper.readValue(cartItem.getSelectedOptions(), new TypeReference<List<Map<String, Object>>>() {});
+                parsedOptions = mapper.readValue(cartItem.getSelectedOptions(),
+                        new TypeReference<List<Map<String, Object>>>() {
+                        });
 
                 // Cộng tiền topping vào
                 for (Map<String, Object> opt : parsedOptions) {
