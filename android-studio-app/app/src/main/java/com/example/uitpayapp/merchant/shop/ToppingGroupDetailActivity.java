@@ -24,6 +24,7 @@ public class ToppingGroupDetailActivity extends AppCompatActivity {
     private RecyclerView rvToppings;
     private MerchantMenuAdapter adapter;
     private String groupName;
+    private Long groupId;
     private List<MerchantMenuItem> toppings;
 
     @Override
@@ -31,6 +32,7 @@ public class ToppingGroupDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         setContentView(R.layout.activity_topping_group_detail);
+        groupId = getIntent().getLongExtra("group_id", -1L);
         groupName = getIntent().getStringExtra("group_name");
         toppings = (List<MerchantMenuItem>) getIntent().getSerializableExtra("toppings");
 
@@ -48,6 +50,7 @@ public class ToppingGroupDetailActivity extends AppCompatActivity {
             intent.putExtra("is_edit_mode", true);
             intent.putExtra("is_topping_group", true);
             intent.putExtra("category_name", groupName);
+            intent.putExtra("category_id", groupId);
             startActivity(intent);
         });
 

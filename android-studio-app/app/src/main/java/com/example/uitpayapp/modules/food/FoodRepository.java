@@ -72,4 +72,28 @@ public class FoodRepository {
     public void getFoodOptions(Long foodId, ApiCallback<List<OptionGroupResponse>> callback) {
         handleCall(foodService.getFoodOptions(foodId), callback);
     }
+
+    public void getRestaurantMenu(Long restaurantId, ApiCallback<List<FoodResponse>> callback) {
+        handleCall(foodService.getRestaurantMenu(restaurantId), callback);
+    }
+
+    public void updateOptionGroup(Long groupId, CreateOptionGroupRequest request, ApiCallback<OptionGroupResponse> callback) {
+        handleCall(foodService.updateOptionGroup(groupId, request), callback);
+    }
+
+    public void addOptionItem(Long groupId, com.example.uitpayapp.modules.food.models.requests.CreateOptionItemRequest request, ApiCallback<com.example.uitpayapp.modules.food.models.responses.OptionItemResponse> callback) {
+        handleCall(foodService.addOptionItem(groupId, request), callback);
+    }
+
+    public void updateOptionItem(Long itemId, com.example.uitpayapp.modules.food.models.requests.CreateOptionItemRequest request, ApiCallback<com.example.uitpayapp.modules.food.models.responses.OptionItemResponse> callback) {
+        handleCall(foodService.updateOptionItem(itemId, request), callback);
+    }
+
+    public void deleteOptionGroup(Long groupId, ApiCallback<String> callback) {
+        handleCall(foodService.deleteOptionGroup(groupId), callback);
+    }
+
+    public void deleteOptionItem(Long itemId, ApiCallback<String> callback) {
+        handleCall(foodService.deleteOptionItem(itemId), callback);
+    }
 }

@@ -32,7 +32,20 @@ public class OrderRepository {
                         callback.onError(apiResponse.getMessage() != null ? apiResponse.getMessage() : "Unknown Error");
                     }
                 } else {
-                    callback.onError("Không kết nối được server (Lỗi: " + response.code() + ")");
+                    String errorMessage = "Lỗi kết nối hệ thống (Lỗi: " + response.code() + ")";
+                    try {
+                        if (response.errorBody() != null) {
+                            String errorBodyStr = response.errorBody().string();
+                            com.google.gson.Gson gson = new com.google.gson.Gson();
+                            ApiResponse<?> errorResponse = gson.fromJson(errorBodyStr, ApiResponse.class);
+                            if (errorResponse != null && errorResponse.getMessage() != null) {
+                                errorMessage = errorResponse.getMessage();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    callback.onError(errorMessage);
                 }
             }
 
@@ -91,7 +104,8 @@ public class OrderRepository {
         enqueueCall(orderService.removeItemFromOrder(orderId, request), callback);
     }
 
-    public void getOrderById(Long orderId, ApiCallback<OrderResponse> callback) {
-        enqueueCall(orderService.getOrderById(orderId), callback);
+    public void merchantCompleteOrder(Long orderId, ApiCallback<OrderResponse> callback) {
+        enqueueCall(orderService.merchantCompleteOrder(orderId), callback);
     }
-}
+}
+

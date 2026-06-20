@@ -66,7 +66,7 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
             holder.llDishesContainer.addView(dishView);
         }
         
-        if ("confirmed".equalsIgnoreCase(order.getStatus())) {
+        if ("confirmed".equalsIgnoreCase(order.getStatus()) || "PREPARING".equalsIgnoreCase(order.getStatus())) {
             holder.btnAccept.setText("Đã xong");
         } else {
             holder.btnAccept.setText("Xác nhận");

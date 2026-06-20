@@ -46,4 +46,37 @@ public interface FoodService {
     Call<ApiResponse<List<OptionGroupResponse>>> getFoodOptions(
             @Path("foodId") Long foodId
     );
+
+    @GET("api/v1/restaurants/{id}/foods")
+    Call<ApiResponse<List<FoodResponse>>> getRestaurantMenu(
+            @Path("id") Long restaurantId
+    );
+
+    @PUT("api/v1/foods/options/groups/{groupId}")
+    Call<ApiResponse<OptionGroupResponse>> updateOptionGroup(
+            @Path("groupId") Long groupId,
+            @Body CreateOptionGroupRequest request
+    );
+
+    @POST("api/v1/foods/options/groups/{groupId}/items")
+    Call<ApiResponse<com.example.uitpayapp.modules.food.models.responses.OptionItemResponse>> addOptionItem(
+            @Path("groupId") Long groupId,
+            @Body com.example.uitpayapp.modules.food.models.requests.CreateOptionItemRequest request
+    );
+
+    @PUT("api/v1/foods/options/items/{itemId}")
+    Call<ApiResponse<com.example.uitpayapp.modules.food.models.responses.OptionItemResponse>> updateOptionItem(
+            @Path("itemId") Long itemId,
+            @Body com.example.uitpayapp.modules.food.models.requests.CreateOptionItemRequest request
+    );
+
+    @DELETE("api/v1/foods/options/groups/{groupId}")
+    Call<ApiResponse<String>> deleteOptionGroup(
+            @Path("groupId") Long groupId
+    );
+
+    @DELETE("api/v1/foods/options/items/{itemId}")
+    Call<ApiResponse<String>> deleteOptionItem(
+            @Path("itemId") Long itemId
+    );
 }

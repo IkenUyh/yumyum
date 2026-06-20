@@ -7,6 +7,9 @@ import com.uit.fooddelivery_api.modules.user.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -46,5 +49,29 @@ public class NotificationController {
         User currentUser = (User) authentication.getPrincipal();
         long count = notificationService.getUnreadCount(currentUser.getId());
         return ApiResponse.success(Map.of("unreadCount", count));
+    }
+
+    // API 4: Đánh dấu đọc tất cả
+    @PutMapping("/read-all")
+    public ApiResponse<String> markAllAsRead(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        notificationService.markAllAsRead(currentUser.getId());
+        return ApiResponse.success("Đã đánh dấu đọc tất cả thông báo");
+    }
+
+    // API 5: Đánh dấu đọc một thông báo
+    @PutMapping("/{id}/read")
+    public ApiResponse<String> markAsRead(@PathVariable("id") Long id, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        notificationService.markAsRead(id, currentUser.getId());
+        return ApiResponse.success("Đã đánh dấu đọc thông báo");
+    }
+
+    // API 6: Xóa tất cả thông báo
+    @DeleteMapping("/all")
+    public ApiResponse<String> deleteAllNotifications(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        notificationService.deleteAllNotifications(currentUser.getId());
+        return ApiResponse.success("Đã xóa tất cả thông báo");
     }
 }

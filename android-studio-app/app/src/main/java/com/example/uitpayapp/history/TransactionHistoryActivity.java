@@ -81,6 +81,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     private DealHistoryAdapter dealAdapter;
     private List<DealHistory> allDealsList;
     private OrderRepository orderRepository;
+    private com.example.uitpayapp.modules.loyalty.LoyaltyRepository loyaltyRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +155,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         setupCalendarSystem(); // Khởi tạo lưới lịch
 
         orderRepository = new OrderRepository();
+        loyaltyRepository = new com.example.uitpayapp.modules.loyalty.LoyaltyRepository();
         fetchOrdersFromBackend();
         setupTabs();
         setupFilterMenus();
@@ -467,6 +469,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             isErrorState = true;
             currentErrorMessage = "Vui lòng đăng nhập để xem đơn hàng của bạn";
             allOrders.clear();
+            allDealsList.clear();
             applyFilter();
             return;
         }
@@ -556,6 +559,38 @@ public class TransactionHistoryActivity extends AppCompatActivity {
                 isErrorState = true;
                 currentErrorMessage = errorMessage;
                 allOrders.clear();
+                applyFilter();
+            }
+        });
+        fetchDealsFromBackend();
+    }
+
+    private void fetchDealsFromBackend() {
+        if (!com.example.uitpayapp.network.SessionManager.getInstance(this).isLoggedIn()) {
+            allDealsList.clear();
+            applyFilter();
+            return;
+        }
+
+        if (loyaltyRepository == null) {
+            loyaltyRepository = new com.example.uitpayapp.modules.loyalty.LoyaltyRepository();
+        }
+
+        loyaltyRepository.getMyDeals(new ApiCallback<List<DealHistory>>() {
+            @Override
+            public void onSuccess(List<DealHistory> deals) {
+                allDealsList.clear();
+                if (deals != null) {
+                    allDealsList.addAll(deals);
+                }
+                dealAdapter.notifyDataSetChanged();
+                applyFilter();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                allDealsList.clear();
+                dealAdapter.notifyDataSetChanged();
                 applyFilter();
             }
         });

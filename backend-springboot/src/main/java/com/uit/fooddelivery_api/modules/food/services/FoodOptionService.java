@@ -6,6 +6,7 @@ import com.uit.fooddelivery_api.modules.food.entities.Food;
 import com.uit.fooddelivery_api.modules.food.entities.FoodOptionGroup;
 import com.uit.fooddelivery_api.modules.food.entities.FoodOptionItem;
 import com.uit.fooddelivery_api.modules.food.repositories.FoodOptionGroupRepository;
+import com.uit.fooddelivery_api.modules.food.repositories.FoodOptionItemRepository;
 import com.uit.fooddelivery_api.modules.food.repositories.FoodRepository;
 import com.uit.fooddelivery_api.modules.user.entities.User;
 import jakarta.transaction.Transactional;
@@ -21,6 +22,7 @@ public class FoodOptionService {
 
     private final FoodOptionGroupRepository groupRepository;
     private final FoodRepository foodRepository;
+    private final FoodOptionItemRepository itemRepository;
 
     // 1. Chủ quán thêm Topping cho món
     @Transactional
@@ -62,5 +64,89 @@ public class FoodOptionService {
     // 2. Lấy danh sách Topping của 1 món để Khách hàng xem
     public List<FoodOptionGroup> getFoodOptions(Long foodId) {
         return groupRepository.findByFoodId(foodId);
+    }
+
+    // 3. Sửa nhóm Topping (OptionGroup)
+    @Transactional
+    public FoodOptionGroup updateOptionGroup(Long groupId, CreateOptionGroupDTO dto, User merchant) {
+        FoodOptionGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhóm option!"));
+
+        // Bảo mật
+        if (!group.getFood().getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa quán khác!");
+        }
+
+        if (dto.getName() != null) group.setName(dto.getName());
+        if (dto.getIsRequired() != null) group.setIsRequired(dto.getIsRequired());
+        if (dto.getMaxChoices() != null) group.setMaxChoices(dto.getMaxChoices());
+
+        return groupRepository.save(group);
+    }
+
+    // 4. Thêm option item vào nhóm
+    @Transactional
+    public FoodOptionItem addOptionItemToGroup(Long groupId, CreateOptionItemDTO dto, User merchant) {
+        FoodOptionGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhóm option!"));
+
+        // Bảo mật
+        if (!group.getFood().getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa quán khác!");
+        }
+
+        FoodOptionItem item = FoodOptionItem.builder()
+                .group(group)
+                .name(dto.getName())
+                .additionalPrice(dto.getAdditionalPrice())
+                .isAvailable(true)
+                .build();
+
+        return itemRepository.save(item);
+    }
+
+    // 5. Cập nhật option item (Topping)
+    @Transactional
+    public FoodOptionItem updateOptionItem(Long itemId, CreateOptionItemDTO dto, User merchant) {
+        FoodOptionItem item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy option item!"));
+
+        // Bảo mật
+        if (!item.getGroup().getFood().getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa quán khác!");
+        }
+
+        if (dto.getName() != null) item.setName(dto.getName());
+        if (dto.getAdditionalPrice() != null) item.setAdditionalPrice(dto.getAdditionalPrice());
+
+        return itemRepository.save(item);
+    }
+
+    // 6. Xóa nhóm option
+    @Transactional
+    public void deleteOptionGroup(Long groupId, User merchant) {
+        FoodOptionGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhóm option!"));
+
+        // Bảo mật
+        if (!group.getFood().getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa quán khác!");
+        }
+
+        groupRepository.delete(group);
+    }
+
+    // 7. Xóa option item
+    @Transactional
+    public void deleteOptionItem(Long itemId, User merchant) {
+        FoodOptionItem item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy option item!"));
+
+        // Bảo mật
+        if (!item.getGroup().getFood().getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa quán khác!");
+        }
+
+        itemRepository.delete(item);
     }
 }

@@ -140,11 +140,23 @@ public class FavoriteActivity extends AppCompatActivity {
                         else if (name.contains("Highlands")) localResId = 0;
                         else localResId = 0; // fallback default
                         
-                        // Fake distance, delivery time, order count for UI demo
-                        double distance = 0.5 + (Math.random() * 5.0);
-                        distance = Math.round(distance * 10.0) / 10.0;
-                        int deliveryTime = 15 + (i * 5) % 20;
-                        int orderCount = 50 + (i * 25);
+                        // Use distance & delivery time from API if available, fallback otherwise
+                        double distance;
+                        if (dto.getDistance() != null) {
+                            distance = dto.getDistance();
+                        } else {
+                            distance = 0.5 + (Math.random() * 5.0);
+                            distance = Math.round(distance * 10.0) / 10.0;
+                        }
+
+                        int deliveryTime;
+                        if (dto.getDeliveryTime() != null) {
+                            deliveryTime = dto.getDeliveryTime();
+                        } else {
+                            deliveryTime = 15 + (i * 5) % 20;
+                        }
+
+                        int orderCount = dto.getReviewCount() != null ? dto.getReviewCount() : (50 + (i * 25));
                         
                         FavoriteShop fs = new FavoriteShop(
                                 String.valueOf(dto.getRestaurantId()),

@@ -8,7 +8,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.content.Intent;
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.home.StoreDetailActivity;
 import java.util.List;
 
 public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -108,7 +110,10 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             vsh.tvInfo.setText("⭐ " + shop.getRating() + "  |  " + shop.getDistance() + "km  |  "
                     + shop.getDeliveryTime() + "phút");
             vsh.tvDiscount.setVisibility(View.GONE);
-            com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(vsh.ivImage, shop.getImageUrl());
+            
+            // Resolved conflict: Use getFormattedImageUrl and our flashing placeholder
+            String formattedUrl = getFormattedImageUrl(shop.getImageUrl());
+            com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(vsh.ivImage, formattedUrl);
 
             if (shop.isFavorited()) {
                 vsh.ivFavoriteHeart.setImageResource(R.drawable.favorite_filled_24px);
@@ -120,6 +125,13 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 if (removeListener != null) {
                     removeListener.onRemove(shop);
                 }
+            });
+
+            vsh.itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(v.getContext(), StoreDetailActivity.class);
+                intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, shop.getName());
+                intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_ID, Long.parseLong(shop.getId()));
+                v.getContext().startActivity(intent);
             });
         }
     }
@@ -160,5 +172,28 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public FooterViewHolder(@NonNull View itemView) {
             super(itemView);
         }
+    }
+
+    private String getFormattedImageUrl(String path) {
+        if (path == null || path.isEmpty() || "null".equalsIgnoreCase(path)) {
+            return null;
+        }
+        String imageUrl = path;
+        if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+            String baseUrl = com.example.uitpayapp.network.RetrofitClient.getBaseUrl();
+            if (baseUrl != null) {
+                if (baseUrl.endsWith("/") && imageUrl.startsWith("/")) {
+                    imageUrl = baseUrl + imageUrl.substring(1);
+                } else if (!baseUrl.endsWith("/") && !imageUrl.startsWith("/")) {
+                    imageUrl = baseUrl + "/" + imageUrl;
+                } else {
+                    imageUrl = baseUrl + imageUrl;
+                }
+            }
+        }
+        if (imageUrl.startsWith("http://")) {
+            imageUrl = imageUrl.replace("http://", "https://");
+        }
+        return imageUrl;
     }
 }

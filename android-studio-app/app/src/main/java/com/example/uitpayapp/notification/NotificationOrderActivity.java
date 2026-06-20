@@ -16,6 +16,10 @@ import java.util.List;
 
 public class NotificationOrderActivity extends AppCompatActivity {
 
+    public interface OnNotificationReadListener {
+        void onNotificationRead();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +54,15 @@ public class NotificationOrderActivity extends AppCompatActivity {
                     }
                 }
 
-                OrderAdapter adapter = new OrderAdapter(list);
+                OrderAdapter adapter = new OrderAdapter(list, () -> {
+                    int unread = 0;
+                    for (OrderNotification noti : list) {
+                        if (!noti.isRead()) {
+                            unread++;
+                        }
+                    }
+                    updateReadAllText(tvReadAll, unread);
+                });
                 rv.setAdapter(adapter);
 
                 final int finalUnreadCount = unreadCount;
@@ -58,12 +70,22 @@ public class NotificationOrderActivity extends AppCompatActivity {
 
                 tvReadAll.setOnClickListener(v -> {
                     if (list.isEmpty()) return;
-                    for (OrderNotification noti : list) {
-                        noti.setRead(true);
-                    }
-                    adapter.notifyDataSetChanged();
-                    updateReadAllText(tvReadAll, 0);
-                    android.widget.Toast.makeText(NotificationOrderActivity.this, "Đã đánh dấu đọc tất cả thông báo", android.widget.Toast.LENGTH_SHORT).show();
+                    notificationRepository.markAllAsRead(new com.example.uitpayapp.network.ApiCallback<String>() {
+                        @Override
+                        public void onSuccess(String result) {
+                            for (OrderNotification noti : list) {
+                                noti.setRead(true);
+                            }
+                            adapter.notifyDataSetChanged();
+                            updateReadAllText(tvReadAll, 0);
+                            android.widget.Toast.makeText(NotificationOrderActivity.this, "Đã đánh dấu đọc tất cả thông báo", android.widget.Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            android.widget.Toast.makeText(NotificationOrderActivity.this, "Lỗi: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 });
             }
 
@@ -128,7 +150,12 @@ public class NotificationOrderActivity extends AppCompatActivity {
 
     private static class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
         private List<OrderNotification> mList;
-        public OrderAdapter(List<OrderNotification> list) { this.mList = list; }
+        private OnNotificationReadListener mListener;
+
+        public OrderAdapter(List<OrderNotification> list, OnNotificationReadListener listener) {
+            this.mList = list;
+            this.mListener = listener;
+        }
 
         @NonNull
         @Override
@@ -154,6 +181,24 @@ public class NotificationOrderActivity extends AppCompatActivity {
                 h.t1.setTextColor(android.graphics.Color.parseColor("#212121"));
                 h.itemView.setBackgroundColor(android.graphics.Color.parseColor("#FFF5F2")); // Nền cam nhạt cho thông báo chưa đọc
             }
+
+            h.itemView.setOnClickListener(v -> {
+                if (!m.isRead()) {
+                    new com.example.uitpayapp.modules.notification.NotificationRepository().markAsRead(Long.parseLong(m.getId()), new com.example.uitpayapp.network.ApiCallback<String>() {
+                        @Override
+                        public void onSuccess(String result) {
+                            m.setRead(true);
+                            notifyItemChanged(h.getAdapterPosition());
+                            if (mListener != null) {
+                                mListener.onNotificationRead();
+                            }
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {}
+                    });
+                }
+            });
         }
 
         @Override

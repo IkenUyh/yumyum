@@ -2,6 +2,10 @@ package com.example.uitpayapp.network;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Base64;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import java.nio.charset.StandardCharsets;
 
 public class SessionManager {
     // Tên của file SharedPreferences lưu trên thiết bị
@@ -67,11 +71,34 @@ public class SessionManager {
         return sharedPreferences.getString(KEY_USER_NAME, "Khách hàng");
     }
 
-    /**
-     * KIỂM TRA TRẠNG THÁI ĐĂNG NHẬP
-     */
     public boolean isLoggedIn() {
+        String token = getAuthToken();
+        if (token == null || token.isEmpty() || isTokenExpired(token)) {
+            if (token != null) {
+                clearSession();
+            }
+            return false;
+        }
         return sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false);
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length < 2) return true;
+            String payload = parts[1];
+            byte[] decodedBytes = Base64.decode(payload, Base64.DEFAULT);
+            String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
+            JsonObject jsonObject = new Gson().fromJson(decodedString, JsonObject.class);
+            if (jsonObject.has("exp")) {
+                long exp = jsonObject.get("exp").getAsLong();
+                long currentTimeSec = System.currentTimeMillis() / 1000;
+                return currentTimeSec >= exp;
+            }
+        } catch (Exception e) {
+            return true;
+        }
+        return false;
     }
 
     /**

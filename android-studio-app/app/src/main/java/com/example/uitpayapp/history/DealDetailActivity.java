@@ -23,12 +23,17 @@ public class DealDetailActivity extends AppCompatActivity {
         txtMerchant.setText(getIntent().getStringExtra("MERCHANT_NAME"));
         txtTitle.setText(getIntent().getStringExtra("DEAL_TITLE"));
 
-        // LUỒNG TÁI SỬ DỤNG MÀN HÌNH CHI TIẾT ĐƠN HÀNG CŨ CỦA BẠN (Ảnh 3, 4)
-        btnViewAppliedOrder.setOnClickListener(v -> {
-            // Gọi chính xác tên class màn hình chi tiết đơn hàng cũ của bạn (OrderDetailActivity)
-            Intent orderDetailIntent = new Intent(DealDetailActivity.this, OrderDetailActivity.class);
-            orderDetailIntent.putExtra("ORDER_ID", appliedOrderId);
-            startActivity(orderDetailIntent);
-        });
+        if (appliedOrderId == null || appliedOrderId.trim().isEmpty()) {
+            btnViewAppliedOrder.setVisibility(android.view.View.GONE);
+        } else {
+            btnViewAppliedOrder.setVisibility(android.view.View.VISIBLE);
+            // LUỒNG TÁI SỬ DỤNG MÀN HÌNH CHI TIẾT ĐƠN HÀNG CŨ CỦA BẠN (Ảnh 3, 4)
+            btnViewAppliedOrder.setOnClickListener(v -> {
+                // Gọi chính xác tên class màn hình chi tiết đơn hàng cũ của bạn (OrderDetailActivity)
+                Intent orderDetailIntent = new Intent(DealDetailActivity.this, OrderDetailActivity.class);
+                orderDetailIntent.putExtra("ORDER_ID", appliedOrderId);
+                startActivity(orderDetailIntent);
+            });
+        }
     }
 }

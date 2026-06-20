@@ -40,4 +40,9 @@ public class RestaurantService {
         return restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà hàng với id: " + restaurantId));
     }
+
+    // Lưu thay đổi thông tin quán
+    public Restaurant save(Restaurant restaurant) {
+        return restaurantRepository.save(restaurant);
+    }
 }

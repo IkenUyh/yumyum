@@ -59,8 +59,16 @@ public class SellerNotificationAdapter extends RecyclerView.Adapter<SellerNotifi
 
         holder.itemView.setOnClickListener(v -> {
             if (!notification.isRead()) {
-                notification.setRead(true);
-                notifyItemChanged(position);
+                new com.example.uitpayapp.modules.notification.NotificationRepository().markAsRead(Long.parseLong(notification.getId()), new com.example.uitpayapp.network.ApiCallback<String>() {
+                    @Override
+                    public void onSuccess(String result) {
+                        notification.setRead(true);
+                        notifyItemChanged(holder.getAdapterPosition());
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {}
+                });
             }
         });
     }

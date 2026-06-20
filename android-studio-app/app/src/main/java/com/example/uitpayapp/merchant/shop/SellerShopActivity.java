@@ -1,6 +1,7 @@
 package com.example.uitpayapp.merchant.shop;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -40,6 +41,12 @@ public class SellerShopActivity extends AppCompatActivity {
         setupBottomNavigation();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateShopHeader();
+    }
+
     private void initViews() {
         tvShopName = findViewById(R.id.tv_shop_name);
         tvRevenue = findViewById(R.id.tv_total_revenue);
@@ -59,10 +66,15 @@ public class SellerShopActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        
         Date date = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         String formattedDate = dateFormat.format(date);
         tvToday.setText(formattedDate);
+        
+        // Cập nhật thông tin quán từ Prefs
+        updateShopHeader();
+        
         tvRevenue.setText("2.450.000đ");
         tvTransactions.setText("24");
 
@@ -89,6 +101,14 @@ public class SellerShopActivity extends AppCompatActivity {
             intentAccount.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intentAccount);
         });
+    }
+
+    private void updateShopHeader() {
+        SharedPreferences sellerPrefs = getSharedPreferences("SellerPrefs", MODE_PRIVATE);
+        String storeName = sellerPrefs.getString("current_store_name", "Cửa hàng của tôi");
+        if (tvShopName != null) {
+            tvShopName.setText(storeName);
+        }
     }
 
     private void setupBottomNavigation() {

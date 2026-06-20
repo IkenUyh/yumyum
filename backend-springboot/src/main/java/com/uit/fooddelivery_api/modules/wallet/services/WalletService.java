@@ -1,6 +1,7 @@
 package com.uit.fooddelivery_api.modules.wallet.services;
 
 import com.uit.fooddelivery_api.modules.user.entities.User;
+import com.uit.fooddelivery_api.modules.user.repositories.UserRepository;
 import com.uit.fooddelivery_api.modules.wallet.entities.Wallet;
 import com.uit.fooddelivery_api.modules.wallet.entities.WalletTransaction;
 import com.uit.fooddelivery_api.modules.wallet.repositories.WalletRepository;
@@ -18,11 +19,18 @@ public class WalletService {
 
     private final WalletRepository walletRepository;
     private final WalletTransactionRepository transactionRepository;
+    private final UserRepository userRepository;
 
     // Lấy thông tin ví
     public Wallet getMyWallet(User user) {
         return walletRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy ví của người dùng!"));
+                .orElseGet(() -> {
+                    Wallet newWallet = Wallet.builder()
+                            .user(user)
+                            .balance(BigDecimal.ZERO)
+                            .build();
+                    return walletRepository.save(newWallet);
+                });
     }
 
     // Lấy sao kê
@@ -35,7 +43,15 @@ public class WalletService {
     @Transactional
     public Wallet processTransaction(Long userId, BigDecimal amount, String type, String referenceId, String description) {
         Wallet wallet = walletRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy ví để giao dịch!"));
+                .orElseGet(() -> {
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng để khởi tạo ví!"));
+                    Wallet newWallet = Wallet.builder()
+                            .user(user)
+                            .balance(BigDecimal.ZERO)
+                            .build();
+                    return walletRepository.save(newWallet);
+                });
 
         // Kiểm tra số dư nếu là lệnh trừ tiền
         if (amount.compareTo(BigDecimal.ZERO) < 0) {

@@ -11,6 +11,9 @@ public class DealHistory {
     private String statusText;
     private String appliedOrderId; // ID để liên kết sang màn hình Chi tiết đơn hàng cũ của bạn
 
+    public DealHistory() {
+    }
+
     public DealHistory(String dealId, String merchantName, String purchaseDate, String dealTitle, String price, String expiryText, String quantityText, String statusText, String appliedOrderId) {
         this.dealId = dealId;
         this.merchantName = merchantName;
