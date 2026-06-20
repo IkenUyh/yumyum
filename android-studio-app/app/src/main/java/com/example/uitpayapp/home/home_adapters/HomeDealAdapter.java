@@ -132,8 +132,12 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.tvDiscountPrice.setText(currencyFormatter.format(deal.getDiscountPrice()));
 
         View.OnClickListener storeClickListener = v -> {
-            // Tính năng bị vô hiệu hóa tạm thời do thiếu restaurantId
-            android.widget.Toast.makeText(v.getContext(), "Tính năng đang được cập nhật", android.widget.Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(v.getContext(), StoreDetailActivity.class);
+            intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, deal.getStoreName());
+            if (deal.getRestaurantId() != null) {
+                intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_ID, deal.getRestaurantId());
+            }
+            v.getContext().startActivity(intent);
         };
 
         if (holder.layoutStoreInfo != null) {

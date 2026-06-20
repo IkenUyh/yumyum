@@ -18,4 +18,5 @@ public class RestaurantHomeDTO {
     private int reviewCount;
     private int deliveryTime;
     private String address;
+    private Long id;
 }

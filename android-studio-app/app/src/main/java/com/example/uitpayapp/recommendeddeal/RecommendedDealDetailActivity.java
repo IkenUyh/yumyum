@@ -123,6 +123,7 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
             int foodImage = extras.getInt("food_image", 0);
             String imageUrl = extras.getString("image_url", "");
             double rating = extras.getDouble("rating", 4.5);
+            long restaurantId = extras.getLong("restaurant_id", -1L);
 
             tvDealName.setText(foodTitle);
             tvStoreName.setText(storeName);
@@ -131,6 +132,7 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
             tvOriginalPrice.setText(currencyFormatter.format(originalPrice));
             tvDistance.setText(distance + "km");
             tvDeliveryTime.setText(deliveryTime + " phút");
+            tvRating.setText(String.valueOf(rating));
             tvSaving.setText(currencyFormatter.format(originalPrice - discountPrice));
 
             android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
@@ -166,13 +168,20 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
             }
 
             FoodMenuItem item = new FoodMenuItem("deal_" + System.currentTimeMillis(), foodTitle, (long) discountPrice, foodImage, "Khuyến mãi từ " + storeName, imageUrl);
+            if (restaurantId != -1L) {
+                item.setRestaurantId(restaurantId);
+            }
             btnBuyNow.setOnClickListener(v -> showFoodItemDetailPopup(item));
 
             View cvStoreInfo = findViewById(R.id.cv_store_info);
             if (cvStoreInfo != null) {
                 cvStoreInfo.setOnClickListener(v -> {
-                    // Tính năng bị vô hiệu hóa tạm thời do thiếu restaurantId
-                    android.widget.Toast.makeText(v.getContext(), "Tính năng đang được cập nhật", android.widget.Toast.LENGTH_SHORT).show();
+                    android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.home.StoreDetailActivity.class);
+                    intent.putExtra(com.example.uitpayapp.home.StoreDetailActivity.EXTRA_RESTAURANT_NAME, storeName);
+                    if (restaurantId != -1L) {
+                        intent.putExtra(com.example.uitpayapp.home.StoreDetailActivity.EXTRA_RESTAURANT_ID, restaurantId);
+                    }
+                    startActivity(intent);
                 });
             }
         }

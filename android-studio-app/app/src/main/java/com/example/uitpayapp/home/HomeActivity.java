@@ -693,6 +693,7 @@ public class HomeActivity extends AppCompatActivity {
                         item.getImageResId(),
                         item.getDescription(),
                         item.getImageUrl());
+                discountedItem.setRestaurantId(item.getRestaurantId());
                 showFoodItemDetailPopup(discountedItem, iv);
             });
         }
