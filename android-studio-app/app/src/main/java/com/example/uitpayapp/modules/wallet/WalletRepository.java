@@ -151,7 +151,7 @@ public class WalletRepository {
                 callback.onError("Lỗi kết nối hệ thống: " + t.getMessage());
             }
         });
-
+    }
 
     // Hàm chuyển tiền từ ví cửa hàng về ví cá nhân
     public void transferMerchantToPersonal(MerchantWalletTransferRequest request, final ApiCallback<String> callback) {
@@ -187,7 +187,6 @@ public class WalletRepository {
             @Override
             public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
                 callback.onError("Lỗi kết nối hệ thống: " + t.getMessage());
->>>>>>> origin/develop
             }
         });
     }

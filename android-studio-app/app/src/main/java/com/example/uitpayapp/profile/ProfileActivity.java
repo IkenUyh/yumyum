@@ -506,7 +506,7 @@ public class ProfileActivity extends AppCompatActivity {
         builder.setCancelable(false);
 
         builder.setPositiveButton("Cập nhật số dư", (dialog, which) -> {
-            fetchWalletInfo();
+            recreate();
             dialog.dismiss();
             Toast.makeText(this, "Đã cập nhật số dư", Toast.LENGTH_SHORT).show();
         });
