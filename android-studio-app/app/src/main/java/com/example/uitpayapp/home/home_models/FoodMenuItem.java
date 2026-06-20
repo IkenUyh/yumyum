@@ -10,6 +10,7 @@ public class FoodMenuItem {
     private int imageResId;
     private String description;
     private String imageUrl;
+    private Long restaurantId;
 
     public FoodMenuItem(String id, String name, long price, int imageResId, String description) {
         this.id = id;
@@ -36,6 +37,8 @@ public class FoodMenuItem {
     public String getDescription() { return description; }
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public Long getRestaurantId() { return restaurantId; }
+    public void setRestaurantId(Long restaurantId) { this.restaurantId = restaurantId; }
 
     public String getFormattedPrice() {
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));

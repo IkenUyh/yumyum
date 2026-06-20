@@ -17,7 +17,7 @@ public interface FlashSaleItemRepository extends JpaRepository<FlashSaleItem, Lo
             @org.springframework.data.repository.query.Param("foodId") Long foodId,
             @org.springframework.data.repository.query.Param("now") java.time.LocalDateTime now);
 
-    @org.springframework.data.jpa.repository.Query("SELECT fsi FROM FlashSaleItem fsi JOIN fsi.flashSale fs " +
+    @org.springframework.data.jpa.repository.Query("SELECT fsi FROM FlashSaleItem fsi JOIN FETCH fsi.food f JOIN FETCH f.restaurant JOIN fsi.flashSale fs " +
             "WHERE fs.isActive = true AND :now BETWEEN fs.startTime AND fs.endTime")
     List<FlashSaleItem> findActiveFlashSaleItems(
             @org.springframework.data.repository.query.Param("now") java.time.LocalDateTime now);

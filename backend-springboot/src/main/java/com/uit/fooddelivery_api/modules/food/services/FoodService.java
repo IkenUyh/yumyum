@@ -1,10 +1,13 @@
 package com.uit.fooddelivery_api.modules.food.services;
 
 import com.uit.fooddelivery_api.modules.food.dtos.CreateFoodDTO;
+import com.uit.fooddelivery_api.modules.food.dtos.FoodDetailResponseDTO;
 import com.uit.fooddelivery_api.modules.food.entities.Category;
 import com.uit.fooddelivery_api.modules.food.entities.Food;
+import com.uit.fooddelivery_api.modules.food.entities.FoodOptionGroup;
 import com.uit.fooddelivery_api.modules.food.repositories.CategoryRepository;
 import com.uit.fooddelivery_api.modules.food.repositories.FoodRepository;
+import com.uit.fooddelivery_api.modules.food.repositories.FoodOptionGroupRepository;
 import com.uit.fooddelivery_api.modules.restaurant.entities.Restaurant;
 import com.uit.fooddelivery_api.modules.restaurant.repositories.RestaurantRepository;
 import com.uit.fooddelivery_api.modules.user.entities.User;
@@ -20,6 +23,7 @@ public class FoodService {
     private final FoodRepository foodRepository;
     private final RestaurantRepository restaurantRepository;
     private final CategoryRepository categoryRepository;
+    private final FoodOptionGroupRepository foodOptionGroupRepository;
     private final com.uit.fooddelivery_api.modules.user.services.CloudinaryService cloudinaryService;
 
     // Hàm xử lý upload ảnh món ăn
@@ -136,5 +140,12 @@ public class FoodService {
         // Chuyển trạng thái thành ngưng bán thay vì xóa data để giữ lịch sử hóa đơn
         food.setIsAvailable(false);
         foodRepository.save(food);
+    }
+
+    public FoodDetailResponseDTO getFoodDetailById(Long foodId) {
+        Food food = foodRepository.findById(foodId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy món ăn với id: " + foodId));
+        List<FoodOptionGroup> optionGroups = foodOptionGroupRepository.findByFoodId(foodId);
+        return FoodDetailResponseDTO.fromEntity(food, optionGroups);
     }
 }
