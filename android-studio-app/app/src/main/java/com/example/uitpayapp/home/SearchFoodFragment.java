@@ -132,11 +132,31 @@ public class SearchFoodFragment extends Fragment {
     private void showFoodItemDetailPopup(FoodMenuItem item, ImageView sourceImage) {
         if (getContext() == null) return;
         com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(getContext(), item, null, (selectedItem, quantity, selectedToppings) -> {
-            CartManager.getInstance().addItem(new CartItem(selectedItem, quantity, selectedToppings));
-            if (getActivity() != null) {
-                View btnCart = getActivity().findViewById(R.id.btn_cart);
-                CartAnimationHelper.animateFlyToCart(getActivity(), sourceImage != null ? sourceImage : getActivity().findViewById(android.R.id.content), btnCart, null);
-            }
+            CartItem newItem = new CartItem(selectedItem, quantity, selectedToppings);
+            CartManager.getInstance().addItemSync(newItem, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String data) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            View btnCart = getActivity().findViewById(R.id.btn_cart);
+                            CartAnimationHelper.animateFlyToCart(getActivity(), sourceImage != null ? sourceImage : getActivity().findViewById(android.R.id.content), btnCart, () -> {
+                                if (getActivity() instanceof SearchActivity) {
+                                    ((SearchActivity) getActivity()).updateGlobalCartBadge();
+                                }
+                            });
+                        });
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            android.widget.Toast.makeText(getContext(), "Không thể thêm vào giỏ hàng: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                }
+            });
         });
     }
 

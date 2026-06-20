@@ -118,7 +118,9 @@ public class StoreDetailActivity extends AppCompatActivity {
                 public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>> response) {
                     if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                         com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto = response.body().getData();
-                        restaurant = new Restaurant(dto.getId(), dto.getName(), dto.getName().substring(0, 1), Color.RED, "Danh mục", new ArrayList<>(), 0, 4.5, 100, 30, dto.getAddress(), dto.getImageUrl());
+                        double ratingVal = dto.getRatingAverage() != null ? dto.getRatingAverage() : 0.0;
+                        int reviewsVal = dto.getReviewCount() != null ? dto.getReviewCount() : 0;
+                        restaurant = new Restaurant(dto.getId(), dto.getName(), dto.getName().substring(0, 1), Color.RED, "Danh mục", new ArrayList<>(), R.drawable.img_food_chicken, ratingVal, reviewsVal, 30, dto.getAddress(), dto.getImageUrl());
                         updateStoreUI(dto);
                         checkFavoriteStatus();
                         fetchRestaurantFoods(id);
@@ -180,7 +182,14 @@ public class StoreDetailActivity extends AppCompatActivity {
         }
         tvStoreName.setText(dto.getName());
         tvStoreAddress.setText(dto.getAddress() != null ? dto.getAddress() : "Không có địa chỉ");
-        tvStoreRating.setText(String.format("4.5 (100+ Bình luận)"));
+        double ratingVal = dto.getRatingAverage() != null ? dto.getRatingAverage() : 0.0;
+        int reviewsVal = dto.getReviewCount() != null ? dto.getReviewCount() : 0;
+        if (reviewsVal > 0) {
+            tvStoreRating.setText(String.format(java.util.Locale.US, "%.1f (%d+ Bình luận)", ratingVal, reviewsVal));
+        } else {
+            tvStoreRating.setText(String.format(java.util.Locale.US, "%.1f (Chưa có bình luận)", ratingVal));
+        }
+        tvDeliveryTime.setText("30 phút");
     }
 
     private void updateMenuUI(List<FoodMenuItem> menuItems) {
@@ -204,14 +213,26 @@ public class StoreDetailActivity extends AppCompatActivity {
     private void showFoodItemDetailPopup(FoodMenuItem item) {
         com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(this, item, null,
                 (selectedItem, quantity, selectedToppings) -> {
-                    CartManager.getInstance().addItem(new CartItem(selectedItem, quantity, selectedToppings));
+                    CartItem newItem = new CartItem(selectedItem, quantity, selectedToppings);
+                    CartManager.getInstance().addItemSync(newItem, new ApiCallback<String>() {
+                        @Override
+                        public void onSuccess(String data) {
+                            runOnUiThread(() -> {
+                                updateGlobalCartBadge();
 
-                    updateGlobalCartBadge();
+                                View btnCart = findViewById(R.id.btn_cart);
+                                View rootView = findViewById(android.R.id.content);
+                                CartAnimationHelper.animateFlyToCart(StoreDetailActivity.this, rootView, btnCart, () -> {
+                                });
+                            });
+                        }
 
-                    View btnCart = findViewById(R.id.btn_cart);
-                    // Fallback for image view animation context (can just use root view if needed)
-                    View rootView = findViewById(android.R.id.content);
-                    CartAnimationHelper.animateFlyToCart(this, rootView, btnCart, () -> {
+                        @Override
+                        public void onError(String errorMessage) {
+                            runOnUiThread(() -> {
+                                Toast.makeText(StoreDetailActivity.this, "Không thể thêm vào giỏ hàng: " + errorMessage, Toast.LENGTH_SHORT).show();
+                            });
+                        }
                     });
                 });
     }

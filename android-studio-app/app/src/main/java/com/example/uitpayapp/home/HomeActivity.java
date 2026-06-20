@@ -1040,11 +1040,162 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void setupTopicSection(View sectionView, String title, String subtitle, long categoryId, List<FoodMenuItem> foods) {
-        android.widget.TextView tvTitle = sectionView.findViewById(R.id.tv_topic_title);
-        android.widget.TextView tvSubtitle = sectionView.findViewById(R.id.tv_topic_subtitle);
-        android.widget.TextView tvSeeMore = sectionView.findViewById(R.id.tv_topic_see_more);
-        androidx.recyclerview.widget.RecyclerView rvStores = sectionView.findViewById(R.id.rv_topic_stores);
+    private void applyFilters() {
+        filteredRestaurants = new ArrayList<>();
+        for (Restaurant r : restaurants) {
+            boolean matchesCategory = true;
+            boolean matchesSearch = true;
+
+            if (selectedCategory != null) {
+                matchesCategory = selectedCategory.equals(r.getCategory());
+            }
+
+            if (!currentSearchQuery.isEmpty()) {
+                String name = r.getName().replace("\n", " ").toLowerCase();
+                boolean nameMatch = name.contains(currentSearchQuery);
+                boolean menuMatch = false;
+                for (FoodMenuItem item : r.getMenu()) {
+                    if (item.getName().toLowerCase().contains(currentSearchQuery)) {
+                        menuMatch = true;
+                        break;
+                    }
+                }
+                matchesSearch = nameMatch || menuMatch;
+            }
+
+            if (matchesCategory && matchesSearch) {
+                filteredRestaurants.add(r);
+            }
+        }
+    }
+
+    private void setupRestaurants() {
+        restaurants = HomeRepository.getInstance().getRestaurants();
+        filteredRestaurants = new ArrayList<>(restaurants);
+    }
+
+    private void setupTopics() {
+        List<Object[]> topicPool = HomeRepository.getInstance().getTopics();
+
+        java.util.Collections.shuffle(topicPool);
+        int[] sectionIds = { R.id.random_topic_section_1, R.id.random_topic_section_2 };
+        for (int i = 0; i < 2; i++) {
+            Object[] topic = topicPool.get(i);
+            @SuppressWarnings("unchecked")
+            List<FoodMenuItem> foods = (List<FoodMenuItem>) topic[2];
+            setupTopicSection(findViewById(sectionIds[i]), (String) topic[0], (String) topic[1], foods);
+        }
+        applyRandomSubtitles();
+    }
+
+    private void setupBrands() {
+        View sectionView = findViewById(R.id.topic_brand_section);
+        if (sectionView == null)
+            return;
+
+        TextView tvTitle = sectionView.findViewById(R.id.tv_topic_title);
+        TextView tvSubtitle = sectionView.findViewById(R.id.tv_topic_subtitle);
+        TextView tvSeeMore = sectionView.findViewById(R.id.tv_topic_see_more);
+        RecyclerView rvStores = sectionView.findViewById(R.id.rv_topic_stores);
+
+        tvTitle.setText("Thương hiệu nổi bật");
+        tvSubtitle.setText("Các cửa hàng được yêu thích nhất");
+
+        rvStores.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        BrandAdapter brandAdapter = new BrandAdapter(new ArrayList<>(), restaurant -> {
+            Intent intent = new Intent(this, StoreDetailActivity.class);
+            intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, restaurant.getName());
+            intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_ID, restaurant.getId());
+            startActivity(intent);
+        });
+        rvStores.setAdapter(brandAdapter);
+
+        com.example.uitpayapp.network.RetrofitClient.getRestaurantService().getAllRestaurants().enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>>() {
+            @Override
+            public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    List<com.example.uitpayapp.home.home_models.Restaurant> mappedRestaurants = new ArrayList<>();
+                    for (com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto : response.body().getData()) {
+                        String shortName = dto.getName() != null && dto.getName().length() > 0 ? dto.getName().substring(0, 1) : "A";
+                        double ratingVal = dto.getRatingAverage() != null ? dto.getRatingAverage() : 0.0;
+                        int reviewsVal = dto.getReviewCount() != null ? dto.getReviewCount() : 0;
+                        mappedRestaurants.add(new com.example.uitpayapp.home.home_models.Restaurant(
+                                dto.getId(), dto.getName(), shortName, 
+                                android.graphics.Color.parseColor("#E4002B"), "Danh mục", 
+                                new ArrayList<>(), R.drawable.img_food_chicken, 
+                                ratingVal, reviewsVal, 30, dto.getAddress(), dto.getImageUrl()));
+                    }
+                    brandAdapter.updateData(mappedRestaurants);
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call, Throwable t) {
+                // Fallback to mock data on error
+                brandAdapter.updateData(HomeRepository.getInstance().getRestaurants());
+            }
+        });
+
+        tvSeeMore.setOnClickListener(v -> {
+            Intent intent = new Intent(this, AllBrandsActivity.class);
+            startActivity(intent);
+        });
+    }
+
+    private void setupFlashsale() {
+        List<FoodMenuItem> flashsaleFoods = HomeRepository.getInstance().getDealFoods();
+        if (flashsaleFoods.size() < 3)
+            return;
+
+        java.util.Collections.shuffle(flashsaleFoods);
+
+        int[] cardIds = { R.id.card_flashsale_1, R.id.card_flashsale_2, R.id.card_flashsale_3 };
+        int[] ivIds = { R.id.iv_flashsale_1, R.id.iv_flashsale_2, R.id.iv_flashsale_3 };
+        int[] nameIds = { R.id.tv_name_1, R.id.tv_name_2, R.id.tv_name_3 };
+        int[] origPriceIds = { R.id.tv_orig_price_1, R.id.tv_orig_price_2, R.id.tv_orig_price_3 };
+        int[] discPriceIds = { R.id.tv_disc_price_1, R.id.tv_disc_price_2, R.id.tv_disc_price_3 };
+
+        for (int i = 0; i < 3; i++) {
+            FoodMenuItem item = flashsaleFoods.get(i);
+            View card = findViewById(cardIds[i]);
+            if (card == null)
+                continue;
+
+            ImageView iv = card.findViewById(ivIds[i]);
+            TextView tvName = card.findViewById(nameIds[i]);
+            TextView tvOrigPrice = card.findViewById(origPriceIds[i]);
+            TextView tvDiscPrice = card.findViewById(discPriceIds[i]);
+
+            iv.setImageResource(item.getImageResId());
+            tvName.setText(item.getName());
+
+            long originalPrice = item.getPrice();
+            long discountedPrice = originalPrice / 2;
+
+            tvOrigPrice.setText(String.format("%,dđ", originalPrice).replace(',', '.'));
+            tvOrigPrice.setPaintFlags(tvOrigPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+
+            tvDiscPrice.setText(String.format("%,dđ", discountedPrice).replace(',', '.'));
+
+            card.setOnClickListener(v -> {
+                FoodMenuItem discountedItem = new FoodMenuItem(
+                        item.getId(),
+                        item.getName(),
+                        discountedPrice,
+                        item.getImageResId(),
+                        item.getDescription(),
+                        item.getImageUrl());
+                discountedItem.setRestaurantId(item.getRestaurantId());
+                showFoodItemDetailPopup(discountedItem, iv);
+            });
+        }
+    }
+
+    private void setupTopicSection(View sectionView, String title, String subtitle, List<FoodMenuItem> foods) {
+        TextView tvTitle = sectionView.findViewById(R.id.tv_topic_title);
+        TextView tvSubtitle = sectionView.findViewById(R.id.tv_topic_subtitle);
+        TextView tvSeeMore = sectionView.findViewById(R.id.tv_topic_see_more);
+        RecyclerView rvStores = sectionView.findViewById(R.id.rv_topic_stores);
 
         tvTitle.setText(title);
         tvSubtitle.setText(subtitle);
@@ -1073,7 +1224,6 @@ public class HomeActivity extends AppCompatActivity {
                             new com.example.uitpayapp.network.ApiCallback<String>() {
                                 @Override
                                 public void onSuccess(String data) {
-                                    CartManager.getInstance().addItem(newItem);
                                     runOnUiThread(() -> {
                                         View btnCart = findViewById(R.id.btn_cart);
                                         CartAnimationHelper.animateFlyToCart(HomeActivity.this,

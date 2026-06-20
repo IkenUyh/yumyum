@@ -114,9 +114,35 @@ public class CartManager {
         });
     }
 
+    private List<Long> getToppingIds(CartItem item) {
+        List<Long> toppingIds = new ArrayList<>();
+        if (item.getSelectedToppings() != null) {
+            for (CartTopping topping : item.getSelectedToppings()) {
+                String tid = topping.getId();
+                if (tid != null) {
+                    if (tid.startsWith("opt_")) {
+                        try {
+                            toppingIds.add(Long.parseLong(tid.substring(4)));
+                        } catch (NumberFormatException e) {
+                            // ignore
+                        }
+                    } else {
+                        try {
+                            toppingIds.add(Long.parseLong(tid));
+                        } catch (NumberFormatException e) {
+                            // ignore
+                        }
+                    }
+                }
+            }
+        }
+        return toppingIds;
+    }
+
     public void addItemSync(CartItem item, final ApiCallback<String> callback) {
         Long foodId = getDbFoodId(item.getMenuItem().getId());
-        CartItemRequestDTO dto = new CartItemRequestDTO(foodId, item.getQuantity(), new ArrayList<>());
+        List<Long> toppingIds = getToppingIds(item);
+        CartItemRequestDTO dto = new CartItemRequestDTO(foodId, item.getQuantity(), toppingIds);
         cartRepository.addOrUpdateItem(dto, new ApiCallback<String>() {
             @Override
             public void onSuccess(String data) {
@@ -187,7 +213,8 @@ public class CartManager {
             return;
         }
         Long foodId = getDbFoodId(item.getMenuItem().getId());
-        CartItemRequestDTO dto = new CartItemRequestDTO(foodId, diff, new ArrayList<>());
+        List<Long> toppingIds = getToppingIds(item);
+        CartItemRequestDTO dto = new CartItemRequestDTO(foodId, diff, toppingIds);
         cartRepository.addOrUpdateItem(dto, new ApiCallback<String>() {
             @Override
             public void onSuccess(String data) {
@@ -209,6 +236,35 @@ public class CartManager {
                 callback.onError(errorMessage);
             }
         });
+    }
+
+    public void updateItemSync(int position, CartItem newItem, final ApiCallback<String> callback) {
+        if (position < 0 || position >= cartItems.size()) {
+            callback.onError("Vị trí không hợp lệ.");
+            return;
+        }
+        CartItem oldItem = cartItems.get(position);
+        boolean toppingsChanged = !new HashSet<>(oldItem.getSelectedToppings()).equals(new HashSet<>(newItem.getSelectedToppings()));
+        
+        if (!toppingsChanged) {
+            updateQuantitySync(position, newItem.getQuantity(), callback);
+        } else {
+            if (oldItem.getDbId() == null) {
+                addItemSync(newItem, callback);
+            } else {
+                cartRepository.removeItem(oldItem.getDbId(), new ApiCallback<String>() {
+                    @Override
+                    public void onSuccess(String data) {
+                        addItemSync(newItem, callback);
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        addItemSync(newItem, callback);
+                    }
+                });
+            }
+        }
     }
 
     public void clearCartSync(final ApiCallback<String> callback) {

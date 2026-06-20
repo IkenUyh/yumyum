@@ -189,11 +189,23 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
 
     private void showFoodItemDetailPopup(FoodMenuItem item) {
         com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(this, item, null, (selectedItem, quantity, selectedToppings) -> {
-            CartManager.getInstance().addItem(new CartItem(selectedItem, quantity, selectedToppings));
-            
-            // Bay animation instead of Toast
-            CartAnimationHelper.animateFlyToCart(this, ivDealImage, btnCart, () -> {
-                updateCartBadge();
+            CartItem newItem = new CartItem(selectedItem, quantity, selectedToppings);
+            CartManager.getInstance().addItemSync(newItem, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String data) {
+                    runOnUiThread(() -> {
+                        CartAnimationHelper.animateFlyToCart(RecommendedDealDetailActivity.this, ivDealImage, btnCart, () -> {
+                            updateCartBadge();
+                        });
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(RecommendedDealDetailActivity.this, "Không thể thêm vào giỏ hàng: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    });
+                }
             });
         });
     }
