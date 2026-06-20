@@ -44,6 +44,20 @@ public class FoodController {
         return ApiResponse.success(foodService.getFoodDetailById(foodId));
     }
 
+    // Tìm kiếm món ăn theo từ khóa (Fuzzy Search)
+    @GetMapping("/keyword")
+    public ApiResponse<java.util.List<FoodResponseDTO>> searchFoodsByKeyword(@RequestParam("q") String keyword) {
+        String cleanKeyword = keyword.trim();
+        if (cleanKeyword.isEmpty()) {
+            return ApiResponse.success(java.util.Collections.emptyList());
+        }
+        java.util.List<FoodResponseDTO> list = foodService.searchFoodsByKeyword(cleanKeyword)
+                .stream()
+                .map(FoodResponseDTO::fromEntity)
+                .toList();
+        return ApiResponse.success(list);
+    }
+
     // Lấy chi tiết 1 món ăn (public - không cần đăng nhập)
     @GetMapping("/{id}")
     public ApiResponse<FoodResponseDTO> getFoodById(@PathVariable("id") Long foodId) {

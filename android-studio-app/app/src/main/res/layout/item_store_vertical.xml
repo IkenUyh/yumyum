@@ -78,6 +78,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tv_review_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
@@ -92,6 +93,7 @@
                     android:background="#E0E0E0" />
 
                 <TextView
+                    android:id="@+id/tv_store_distance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="1.2 km"

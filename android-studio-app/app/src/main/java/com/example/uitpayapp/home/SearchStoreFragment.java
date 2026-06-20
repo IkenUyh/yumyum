@@ -101,12 +101,10 @@ public class SearchStoreFragment extends Fragment {
         }
     }
 
+    private String currentQuery = "";
+
     private void setupSearchResults() {
-        allStores = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
-            allStores.add(new Restaurant((long) i, "Cửa hàng tìm kiếm " + i, "CH" + i, 0, "Danh mục", new ArrayList<>(), 0, 4.5, 100, 20, "Địa chỉ " + i));
-        }
-        filteredStores = new ArrayList<>(allStores);
+        filteredStores = new ArrayList<>();
 
         rvSearchResults.setLayoutManager(new LinearLayoutManager(getContext()));
         searchAdapter = new SearchStoreAdapter(filteredStores, restaurant -> {
@@ -121,20 +119,61 @@ public class SearchStoreFragment extends Fragment {
     }
 
     private void filter(String query) {
+        currentQuery = query;
         if (query.isEmpty()) {
             layoutEmptyState.setVisibility(View.VISIBLE);
             rvSearchResults.setVisibility(View.GONE);
+            filteredStores.clear();
+            searchAdapter.notifyDataSetChanged();
         } else {
             layoutEmptyState.setVisibility(View.GONE);
             rvSearchResults.setVisibility(View.VISIBLE);
 
-            filteredStores.clear();
-            for (Restaurant r : allStores) {
-                if (r.getName().toLowerCase().contains(query)) {
-                    filteredStores.add(r);
+            new com.example.uitpayapp.modules.restaurant.RestaurantRepository().searchByKeyword(query, new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.restaurant.models.RestaurantDistanceViewDTO>>() {
+                @Override
+                public void onSuccess(List<com.example.uitpayapp.modules.restaurant.models.RestaurantDistanceViewDTO> result) {
+                    if (!query.equals(currentQuery)) {
+                        return;
+                    }
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(() -> {
+                        filteredStores.clear();
+                        if (result != null) {
+                            for (com.example.uitpayapp.modules.restaurant.models.RestaurantDistanceViewDTO dto : result) {
+                                Restaurant r = new Restaurant(
+                                        dto.getId(),
+                                        dto.getName(),
+                                        dto.getName(),
+                                        0,
+                                        "", // category stub
+                                        new ArrayList<>(),
+                                        0,
+                                        dto.getRatingAverage() != null ? dto.getRatingAverage() : 0.0,
+                                        dto.getReviewCount() != null ? dto.getReviewCount() : 0,
+                                        0,
+                                        dto.getAddress(),
+                                        dto.getImageUrl()
+                                );
+                                r.setDistance(dto.getDistance());
+                                filteredStores.add(r);
+                            }
+                        }
+                        searchAdapter.notifyDataSetChanged();
+                    });
                 }
-            }
-            searchAdapter.notifyDataSetChanged();
+
+                @Override
+                public void onError(String errorMessage) {
+                    if (!query.equals(currentQuery)) {
+                        return;
+                    }
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(() -> {
+                        filteredStores.clear();
+                        searchAdapter.notifyDataSetChanged();
+                    });
+                }
+            });
         }
     }
 
@@ -162,9 +201,29 @@ public class SearchStoreFragment extends Fragment {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Restaurant item = items.get(position);
             holder.tvName.setText(item.getName());
-            holder.tvCategory.setText(item.getCategory());
+            
+            // Set category or default placeholder
+            if (item.getCategory() != null && !item.getCategory().isEmpty()) {
+                holder.tvCategory.setText(item.getCategory());
+            } else {
+                holder.tvCategory.setText("Quán ăn");
+            }
 
-            // Just map some dummy rating and distance for visual
+            // Bind rating and review count
+            holder.tvRating.setText(String.format(java.util.Locale.US, "%.1f", item.getRating()));
+            holder.tvReviewCount.setText("(" + item.getReviewCount() + ")");
+
+            // Bind distance if available
+            if (item.getDistance() != null) {
+                holder.tvDistance.setText(String.format(java.util.Locale.US, "%.1f km", item.getDistance()));
+                holder.tvDistance.setVisibility(View.VISIBLE);
+            } else {
+                holder.tvDistance.setVisibility(View.GONE);
+            }
+
+            // Load remote image with placeholder animation
+            com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(holder.ivStoreImage, item.getImageUrl());
+
             holder.itemView.setOnClickListener(v -> listener.onItemClick(item));
         }
 
@@ -174,13 +233,21 @@ public class SearchStoreFragment extends Fragment {
         }
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
+            android.widget.ImageView ivStoreImage;
             TextView tvName;
             TextView tvCategory;
+            TextView tvRating;
+            TextView tvReviewCount;
+            TextView tvDistance;
 
             public ViewHolder(View itemView) {
                 super(itemView);
+                ivStoreImage = itemView.findViewById(R.id.iv_store_image);
                 tvName = itemView.findViewById(R.id.tv_store_name);
                 tvCategory = itemView.findViewById(R.id.tv_store_category);
+                tvRating = itemView.findViewById(R.id.tv_store_rating);
+                tvReviewCount = itemView.findViewById(R.id.tv_review_count);
+                tvDistance = itemView.findViewById(R.id.tv_store_distance);
             }
         }
     }
