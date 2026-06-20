@@ -63,7 +63,12 @@ public class GiftExchangeActivity extends AppCompatActivity {
         setCategoryData();
         setExchangeVoucherData();
         setBannerData();
-        SetCheckInData();
+
+        checkinAdapter = new PriorityCheckInAdapter(new ArrayList<>(), item -> HandleCheckIn(item));
+        rvCheckIn.setAdapter(checkinAdapter);
+
+        loadLoyaltyData();
+
         findViewById(R.id.gift_exchange_my_voucher).setOnClickListener(v ->
         {
             Intent intent = new Intent(this, VoucherActivity.class);
@@ -202,23 +207,87 @@ public class GiftExchangeActivity extends AppCompatActivity {
             public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>> call, Throwable t) {}
         });
     }
-    private void SetCheckInData() {
-        List<CheckInModel> checkInList = new ArrayList<>();
-        //sau nay goi api voi xu ly o day
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_1, true,false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_2, false,false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_3, false,false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_4, false,false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_5, false,false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_6, false,false));
-        checkInList.add(new CheckInModel(CheckInModel.DayConfig.DAY_7, false,false));
-        checkinAdapter= new PriorityCheckInAdapter(checkInList, item -> HandleCheckIn(item));
-        rvCheckIn.setAdapter(checkinAdapter);
+    private void loadLoyaltyData() {
+        new com.example.uitpayapp.modules.loyalty.LoyaltyRepository().getMyLoyaltyInfo(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO>() {
+            @Override
+            public void onSuccess(com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO data) {
+                runOnUiThread(() -> {
+                    TextView tvUserCoins = findViewById(R.id.tv_user_coins);
+                    if (tvUserCoins != null) {
+                        tvUserCoins.setText(" " + (data.getCurrentPoints() != null ? data.getCurrentPoints() : 0));
+                    }
+
+                    int streak = data.getCheckinStreak() != null ? data.getCheckinStreak() : 0;
+                    boolean canCheckIn = data.getCanCheckInToday() != null && data.getCanCheckInToday();
+
+                    List<CheckInModel> checkInList = new ArrayList<>();
+                    CheckInModel.DayConfig[] dayConfigs = CheckInModel.DayConfig.values();
+
+                    int todayIndex = canCheckIn ? (streak % 7) : -1;
+
+                    for (int i = 0; i < 7; i++) {
+                        boolean isOpened;
+                        boolean isChecked;
+
+                        if (canCheckIn) {
+                            if (i < todayIndex) {
+                                isOpened = true;
+                                isChecked = true;
+                            } else if (i == todayIndex) {
+                                isOpened = true;
+                                isChecked = false;
+                            } else {
+                                isOpened = false;
+                                isChecked = false;
+                            }
+                        } else {
+                            int lastCheckedIndex = (streak > 0) ? ((streak - 1) % 7) : -1;
+                            if (i <= lastCheckedIndex) {
+                                isOpened = true;
+                                isChecked = true;
+                            } else {
+                                isOpened = false;
+                                isChecked = false;
+                            }
+                        }
+
+                        checkInList.add(new CheckInModel(dayConfigs[i], isOpened, isChecked));
+                    }
+
+                    checkinAdapter = new PriorityCheckInAdapter(checkInList, item -> HandleCheckIn(item));
+                    rvCheckIn.setAdapter(checkinAdapter);
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    android.widget.Toast.makeText(GiftExchangeActivity.this, "Lỗi tải thông tin xu: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
-    private void HandleCheckIn(CheckInModel item)
-    {
-        //sau nay goi api voi xu ly o day
-        item.setChecked(true);
-        checkinAdapter.notifyDataSetChanged();
+
+    private void HandleCheckIn(CheckInModel item) {
+        new com.example.uitpayapp.modules.loyalty.LoyaltyRepository().dailyCheckIn(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO>() {
+            @Override
+            public void onSuccess(com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO data) {
+                runOnUiThread(() -> {
+                    TextView tvUserCoins = findViewById(R.id.tv_user_coins);
+                    if (tvUserCoins != null) {
+                        tvUserCoins.setText(" " + (data.getCurrentPoints() != null ? data.getCurrentPoints() : 0));
+                    }
+                    loadLoyaltyData();
+                    android.widget.Toast.makeText(GiftExchangeActivity.this, "Điểm danh thành công! Nhận " + item.getConfig().getCoins() + " xu.", android.widget.Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    android.widget.Toast.makeText(GiftExchangeActivity.this, "Lỗi điểm danh: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
 }
