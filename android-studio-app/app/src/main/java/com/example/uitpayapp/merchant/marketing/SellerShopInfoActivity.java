@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -183,6 +184,22 @@ public class SellerShopInfoActivity extends AppCompatActivity {
                     .placeholder(R.drawable.yumyum_demo_logo)
                     .circleCrop()
                     .into(ivShopAvatar);
+        }
+
+        // Bind RatingBar và text rating từ dữ liệu thực của cửa hàng
+        RatingBar ratingBar = findViewById(R.id.rating_bar);
+        TextView tvShopRating = findViewById(R.id.tv_shop_rating);
+        double rating = data.getRatingAverage() != null ? data.getRatingAverage() : 0.0;
+        int reviewCount = data.getReviewCount() != null ? data.getReviewCount() : 0;
+        if (ratingBar != null) {
+            ratingBar.setRating((float) rating);
+        }
+        if (tvShopRating != null) {
+            if (reviewCount > 0) {
+                tvShopRating.setText(String.format(java.util.Locale.US, "%.1f/5 (%d đánh giá)", rating, reviewCount));
+            } else {
+                tvShopRating.setText(String.format(java.util.Locale.US, "%.1f/5 (Chưa có đánh giá)", rating));
+            }
         }
     }
 

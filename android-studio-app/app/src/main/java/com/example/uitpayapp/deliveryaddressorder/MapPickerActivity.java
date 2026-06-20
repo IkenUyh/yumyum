@@ -118,6 +118,8 @@ public class MapPickerActivity extends AppCompatActivity {
         mapPickerFinish.setOnClickListener(v -> {
             Intent intent=new Intent();
             intent.putExtra("ADDRESS_SELECTED",etSearchAddress.getText().toString());
+            intent.putExtra("LATITUDE_SELECTED", mapView.getMapCenter().getLatitude());
+            intent.putExtra("LONGITUDE_SELECTED", mapView.getMapCenter().getLongitude());
             setResult(RESULT_OK,intent);
             finish();
         });

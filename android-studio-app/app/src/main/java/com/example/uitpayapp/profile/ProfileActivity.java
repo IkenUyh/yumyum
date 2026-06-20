@@ -34,6 +34,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.example.uitpayapp.network.SessionManager;
 import com.example.uitpayapp.modules.user.UserRepository;
 import com.example.uitpayapp.modules.user.models.responses.UserResponseDTO;
+import com.example.uitpayapp.registerstore.RegisterStoreActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -206,8 +207,11 @@ public class ProfileActivity extends AppCompatActivity {
         //Nhóm 3: Tiện ích
         List<MenuItemData> ListItems_tienich = new ArrayList<>();
         ListItems_tienich.add(new MenuItemData("Mời bạn bè", "", R.drawable.ic_invite_friend,false));
-        ListItems_tienich.add(new MenuItemData("Cửa hàng của bạn", "", R.drawable.ic_my_store,false));
-        ListItems_tienich.add(new MenuItemData("Quản lý duyệt", "5 chờ duyệt", R.drawable.list_alt_24px,false));
+        ListItems_tienich.add(new MenuItemData("Cửa hàng", "", R.drawable.ic_my_store,false));
+        SessionManager session = SessionManager.getInstance(this);
+        if (session.isLoggedIn() && "ADMIN".equalsIgnoreCase(session.getUserRole())) {
+            ListItems_tienich.add(new MenuItemData("Quản lý duyệt", "chờ duyệt", R.drawable.list_alt_24px,false));
+        }
         ListGroupItem.add(new GroupItemData("Tiện ích", ListItems_tienich));
         //Nhóm 4: Hỗ trợ
         List<MenuItemData> ListItems_support = new ArrayList<>();
@@ -223,6 +227,11 @@ public class ProfileActivity extends AppCompatActivity {
         if (item == null) return;
         
         if (item.getTitle().equals("Quản lý duyệt")) {
+            SessionManager session = SessionManager.getInstance(this);
+            if (!session.isLoggedIn() || !"ADMIN".equalsIgnoreCase(session.getUserRole())) {
+                Toast.makeText(this, "Bạn không có quyền truy cập!", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intentAdmin = new Intent(this, com.example.uitpayapp.admin.AdminApprovalActivity.class);
             startActivity(intentAdmin);
             return;
@@ -282,10 +291,40 @@ public class ProfileActivity extends AppCompatActivity {
                 Intent intentLocation=new Intent(this, com.example.uitpayapp.deliveryaddressorder.AddressOrderActivity.class);
                 startActivity(intentLocation);
                 break;
-            case "Cửa hàng của bạn":
-                showStoreSelectionDialog();
+            case "Cửa hàng":
+                showStoreOptionsBottomSheet();
                 break;
         }
+    }
+
+    private void showStoreOptionsBottomSheet() {
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_add_menu_selection, null);
+        dialog.setContentView(view);
+
+        TextView tvTitle = view.findViewById(R.id.tv_sheet_title);
+        TextView btnAddCategory = view.findViewById(R.id.btn_add_category);
+        TextView btnAddItem = view.findViewById(R.id.btn_add_item);
+        TextView btnCancel = view.findViewById(R.id.btn_cancel_sheet);
+
+        tvTitle.setText("Cửa hàng");
+        btnAddCategory.setText("Tạo cửa hàng mới");
+        btnAddItem.setText("Cửa hàng của bạn");
+
+        btnAddCategory.setOnClickListener(v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(ProfileActivity.this, RegisterStoreActivity.class);
+            startActivity(intent);
+        });
+
+        btnAddItem.setOnClickListener(v -> {
+            dialog.dismiss();
+            showStoreSelectionDialog();
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
     public static void SetDetailMenuItem(View item, String item_title, String item_subtitle, int item_icon) {
         if (item == null) return;

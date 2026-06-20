@@ -18,6 +18,9 @@ public class MerchantRequestResponseDTO {
     private String businessLicenseUrl;
     private String status;
     private String confirmationCode;
+    private String ownerName;
+    private java.math.BigDecimal latitude;
+    private java.math.BigDecimal longitude;
     private LocalDateTime createdAt;
 
     public static MerchantRequestResponseDTO fromEntity(MerchantRequest req) {
@@ -30,6 +33,9 @@ public class MerchantRequestResponseDTO {
                 .businessLicenseUrl(req.getBusinessLicenseUrl())
                 .status(req.getStatus())
                 .confirmationCode(req.getConfirmationCode())
+                .ownerName(req.getUser().getFullName())
+                .latitude(req.getLatitude())
+                .longitude(req.getLongitude())
                 .createdAt(req.getCreatedAt())
                 .build();
     }

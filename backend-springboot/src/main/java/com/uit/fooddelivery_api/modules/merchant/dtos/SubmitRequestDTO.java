@@ -10,4 +10,6 @@ public class SubmitRequestDTO {
     private String storeAddress;
     private String storePhone;
     private String confirmationCode;
+    private java.math.BigDecimal latitude;
+    private java.math.BigDecimal longitude;
 }

@@ -51,8 +51,8 @@
                 android:background="#FFFFFF"
                 android:orientation="vertical">
                 <include layout="@layout/item_info_row" android:id="@+id/row_owner_name"/>
-                <include layout="@layout/item_info_row" android:id="@+id/row_owner_id"/>
-                <include layout="@layout/item_info_row" android:id="@+id/row_owner_permanent_address"/>
+                <include layout="@layout/item_info_row" android:id="@+id/row_owner_phone"/>
+                <include layout="@layout/item_info_row" android:id="@+id/row_owner_address"/>
             </LinearLayout>
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -80,9 +80,7 @@
                 android:background="#FFFFFF"
                 android:orientation="vertical">
                 <include layout="@layout/item_info_row" android:id="@+id/row_store_name"/>
-                <include layout="@layout/item_info_row" android:id="@+id/row_store_phone"/>
                 <include layout="@layout/item_info_row" android:id="@+id/row_store_address"/>
-                <include layout="@layout/item_info_row" android:id="@+id/row_store_type"/>
             </LinearLayout>
             <TextView
                 android:layout_width="wrap_content"

@@ -35,10 +35,11 @@ public class MerchantRequestController {
         }
     }
 
-    // 2. API: Admin xem danh sách đang chờ duyệt
-    @GetMapping("/pending")
-    public ApiResponse<List<MerchantRequestResponseDTO>> getPendingRequests() {
-        List<MerchantRequestResponseDTO> list = requestService.getPendingRequests()
+    // 2. API: Admin xem danh sách theo trạng thái
+    @GetMapping("")
+    public ApiResponse<List<MerchantRequestResponseDTO>> getRequestsByStatus(
+            @RequestParam(value = "status", required = false) String status) {
+        List<MerchantRequestResponseDTO> list = requestService.getRequestsByStatus(status)
                 .stream()
                 .map(MerchantRequestResponseDTO::fromEntity)
                 .toList();

@@ -20,6 +20,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.profile.ProfileActivity;
+import com.example.uitpayapp.modules.merchant.MerchantRepository;
+import com.example.uitpayapp.network.ApiCallback;
+import com.example.uitpayapp.modules.merchant.models.responses.MerchantRequestResponseDTO;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
 
@@ -39,6 +42,7 @@ public class AdminApprovalActivity extends AppCompatActivity {
     private List<PendingDish> allDishes = new ArrayList<>();
 
     private String currentFilter = "pending";
+    private MerchantRepository merchantRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +54,10 @@ public class AdminApprovalActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_admin_approval);
 
+        merchantRepository = new MerchantRepository();
+
         initViews();
-        setupData();
         setupFilters();
-        setupTabLayout();
 
         // Default to store and pending
         filterData("pending");
@@ -65,6 +69,7 @@ public class AdminApprovalActivity extends AppCompatActivity {
         ((TextView) topBar.findViewById(R.id.top_bar_title)).setText("Quản lý duyệt");
 
         tabLayout = findViewById(R.id.tab_layout);
+        tabLayout.setVisibility(View.GONE);
         rvApprovalList = findViewById(R.id.rv_approval_list);
         rvApprovalList.setLayoutManager(new LinearLayoutManager(this));
 
@@ -109,17 +114,6 @@ public class AdminApprovalActivity extends AppCompatActivity {
         tvFilterRejected.setOnClickListener(v -> filterData("rejected"));
     }
 
-    private void setupTabLayout() {
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                filterData(currentFilter);
-            }
-            @Override public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override public void onTabReselected(TabLayout.Tab tab) {}
-        });
-    }
-
     private void filterData(String status) {
         currentFilter = status;
 
@@ -141,27 +135,33 @@ public class AdminApprovalActivity extends AppCompatActivity {
             tvFilterRejected.setTextColor(Color.parseColor("#f24405"));
         }
 
-        if (tabLayout.getSelectedTabPosition() == 0) {
-            // Stores
-            List<PendingStore> filteredStores = new ArrayList<>();
-            for (PendingStore store : allStores) {
-                if (store.getStatus().equals(status)) {
-                    filteredStores.add(store);
+        String apiStatus = status.toUpperCase(); // "PENDING", "APPROVED", "REJECTED"
+        merchantRepository.getRequestsByStatus(apiStatus, new ApiCallback<List<MerchantRequestResponseDTO>>() {
+            @Override
+            public void onSuccess(List<MerchantRequestResponseDTO> response) {
+                List<PendingStore> pendingStores = new ArrayList<>();
+                for (MerchantRequestResponseDTO dto : response) {
+                    String id = dto.getId().toString();
+                    String storeName = dto.getStoreName();
+                    String ownerName = dto.getOwnerName() != null ? dto.getOwnerName() : (dto.getStorePhone() != null ? dto.getStorePhone() : "Chưa rõ");
+                    String address = dto.getStoreAddress();
+                    String storeType = "Cửa hàng ăn uống";
+                    int imageRes = 0;
+                    String displayStatus = dto.getStatus().toLowerCase();
+                    String submittedDate = dto.getCreatedAt() != null ? dto.getCreatedAt().replace("T", " ") : "Chưa rõ";
+
+                    PendingStore pendingStore = new PendingStore(id, storeName, ownerName, address, storeType, imageRes, displayStatus, submittedDate);
+                    pendingStores.add(pendingStore);
                 }
+                storeAdapter = new PendingStoreAdapter(AdminApprovalActivity.this, pendingStores, AdminApprovalActivity.this::showStoreDetailBottomSheet);
+                rvApprovalList.setAdapter(storeAdapter);
             }
-            storeAdapter = new PendingStoreAdapter(this, filteredStores, this::showStoreDetailBottomSheet);
-            rvApprovalList.setAdapter(storeAdapter);
-        } else {
-            // Dishes
-            List<PendingDish> filteredDishes = new ArrayList<>();
-            for (PendingDish dish : allDishes) {
-                if (dish.getStatus().equals(status)) {
-                    filteredDishes.add(dish);
-                }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(AdminApprovalActivity.this, "Lỗi tải danh sách: " + error, Toast.LENGTH_SHORT).show();
             }
-            dishAdapter = new PendingDishAdapter(this, filteredDishes, this::showDishDetailBottomSheet);
-            rvApprovalList.setAdapter(dishAdapter);
-        }
+        });
     }
 
     private void showStoreDetailBottomSheet(PendingStore store) {
@@ -290,15 +290,25 @@ public class AdminApprovalActivity extends AppCompatActivity {
         view.findViewById(R.id.btn_dialog_cancel).setOnClickListener(v -> dialog.dismiss());
         view.findViewById(R.id.btn_dialog_approve).setOnClickListener(v -> {
             if (store != null) {
-                store.setStatus("approved");
-                Toast.makeText(this, "Đã duyệt cửa hàng!", Toast.LENGTH_SHORT).show();
+                Long requestId = Long.parseLong(store.getId());
+                merchantRepository.approveRequest(requestId, new ApiCallback<MerchantRequestResponseDTO>() {
+                    @Override
+                    public void onSuccess(MerchantRequestResponseDTO response) {
+                        Toast.makeText(AdminApprovalActivity.this, "Đã duyệt cửa hàng thành công!", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                        if (parentDialog != null) parentDialog.dismiss();
+                        filterData(currentFilter);
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Toast.makeText(AdminApprovalActivity.this, "Lỗi duyệt: " + error, Toast.LENGTH_SHORT).show();
+                    }
+                });
             } else if (dish != null) {
-                dish.setStatus("approved");
-                Toast.makeText(this, "Đã duyệt món ăn!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Chức năng duyệt món ăn tạm thời chưa khả dụng!", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
             }
-            dialog.dismiss();
-            if (parentDialog != null) parentDialog.dismiss();
-            filterData(currentFilter);
         });
 
         dialog.show();
@@ -322,17 +332,25 @@ public class AdminApprovalActivity extends AppCompatActivity {
             }
 
             if (store != null) {
-                store.setStatus("rejected");
-                store.setRejectReason(reason);
-                Toast.makeText(this, "Đã từ chối cửa hàng!", Toast.LENGTH_SHORT).show();
+                Long requestId = Long.parseLong(store.getId());
+                merchantRepository.rejectRequest(requestId, new ApiCallback<MerchantRequestResponseDTO>() {
+                    @Override
+                    public void onSuccess(MerchantRequestResponseDTO response) {
+                        Toast.makeText(AdminApprovalActivity.this, "Đã từ chối cửa hàng thành công!", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                        if (parentDialog != null) parentDialog.dismiss();
+                        filterData(currentFilter);
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Toast.makeText(AdminApprovalActivity.this, "Lỗi từ chối: " + error, Toast.LENGTH_SHORT).show();
+                    }
+                });
             } else if (dish != null) {
-                dish.setStatus("rejected");
-                dish.setRejectReason(reason);
-                Toast.makeText(this, "Đã từ chối món ăn!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Chức năng từ chối món ăn tạm thời chưa khả dụng!", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
             }
-            dialog.dismiss();
-            if (parentDialog != null) parentDialog.dismiss();
-            filterData(currentFilter);
         });
 
         dialog.show();

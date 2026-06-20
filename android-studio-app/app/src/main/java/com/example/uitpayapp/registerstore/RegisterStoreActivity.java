@@ -25,6 +25,8 @@ public class RegisterStoreActivity extends AppCompatActivity {
     private String storePhone = "Chưa cập nhật";
     private String storeAddress = "Chưa cập nhật";
     private String storeType = "Chưa cập nhật";
+    private Double latitude = 0.0;
+    private Double longitude = 0.0;
 
     private TextView tvBottomSheetAddressRef;
 
@@ -59,9 +61,7 @@ public class RegisterStoreActivity extends AppCompatActivity {
 
         View.OnClickListener openSheetListener = v -> showRegisterStoreInfoBottomSheet();
         findViewById(R.id.row_store_name).setOnClickListener(openSheetListener);
-        findViewById(R.id.row_store_phone).setOnClickListener(openSheetListener);
         findViewById(R.id.row_store_address).setOnClickListener(openSheetListener);
-        findViewById(R.id.row_store_type).setOnClickListener(openSheetListener);
         findViewById(R.id.tv_register_store_edit_store_info).setOnClickListener(openSheetListener);
 
         findViewById(R.id.btn_register_store_submit).setOnClickListener(v -> {
@@ -69,23 +69,51 @@ public class RegisterStoreActivity extends AppCompatActivity {
                 Toast.makeText(this, "Vui lòng cập nhật đầy đủ thông tin cửa hàng", Toast.LENGTH_SHORT).show();
                 return;
             }
-            Toast.makeText(this, "Yêu cầu của bạn đã được gửi và đang chờ duyệt!", Toast.LENGTH_LONG).show();
-            finish();
+
+            com.example.uitpayapp.modules.merchant.MerchantRepository merchantRepository = new com.example.uitpayapp.modules.merchant.MerchantRepository();
+            com.example.uitpayapp.modules.merchant.models.requests.SubmitRequestDTO dto = 
+                new com.example.uitpayapp.modules.merchant.models.requests.SubmitRequestDTO(
+                    storeName,
+                    storeAddress,
+                    storePhone,
+                    "LIC" + System.currentTimeMillis(),
+                    latitude,
+                    longitude
+                );
+
+            merchantRepository.submitRequest(dto, null, new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.merchant.models.responses.MerchantRequestResponseDTO>() {
+                @Override
+                public void onSuccess(com.example.uitpayapp.modules.merchant.models.responses.MerchantRequestResponseDTO response) {
+                    Toast.makeText(RegisterStoreActivity.this, "Yêu cầu của bạn đã được gửi và đang chờ duyệt!", Toast.LENGTH_LONG).show();
+                    finish();
+                }
+
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(RegisterStoreActivity.this, "Lỗi đăng ký cửa hàng: " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
         });
     }
 
     private void setupInitialData() {
-        setRowData(R.id.row_owner_name, "Họ và tên chủ quán", "Nguyễn Văn A");
-        setRowData(R.id.row_owner_id, "Số CCCD/MST", "0123456789");
-        setRowData(R.id.row_owner_permanent_address, "Địa chỉ thường trú", "Thủ Đức, TP.HCM");
+        com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        String name = session.getUserName();
+        String phone = session.getUserPhone();
+
+        setRowData(R.id.row_owner_name, "Họ và tên chủ quán", name != null && !name.isEmpty() ? name : "Chưa cập nhật");
+        setRowData(R.id.row_owner_phone, "Số điện thoại chủ", phone != null && !phone.isEmpty() ? phone : "Chưa cập nhật");
+        setRowData(R.id.row_owner_address, "Email chủ quán", session.getUserEmail() != null && !session.getUserEmail().isEmpty() ? session.getUserEmail() : "Chưa cập nhật");
+
+        if (phone != null && !phone.isEmpty()) {
+            storePhone = phone;
+        }
         updateStoreRowsUI();
     }
 
     private void updateStoreRowsUI() {
         setRowData(R.id.row_store_name, "Tên cửa hàng", storeName);
-        setRowData(R.id.row_store_phone, "Số điện thoại quán", storePhone);
         setRowData(R.id.row_store_address, "Địa chỉ quán", storeAddress);
-        setRowData(R.id.row_store_type, "Loại hình kinh doanh", storeType);
     }
 
     private void setRowData(int viewId, String label, String value) {
@@ -102,51 +130,58 @@ public class RegisterStoreActivity extends AppCompatActivity {
         View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_register_store_info, null);
         bottomSheetDialog.setContentView(view);
         EditText etName = view.findViewById(R.id.et_store_name);
-        EditText etPhone = view.findViewById(R.id.et_store_phone);
         TextView tvAddress = view.findViewById(R.id.tv_selected_store_address);
-        TextView tvType = view.findViewById(R.id.tv_selected_store_type);
 
         if (!storeName.equals("Chưa cập nhật")) etName.setText(storeName);
-        if (!storePhone.equals("Chưa cập nhật")) etPhone.setText(storePhone);
-        if (!storeAddress.equals("Chưa cập nhật")) {
+        if (!storeAddress.equals("Chưa cập nhật") && !storeAddress.equals("Chọn địa chỉ từ bản đồ")) {
             tvAddress.setText(storeAddress);
             tvAddress.setTextColor(Color.BLACK);
         }
-        if (!storeType.equals("Chưa cập nhật")) {
-            tvType.setText(storeType);
-            tvType.setTextColor(Color.BLACK);
-        }
         tvBottomSheetAddressRef = tvAddress;
         view.findViewById(R.id.layout_select_store_address).setOnClickListener(v -> {
-            Intent intent = new Intent(this, MapPickerActivity.class);
-            startActivityForResult(intent, 100);
-        });
-        view.findViewById(R.id.layout_select_store_type).setOnClickListener(v -> {
-            PopupMenu popupMenu = new PopupMenu(this, v);
-            String[] types = {"Đồ ăn", "Thức uống", "Tiệm bánh", "Siêu thị/Tạp hóa", "Hoa & Quà tặng"};
-            for (String type : types) popupMenu.getMenu().add(type);
-            popupMenu.setOnMenuItemClickListener(item -> {
-                tvType.setText(item.getTitle());
-                tvType.setTextColor(Color.BLACK);
-                return true;
-            });
-            popupMenu.show();
+            CharSequence[] options = {"Nhập địa chỉ cửa hàng", "Chọn địa chỉ qua bản đồ"};
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("Phương thức chọn địa chỉ")
+                .setItems(options, (dialogInterface, i) -> {
+                    if (i == 0) {
+                        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+                        builder.setTitle("Nhập địa chỉ cửa hàng");
+                        final EditText input = new EditText(this);
+                        input.setHint("Nhập số nhà, tên đường, quận/huyện...");
+                        if (!storeAddress.equals("Chưa cập nhật") && !storeAddress.equals("Chọn địa chỉ từ bản đồ")) {
+                            input.setText(storeAddress);
+                        }
+                        builder.setView(input);
+                        builder.setPositiveButton("Xác nhận", (dialog, which) -> {
+                            String manualAddress = input.getText().toString().trim();
+                            if (!manualAddress.isEmpty()) {
+                                tvAddress.setText(manualAddress);
+                                tvAddress.setTextColor(Color.BLACK);
+                                storeAddress = manualAddress;
+                                latitude = 0.0;
+                                longitude = 0.0;
+                            }
+                        });
+                        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
+                        builder.show();
+                    } else {
+                        Intent intent = new Intent(this, MapPickerActivity.class);
+                        startActivityForResult(intent, 100);
+                    }
+                })
+                .show();
         });
         view.findViewById(R.id.btn_save_store_info).setOnClickListener(v -> {
             String name = etName.getText().toString().trim();
-            String phone = etPhone.getText().toString().trim();
             String address = tvAddress.getText().toString();
-            String type = tvType.getText().toString();
 
-            if (name.isEmpty() || address.equals("Chọn địa chỉ từ bản đồ")) {
+            if (name.isEmpty() || address.equals("Chọn địa chỉ từ bản đồ") || address.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập tên và chọn địa chỉ quán", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             storeName = name;
-            storePhone = phone.isEmpty() ? "Chưa cập nhật" : phone;
             storeAddress = address;
-            storeType = type.equals("Chọn loại hình quán") ? "Chưa cập nhật" : type;
 
             updateStoreRowsUI();
             bottomSheetDialog.dismiss();
@@ -162,9 +197,14 @@ public class RegisterStoreActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 100 && resultCode == RESULT_OK && data != null) {
             String address = data.getStringExtra("ADDRESS_SELECTED");
+            double lat = data.getDoubleExtra("LATITUDE_SELECTED", 0.0);
+            double lon = data.getDoubleExtra("LONGITUDE_SELECTED", 0.0);
             if (address != null && tvBottomSheetAddressRef != null) {
                 tvBottomSheetAddressRef.setText(address);
                 tvBottomSheetAddressRef.setTextColor(Color.BLACK);
+                storeAddress = address;
+                latitude = lat;
+                longitude = lon;
             }
         }
     }
