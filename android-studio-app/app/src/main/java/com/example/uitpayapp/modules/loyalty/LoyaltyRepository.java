@@ -5,6 +5,9 @@ import com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO;
 import com.example.uitpayapp.network.ApiCallback;
 import com.example.uitpayapp.network.RetrofitClient;
 
+import com.example.uitpayapp.history.DealHistory;
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -39,6 +42,20 @@ public class LoyaltyRepository {
 
             @Override
             public void onFailure(Call<ApiResponse<LoyaltyResponseDTO>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void getMyDeals(final ApiCallback<List<DealHistory>> callback) {
+        loyaltyService.getMyDeals().enqueue(new Callback<ApiResponse<List<DealHistory>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<DealHistory>>> call, Response<ApiResponse<List<DealHistory>>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<DealHistory>>> call, Throwable t) {
                 callback.onError(t.getMessage());
             }
         });
