@@ -125,6 +125,11 @@ public class FoodDetailBottomSheetHelper {
         });
 
         btnAddToCart.setOnClickListener(v -> {
+            com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(context);
+            if (!sessionManager.isLoggedIn()) {
+                com.example.uitpayapp.utils.LoginPopupHelper.showLoginRequiredPopup(context);
+                return;
+            }
             if (listener != null) {
                 listener.onAddToCart(item, popupQty[0], new ArrayList<>(selectedToppings));
             }

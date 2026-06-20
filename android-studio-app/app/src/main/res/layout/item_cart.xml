@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/img_food_chicken" />
+            android:src="#E0E0E0" />
     </androidx.cardview.widget.CardView>
 
     <!-- Thông tin món -->

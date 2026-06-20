@@ -132,7 +132,6 @@ public class RecommendedDealActivity extends AppCompatActivity {
     }
 
     private void loadDummyData() {
-        allDeals.addAll(com.example.uitpayapp.home.HomeActivity.HomeRepository.getInstance().getRecommendedDeals());
         filterDeals();
     }
 }

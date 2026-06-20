@@ -77,7 +77,6 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
         tvDealName = findViewById(R.id.tv_deal_name);
         ivStoreLogo = findViewById(R.id.iv_store_logo);
         tvStoreName = findViewById(R.id.tv_store_name);
-        tvRating = findViewById(R.id.tv_rating);
         tvDistance = findViewById(R.id.tv_distance);
         tvDeliveryTime = findViewById(R.id.tv_delivery_time);
         tvDiscountPriceFooter = findViewById(R.id.tv_discount_price_footer);
@@ -87,6 +86,10 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
         tvCartBadge = findViewById(R.id.tv_cart_badge);
         
         btnCart.setOnClickListener(v -> {
+            if (!com.example.uitpayapp.network.SessionManager.getInstance(this).isLoggedIn()) {
+                com.example.uitpayapp.utils.LoginPopupHelper.showLoginRequiredPopup(this);
+                return;
+            }
             startActivity(new android.content.Intent(this, CartActivity.class));
         });
 
@@ -117,70 +120,70 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
             double originalPrice = extras.getDouble("original_price", 0);
             double distance = extras.getDouble("distance", 0);
             int deliveryTime = extras.getInt("delivery_time", 0);
-            int foodImage = extras.getInt("food_image", R.drawable.img_food_chicken);
+            int foodImage = extras.getInt("food_image", 0);
             String imageUrl = extras.getString("image_url", "");
-             double rating = extras.getDouble("rating", 4.5);
-             long restaurantId = extras.getLong("restaurant_id", -1L);
+            double rating = extras.getDouble("rating", 4.5);
+            long restaurantId = extras.getLong("restaurant_id", -1L);
 
-             tvDealName.setText(foodTitle);
-             tvStoreName.setText(storeName);
-             tvDiscountPrice.setText(currencyFormatter.format(discountPrice));
-             tvDiscountPriceFooter.setText(currencyFormatter.format(discountPrice));
-             tvOriginalPrice.setText(currencyFormatter.format(originalPrice));
-             tvDistance.setText(distance + "km");
-             tvDeliveryTime.setText(deliveryTime + " phút");
-             tvRating.setText(String.valueOf(rating));
-             tvSaving.setText(currencyFormatter.format(originalPrice - discountPrice));
+            tvDealName.setText(foodTitle);
+            tvStoreName.setText(storeName);
+            tvDiscountPrice.setText(currencyFormatter.format(discountPrice));
+            tvDiscountPriceFooter.setText(currencyFormatter.format(discountPrice));
+            tvOriginalPrice.setText(currencyFormatter.format(originalPrice));
+            tvDistance.setText(distance + "km");
+            tvDeliveryTime.setText(deliveryTime + " phút");
+            tvRating.setText(String.valueOf(rating));
+            tvSaving.setText(currencyFormatter.format(originalPrice - discountPrice));
 
-             android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
-             if (imageUrl != null && !imageUrl.isEmpty()) {
-                 android.view.animation.AlphaAnimation blinkAnimation = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
-                 blinkAnimation.setDuration(500);
-                 blinkAnimation.setRepeatMode(android.view.animation.Animation.REVERSE);
-                 blinkAnimation.setRepeatCount(android.view.animation.Animation.INFINITE);
-                 ivDealImage.startAnimation(blinkAnimation);
+            android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                android.view.animation.AlphaAnimation blinkAnimation = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
+                blinkAnimation.setDuration(500);
+                blinkAnimation.setRepeatMode(android.view.animation.Animation.REVERSE);
+                blinkAnimation.setRepeatCount(android.view.animation.Animation.INFINITE);
+                ivDealImage.startAnimation(blinkAnimation);
 
-                 com.bumptech.glide.request.RequestOptions options = new com.bumptech.glide.request.RequestOptions().placeholder(grayPlaceholder);
-                 com.bumptech.glide.Glide.with(this)
-                         .load(imageUrl)
-                         .apply(options)
-                         .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
-                             @Override
-                             public boolean onLoadFailed(@androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
-                                 ivDealImage.clearAnimation();
-                                 return false;
-                             }
+                com.bumptech.glide.request.RequestOptions options = new com.bumptech.glide.request.RequestOptions().placeholder(grayPlaceholder);
+                com.bumptech.glide.Glide.with(this)
+                        .load(imageUrl)
+                        .apply(options)
+                        .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(@androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                                ivDealImage.clearAnimation();
+                                return false;
+                            }
 
-                             @Override
-                             public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
-                                 ivDealImage.clearAnimation();
-                                 return false;
-                             }
-                         })
-                         .into(ivDealImage);
-             } else if (foodImage != 0) {
-                 ivDealImage.setImageResource(foodImage);
-             } else {
-                 ivDealImage.setImageDrawable(grayPlaceholder);
-             }
+                            @Override
+                            public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                                ivDealImage.clearAnimation();
+                                return false;
+                            }
+                        })
+                        .into(ivDealImage);
+            } else if (foodImage != 0) {
+                ivDealImage.setImageResource(foodImage);
+            } else {
+                ivDealImage.setImageDrawable(grayPlaceholder);
+            }
 
-             FoodMenuItem item = new FoodMenuItem("deal_" + System.currentTimeMillis(), foodTitle, (long) discountPrice, foodImage, "Khuyến mãi từ " + storeName, imageUrl);
-             if (restaurantId != -1L) {
-                 item.setRestaurantId(restaurantId);
-             }
-             btnBuyNow.setOnClickListener(v -> showFoodItemDetailPopup(item));
+            FoodMenuItem item = new FoodMenuItem("deal_" + System.currentTimeMillis(), foodTitle, (long) discountPrice, foodImage, "Khuyến mãi từ " + storeName, imageUrl);
+            if (restaurantId != -1L) {
+                item.setRestaurantId(restaurantId);
+            }
+            btnBuyNow.setOnClickListener(v -> showFoodItemDetailPopup(item));
 
-             View cvStoreInfo = findViewById(R.id.cv_store_info);
-             if (cvStoreInfo != null) {
-                 cvStoreInfo.setOnClickListener(v -> {
-                     android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.home.StoreDetailActivity.class);
-                     intent.putExtra(com.example.uitpayapp.home.StoreDetailActivity.EXTRA_RESTAURANT_NAME, storeName);
-                     if (restaurantId != -1L) {
-                         intent.putExtra(com.example.uitpayapp.home.StoreDetailActivity.EXTRA_RESTAURANT_ID, restaurantId);
-                     }
-                     startActivity(intent);
-                 });
-             }
+            View cvStoreInfo = findViewById(R.id.cv_store_info);
+            if (cvStoreInfo != null) {
+                cvStoreInfo.setOnClickListener(v -> {
+                    android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.home.StoreDetailActivity.class);
+                    intent.putExtra(com.example.uitpayapp.home.StoreDetailActivity.EXTRA_RESTAURANT_NAME, storeName);
+                    if (restaurantId != -1L) {
+                        intent.putExtra(com.example.uitpayapp.home.StoreDetailActivity.EXTRA_RESTAURANT_ID, restaurantId);
+                    }
+                    startActivity(intent);
+                });
+            }
         }
     }
 

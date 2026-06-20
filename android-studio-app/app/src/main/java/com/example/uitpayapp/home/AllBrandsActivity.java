@@ -56,30 +56,41 @@ public class AllBrandsActivity extends AppCompatActivity {
         RecyclerView rvBrands = findViewById(R.id.rv_all_brands);
         rvBrands.setLayoutManager(new LinearLayoutManager(this));
 
-        List<Restaurant> restaurants = generateMockRestaurants();
-        AllBrandsAdapter adapter = new AllBrandsAdapter(restaurants, restaurant -> {
+        AllBrandsAdapter adapter = new AllBrandsAdapter(new ArrayList<>(), restaurant -> {
             Intent intent = new Intent(this, StoreDetailActivity.class);
             intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, restaurant.getName());
+            intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_ID, restaurant.getId());
             startActivity(intent);
         });
         rvBrands.setAdapter(adapter);
+
+        fetchBrands(adapter);
     }
 
-    private List<Restaurant> generateMockRestaurants() {
-        // Reuse the dummy food list
-        List<FoodMenuItem> dummyFoods = Arrays.asList(
-                new FoodMenuItem("1", "Gà rán", 50000, R.drawable.img_food_chicken, "1 MIẾNG GÀ RÁN GIÒN + 1 GÀ POPCORN..."),
-                new FoodMenuItem("2", "Pizza", 150000, R.drawable.img_food_pizza, "Pizza thập cẩm..."),
-                new FoodMenuItem("3", "Trà sữa", 45000, R.drawable.img_food_bubbletea, "Trà sữa trân châu...")
-        );
+    private void fetchBrands(AllBrandsAdapter adapter) {
+        com.example.uitpayapp.network.RetrofitClient.getRestaurantService().getAllRestaurants().enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>>() {
+            @Override
+            public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    List<Restaurant> mappedRestaurants = new ArrayList<>();
+                    for (com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto : response.body().getData()) {
+                        String shortName = dto.getName() != null && dto.getName().length() > 0 ? dto.getName().substring(0, 1) : "A";
+                        mappedRestaurants.add(new Restaurant(
+                                dto.getId(), dto.getName(), shortName,
+                                Color.parseColor("#E4002B"), "Danh mục",
+                                new ArrayList<>(), 0,
+                                4.5, 100, 30, dto.getAddress(), dto.getImageUrl()));
+                    }
+                    adapter.updateData(mappedRestaurants);
+                } else {
+                    android.widget.Toast.makeText(AllBrandsActivity.this, "Lỗi khi tải danh sách thương hiệu", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }
 
-        return Arrays.asList(
-                new Restaurant("Phúc Long - Giga Mall", "PL", Color.parseColor("#00603A"), "Trà & Cà phê", dummyFoods, R.drawable.img_food_bubbletea, 4.8, 1250, 25, "Giga Mall, Thủ Đức"),
-                new Restaurant("Gà Rán Popeyes", "PP", Color.parseColor("#E65100"), "Gà rán", dummyFoods, R.drawable.img_food_chicken, 4.5, 980, 20, "Võ Văn Ngân, Thủ Đức"),
-                new Restaurant("The Pizza Company", "PC", Color.parseColor("#1B5E20"), "Pizza & Pasta", dummyFoods, R.drawable.img_food_pizza, 4.2, 450, 35, "Vincom Thủ Đức"),
-                new Restaurant("Highlands Coffee", "HL", Color.parseColor("#B71C1C"), "Trà & Cà phê", dummyFoods, R.drawable.img_food_coffee, 4.7, 3200, 15, "Làng Đại Học"),
-                new Restaurant("KFC - Xa lộ Hà Nội", "KFC", Color.parseColor("#D32F2F"), "Gà rán", dummyFoods, R.drawable.img_food_chicken, 4.4, 2100, 25, "Xa lộ Hà Nội, Quận 9"),
-                new Restaurant("Domino's Pizza", "DP", Color.parseColor("#0D47A1"), "Pizza", dummyFoods, R.drawable.img_food_pizza, 4.6, 850, 30, "Lê Văn Việt, Quận 9")
-        );
+            @Override
+            public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call, Throwable t) {
+                android.widget.Toast.makeText(AllBrandsActivity.this, "Lỗi kết nối", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

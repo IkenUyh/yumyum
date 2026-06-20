@@ -87,25 +87,40 @@ public class HomeViewModel extends ViewModel {
 
     private void fetchBrandsData() {
         brandsData.setValue(UiState.loading(null));
-        apiService.getPopularBrands(currentAddressId).enqueue(new Callback<ApiResponse<BrandResponse>>() {
+        RetrofitClient.getRestaurantService().getAllRestaurants().enqueue(new Callback<ApiResponse<List<RestaurantResponseDTO>>>() {
             @Override
-            public void onResponse(Call<ApiResponse<BrandResponse>> call, Response<ApiResponse<BrandResponse>> response) {
+            public void onResponse(Call<ApiResponse<List<RestaurantResponseDTO>>> call, Response<ApiResponse<List<RestaurantResponseDTO>>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    BrandResponse data = response.body().getData();
-                    if (data.getBrands() == null || data.getBrands().isEmpty()) {
+                    List<RestaurantResponseDTO> dtos = response.body().getData();
+                    if (dtos.isEmpty()) {
                         brandsData.setValue(UiState.empty());
                     } else {
-                        brandsData.setValue(UiState.success(data));
+                        // Map RestaurantResponseDTO -> Restaurant (giới hạn tối đa 10)
+                        List<com.example.uitpayapp.home.home_models.Restaurant> mappedRestaurants = new ArrayList<>();
+                        int limit = Math.min(dtos.size(), 10);
+                        for (int i = 0; i < limit; i++) {
+                            RestaurantResponseDTO dto = dtos.get(i);
+                            String shortName = dto.getName() != null && dto.getName().length() > 0
+                                    ? dto.getName().substring(0, 1) : "A";
+                            mappedRestaurants.add(new com.example.uitpayapp.home.home_models.Restaurant(
+                                    dto.getId(), dto.getName(), shortName,
+                                    android.graphics.Color.parseColor("#E4002B"), "Danh mục",
+                                    new ArrayList<>(), 0,
+                                    4.5, 100, 30, dto.getAddress(), dto.getImageUrl()));
+                        }
+                        BrandResponse brandResponse = new BrandResponse();
+                        brandResponse.setBrands(mappedRestaurants);
+                        brandsData.setValue(UiState.success(brandResponse));
                     }
                 } else {
-                    android.util.Log.w("HomeViewModel", "getPopularBrands: FAIL (code " + response.code() + ") - Showing error.");
+                    android.util.Log.w("HomeViewModel", "getAllRestaurants: FAIL (code " + response.code() + ") - Showing error.");
                     brandsData.setValue(UiState.error("Không kết nối được server (Lỗi: " + response.code() + ")", null));
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<BrandResponse>> call, Throwable t) {
-                android.util.Log.e("HomeViewModel", "getPopularBrands: FAILURE (" + t.getMessage() + ") - Showing error.");
+            public void onFailure(Call<ApiResponse<List<RestaurantResponseDTO>>> call, Throwable t) {
+                android.util.Log.e("HomeViewModel", "getAllRestaurants: FAILURE (" + t.getMessage() + ") - Showing error.");
                 brandsData.setValue(UiState.error("Không kết nối được server (" + t.getMessage() + ")", null));
             }
         });
@@ -235,7 +250,7 @@ public class HomeViewModel extends ViewModel {
                 ));
             }
             if (!items.isEmpty()) {
-                result.add(new TopicResponse(cat.getName(), "", items));
+                result.add(new TopicResponse(cat.getName(), "", cat.getId(), items));
             }
         }
         
@@ -256,39 +271,39 @@ public class HomeViewModel extends ViewModel {
                 "    { \"id\": \"b3\", \"imageUrl\": \"https://dummyimage.com/600x300/3366ff/fff&text=Banner+3\", \"link\": \"\" }" +
                 "  ]," +
                 "  \"categories\": [" +
-                "    { \"name\": \"Cơm\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_com + ", \"bgColor\": -1748736 }," +
-                "    { \"name\": \"Bún Phở\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_bun_pho + ", \"bgColor\": -16743281 }," +
-                "    { \"name\": \"Bánh mì\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_banh_mi + ", \"bgColor\": -4246004 }," +
-                "    { \"name\": \"Fastfood\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_fastfood + ", \"bgColor\": -3790552 }," +
-                "    { \"name\": \"Lẩu\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_lau + ", \"bgColor\": -2604267 }," +
-                "    { \"name\": \"Đồ nướng\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_bbq + ", \"bgColor\": -4777216 }," +
-                "    { \"name\": \"Cafe\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_ca_phe + ", \"bgColor\": -11651810 }," +
-                "    { \"name\": \"Trà sữa\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_tra_sua + ", \"bgColor\": -7508125 }," +
-                "    { \"name\": \"Ăn vặt\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_an_vat + ", \"bgColor\": -9823334 }," +
-                "    { \"name\": \"Danh mục\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_all + ", \"bgColor\": -14142317, \"isSelectAll\": true }" +
+                "    { \"id\": 1, \"name\": \"Cơm\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_com + ", \"bgColor\": -1748736 }," +
+                "    { \"id\": 2, \"name\": \"Bún Phở\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_bun_pho + ", \"bgColor\": -16743281 }," +
+                "    { \"id\": 3, \"name\": \"Bánh mì\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_banh_mi + ", \"bgColor\": -4246004 }," +
+                "    { \"id\": 4, \"name\": \"Fastfood\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_fastfood + ", \"bgColor\": -3790552 }," +
+                "    { \"id\": 5, \"name\": \"Lẩu\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_lau + ", \"bgColor\": -2604267 }," +
+                "    { \"id\": 6, \"name\": \"Đồ nướng\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_bbq + ", \"bgColor\": -4777216 }," +
+                "    { \"id\": 7, \"name\": \"Cafe\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_ca_phe + ", \"bgColor\": -11651810 }," +
+                "    { \"id\": 8, \"name\": \"Trà sữa\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_tra_sua + ", \"bgColor\": -7508125 }," +
+                "    { \"id\": 9, \"name\": \"Ăn vặt\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_an_vat + ", \"bgColor\": -9823334 }," +
+                "    { \"id\": 10, \"name\": \"Danh mục\", \"iconResId\": " + com.example.uitpayapp.R.drawable.ic_cat_all + ", \"bgColor\": -14142317, \"isSelectAll\": true }" +
                 "  ]," +
                 "  \"flashSales\": [" +
-                "    { \"id\": \"d_1\", \"name\": \"Gà rán truyền thống\", \"price\": 45000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_chicken + ", \"description\": \"1 miếng gà rán giòn\" }," +
-                "    { \"id\": \"d_2\", \"name\": \"Combo gà rán + khoai\", \"price\": 89000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_chicken + ", \"description\": \"2 miếng gà + khoai tây\" }," +
-                "    { \"id\": \"d_3\", \"name\": \"Burger gà giòn\", \"price\": 39000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_chicken + ", \"description\": \"Burger gà với rau tươi\" }" +
+                "    { \"id\": \"d_1\", \"name\": \"Gà rán truyền thống\", \"price\": 45000, \"imageResId\": " + 0 + ", \"description\": \"1 miếng gà rán giòn\" }," +
+                "    { \"id\": \"d_2\", \"name\": \"Combo gà rán + khoai\", \"price\": 89000, \"imageResId\": " + 0 + ", \"description\": \"2 miếng gà + khoai tây\" }," +
+                "    { \"id\": \"d_3\", \"name\": \"Burger gà giòn\", \"price\": 39000, \"imageResId\": " + 0 + ", \"description\": \"Burger gà với rau tươi\" }" +
                 "  ]," +
                 "  \"topics\": [" +
                 "    {" +
                 "      \"title\": \"Món Ngon Gần Bạn\"," +
                 "      \"subtitle\": \"Khám phá ẩm thực xung quanh bạn\"," +
                 "      \"items\": [" +
-                "        { \"id\": \"f_1\", \"name\": \"Gà rán KFC\", \"price\": 45000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_chicken + ", \"description\": \"Gà rán giòn rụm\" }," +
-                "        { \"id\": \"f_2\", \"name\": \"Trà sữa thái\", \"price\": 25000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_bubbletea + ", \"description\": \"Trà sữa thái xanh trân châu\" }," +
-                "        { \"id\": \"f_3\", \"name\": \"Cà phê đen đá\", \"price\": 15000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_coffee + ", \"description\": \"Cà phê phin truyền thống\" }" +
+                "        { \"id\": \"f_1\", \"name\": \"Gà rán KFC\", \"price\": 45000, \"imageResId\": " + 0 + ", \"description\": \"Gà rán giòn rụm\" }," +
+                "        { \"id\": \"f_2\", \"name\": \"Trà sữa thái\", \"price\": 25000, \"imageResId\": " + 0 + ", \"description\": \"Trà sữa thái xanh trân châu\" }," +
+                "        { \"id\": \"f_3\", \"name\": \"Cà phê đen đá\", \"price\": 15000, \"imageResId\": " + 0 + ", \"description\": \"Cà phê phin truyền thống\" }" +
                 "      ]" +
                 "    }," +
                 "    {" +
                 "      \"title\": \"Ưu Đãi Hôm Nay\"," +
                 "      \"subtitle\": \"Khuyến mãi cực hot dành riêng cho bạn\"," +
                 "      \"items\": [" +
-                "        { \"id\": \"f_4\", \"name\": \"Pizza xúc xích\", \"price\": 89000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_pizza + ", \"description\": \"Pizza phô mai xúc xích\" }," +
-                "        { \"id\": \"f_5\", \"name\": \"Gà cay phô mai\", \"price\": 55000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_chicken + ", \"description\": \"Gà xào bắp cải phô mai\" }," +
-                "        { \"id\": \"f_6\", \"name\": \"Trà đào\", \"price\": 30000, \"imageResId\": " + com.example.uitpayapp.R.drawable.img_food_bubbletea + ", \"description\": \"Trà đào cam sả thanh mát\" }" +
+                "        { \"id\": \"f_4\", \"name\": \"Pizza xúc xích\", \"price\": 89000, \"imageResId\": " + 0 + ", \"description\": \"Pizza phô mai xúc xích\" }," +
+                "        { \"id\": \"f_5\", \"name\": \"Gà cay phô mai\", \"price\": 55000, \"imageResId\": " + 0 + ", \"description\": \"Gà xào bắp cải phô mai\" }," +
+                "        { \"id\": \"f_6\", \"name\": \"Trà đào\", \"price\": 30000, \"imageResId\": " + 0 + ", \"description\": \"Trà đào cam sả thanh mát\" }" +
                 "      ]" +
                 "    }" +
                 "  ]" +
@@ -297,8 +312,10 @@ public class HomeViewModel extends ViewModel {
     }
 
     private BrandResponse getMockBrandResponse() {
-        java.util.List<com.example.uitpayapp.home.home_models.Restaurant> restaurantsList =
-                HomeActivity.HomeRepository.getInstance().getRestaurants();
+        java.util.List<com.example.uitpayapp.home.home_models.Restaurant> restaurantsList = new java.util.ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            restaurantsList.add(new com.example.uitpayapp.home.home_models.Restaurant((long) i, "KFC " + i, "KFC", 0, "Gà rán", new java.util.ArrayList<>(), 0, 4.8, 1250, 25, "KFC Võ Văn Ngân"));
+        }
         String json = "{" +
                 "  \"brands\": " + new com.google.gson.Gson().toJson(restaurantsList) +
                 "}";

@@ -77,4 +77,11 @@ public class CategoryViewModel extends ViewModel {
     public boolean hasData() {
         return !originalFoods.isEmpty();
     }
+
+    /**
+     * Báo lỗi ngay lập tức mà không cần gọi API (ví dụ id danh mục không hợp lệ)
+     */
+    public void triggerError(String message) {
+        foodsData.setValue(UiState.error(message, null));
+    }
 }

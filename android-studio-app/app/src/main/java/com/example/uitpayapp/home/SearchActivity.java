@@ -45,6 +45,10 @@ public class SearchActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         findViewById(R.id.btn_cart).setOnClickListener(v -> {
+            if (!com.example.uitpayapp.network.SessionManager.getInstance(this).isLoggedIn()) {
+                com.example.uitpayapp.utils.LoginPopupHelper.showLoginRequiredPopup(this);
+                return;
+            }
             startActivity(new Intent(this, CartActivity.class));
         });
 

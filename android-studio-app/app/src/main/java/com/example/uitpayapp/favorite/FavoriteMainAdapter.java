@@ -110,16 +110,10 @@ public class FavoriteMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             vsh.tvInfo.setText("⭐ " + shop.getRating() + "  |  " + shop.getDistance() + "km  |  "
                     + shop.getDeliveryTime() + "phút");
             vsh.tvDiscount.setVisibility(View.GONE);
+            
+            // Resolved conflict: Use getFormattedImageUrl and our flashing placeholder
             String formattedUrl = getFormattedImageUrl(shop.getImageUrl());
-            if (formattedUrl != null) {
-                com.bumptech.glide.Glide.with(vsh.ivImage.getContext())
-                        .load(formattedUrl)
-                        .placeholder(R.drawable.img_food_chicken)
-                        .error(shop.getImageResId() != 0 ? shop.getImageResId() : R.drawable.img_food_chicken)
-                        .into(vsh.ivImage);
-            } else {
-                vsh.ivImage.setImageResource(shop.getImageResId() != 0 ? shop.getImageResId() : R.drawable.img_food_chicken);
-            }
+            com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(vsh.ivImage, formattedUrl);
 
             if (shop.isFavorited()) {
                 vsh.ivFavoriteHeart.setImageResource(R.drawable.favorite_filled_24px);

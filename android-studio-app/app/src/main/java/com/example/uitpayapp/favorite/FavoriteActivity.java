@@ -133,12 +133,12 @@ public class FavoriteActivity extends AppCompatActivity {
                         // Try to map to the local resource ID if the name matches our mock list
                         int localResId = 0;
                         String name = dto.getRestaurantName();
-                        if (name.contains("KFC")) localResId = R.drawable.img_food_chicken;
-                        else if (name.contains("Phúc Long")) localResId = R.drawable.img_food_bubbletea;
-                        else if (name.contains("Coffee House")) localResId = R.drawable.img_food_coffee;
-                        else if (name.contains("Jollibee")) localResId = R.drawable.img_food_chicken;
-                        else if (name.contains("Highlands")) localResId = R.drawable.img_food_coffee;
-                        else localResId = R.drawable.img_food_pizza; // fallback default
+                        if (name.contains("KFC")) localResId = 0;
+                        else if (name.contains("Phúc Long")) localResId = 0;
+                        else if (name.contains("Coffee House")) localResId = 0;
+                        else if (name.contains("Jollibee")) localResId = 0;
+                        else if (name.contains("Highlands")) localResId = 0;
+                        else localResId = 0; // fallback default
                         
                         // Use distance & delivery time from API if available, fallback otherwise
                         double distance;

@@ -92,11 +92,13 @@ public class CategoryTabFragment extends Fragment {
         viewModel.getFoodsData().observe(getViewLifecycleOwner(), state -> {
             if (state.isLoading()) {
                 layoutLoading.setVisibility(View.VISIBLE);
+                startShimmerAnimation();
                 layoutError.setVisibility(View.GONE);
                 layoutEmpty.setVisibility(View.GONE);
                 swipeRefreshLayout.setVisibility(View.GONE);
             } else if (state.isSuccess()) {
                 layoutLoading.setVisibility(View.GONE);
+                stopShimmerAnimation();
                 layoutError.setVisibility(View.GONE);
                 layoutEmpty.setVisibility(View.GONE);
                 swipeRefreshLayout.setVisibility(View.VISIBLE);
@@ -116,12 +118,14 @@ public class CategoryTabFragment extends Fragment {
                 recyclerView.setAdapter(adapter);
             } else if (state.isEmpty()) {
                 layoutLoading.setVisibility(View.GONE);
+                stopShimmerAnimation();
                 layoutError.setVisibility(View.GONE);
                 layoutEmpty.setVisibility(View.VISIBLE);
                 swipeRefreshLayout.setVisibility(View.GONE);
                 tvEmpty.setText("Chưa có món ăn nào trong danh mục này");
             } else if (state.isError()) {
                 layoutLoading.setVisibility(View.GONE);
+                stopShimmerAnimation();
                 layoutError.setVisibility(View.VISIBLE);
                 layoutEmpty.setVisibility(View.GONE);
                 swipeRefreshLayout.setVisibility(View.GONE);
@@ -132,9 +136,27 @@ public class CategoryTabFragment extends Fragment {
         // Chỉ gọi API nếu ViewModel chưa có dữ liệu (tránh gọi lại khi chuyển tab)
         if (!viewModel.hasData() && categoryId > 0) {
             viewModel.fetchFoodsByCategory(categoryId);
+        } else if (!viewModel.hasData() && categoryId <= 0) {
+            viewModel.triggerError("Danh mục không hợp lệ");
         }
 
         return view;
+    }
+
+    private void startShimmerAnimation() {
+        if (layoutLoading != null) {
+            android.view.animation.AlphaAnimation blinkAnimation = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
+            blinkAnimation.setDuration(500);
+            blinkAnimation.setRepeatMode(android.view.animation.Animation.REVERSE);
+            blinkAnimation.setRepeatCount(android.view.animation.Animation.INFINITE);
+            layoutLoading.startAnimation(blinkAnimation);
+        }
+    }
+
+    private void stopShimmerAnimation() {
+        if (layoutLoading != null) {
+            layoutLoading.clearAnimation();
+        }
     }
 
     private void showFoodItemDetailPopup(FoodMenuItem item, ImageView sourceImage) {
