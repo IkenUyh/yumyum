@@ -30,12 +30,17 @@ public class CartItemResponseDTO {
 
     public static CartItemResponseDTO fromEntity(CartItem cartItem, com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository) {
         BigDecimal basePrice = cartItem.getFood().getPrice();
+        boolean hasFlashSale = false;
         if (flashSaleItemRepository != null) {
             java.util.Optional<com.uit.fooddelivery_api.modules.flashsale.entities.FlashSaleItem> flashSaleOpt =
                     flashSaleItemRepository.findActiveFlashSaleItemByFoodId(cartItem.getFood().getId(), java.time.LocalDateTime.now());
             if (flashSaleOpt.isPresent()) {
                 basePrice = flashSaleOpt.get().getSalePrice();
+                hasFlashSale = true;
             }
+        }
+        if (!hasFlashSale) {
+            basePrice = basePrice.multiply(BigDecimal.valueOf(0.8));
         }
         Integer qty = cartItem.getQuantity();
         BigDecimal optionsTotal = BigDecimal.ZERO;

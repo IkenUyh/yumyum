@@ -133,7 +133,9 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
             tvOriginalPrice.setText(currencyFormatter.format(originalPrice));
             tvDistance.setText(distance + "km");
             tvDeliveryTime.setText(deliveryTime + " phút");
-            tvRating.setText(String.valueOf(rating));
+            if (tvRating != null) {
+                tvRating.setText(String.valueOf(rating));
+            }
             tvSaving.setText(currencyFormatter.format(originalPrice - discountPrice));
 
             android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
