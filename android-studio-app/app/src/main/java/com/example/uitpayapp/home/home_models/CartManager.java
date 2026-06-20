@@ -43,9 +43,6 @@ public class CartManager {
         try {
             long id = Long.parseLong(digits);
             if (id <= 0) return 1L;
-            if (id > 150) {
-                return (id % 150) + 1;
-            }
             return id;
         } catch (NumberFormatException e) {
             return 1L;

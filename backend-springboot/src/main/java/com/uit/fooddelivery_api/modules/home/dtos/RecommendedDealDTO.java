@@ -19,4 +19,5 @@ public class RecommendedDealDTO {
     private double discountPrice;
     private double rating;
     private Long restaurantId;
+    private Long foodId;
 }

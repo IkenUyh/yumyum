@@ -227,6 +227,7 @@ public class HomeService {
                                                         .discountPrice(discPrice)
                                                         .rating(rating)
                                                         .restaurantId(f.getRestaurant() != null ? f.getRestaurant().getId() : null)
+                                                        .foodId(f.getId())
                                                         .build();
                                 })
                                 .collect(Collectors.toList());

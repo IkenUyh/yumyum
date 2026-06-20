@@ -14,6 +14,9 @@ public class RecommendedDealModel {
     private double rating;
     private Long restaurantId;
 
+    @com.google.gson.annotations.SerializedName("foodId")
+    private Long foodId;
+
     public RecommendedDealModel(String storeName, double distance, int deliveryTime, int foodImageResId,
                                String discountTag, String foodTitle, long soldCount,
                                double originalPrice, double discountPrice, String imageUrl, double rating) {
@@ -61,4 +64,7 @@ public class RecommendedDealModel {
     public double getRating() { return rating; }
     public Long getRestaurantId() { return restaurantId; }
     public void setRestaurantId(Long restaurantId) { this.restaurantId = restaurantId; }
+
+    public Long getFoodId() { return foodId; }
+    public void setFoodId(Long foodId) { this.foodId = foodId; }
 }

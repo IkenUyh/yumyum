@@ -124,6 +124,7 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
             String imageUrl = extras.getString("image_url", "");
             double rating = extras.getDouble("rating", 4.5);
             long restaurantId = extras.getLong("restaurant_id", -1L);
+            long foodId = extras.getLong("food_id", -1L);
 
             tvDealName.setText(foodTitle);
             tvStoreName.setText(storeName);
@@ -167,7 +168,12 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
                 ivDealImage.setImageDrawable(grayPlaceholder);
             }
 
-            FoodMenuItem item = new FoodMenuItem("deal_" + System.currentTimeMillis(), foodTitle, (long) discountPrice, foodImage, "Khuyến mãi từ " + storeName, imageUrl);
+            FoodMenuItem item;
+            if (foodId != -1L) {
+                item = new FoodMenuItem(String.valueOf(foodId), foodTitle, (long) discountPrice, foodImage, "Khuyến mãi từ " + storeName, imageUrl);
+            } else {
+                item = new FoodMenuItem("deal_" + System.currentTimeMillis(), foodTitle, (long) discountPrice, foodImage, "Khuyến mãi từ " + storeName, imageUrl);
+            }
             if (restaurantId != -1L) {
                 item.setRestaurantId(restaurantId);
             }

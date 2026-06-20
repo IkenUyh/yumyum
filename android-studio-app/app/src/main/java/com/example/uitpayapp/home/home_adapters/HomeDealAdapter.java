@@ -155,6 +155,12 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             intent.putExtra("food_image", deal.getFoodImageResId());
             intent.putExtra("image_url", deal.getImageUrl());
             intent.putExtra("rating", deal.getRating());
+            if (deal.getRestaurantId() != null) {
+                intent.putExtra("restaurant_id", deal.getRestaurantId());
+            }
+            if (deal.getFoodId() != null) {
+                intent.putExtra("food_id", deal.getFoodId());
+            }
             v.getContext().startActivity(intent);
         };
 
