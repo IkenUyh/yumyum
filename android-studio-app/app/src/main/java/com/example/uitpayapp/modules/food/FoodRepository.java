@@ -96,4 +96,8 @@ public class FoodRepository {
     public void deleteOptionItem(Long itemId, ApiCallback<String> callback) {
         handleCall(foodService.deleteOptionItem(itemId), callback);
     }
+
+    public void searchFoodsByKeyword(String keyword, ApiCallback<List<FoodResponse>> callback) {
+        handleCall(foodService.searchFoodsByKeyword(keyword), callback);
+    }
 }

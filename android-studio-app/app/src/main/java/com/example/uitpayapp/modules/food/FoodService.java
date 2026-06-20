@@ -79,4 +79,9 @@ public interface FoodService {
     Call<ApiResponse<String>> deleteOptionItem(
             @Path("itemId") Long itemId
     );
+
+    @GET("api/v1/foods/keyword")
+    Call<ApiResponse<List<FoodResponse>>> searchFoodsByKeyword(
+            @Query("q") String keyword
+    );
 }

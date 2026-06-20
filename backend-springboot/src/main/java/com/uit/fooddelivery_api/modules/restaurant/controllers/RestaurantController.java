@@ -98,6 +98,8 @@ public class RestaurantController {
             restaurant.setMaxPendingOrders(dto.getMaxPendingOrders());
         }
 
+        restaurantService.save(restaurant);
+
         return ApiResponse.success(RestaurantResponseDTO.fromEntity(restaurant));
     }
 

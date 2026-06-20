@@ -96,13 +96,10 @@ public class SearchFoodFragment extends Fragment {
         }
     }
 
+    private String currentQuery = "";
+
     private void setupSearchResults() {
-        allFoods = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
-            allFoods.add(new FoodMenuItem("f" + i, "Món ăn tìm kiếm " + i, 50000, 0, "Mô tả"));
-        }
-        
-        filteredFoods = new ArrayList<>(allFoods);
+        filteredFoods = new ArrayList<>();
 
         rvSearchResults.setLayoutManager(new LinearLayoutManager(getContext()));
         searchAdapter = new SearchFoodAdapter(filteredFoods, (item, sourceImage) -> {
@@ -112,20 +109,55 @@ public class SearchFoodFragment extends Fragment {
     }
 
     private void filter(String query) {
+        currentQuery = query;
         if (query.isEmpty()) {
             layoutEmptyState.setVisibility(View.VISIBLE);
             rvSearchResults.setVisibility(View.GONE);
+            filteredFoods.clear();
+            searchAdapter.notifyDataSetChanged();
         } else {
             layoutEmptyState.setVisibility(View.GONE);
             rvSearchResults.setVisibility(View.VISIBLE);
 
-            filteredFoods.clear();
-            for (FoodMenuItem f : allFoods) {
-                if (f.getName().toLowerCase().contains(query)) {
-                    filteredFoods.add(f);
+            new com.example.uitpayapp.modules.food.FoodRepository().searchFoodsByKeyword(query, new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.food.models.responses.FoodResponse>>() {
+                @Override
+                public void onSuccess(List<com.example.uitpayapp.modules.food.models.responses.FoodResponse> result) {
+                    if (!query.equals(currentQuery)) {
+                        return;
+                    }
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(() -> {
+                        filteredFoods.clear();
+                        if (result != null) {
+                            for (com.example.uitpayapp.modules.food.models.responses.FoodResponse res : result) {
+                                FoodMenuItem item = new FoodMenuItem(
+                                        res.getId().toString(),
+                                        res.getName(),
+                                        res.getPrice() != null ? res.getPrice().longValue() : 0L,
+                                        0,
+                                        res.getDescription(),
+                                        res.getImageUrl()
+                                );
+                                item.setRestaurantId(res.getRestaurantId());
+                                filteredFoods.add(item);
+                            }
+                        }
+                        searchAdapter.notifyDataSetChanged();
+                    });
                 }
-            }
-            searchAdapter.notifyDataSetChanged();
+
+                @Override
+                public void onError(String errorMessage) {
+                    if (!query.equals(currentQuery)) {
+                        return;
+                    }
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(() -> {
+                        filteredFoods.clear();
+                        searchAdapter.notifyDataSetChanged();
+                    });
+                }
+            });
         }
     }
 
@@ -187,11 +219,11 @@ public class SearchFoodFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             FoodMenuItem item = items.get(position);
-            // item_food_recommend_deal has tv_restaurant_name (used as food name), tv_price
-            // Let's adapt
             if(holder.tvName != null) holder.tvName.setText(item.getName());
             if(holder.tvPrice != null) holder.tvPrice.setText(item.getFormattedPrice());
-            if(holder.ivImage != null) holder.ivImage.setImageResource(item.getImageResId());
+            if(holder.ivImage != null) {
+                com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(holder.ivImage, item.getImageUrl());
+            }
             
             holder.itemView.setOnClickListener(v -> listener.onItemClick(item, holder.ivImage));
         }

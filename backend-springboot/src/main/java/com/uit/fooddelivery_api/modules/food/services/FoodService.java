@@ -148,4 +148,8 @@ public class FoodService {
         List<FoodOptionGroup> optionGroups = foodOptionGroupRepository.findByFoodId(foodId);
         return FoodDetailResponseDTO.fromEntity(food, optionGroups);
     }
+
+    public List<Food> searchFoodsByKeyword(String keyword) {
+        return foodRepository.searchFoodsByKeyword(keyword);
+    }
 }

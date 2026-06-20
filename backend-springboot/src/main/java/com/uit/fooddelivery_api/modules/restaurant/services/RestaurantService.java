@@ -15,6 +15,7 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final com.uit.fooddelivery_api.modules.user.services.CloudinaryService cloudinaryService;
+    private final com.uit.fooddelivery_api.modules.search.services.RestaurantSearchService restaurantSearchService;
 
     @jakarta.transaction.Transactional
     public String updateRestaurantImage(Long restaurantId, org.springframework.web.multipart.MultipartFile file, User merchant) throws java.io.IOException {
@@ -27,7 +28,8 @@ public class RestaurantService {
 
         String imageUrl = cloudinaryService.uploadAvatar(file);
         restaurant.setImageUrl(imageUrl);
-        restaurantRepository.save(restaurant);
+        Restaurant saved = restaurantRepository.save(restaurant);
+        restaurantSearchService.syncRestaurant(saved);
 
         return imageUrl;
     }
@@ -44,7 +46,9 @@ public class RestaurantService {
                 .build();
 
         // Luu vao database
-        return restaurantRepository.save(restaurant);
+        Restaurant saved = restaurantRepository.save(restaurant);
+        restaurantSearchService.syncRestaurant(saved);
+        return saved;
     }
 
     public List<Restaurant> getAllRestaurants() {
@@ -60,6 +64,8 @@ public class RestaurantService {
 
     // Lưu thay đổi thông tin quán
     public Restaurant save(Restaurant restaurant) {
-        return restaurantRepository.save(restaurant);
+        Restaurant saved = restaurantRepository.save(restaurant);
+        restaurantSearchService.syncRestaurant(saved);
+        return saved;
     }
 }

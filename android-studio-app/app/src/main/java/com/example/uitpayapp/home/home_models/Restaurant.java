@@ -106,4 +106,8 @@ public class Restaurant implements java.io.Serializable {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+    private Double distance;
+    public Double getDistance() { return distance; }
+    public void setDistance(Double distance) { this.distance = distance; }
 }
