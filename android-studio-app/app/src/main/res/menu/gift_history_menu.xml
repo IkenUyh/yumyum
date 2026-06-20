@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/action_tich_xu"
-        android:icon="@drawable/img_coin"
+        android:icon="@drawable/ic_coin"
         android:title="Tích/dùng xu" />
     <item
         android:id="@+id/action_qua_da_doi"

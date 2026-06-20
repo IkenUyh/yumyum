@@ -46,7 +46,7 @@ public class GiftExchangeActivity extends AppCompatActivity {
     private NestedScrollView nestedScrollView;
     private View layoutNewGifts;
     private TextView tvSeeMore;
-    private EditText etSearch;
+
 
     private ViewPager2 BannerSlider;
     Handler sliderHandler;
@@ -69,18 +69,7 @@ public class GiftExchangeActivity extends AppCompatActivity {
 
         loadLoyaltyData();
 
-        findViewById(R.id.gift_exchange_my_voucher).setOnClickListener(v ->
-        {
-            Intent intent = new Intent(this, VoucherActivity.class);
-            startActivity(intent);
-            this.finish();
-        });
-        findViewById(R.id.gift_exchange_priority).setOnClickListener(v ->
-        {
-            Intent intent = new Intent(this, PriorityYumYumActivity.class);
-            startActivity(intent);
-            this.finish();
-        });
+
     }
 
 
@@ -94,7 +83,7 @@ public class GiftExchangeActivity extends AppCompatActivity {
         BannerSlider = findViewById(R.id.gift_exchange_image_slider);
         layoutNewGifts = findViewById(R.id.layout_new_gifts_section);
         tvSeeMore = findViewById(R.id.tv_see_more_exchange_voucher);
-        etSearch = findViewById(R.id.et_search_gift);
+
 
         ViewCompat.setOnApplyWindowInsetsListener(topBar, (v, insets) -> {
             Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
@@ -214,7 +203,7 @@ public class GiftExchangeActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     TextView tvUserCoins = findViewById(R.id.tv_user_coins);
                     if (tvUserCoins != null) {
-                        tvUserCoins.setText(" " + (data.getCurrentPoints() != null ? data.getCurrentPoints() : 0));
+                        tvUserCoins.setText(String.valueOf(data.getCurrentPoints() != null ? data.getCurrentPoints() : 0));
                     }
 
                     int streak = data.getCheckinStreak() != null ? data.getCheckinStreak() : 0;
@@ -275,7 +264,7 @@ public class GiftExchangeActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     TextView tvUserCoins = findViewById(R.id.tv_user_coins);
                     if (tvUserCoins != null) {
-                        tvUserCoins.setText(" " + (data.getCurrentPoints() != null ? data.getCurrentPoints() : 0));
+                        tvUserCoins.setText(String.valueOf(data.getCurrentPoints() != null ? data.getCurrentPoints() : 0));
                     }
                     loadLoyaltyData();
                     android.widget.Toast.makeText(GiftExchangeActivity.this, "Điểm danh thành công! Nhận " + item.getConfig().getCoins() + " xu.", android.widget.Toast.LENGTH_SHORT).show();

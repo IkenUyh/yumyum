@@ -41,7 +41,6 @@ import com.example.uitpayapp.home.home_models.FoodMenuItem;
 import com.example.uitpayapp.home.home_models.Restaurant;
 import com.example.uitpayapp.home.home_models.TopicStore;
 import com.example.uitpayapp.network.RetrofitClient;
-import com.example.uitpayapp.recommendeddeal.RecommendedDealActivity;
 import com.example.uitpayapp.recommendeddeal.RecommendedDealModel;
 import com.example.uitpayapp.utils.CartAnimationHelper;
 import com.example.uitpayapp.home.home_adapters.TopicStoreAdapter;

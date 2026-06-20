@@ -93,7 +93,7 @@
                         <ImageView
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:src="@drawable/img_coin"/>
+                            android:src="@drawable/ic_coin"/>
                     </LinearLayout>
 
                     <!-- SPACE -->
