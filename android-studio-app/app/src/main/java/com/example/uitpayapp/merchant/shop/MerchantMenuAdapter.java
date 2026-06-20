@@ -81,12 +81,18 @@ public class MerchantMenuAdapter extends RecyclerView.Adapter<MerchantMenuAdapte
                 }
             });
 
-            // Hide image if not provided
-            if (item.getImageRes() == 0) {
-                ivImage.setVisibility(View.GONE);
-            } else {
+            // Load image using Glide if imageUrl is available, otherwise use drawable imageRes, else hide
+            if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
+                ivImage.setVisibility(View.VISIBLE);
+                com.bumptech.glide.Glide.with(itemView.getContext())
+                        .load(item.getImageUrl())
+                        .placeholder(R.drawable.yumyum_demo_logo)
+                        .into(ivImage);
+            } else if (item.getImageRes() != 0) {
                 ivImage.setVisibility(View.VISIBLE);
                 ivImage.setImageResource(item.getImageRes());
+            } else {
+                ivImage.setVisibility(View.GONE);
             }
 
             tvName.setText(item.getName());

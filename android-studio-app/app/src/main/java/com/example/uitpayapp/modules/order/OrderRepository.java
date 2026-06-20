@@ -15,7 +15,6 @@ public class OrderRepository {
     private final OrderService orderService;
 
     public OrderRepository() {
-        // Hãy đảm bảo bạn đã khai báo getOrderService() trong RetrofitClient theo mục 3 phía dưới
         this.orderService = RetrofitClient.getOrderService();
     }
 
@@ -25,7 +24,6 @@ public class OrderRepository {
             public void onResponse(Call<ApiResponse<T>> call, Response<ApiResponse<T>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<T> apiResponse = response.body();
-                    // Giả định backend trả về mã code thành công (ví dụ: 200 hoặc tùy định nghĩa của bạn)
                     if (apiResponse.getData() != null) {
                         callback.onSuccess(apiResponse.getData());
                     } else {
@@ -54,6 +52,10 @@ public class OrderRepository {
                 callback.onError("Không kết nối được server (Lỗi: " + (t.getMessage() != null ? t.getMessage() : "Mạng") + ")");
             }
         });
+    }
+
+    public void getOrderById(Long orderId, ApiCallback<OrderResponse> callback) {
+        enqueueCall(orderService.getOrderById(orderId), callback);
     }
 
     public void previewOrder(CreateOrderRequest request, ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderPreviewResponse> callback) {
@@ -108,4 +110,3 @@ public class OrderRepository {
         enqueueCall(orderService.merchantCompleteOrder(orderId), callback);
     }
 }
-

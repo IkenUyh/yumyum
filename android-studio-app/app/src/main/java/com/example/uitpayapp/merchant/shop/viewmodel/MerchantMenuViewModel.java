@@ -40,6 +40,7 @@ public class MerchantMenuViewModel extends ViewModel {
     private final MutableLiveData<UiState<List<ToppingGroup>>> toppingGroups = new MutableLiveData<>();
     private final MutableLiveData<Long> restaurantId = new MutableLiveData<>();
     private final MutableLiveData<UiState<String>> operationStatus = new MutableLiveData<>();
+    private final MutableLiveData<UiState<FoodResponse>> foodOperationSuccess = new MutableLiveData<>();
 
     public MerchantMenuViewModel() {
         this.categoryRepository = new CategoryRepository();
@@ -61,6 +62,10 @@ public class MerchantMenuViewModel extends ViewModel {
 
     public LiveData<UiState<String>> getOperationStatus() {
         return operationStatus;
+    }
+
+    public LiveData<UiState<FoodResponse>> getFoodOperationSuccess() {
+        return foodOperationSuccess;
     }
 
     /**
@@ -331,22 +336,22 @@ public class MerchantMenuViewModel extends ViewModel {
     public void createFood(String name, String description, double price, Long categoryId) {
         Long resId = restaurantId.getValue();
         if (resId == null) {
-            operationStatus.setValue(UiState.error("Chưa chọn nhà hàng!", null));
+            foodOperationSuccess.setValue(UiState.error("Chưa chọn nhà hàng!", null));
             return;
         }
 
-        operationStatus.setValue(UiState.loading(null));
+        foodOperationSuccess.setValue(UiState.loading(null));
         CreateFoodRequest request = new CreateFoodRequest(resId, categoryId, name, description, BigDecimal.valueOf(price));
         foodRepository.createFood(request, new ApiCallback<FoodResponse>() {
             @Override
             public void onSuccess(FoodResponse result) {
-                operationStatus.setValue(UiState.success("Đã lưu món ăn thành công!"));
                 loadMenu();
+                foodOperationSuccess.setValue(UiState.success(result));
             }
 
             @Override
             public void onError(String errorMessage) {
-                operationStatus.setValue(UiState.error("Lưu món ăn thất bại: " + errorMessage, null));
+                foodOperationSuccess.setValue(UiState.error("Lưu món ăn thất bại: " + errorMessage, null));
             }
         });
     }
@@ -357,22 +362,49 @@ public class MerchantMenuViewModel extends ViewModel {
     public void updateFood(Long foodId, String name, String description, double price, Long categoryId) {
         Long resId = restaurantId.getValue();
         if (resId == null) {
-            operationStatus.setValue(UiState.error("Chưa chọn nhà hàng!", null));
+            foodOperationSuccess.setValue(UiState.error("Chưa chọn nhà hàng!", null));
             return;
         }
 
-        operationStatus.setValue(UiState.loading(null));
+        foodOperationSuccess.setValue(UiState.loading(null));
         CreateFoodRequest request = new CreateFoodRequest(resId, categoryId, name, description, BigDecimal.valueOf(price));
         foodRepository.updateFood(foodId, request, new ApiCallback<FoodResponse>() {
             @Override
             public void onSuccess(FoodResponse result) {
-                operationStatus.setValue(UiState.success("Đã cập nhật món ăn thành công!"));
                 loadMenu();
+                foodOperationSuccess.setValue(UiState.success(result));
             }
 
             @Override
             public void onError(String errorMessage) {
-                operationStatus.setValue(UiState.error("Cập nhật món ăn thất bại: " + errorMessage, null));
+                foodOperationSuccess.setValue(UiState.error("Cập nhật món ăn thất bại: " + errorMessage, null));
+            }
+        });
+    }
+
+    public void uploadFoodImage(Long foodId, java.io.File file) {
+        if (file == null || !file.exists()) {
+            foodOperationSuccess.setValue(UiState.error("Tệp ảnh không hợp lệ", null));
+            return;
+        }
+
+        foodOperationSuccess.setValue(UiState.loading(null));
+        okhttp3.RequestBody fileBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("image/*"), file);
+        okhttp3.MultipartBody.Part filePart = okhttp3.MultipartBody.Part.createFormData("foodFile", file.getName(), fileBody);
+
+        foodRepository.uploadFoodImage(foodId, filePart, new ApiCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                loadMenu();
+                FoodResponse mockResponse = new FoodResponse();
+                mockResponse.setId(foodId);
+                mockResponse.setImageUrl(result);
+                foodOperationSuccess.setValue(UiState.success(mockResponse));
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                foodOperationSuccess.setValue(UiState.error("Tải ảnh lên thất bại: " + errorMessage, null));
             }
         });
     }

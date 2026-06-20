@@ -147,7 +147,6 @@ public class HomeActivity extends AppCompatActivity {
         setupCategories();
         setupSearch();
         setupDeals();
-        setupDeals();
         setupStickyTab();
         setupBottomNavigation();
         setupObservers();

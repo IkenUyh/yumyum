@@ -7,7 +7,10 @@ import com.uit.fooddelivery_api.modules.user.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -28,12 +31,13 @@ public class NotificationController {
         User currentUser = (User) authentication.getPrincipal();
         return notificationService.subscribe(currentUser.getId());
     }
-
-    // API 2: Lấy lịch sử thông báo
     @GetMapping("/history")
-    public ApiResponse<List<NotificationResponseDTO>> getHistory(Authentication authentication) {
+    public ApiResponse<List<NotificationResponseDTO>> getHistory(
+            @RequestParam(value = "month", required = false) Integer month,
+            @RequestParam(value = "year", required = false) Integer year,
+            Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
-        List<NotificationResponseDTO> list = notificationService.getMyHistory(currentUser.getId())
+        List<NotificationResponseDTO> list = notificationService.getMyHistory(currentUser.getId(), month, year)
                 .stream()
                 .map(NotificationResponseDTO::fromEntity)
                 .toList();
@@ -46,5 +50,21 @@ public class NotificationController {
         User currentUser = (User) authentication.getPrincipal();
         long count = notificationService.getUnreadCount(currentUser.getId());
         return ApiResponse.success(Map.of("unreadCount", count));
+    }
+
+    // API 4: Đánh dấu 1 thông báo là đã đọc
+    @PatchMapping("/mark-read/{id}")
+    public ApiResponse<String> markAsRead(@PathVariable Long id, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        notificationService.markAsRead(id, currentUser.getId());
+        return ApiResponse.success("Cập nhật thành công");
+    }
+
+    // API 5: Đánh dấu tất cả là đã đọc
+    @PatchMapping("/mark-all-read")
+    public ApiResponse<String> markAllAsRead(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        notificationService.markAllAsRead(currentUser.getId());
+        return ApiResponse.success("Đã đánh dấu tất cả là đã đọc");
     }
 }

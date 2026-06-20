@@ -118,6 +118,19 @@ public class RestaurantRepository {
         });
     }
 
+    public void uploadRestaurantImage(Long restaurantId, okhttp3.MultipartBody.Part file, final ApiCallback<String> callback) {
+        restaurantService.uploadRestaurantImage(restaurantId, file).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
     // Search
     public void getNearbyRestaurants(double lat, double lng, double radiusKm, final ApiCallback<List<RestaurantDistanceViewDTO>> callback) {
         restaurantSearchService.getNearbyRestaurants(lat, lng, radiusKm).enqueue(new Callback<ApiResponse<List<RestaurantDistanceViewDTO>>>() {

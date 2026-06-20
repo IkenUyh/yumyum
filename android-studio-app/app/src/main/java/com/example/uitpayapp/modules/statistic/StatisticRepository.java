@@ -4,6 +4,8 @@ import com.example.uitpayapp.models.ApiResponse;
 import com.example.uitpayapp.network.ApiCallback;
 import com.example.uitpayapp.network.RetrofitClient;
 import com.example.uitpayapp.modules.statistic.models.responses.MerchantDashboardResponse;
+import com.example.uitpayapp.modules.statistic.models.responses.MerchantDailyStatisticResponse;
+import com.example.uitpayapp.modules.statistic.models.responses.MerchantMonthlyStatisticResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,5 +41,54 @@ public class StatisticRepository {
                 callback.onError("Lỗi mạng: " + t.getMessage());
             }
         });
+    }
+
+    public void getMerchantDailyStatistic(Long restaurantId, String date, final ApiCallback<MerchantDailyStatisticResponse> callback) {
+        statisticService.getMerchantDailyStatistic(restaurantId, date).enqueue(new Callback<ApiResponse<MerchantDailyStatisticResponse>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<MerchantDailyStatisticResponse>> call, Response<ApiResponse<MerchantDailyStatisticResponse>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<MerchantDailyStatisticResponse> apiResponse = response.body();
+                    if (apiResponse.getData() != null) {
+                        callback.onSuccess(apiResponse.getData());
+                    } else {
+                        callback.onError(apiResponse.getMessage() != null ? apiResponse.getMessage() : "Dữ liệu trống");
+                    }
+                } else {
+                    callback.onError("Lỗi kết nối hệ thống: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<MerchantDailyStatisticResponse>> call, Throwable t) {
+                callback.onError("Lỗi mạng: " + t.getMessage());
+            }
+        });
+    }
+
+    public void getMerchantMonthlyStatistic(Long restaurantId, int month, int year,
+                                             final ApiCallback<MerchantMonthlyStatisticResponse> callback) {
+        statisticService.getMerchantMonthlyStatistic(restaurantId, month, year)
+                .enqueue(new Callback<ApiResponse<MerchantMonthlyStatisticResponse>>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<MerchantMonthlyStatisticResponse>> call,
+                                           Response<ApiResponse<MerchantMonthlyStatisticResponse>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            ApiResponse<MerchantMonthlyStatisticResponse> apiResponse = response.body();
+                            if (apiResponse.getData() != null) {
+                                callback.onSuccess(apiResponse.getData());
+                            } else {
+                                callback.onError(apiResponse.getMessage() != null ? apiResponse.getMessage() : "Dữ liệu trống");
+                            }
+                        } else {
+                            callback.onError("Lỗi kết nối hệ thống: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiResponse<MerchantMonthlyStatisticResponse>> call, Throwable t) {
+                        callback.onError("Lỗi mạng: " + t.getMessage());
+                    }
+                });
     }
 }

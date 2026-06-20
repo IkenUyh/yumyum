@@ -27,17 +27,23 @@ import com.example.uitpayapp.merchant.home.home_model.SellerOrder;
 import com.example.uitpayapp.merchant.marketing.SellerMarketingActivity;
 import com.example.uitpayapp.merchant.notification.SellerNotificationActivity;
 import com.example.uitpayapp.merchant.shop.SellerShopActivity;
+import com.example.uitpayapp.modules.restaurant.RestaurantRepository;
+import com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO;
+import com.example.uitpayapp.network.ApiCallback;
 import com.example.uitpayapp.profile.ProfileWebView;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
 
+import java.util.Calendar;
 import java.util.List;
 
 public class SellerHomeActivity extends AppCompatActivity {
 
     private TabLayout tabLayout;
     private SellerOrderViewModel viewModel;
+    private TextView tvShopStatus;
+    private RestaurantRepository restaurantRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +52,7 @@ public class SellerHomeActivity extends AppCompatActivity {
         setContentView(R.layout.seller_activity_home);
 
         viewModel = new ViewModelProvider(this).get(SellerOrderViewModel.class);
+        restaurantRepository = new RestaurantRepository();
 
         initViews();
         setupTabLayout();
@@ -66,10 +73,12 @@ public class SellerHomeActivity extends AppCompatActivity {
         super.onResume();
         // Refresh khi quay lại màn hình
         viewModel.loadData();
+        loadShopStatus();
     }
 
     private void initViews() {
         tabLayout = findViewById(R.id.tab_layout);
+        tvShopStatus = findViewById(R.id.tv_shop_status);
         View mainContainer = findViewById(R.id.seller_home_container);
 
         ViewCompat.setOnApplyWindowInsetsListener(mainContainer, (v, insets) -> {
@@ -78,13 +87,82 @@ public class SellerHomeActivity extends AppCompatActivity {
             return insets;
         });
 
-        findViewById(R.id.tv_shop_status).setOnClickListener(v ->
+        tvShopStatus.setOnClickListener(v ->
             startActivity(new Intent(this, SellerStatusActivity.class)));
+
         findViewById(R.id.seller_home_contact_support).setOnClickListener(v -> {
             Intent intent = new Intent(this, ProfileWebView.class);
             intent.putExtra("URL_KEY", "https://merchant.shopeefood.vn/edu/collection/co-ban");
             startActivity(intent);
         });
+    }
+
+    private void loadShopStatus() {
+        android.content.SharedPreferences prefs = getSharedPreferences("SellerPrefs", MODE_PRIVATE);
+        long restaurantId = prefs.getLong("current_store_id", -1L);
+        if (restaurantId == -1L) return;
+
+        restaurantRepository.getRestaurantById(restaurantId, new ApiCallback<RestaurantResponseDTO>() {
+            @Override
+            public void onSuccess(RestaurantResponseDTO data) {
+                runOnUiThread(() -> updateShopStatusUI(data));
+            }
+
+            @Override
+            public void onError(String message) {
+                // Ignore error in background update
+            }
+        });
+    }
+
+    private void updateShopStatusUI(RestaurantResponseDTO restaurant) {
+        if (restaurant == null || tvShopStatus == null) return;
+
+        boolean isAccepting = restaurant.getIsAcceptingOrders() != null && restaurant.getIsAcceptingOrders();
+        boolean inHours = isCurrentTimeInOpenHours(restaurant.getOpenTime(), restaurant.getCloseTime());
+
+        if (isAccepting && inHours) {
+            tvShopStatus.setText("Mở");
+            tvShopStatus.setTextColor(Color.parseColor("#4CAF50")); // Green
+            tvShopStatus.getBackground().setTint(Color.parseColor("#E8F5E9")); // Light Green
+        } else {
+            tvShopStatus.setText("Đóng");
+            tvShopStatus.setTextColor(Color.parseColor("#B71C1C")); // Dark Red
+            tvShopStatus.getBackground().setTint(Color.parseColor("#FFEBEE")); // Very Light Red
+        }
+    }
+
+    private boolean isCurrentTimeInOpenHours(String openTime, String closeTime) {
+        if (openTime == null || closeTime == null || openTime.isEmpty() || closeTime.isEmpty()) {
+            return false;
+        }
+        try {
+            String[] openParts = openTime.split(":");
+            String[] closeParts = closeTime.split(":");
+            if (openParts.length < 2 || closeParts.length < 2) return false;
+
+            int openHour = Integer.parseInt(openParts[0]);
+            int openMin = Integer.parseInt(openParts[1]);
+            int closeHour = Integer.parseInt(closeParts[0]);
+            int closeMin = Integer.parseInt(closeParts[1]);
+
+            Calendar now = Calendar.getInstance();
+            int nowHour = now.get(Calendar.HOUR_OF_DAY);
+            int nowMin = now.get(Calendar.MINUTE);
+
+            int nowVal = nowHour * 60 + nowMin;
+            int openVal = openHour * 60 + openMin;
+            int closeVal = closeHour * 60 + closeMin;
+
+            if (closeVal < openVal) {
+                return nowVal >= openVal || nowVal <= closeVal;
+            } else {
+                return nowVal >= openVal && nowVal <= closeVal;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private void setupObservers() {

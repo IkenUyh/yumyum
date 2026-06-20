@@ -42,7 +42,7 @@ public class SellerShopInfoActivity extends AppCompatActivity {
                             .placeholder(R.drawable.yumyum_demo_logo)
                             .circleCrop()
                             .into(ivShopAvatar);
-                    Toast.makeText(this, "Đã cập nhật ảnh đại diện (chức năng upload ảnh đang phát triển)", Toast.LENGTH_SHORT).show();
+                    uploadShopImage(uri);
                 }
             });
 
@@ -309,5 +309,57 @@ public class SellerShopInfoActivity extends AppCompatActivity {
                         "⚠️ Cập nhật thất bại: " + errorMessage + "\n(Thay đổi đã được lưu cục bộ)", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void uploadShopImage(android.net.Uri uri) {
+        if (currentRestaurantId == null) {
+            Toast.makeText(this, "Không tìm thấy thông tin cửa hàng để tải ảnh lên", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        java.io.File file = getFileFromUri(uri);
+        if (file == null) {
+            Toast.makeText(this, "Lỗi đọc tệp ảnh", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+
+        okhttp3.RequestBody fileBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("image/*"), file);
+        okhttp3.MultipartBody.Part filePart = okhttp3.MultipartBody.Part.createFormData("restaurantFile", file.getName(), fileBody);
+
+        restaurantRepository.uploadRestaurantImage(currentRestaurantId, filePart, new ApiCallback<String>() {
+            @Override
+            public void onSuccess(String imageUrl) {
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
+                Toast.makeText(SellerShopInfoActivity.this, "Đã cập nhật ảnh đại diện cửa hàng thành công!", Toast.LENGTH_SHORT).show();
+                fetchRestaurantInfo(currentRestaurantId);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
+                Toast.makeText(SellerShopInfoActivity.this, "Cập nhật ảnh đại diện thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private java.io.File getFileFromUri(android.net.Uri uri) {
+        try {
+            java.io.File tempFile = new java.io.File(getCacheDir(), "temp_shop_avatar.jpg");
+            java.io.InputStream inputStream = getContentResolver().openInputStream(uri);
+            java.io.FileOutputStream outputStream = new java.io.FileOutputStream(tempFile);
+            byte[] buffer = new byte[4096];
+            int read;
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            outputStream.flush();
+            outputStream.close();
+            inputStream.close();
+            return tempFile;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
