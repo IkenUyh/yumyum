@@ -27,7 +27,7 @@ public class SecurityConfig {
                         // Chi cong khai API login va register va forgot password
                         .requestMatchers("/api/v1/users/login", "/api/v1/users/register", "/api/v1/users/forgot-password/**", "/api/v1/users/check-phone").permitAll()
                         // Cho phep xem danh sach nha hang, mon an va tim kiem thoai mai khong can Token
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/restaurants/**", "/api/v1/foods/**", "/api/v1/search/**", "/api/v1/payments/zalopay/callback", "/api/v1/categories/**", "/api/v1/home/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/restaurants/**", "/api/v1/foods/**", "/api/v1/search/**", "/api/v1/payments/zalopay/callback", "/api/v1/payments/vnpay/ipn", "/api/v1/payments/vnpay/return", "/api/v1/categories/**", "/api/v1/home/**").permitAll()
                         // Tat ca API con lai deu phai xac thuc qua Token
                         .anyRequest().authenticated()
                 )

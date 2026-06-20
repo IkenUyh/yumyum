@@ -112,4 +112,23 @@ public class WalletRepository {
             }
         });
     }
+
+    // Nạp tiền qua VNPay
+    public void createVNPayTopUp(long amount, final ApiCallback<java.util.Map<String, Object>> callback) {
+        walletService.createVNPayTopUp(amount).enqueue(new Callback<ApiResponse<java.util.Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<java.util.Map<String, Object>>> call, Response<ApiResponse<java.util.Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body().getData());
+                } else {
+                    callback.onError("Không thể tạo đơn VNPay: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<java.util.Map<String, Object>>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
 }
