@@ -57,4 +57,8 @@ public class Restaurant {
 
     @Column(name = "review_count")
     private Integer reviewCount;
+
+    @Column(precision = 19, scale = 2)
+    @Builder.Default
+    private java.math.BigDecimal balance = java.math.BigDecimal.ZERO;
 }

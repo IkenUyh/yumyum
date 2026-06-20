@@ -100,7 +100,7 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
                         if (tvPersonalBalance.getTag() != null) {
                             tvPersonalBalance.setText((String)tvPersonalBalance.getTag());
                         } else {
-                            tvPersonalBalance.setText("0đ");
+                            tvPersonalBalance.setText("Lỗi tải");
                         }
                     }
                 });
@@ -132,78 +132,7 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
                 });
                 layoutBalances.addView(personalWalletView);
 
-                // Fetch Merchant Restaurants
-                com.example.uitpayapp.modules.restaurant.RestaurantRepository restaurantRepo = new com.example.uitpayapp.modules.restaurant.RestaurantRepository();
-                restaurantRepo.getAllRestaurants(new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>() {
-                    @Override
-                    public void onSuccess(List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO> data) {
-                        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                            if (data == null || data.isEmpty()) return;
-                            com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(holder.itemView.getContext());
-                            Long currentUserId = sessionManager.getUserId();
-                            
-                            for (com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO restaurant : data) {
-                                if (restaurant.getMerchantId() == null || !restaurant.getMerchantId().equals(currentUserId)) {
-                                    continue;
-                                }
-                                View merchantWalletView = LayoutInflater.from(holder.itemView.getContext()).inflate(R.layout.item_wallet_entry, layoutBalances, false);
-                                TextView tvMerchantName = merchantWalletView.findViewById(R.id.tv_wallet_name);
-                                TextView btnMerchantAction = merchantWalletView.findViewById(R.id.btn_action);
-                                TextView tvMerchantBalance = merchantWalletView.findViewById(R.id.wallet_balance);
-                                
-                                final boolean[] isMerchantHidden = {true};
 
-                                tvMerchantName.setText(restaurant.getName());
-                                btnMerchantAction.setText("Rút -");
-                                btnMerchantAction.setOnClickListener(v -> {
-                                    android.widget.Toast.makeText(holder.itemView.getContext(), "Chức năng rút tiền đang phát triển", android.widget.Toast.LENGTH_SHORT).show();
-                                });
-                                tvMerchantBalance.setOnClickListener(v -> {
-                                    isMerchantHidden[0] = !isMerchantHidden[0];
-                                    if (isMerchantHidden[0]) {
-                                        tvMerchantBalance.setText("***");
-                                    } else {
-                                        if (tvMerchantBalance.getTag() != null) {
-                                            tvMerchantBalance.setText((String)tvMerchantBalance.getTag());
-                                        } else {
-                                            tvMerchantBalance.setText("0đ");
-                                        }
-                                    }
-                                });
-                                
-                                layoutBalances.addView(merchantWalletView);
-
-                                walletRepo.getMerchantBalance(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse>() {
-                                    @Override
-                                    public void onSuccess(com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse balanceData) {
-                                        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                                            java.text.NumberFormat format = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
-                                            if (tvMerchantBalance != null) {
-                                                tvMerchantBalance.setTag(format.format(balanceData.getBalance()) + "đ");
-                                                if (!isMerchantHidden[0]) {
-                                                    tvMerchantBalance.setText((String)tvMerchantBalance.getTag());
-                                                } else {
-                                                    tvMerchantBalance.setText("***");
-                                                }
-                                            }
-                                        });
-                                    }
-                                    @Override
-                                    public void onError(String errorMessage) {
-                                        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                                            if (tvMerchantBalance != null) {
-                                                tvMerchantBalance.setText("Lỗi tải");
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                    @Override
-                    public void onError(String errorMessage) {
-                    }
-                });
 
 
             }

@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
+    List<Restaurant> findByMerchantId(Long merchantId);
+
     // Công thức Haversine chuẩn: Bán kính Trái Đất = 6371 km.
     // Lọc ra các quán Đang mở cửa (isActive = true) và Đang nhận đơn (isAccepting = true),
     // khoảng cách < radius, và xếp gần nhất lên đầu.

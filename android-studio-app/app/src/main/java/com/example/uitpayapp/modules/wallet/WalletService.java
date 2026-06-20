@@ -28,8 +28,12 @@ public interface WalletService {
     @GET("api/v1/merchant/wallets/balance")
     Call<ApiResponse<BalanceResponse>> getMerchantBalance();
 
+    // Lấy sao kê giao dịch của cửa hàng
+    @GET("api/v1/merchant/wallets/transactions")
+    Call<ApiResponse<List<TransactionResponse>>> getMerchantTransactions();
+
     // Chuyển tiền từ ví cửa hàng sang ví cá nhân
-    @POST("api/v1/merchant/wallets/transfer-to-personal")
+    @POST("api/v1/merchant/wallets/transfer")
     Call<ApiResponse<Void>> transferToPersonalWallet(@Body MerchantWalletTransferRequest request);
 
     // Rút tiền khỏi hệ thống

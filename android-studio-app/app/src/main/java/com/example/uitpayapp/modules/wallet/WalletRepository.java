@@ -153,6 +153,25 @@ public class WalletRepository {
         });
     }
 
+    // Hàm gọi lấy lịch sử giao dịch ví cửa hàng
+    public void getMerchantTransactionHistory(final ApiCallback<List<TransactionResponse>> callback) {
+        walletService.getMerchantTransactions().enqueue(new Callback<ApiResponse<List<TransactionResponse>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<TransactionResponse>>> call, Response<ApiResponse<List<TransactionResponse>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body().getData());
+                } else {
+                    callback.onError("Không thể tải lịch sử giao dịch cửa hàng.");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<TransactionResponse>>> call, Throwable t) {
+                callback.onError("Lỗi mạng: " + t.getMessage());
+            }
+        });
+    }
+
     // Hàm chuyển tiền từ ví cửa hàng về ví cá nhân
     public void transferMerchantToPersonal(MerchantWalletTransferRequest request, final ApiCallback<String> callback) {
         walletService.transferToPersonalWallet(request).enqueue(new Callback<ApiResponse<Void>>() {
