@@ -103,6 +103,9 @@ public class RecommendedDealAdapter extends RecyclerView.Adapter<RecommendedDeal
             if (deal.getRestaurantId() != null) {
                 intent.putExtra("restaurant_id", deal.getRestaurantId());
             }
+            if (deal.getFoodId() != null) {
+                intent.putExtra("food_id", deal.getFoodId());
+            }
             v.getContext().startActivity(intent);
         });
 
@@ -119,6 +122,9 @@ public class RecommendedDealAdapter extends RecyclerView.Adapter<RecommendedDeal
             intent.putExtra("rating", deal.getRating());
             if (deal.getRestaurantId() != null) {
                 intent.putExtra("restaurant_id", deal.getRestaurantId());
+            }
+            if (deal.getFoodId() != null) {
+                intent.putExtra("food_id", deal.getFoodId());
             }
             v.getContext().startActivity(intent);
         });
