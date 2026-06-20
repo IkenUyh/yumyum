@@ -174,6 +174,11 @@ public class ProfileActivity extends AppCompatActivity {
             editor.apply();
             checkLoginStatus();
             Toast.makeText(this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(this, com.example.uitpayapp.home.HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
         });
         findViewById(R.id.btn_login_profile).setOnClickListener(v->
         {
