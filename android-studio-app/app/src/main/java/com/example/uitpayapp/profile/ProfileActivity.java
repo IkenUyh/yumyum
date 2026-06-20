@@ -450,14 +450,14 @@ public class ProfileActivity extends AppCompatActivity {
 
     public void showTopUpDialog() {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-        builder.setTitle("Nạp tiền vào ví qua ZaloPay");
+        builder.setTitle("Nạp tiền vào ví qua VNPay");
 
         final android.widget.EditText input = new android.widget.EditText(this);
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         input.setHint("Nhập số tiền cần nạp (tối thiểu 10,000 VNĐ)");
         builder.setView(input);
 
-        builder.setPositiveButton("Nạp ZaloPay", (dialog, which) -> {
+        builder.setPositiveButton("Nạp VNPay", (dialog, which) -> {
             String amountStr = input.getText().toString();
             if (!amountStr.isEmpty()) {
                 long amount = Long.parseLong(amountStr);
@@ -467,22 +467,21 @@ public class ProfileActivity extends AppCompatActivity {
                 }
                 
                 com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
-                walletRepo.createZaloPayTopUp(amount, new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
+                walletRepo.createVNPayTopUp(amount, new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
                     @Override
                     public void onSuccess(java.util.Map<String, Object> data) {
                         runOnUiThread(() -> {
-                            if (data != null && data.containsKey("order_url")) {
-                                String orderUrl = (String) data.get("order_url");
-                                String appTransId = (String) data.get("app_trans_id");
+                            if (data != null && data.containsKey("paymentUrl")) {
+                                String paymentUrl = (String) data.get("paymentUrl");
                                 
-                                // Mở trang thanh toán ZaloPay
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(orderUrl));
+                                // Mở trang thanh toán VNPay
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(paymentUrl));
                                 startActivity(browserIntent);
                                 
-                                // Hiện dialog để kiểm tra trạng thái
-                                showCheckStatusDialog(appTransId);
+                                // Hiện dialog để người dùng tự bấm cập nhật số dư sau khi thanh toán
+                                showRefreshBalanceDialog();
                             } else {
-                                Toast.makeText(ProfileActivity.this, "Không lấy được link thanh toán", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ProfileActivity.this, "Không lấy được link thanh toán VNPay", Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -497,6 +496,20 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+    private void showRefreshBalanceDialog() {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("Đang chờ thanh toán");
+        builder.setMessage("Sau khi thanh toán xong trên VNPay, hãy bấm nút dưới đây để cập nhật số dư nhé!");
+        builder.setCancelable(false);
+
+        builder.setPositiveButton("Cập nhật số dư", (dialog, which) -> {
+            fetchWalletInfo();
+            dialog.dismiss();
+            Toast.makeText(this, "Đã cập nhật số dư", Toast.LENGTH_SHORT).show();
+        });
         builder.show();
     }
 

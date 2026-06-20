@@ -62,3 +62,9 @@ zalopay:
   endpoint-query: "https://sb-openapi.zalopay.vn/v2/query"
   endpoint-refund: "https://sb-openapi.zalopay.vn/v2/refund"
   endpoint-query-refund: "https://sb-openapi.zalopay.vn/v2/query_refund"
+
+vnpay:
+  tmn-code: "YMY7CP24"
+  hash-secret: "5Q2UU0H6QTW8K88FVCXUVRCYTUHH4KCR"
+  url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+  return-url: "http://10.0.2.2:8081/api/v1/payments/vnpay/return"

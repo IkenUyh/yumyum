@@ -48,4 +48,8 @@ public interface WalletService {
     // Query Order Status
     @GET("api/v1/payments/zalopay/order-status/{appTransId}")
     Call<ApiResponse<java.util.Map<String, Object>>> queryZaloPayOrderStatus(@retrofit2.http.Path("appTransId") String appTransId);
+
+    // VNPay TopUp API
+    @POST("api/v1/payments/vnpay/topup")
+    Call<ApiResponse<java.util.Map<String, Object>>> createVNPayTopUp(@retrofit2.http.Query("amount") long amount);
 }

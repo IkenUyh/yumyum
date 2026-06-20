@@ -16,12 +16,15 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.uit.fooddelivery_api.modules.payment.services.VNPayService;
+
 @RestController
 @RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
 public class PaymentController {
 
     private final ZaloPayService zaloPayService;
+    private final VNPayService vnPayService;
     private final WalletRepository walletRepository;
 
     @Value("${zalopay.key2}")
@@ -108,5 +111,91 @@ public class PaymentController {
     public ApiResponse<Map<String, Object>> getRefundStatus(@PathVariable String mRefundId) {
         Map<String, Object> result = zaloPayService.queryRefundStatus(mRefundId);
         return ApiResponse.success(result);
+    }
+
+    // ==========================================
+    // VNPay Integration
+    // ==========================================
+
+    @PostMapping("/vnpay/topup")
+    public ApiResponse<Map<String, Object>> createVNPayTopUp(
+            Authentication authentication,
+            @RequestParam Long amount) {
+
+        User currentUser = (User) authentication.getPrincipal();
+        if (amount < 10000) {
+            throw new RuntimeException("Số tiền nạp tối thiểu là 10.000 VNĐ");
+        }
+
+        String paymentUrl = vnPayService.createPaymentUrl(currentUser, amount);
+        Map<String, Object> result = new HashMap<>();
+        result.put("paymentUrl", paymentUrl);
+        return ApiResponse.success(result);
+    }
+
+    @GetMapping("/vnpay/ipn")
+    public String vnpayIpn(@RequestParam Map<String, String> allParams) {
+        try {
+            if (vnPayService.verifyIpnSignature(allParams)) {
+                if ("00".equals(allParams.get("vnp_ResponseCode"))) {
+                    String vnp_OrderInfo = allParams.get("vnp_OrderInfo");
+                    // Format: TopUp_{userId}_Amount_{amount}
+                    String[] parts = vnp_OrderInfo.split("_");
+                    Long userId = Long.parseLong(parts[1]);
+                    Long amount = Long.parseLong(allParams.get("vnp_Amount")) / 100;
+
+                    Wallet wallet = walletRepository.findByUserId(userId)
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy ví"));
+
+                    wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(amount)));
+                    walletRepository.save(wallet);
+                    
+                    return "{\"RspCode\":\"00\",\"Message\":\"Confirm Success\"}";
+                } else {
+                    return "{\"RspCode\":\"02\",\"Message\":\"Order already confirmed\"}";
+                }
+            } else {
+                return "{\"RspCode\":\"97\",\"Message\":\"Invalid Checksum\"}";
+            }
+        } catch (Exception e) {
+            return "{\"RspCode\":\"99\",\"Message\":\"Unknown error\"}";
+        }
+    }
+
+    // Lưu tạm các mã giao dịch đã xử lý để tránh cộng tiền 2 lần khi refresh trang
+    private final java.util.Set<String> processedVNPayTxnRefs = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
+
+    @GetMapping("/vnpay/return")
+    public String vnpayReturn(@RequestParam Map<String, String> allParams) {
+        if (vnPayService.verifyIpnSignature(allParams)) {
+            if ("00".equals(allParams.get("vnp_ResponseCode"))) {
+                String vnp_TxnRef = allParams.get("vnp_TxnRef");
+                
+                // Tránh cộng tiền 2 lần nếu user F5 trang web
+                if (!processedVNPayTxnRefs.contains(vnp_TxnRef)) {
+                    processedVNPayTxnRefs.add(vnp_TxnRef);
+                    
+                    try {
+                        String vnp_OrderInfo = allParams.get("vnp_OrderInfo");
+                        String[] parts = vnp_OrderInfo.split("_");
+                        Long userId = Long.parseLong(parts[1]);
+                        Long amount = Long.parseLong(allParams.get("vnp_Amount")) / 100;
+
+                        Wallet wallet = walletRepository.findByUserId(userId)
+                                .orElseThrow(() -> new RuntimeException("Không tìm thấy ví"));
+
+                        wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(amount)));
+                        walletRepository.save(wallet);
+                    } catch (Exception e) {
+                        return "<h1>Lỗi cộng tiền: " + e.getMessage() + "</h1>";
+                    }
+                }
+                
+                return "<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'></head><body style='text-align:center; padding: 50px;'><h1 style='color: green;'>Thanh toán thành công!</h1><p>Tiền đã được cộng vào ví UITpay.</p><p>Bạn có thể đóng trình duyệt này và quay lại ứng dụng.</p></body></html>";
+            } else {
+                return "<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'></head><body style='text-align:center; padding: 50px;'><h1 style='color: red;'>Thanh toán thất bại!</h1><p>Giao dịch của bạn đã bị hủy hoặc có lỗi xảy ra.</p></body></html>";
+            }
+        }
+        return "<h1>Lỗi xác thực chữ ký VNPay!</h1>";
     }
 }

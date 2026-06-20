@@ -115,6 +115,25 @@ public class WalletRepository {
         });
     }
 
+    // Nạp tiền qua VNPay
+    public void createVNPayTopUp(long amount, final ApiCallback<java.util.Map<String, Object>> callback) {
+        walletService.createVNPayTopUp(amount).enqueue(new Callback<ApiResponse<java.util.Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<java.util.Map<String, Object>>> call, Response<ApiResponse<java.util.Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body().getData());
+                } else {
+                    callback.onError("Không thể tạo đơn VNPay: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<java.util.Map<String, Object>>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
     // Hàm gọi lấy số dư ví cửa hàng
     public void getMerchantBalance(final ApiCallback<BalanceResponse> callback) {
         walletService.getMerchantBalance().enqueue(new Callback<ApiResponse<BalanceResponse>>() {
@@ -132,7 +151,7 @@ public class WalletRepository {
                 callback.onError("Lỗi kết nối hệ thống: " + t.getMessage());
             }
         });
-    }
+
 
     // Hàm chuyển tiền từ ví cửa hàng về ví cá nhân
     public void transferMerchantToPersonal(MerchantWalletTransferRequest request, final ApiCallback<String> callback) {
@@ -168,6 +187,7 @@ public class WalletRepository {
             @Override
             public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
                 callback.onError("Lỗi kết nối hệ thống: " + t.getMessage());
+>>>>>>> origin/develop
             }
         });
     }
