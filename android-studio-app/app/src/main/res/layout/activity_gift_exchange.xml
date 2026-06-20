@@ -72,6 +72,7 @@
                             android:src="@drawable/ic_my_coin"
                             app:tint="#000000" />
                         <TextView
+                            android:id="@+id/tv_user_coins"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text=" 0"
