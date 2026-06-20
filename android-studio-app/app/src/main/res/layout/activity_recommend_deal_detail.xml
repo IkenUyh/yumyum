@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/img_food_chicken"/>
+            android:src="#E0E0E0"/>
         <RelativeLayout
             android:id="@+id/top_bar_recommend_deal_detail"
             android:layout_width="match_parent"
@@ -203,28 +203,13 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical">
-                            <ImageView
-                                android:layout_width="15dp"
-                                android:layout_height="15dp"
-                                android:src="@drawable/ic_star"
-                                android:scaleType="centerCrop"
-                                app:tint="#f2cb05" />
-                            <TextView
-                                android:id="@+id/tv_rating"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textSize="12sp"
-                                android:textColor="#BDBDBD"
-                                android:text="4.5"
-                                android:layout_marginStart="5dp"/>
                             <TextView
                                 android:id="@+id/tv_distance"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textSize="12sp"
                                 android:textColor="#BDBDBD"
-                                android:text="4.5km"
-                                android:layout_marginStart="20dp"/>
+                                android:text="4.5km"/>
                             <View
                                 android:layout_width="1dp"
                                 android:layout_height="match_parent"

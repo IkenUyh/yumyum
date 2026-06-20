@@ -413,40 +413,32 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     private void setupRecommendations() {
         rvRecommendations.setLayoutManager(new LinearLayoutManager(this));
         List<RecommendedShop> recList = new ArrayList<>();
-        List<com.example.uitpayapp.home.home_models.Restaurant> restaurants = com.example.uitpayapp.home.HomeActivity.HomeRepository.getInstance().getRestaurants();
         
-        if (restaurants != null && restaurants.size() >= 3) {
-            recList.add(new RecommendedShop(restaurants.get(0).getName(), 4.8, 1.2, 15, "Mã giảm 20%", restaurants.get(0).getMenu().get(0).getImageResId()));
-            recList.add(new RecommendedShop(restaurants.get(1).getName(), 4.6, 2.5, 25, "Mã giảm 15%", restaurants.get(1).getMenu().get(0).getImageResId()));
-            recList.add(new RecommendedShop(restaurants.get(2).getName(), 4.5, 3.1, 30, "Mã giảm 10%", restaurants.get(2).getMenu().get(0).getImageResId()));
-        } else {
-            recList.add(new RecommendedShop("Ăn Vặt Minh Mập - Mì Xào & Nuôi Xào - Quốc Lộ 1k", 4.4, 0.2, 22, "Mã giảm 18%", android.R.drawable.ic_menu_gallery));
-            recList.add(new RecommendedShop("Bánh Mì Uyên Thư - Quốc Lộ 1K", 4.6, 0.3, 25, "Mã giảm 18%", android.R.drawable.ic_menu_gallery));
-            recList.add(new RecommendedShop("GS25 - Nguyễn Bĩnh Khiêm - Bình Dương", 4.2, 0.5, 18, "Mã giảm 10%", android.R.drawable.ic_menu_gallery));
-        }
+        recList.add(new RecommendedShop("Ăn Vặt Minh Mập - Mì Xào & Nuôi Xào - Quốc Lộ 1k", 4.4, 0.2, 22, "Mã giảm 18%", android.R.drawable.ic_menu_gallery));
+        recList.add(new RecommendedShop("Bánh Mì Uyên Thư - Quốc Lộ 1K", 4.6, 0.3, 25, "Mã giảm 18%", android.R.drawable.ic_menu_gallery));
+        recList.add(new RecommendedShop("GS25 - Nguyễn Bĩnh Khiêm - Bình Dương", 4.2, 0.5, 18, "Mã giảm 10%", android.R.drawable.ic_menu_gallery));
+        
         rvRecommendations.setAdapter(new RecommendedShopAdapter(recList));
     }
 
     private void createDummyFoodOrders() {
-        List<com.example.uitpayapp.home.home_models.FoodMenuItem> popularFoods = com.example.uitpayapp.home.HomeActivity.HomeRepository.getInstance().getPopularFoods();
-        
         List<FoodOrder.SubItem> subItems1 = new ArrayList<>();
-        subItems1.add(new FoodOrder.SubItem(popularFoods.get(0).getName(), popularFoods.get(0).getImageResId()));
-        subItems1.add(new FoodOrder.SubItem(popularFoods.get(1).getName(), popularFoods.get(1).getImageResId()));
+        subItems1.add(new FoodOrder.SubItem("Món 1", 0));
+        subItems1.add(new FoodOrder.SubItem("Món 2", 0));
         allOrders.add(new FoodOrder("05066-620675729", "Bun Burrito - Trần Quốc Toản", 61000, 1, "Hôm nay 17:14", "Đang giao", "Đồ ăn", true, "Đang đến", subItems1));
 
         List<FoodOrder.SubItem> subItems2 = new ArrayList<>();
-        subItems2.add(new FoodOrder.SubItem(popularFoods.get(2).getName(), popularFoods.get(2).getImageResId()));
-        subItems2.add(new FoodOrder.SubItem(popularFoods.get(3).getName(), popularFoods.get(3).getImageResId()));
+        subItems2.add(new FoodOrder.SubItem("Món 3", 0));
+        subItems2.add(new FoodOrder.SubItem("Món 4", 0));
         allOrders.add(new FoodOrder("04066-570542539", "MêBee - Cơm Tấm Long Xuyên &amp; Trà Sữa", 64000, 3, "04/06/2026", "Hoàn thành", "Đồ ăn", true, "Lịch sử", subItems2));
 
         List<FoodOrder.SubItem> subItemsSingle = new ArrayList<>();
-        subItemsSingle.add(new FoodOrder.SubItem(popularFoods.get(4).getName(), popularFoods.get(4).getImageResId()));
+        subItemsSingle.add(new FoodOrder.SubItem("Món 5", 0));
         allOrders.add(new FoodOrder("21099-112233445", "Cơm Tấm Ngô Quyền - Linh Trung", 45000, 1, "15/05/2026", "Hoàn thành", "Đồ ăn", false, "Lịch sử", subItemsSingle));
 
         List<FoodOrder.SubItem> subItemsAnVien = new ArrayList<>();
         // Đổ món ăn "Lục Trà Chanh Dây" vào danh sách sub-item
-        subItemsAnVien.add(new FoodOrder.SubItem("Lục Trà Chanh Dây", popularFoods.get(0).getImageResId()));
+        subItemsAnVien.add(new FoodOrder.SubItem("Lục Trà Chanh Dây", 0));
 
         allOrders.add(new FoodOrder(
                 "15016-594977098",                        // Mã hóa đơn (Khớp mã liên kết từ tab Deal)
@@ -463,7 +455,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
 
 
         List<FoodOrder.SubItem> subItemsFour = new ArrayList<>();
-        subItemsFour.add(new FoodOrder.SubItem(popularFoods.get(5).getName(), popularFoods.get(5).getImageResId()));
+        subItemsFour.add(new FoodOrder.SubItem("Món 6", 0));
         allOrders.add(new FoodOrder("12044-998877665", "Gà Rán Popeyes - Võ Văn Ngân", 145000, 4, "12/05/2026", "Hoàn thành", "Đồ ăn", true, "Lịch sử", subItemsFour));
     }
 

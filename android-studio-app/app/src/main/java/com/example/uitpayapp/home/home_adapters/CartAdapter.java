@@ -48,14 +48,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         CartItem item = cartItems.get(position);
 
         String url = item.getMenuItem().getImageUrl();
-        if (url != null && !url.isEmpty() && url.startsWith("http")) {
-            com.bumptech.glide.Glide.with(holder.imgItem.getContext())
-                    .load(url)
-                    .placeholder(R.drawable.img_food_chicken)
-                    .into(holder.imgItem);
-        } else {
-            holder.imgItem.setImageResource(item.getMenuItem().getImageResId());
-        }
+        com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(holder.imgItem, url);
         holder.tvName.setText(item.getMenuItem().getName());
         
         // Show total price of one single item including toppings (or wait, the price per item including toppings, or just base price?)

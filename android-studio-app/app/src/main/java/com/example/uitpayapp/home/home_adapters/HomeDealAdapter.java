@@ -132,9 +132,8 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.tvDiscountPrice.setText(currencyFormatter.format(deal.getDiscountPrice()));
 
         View.OnClickListener storeClickListener = v -> {
-            Intent intent = new Intent(v.getContext(), StoreDetailActivity.class);
-            intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, deal.getStoreName());
-            v.getContext().startActivity(intent);
+            // Tính năng bị vô hiệu hóa tạm thời do thiếu restaurantId
+            android.widget.Toast.makeText(v.getContext(), "Tính năng đang được cập nhật", android.widget.Toast.LENGTH_SHORT).show();
         };
 
         if (holder.layoutStoreInfo != null) {
@@ -186,7 +185,6 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             tvOriginalPrice = itemView.findViewById(R.id.tv_original_price);
             tvDiscountPrice = itemView.findViewById(R.id.tv_discount_price);
             btnBuyNow = itemView.findViewById(R.id.btn_buy_now);
-            tvRating = itemView.findViewById(R.id.tv_rating);
         }
     }
 

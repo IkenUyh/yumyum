@@ -89,9 +89,9 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         RecyclerView rvSuggested = findViewById(R.id.rv_suggested_items);
         rvSuggested.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         List<SuggestedItemAdapter.SuggestedItem> suggestedItems = new ArrayList<>();
-        suggestedItems.add(new SuggestedItemAdapter.SuggestedItem("Trà sữa trân châu", 25000, R.drawable.img_food_bubbletea));
-        suggestedItems.add(new SuggestedItemAdapter.SuggestedItem("Gà rán giòn", 35000, R.drawable.img_food_chicken));
-        suggestedItems.add(new SuggestedItemAdapter.SuggestedItem("Pizza phô mai", 45000, R.drawable.img_food_pizza));
+        suggestedItems.add(new SuggestedItemAdapter.SuggestedItem("Trà sữa trân châu", 25000, 0));
+        suggestedItems.add(new SuggestedItemAdapter.SuggestedItem("Gà rán giòn", 35000, 0));
+        suggestedItems.add(new SuggestedItemAdapter.SuggestedItem("Pizza phô mai", 45000, 0));
         rvSuggested.setAdapter(new SuggestedItemAdapter(suggestedItems));
     }
 

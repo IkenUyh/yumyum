@@ -88,24 +88,18 @@ public class AdminApprovalActivity extends AppCompatActivity {
 
         String[] statuses = {"pending", "approved", "rejected"};
 
-        List<com.example.uitpayapp.home.home_models.Restaurant> homeRestaurants = com.example.uitpayapp.home.HomeActivity.HomeRepository.getInstance().getRestaurants();
         int storeId = 1;
-        if (homeRestaurants != null) {
-            for (com.example.uitpayapp.home.home_models.Restaurant r : homeRestaurants) {
-                String status = statuses[(storeId - 1) % 3];
-                allStores.add(new PendingStore("S" + storeId, r.getName(), "Chủ cửa hàng " + storeId, r.getAddress(), r.getCategory(), r.getImageResId(), status, "20/05/2024"));
-                storeId++;
-            }
+        for (int i = 0; i < 5; i++) {
+            String status = statuses[i % 3];
+            allStores.add(new PendingStore("S" + storeId, "Cửa hàng " + storeId, "Chủ cửa hàng " + storeId, "Địa chỉ " + storeId, "Danh mục", 0, status, "20/05/2024"));
+            storeId++;
         }
 
-        List<com.example.uitpayapp.home.home_models.FoodMenuItem> homeFoods = com.example.uitpayapp.home.HomeActivity.HomeRepository.getInstance().getPopularFoods();
         int dishId = 1;
-        if (homeFoods != null) {
-            for (com.example.uitpayapp.home.home_models.FoodMenuItem f : homeFoods) {
-                String status = statuses[(dishId - 1) % 3];
-                allDishes.add(new PendingDish("D" + dishId, f.getName(), "Cửa hàng " + dishId, "Đồ ăn", f.getPrice(), f.getImageResId(), status, "21/05/2024"));
-                dishId++;
-            }
+        for (int i = 0; i < 5; i++) {
+            String status = statuses[i % 3];
+            allDishes.add(new PendingDish("D" + dishId, "Món ăn " + dishId, "Cửa hàng " + dishId, "Đồ ăn", 50000, 0, status, "21/05/2024"));
+            dishId++;
         }
     }
 

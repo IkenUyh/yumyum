@@ -63,32 +63,8 @@ public class StoreDetailActivity extends AppCompatActivity {
 
         if (restaurantId != -1) {
             fetchRestaurantDetails(restaurantId);
-        } else if (restName != null) {
-            // Fallback: try to find the restaurant ID by fetching all
-            com.example.uitpayapp.network.RetrofitClient.getRestaurantService().getAllRestaurants()
-                .enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>>() {
-                    @Override
-                    public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> response) {
-                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                            for (com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto : response.body().getData()) {
-                                if (dto.getName().equals(restName) || dto.getName().contains(restName) || restName.contains(dto.getName())) {
-                                    fetchRestaurantDetails(dto.getId());
-                                    return;
-                                }
-                            }
-                        }
-                        Toast.makeText(StoreDetailActivity.this, "Không tìm thấy thông tin cửa hàng", Toast.LENGTH_SHORT).show();
-                        finish();
-                    }
-
-                    @Override
-                    public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>>> call, Throwable t) {
-                        Toast.makeText(StoreDetailActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
-                        finish();
-                    }
-                });
         } else {
-            Toast.makeText(this, "Không tìm thấy thông tin cửa hàng", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Thiếu ID cửa hàng", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -125,6 +101,10 @@ public class StoreDetailActivity extends AppCompatActivity {
         View btnCart = findViewById(R.id.btn_cart);
         if (btnCart != null) {
             btnCart.setOnClickListener(v -> {
+                if (!com.example.uitpayapp.network.SessionManager.getInstance(this).isLoggedIn()) {
+                    com.example.uitpayapp.utils.LoginPopupHelper.showLoginRequiredPopup(this);
+                    return;
+                }
                 Intent intent = new Intent(this, CartActivity.class);
                 startActivity(intent);
             });
@@ -138,7 +118,7 @@ public class StoreDetailActivity extends AppCompatActivity {
                 public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>> response) {
                     if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                         com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO dto = response.body().getData();
-                        restaurant = new Restaurant(dto.getId(), dto.getName(), dto.getName().substring(0, 1), Color.RED, "Danh mục", new ArrayList<>(), R.drawable.img_food_chicken, 4.5, 100, 30, dto.getAddress(), dto.getImageUrl());
+                        restaurant = new Restaurant(dto.getId(), dto.getName(), dto.getName().substring(0, 1), Color.RED, "Danh mục", new ArrayList<>(), 0, 4.5, 100, 30, dto.getAddress(), dto.getImageUrl());
                         updateStoreUI(dto);
                         checkFavoriteStatus();
                         fetchRestaurantFoods(id);
@@ -159,7 +139,7 @@ public class StoreDetailActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                         List<FoodMenuItem> menuItems = new ArrayList<>();
                         for (com.example.uitpayapp.modules.food.models.responses.FoodResponse food : response.body().getData()) {
-                            menuItems.add(new FoodMenuItem(String.valueOf(food.getId()), food.getName(), food.getPrice().longValue(), R.drawable.img_food_chicken, food.getDescription(), food.getImageUrl()));
+                            menuItems.add(new FoodMenuItem(String.valueOf(food.getId()), food.getName(), food.getPrice().longValue(), 0, food.getDescription(), food.getImageUrl()));
                         }
                         restaurant.getMenu().clear();
                         restaurant.getMenu().addAll(menuItems);
@@ -201,7 +181,6 @@ public class StoreDetailActivity extends AppCompatActivity {
         tvStoreName.setText(dto.getName());
         tvStoreAddress.setText(dto.getAddress() != null ? dto.getAddress() : "Không có địa chỉ");
         tvStoreRating.setText(String.format("4.5 (100+ Bình luận)"));
-        tvDeliveryTime.setText("30 phút");
     }
 
     private void updateMenuUI(List<FoodMenuItem> menuItems) {

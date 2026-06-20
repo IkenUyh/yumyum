@@ -13,6 +13,7 @@ import com.example.uitpayapp.R;
 import com.example.uitpayapp.home.home_models.FoodMenuItem;
 
 import java.util.List;
+import com.bumptech.glide.Glide;
 
 public class StorePopularFoodAdapter extends RecyclerView.Adapter<StorePopularFoodAdapter.ViewHolder> {
     private final List<FoodMenuItem> foods;
@@ -39,7 +40,7 @@ public class StorePopularFoodAdapter extends RecyclerView.Adapter<StorePopularFo
         FoodMenuItem item = foods.get(position);
         holder.tvFoodName.setText(item.getName());
         holder.tvFoodPrice.setText(item.getFormattedPrice());
-        holder.ivFoodImage.setImageResource(item.getImageResId());
+        com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(holder.ivFoodImage, item.getImageUrl());
         
         // Random badge
         int sold = 100 + (item.getName().hashCode() % 400);

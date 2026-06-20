@@ -37,15 +37,7 @@ public class FavoriteHorizontalAdapter extends RecyclerView.Adapter<FavoriteHori
         FavoriteShop shop = shopList.get(position);
 
         holder.tvHorizontalName.setText(shop.getName());
-        if (shop.getImageUrl() != null && !shop.getImageUrl().isEmpty()) {
-            com.bumptech.glide.Glide.with(holder.ivHorizontalImage.getContext())
-                    .load(shop.getImageUrl())
-                    .placeholder(R.drawable.img_food_chicken)
-                    .error(shop.getImageResId() != 0 ? shop.getImageResId() : R.drawable.img_food_chicken)
-                    .into(holder.ivHorizontalImage);
-        } else {
-            holder.ivHorizontalImage.setImageResource(shop.getImageResId() != 0 ? shop.getImageResId() : R.drawable.img_food_chicken);
-        }
+        com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(holder.ivHorizontalImage, shop.getImageUrl());
 
         if (shop.isFavorited()) {
             holder.ivHorizontalFavoriteHeart.setImageResource(R.drawable.favorite_filled_24px);

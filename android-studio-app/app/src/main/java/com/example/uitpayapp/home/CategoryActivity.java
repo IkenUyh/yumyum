@@ -42,6 +42,16 @@ public class CategoryActivity extends AppCompatActivity {
             return insets;
         });
 
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.view_pager_categories), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
+            return insets;
+        });
+
+        getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
+        androidx.core.view.WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        windowInsetsController.setAppearanceLightNavigationBars(true);
+
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> {
             finish();
@@ -50,6 +60,10 @@ public class CategoryActivity extends AppCompatActivity {
 
         // Cart button
         findViewById(R.id.btn_cart).setOnClickListener(v -> {
+            if (!com.example.uitpayapp.network.SessionManager.getInstance(this).isLoggedIn()) {
+                com.example.uitpayapp.utils.LoginPopupHelper.showLoginRequiredPopup(this);
+                return;
+            }
             startActivity(new android.content.Intent(this, CartActivity.class));
         });
         updateCartBadge();
@@ -67,7 +81,7 @@ public class CategoryActivity extends AppCompatActivity {
             selectedCategory = "Tất cả";
         }
 
-        List<String> filters = java.util.Arrays.asList("Gần tôi", "Bán chạy", "Đánh giá");
+        List<String> filters = java.util.Arrays.asList("Gần tôi", "Bán chạy");
 
         CategoryPagerAdapter adapter = new CategoryPagerAdapter(this, selectedCategory, categoryId, filters);
         viewPager.setAdapter(adapter);

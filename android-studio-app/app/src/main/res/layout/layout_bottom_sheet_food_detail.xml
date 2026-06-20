@@ -37,7 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            tools:src="@drawable/img_food_chicken" />
+            tools:src="#E0E0E0" />
     </androidx.cardview.widget.CardView>
 
     <TextView

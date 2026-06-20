@@ -15,6 +15,11 @@ public class SessionManager {
     private static final String KEY_USER_AVATAR = "user_avatar_url";
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_USER_EMAIL = "user_email";
+    
+    // Address storage
+    private static final String KEY_DELIVERY_ADDRESS_ID = "delivery_address_id";
+    private static final String KEY_DELIVERY_ADDRESS_TEXT = "delivery_address_text";
+    
     private static SessionManager instance;
     private final SharedPreferences sharedPreferences;
     private final SharedPreferences.Editor editor;
@@ -107,5 +112,36 @@ public class SessionManager {
 
     public String getUserEmail() {
         return sharedPreferences.getString(KEY_USER_EMAIL, "");
+    }
+
+    /**
+     * LƯU ĐỊA CHỈ GIAO HÀNG ĐANG CHỌN
+     */
+    public void saveDeliveryAddress(Long addressId, String addressText) {
+        if (addressId == null) {
+            editor.remove(KEY_DELIVERY_ADDRESS_ID);
+        } else {
+            editor.putLong(KEY_DELIVERY_ADDRESS_ID, addressId);
+        }
+        
+        if (addressText == null) {
+            editor.remove(KEY_DELIVERY_ADDRESS_TEXT);
+        } else {
+            editor.putString(KEY_DELIVERY_ADDRESS_TEXT, addressText);
+        }
+        editor.apply();
+    }
+
+    /**
+     * LẤY ĐỊA CHỈ GIAO HÀNG ĐANG CHỌN
+     * @return chuỗi địa chỉ hoặc null
+     */
+    public String getDeliveryAddressText() {
+        return sharedPreferences.getString(KEY_DELIVERY_ADDRESS_TEXT, null);
+    }
+    
+    public Long getDeliveryAddressId() {
+        long id = sharedPreferences.getLong(KEY_DELIVERY_ADDRESS_ID, -1L);
+        return id == -1L ? null : id;
     }
 }

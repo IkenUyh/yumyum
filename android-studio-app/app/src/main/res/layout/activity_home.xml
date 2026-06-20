@@ -42,6 +42,7 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/tv_delivery_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Giao đến:"
@@ -61,6 +62,7 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/tv_delivery_arrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
@@ -139,6 +141,7 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tv_delivery_label_dummy"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Giao đến:"
@@ -483,11 +486,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Bán chạy" />
-
-                    <com.google.android.material.tabs.TabItem
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Đánh giá" />
                 </com.google.android.material.tabs.TabLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -585,11 +583,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Bán chạy" />
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Đánh giá" />
     </com.google.android.material.tabs.TabLayout>
 
     <FrameLayout

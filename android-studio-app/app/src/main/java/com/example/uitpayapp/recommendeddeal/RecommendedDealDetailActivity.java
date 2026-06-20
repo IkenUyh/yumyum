@@ -77,7 +77,6 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
         tvDealName = findViewById(R.id.tv_deal_name);
         ivStoreLogo = findViewById(R.id.iv_store_logo);
         tvStoreName = findViewById(R.id.tv_store_name);
-        tvRating = findViewById(R.id.tv_rating);
         tvDistance = findViewById(R.id.tv_distance);
         tvDeliveryTime = findViewById(R.id.tv_delivery_time);
         tvDiscountPriceFooter = findViewById(R.id.tv_discount_price_footer);
@@ -87,6 +86,10 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
         tvCartBadge = findViewById(R.id.tv_cart_badge);
         
         btnCart.setOnClickListener(v -> {
+            if (!com.example.uitpayapp.network.SessionManager.getInstance(this).isLoggedIn()) {
+                com.example.uitpayapp.utils.LoginPopupHelper.showLoginRequiredPopup(this);
+                return;
+            }
             startActivity(new android.content.Intent(this, CartActivity.class));
         });
 
@@ -117,7 +120,7 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
             double originalPrice = extras.getDouble("original_price", 0);
             double distance = extras.getDouble("distance", 0);
             int deliveryTime = extras.getInt("delivery_time", 0);
-            int foodImage = extras.getInt("food_image", R.drawable.img_food_chicken);
+            int foodImage = extras.getInt("food_image", 0);
             String imageUrl = extras.getString("image_url", "");
             double rating = extras.getDouble("rating", 4.5);
 
@@ -128,7 +131,6 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
             tvOriginalPrice.setText(currencyFormatter.format(originalPrice));
             tvDistance.setText(distance + "km");
             tvDeliveryTime.setText(deliveryTime + " phút");
-            tvRating.setText(String.valueOf(rating));
             tvSaving.setText(currencyFormatter.format(originalPrice - discountPrice));
 
             android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
@@ -169,9 +171,8 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
             View cvStoreInfo = findViewById(R.id.cv_store_info);
             if (cvStoreInfo != null) {
                 cvStoreInfo.setOnClickListener(v -> {
-                    android.content.Intent intent = new android.content.Intent(this, com.example.uitpayapp.home.StoreDetailActivity.class);
-                    intent.putExtra(com.example.uitpayapp.home.StoreDetailActivity.EXTRA_RESTAURANT_NAME, storeName);
-                    startActivity(intent);
+                    // Tính năng bị vô hiệu hóa tạm thời do thiếu restaurantId
+                    android.widget.Toast.makeText(v.getContext(), "Tính năng đang được cập nhật", android.widget.Toast.LENGTH_SHORT).show();
                 });
             }
         }

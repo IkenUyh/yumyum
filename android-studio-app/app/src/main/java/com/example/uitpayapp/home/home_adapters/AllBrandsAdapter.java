@@ -60,6 +60,12 @@ public class AllBrandsAdapter extends RecyclerView.Adapter<AllBrandsAdapter.View
         });
     }
 
+    public void updateData(List<Restaurant> newRestaurants) {
+        this.restaurants.clear();
+        this.restaurants.addAll(newRestaurants);
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() { return restaurants.size(); }
 

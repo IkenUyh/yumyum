@@ -53,15 +53,15 @@ public class CartManager {
     }
 
     public static CartItem mapResponseToCartItem(CartItemResponseDTO dto) {
-        int imageResId = com.example.uitpayapp.R.drawable.img_food_chicken;
+        int imageResId = 0;
         if (dto.getFoodName() != null) {
             String lower = dto.getFoodName().toLowerCase();
             if (lower.contains("trà") || lower.contains("sữa") || lower.contains("phandi") || lower.contains("freeze")) {
-                imageResId = com.example.uitpayapp.R.drawable.img_food_bubbletea;
+                imageResId = 0;
             } else if (lower.contains("cà phê") || lower.contains("phin")) {
-                imageResId = com.example.uitpayapp.R.drawable.img_food_coffee;
+                imageResId = 0;
             } else if (lower.contains("pizza")) {
-                imageResId = com.example.uitpayapp.R.drawable.img_food_pizza;
+                imageResId = 0;
             }
         }
 
