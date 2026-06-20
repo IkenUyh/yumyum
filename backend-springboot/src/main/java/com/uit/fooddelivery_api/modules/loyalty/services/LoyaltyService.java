@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -91,71 +92,93 @@ public class LoyaltyService {
         // 1. Lấy toàn bộ đơn hàng của khách hàng
         List<com.uit.fooddelivery_api.modules.order.entities.Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
 
-        // 2. Duyệt qua đơn hàng để trích xuất voucher đã dùng làm Deal đã mua
+        // 2. Duyệt qua đơn hàng để trích xuất các món ăn được mua với giá ưu đãi (discount price)
         for (com.uit.fooddelivery_api.modules.order.entities.Order order : orders) {
-            if (order.getVouchers() != null && !order.getVouchers().isEmpty()) {
-                for (com.uit.fooddelivery_api.modules.voucher.entities.Voucher voucher : order.getVouchers()) {
-                    String dateStr = "Hôm nay";
-                    if (order.getCreatedAt() != null) {
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                        dateStr = order.getCreatedAt().format(formatter);
-                    }
+            if (order.getOrderItems() != null) {
+                for (com.uit.fooddelivery_api.modules.order.entities.OrderItem item : order.getOrderItems()) {
+                    BigDecimal originalPrice = item.getFood().getPrice();
+                    BigDecimal purchasedPrice = item.getPrice();
                     
-                    String expiryStr = "HSD: ";
-                    if (voucher.getEndDate() != null) {
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                        expiryStr += voucher.getEndDate().format(formatter);
-                    } else {
-                        expiryStr += "Không thời hạn";
+                    // Coi món ăn là Deal nếu giá mua nhỏ hơn giá bán lẻ gốc,
+                    // hoặc nếu toàn đơn hàng có áp dụng giảm giá.
+                    boolean isDiscounted = (originalPrice != null && purchasedPrice.compareTo(originalPrice) < 0) 
+                            || (order.getDiscountAmount() != null && order.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0);
+                    
+                    if (isDiscounted) {
+                        String dateStr = "Hôm nay";
+                        if (order.getCreatedAt() != null) {
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                            dateStr = order.getCreatedAt().format(formatter);
+                        }
+                        
+                        String originalPriceStr = "Giá gốc: " + (originalPrice != null ? formatCurrency(originalPrice) : "0đ");
+                        String dealTitleText = item.getFood().getName();
+                        String statusText = translateStatus(order.getStatus());
+                        
+                        list.add(DealHistoryResponseDTO.builder()
+                                .dealId(order.getId() + "_" + item.getId())
+                                .merchantName(order.getRestaurant() != null ? order.getRestaurant().getName() : "Hệ thống")
+                                .purchaseDate(dateStr)
+                                .dealTitle(dealTitleText)
+                                .price(formatCurrency(purchasedPrice))
+                                .expiryText(originalPriceStr)
+                                .quantityText("x" + item.getQuantity())
+                                .statusText(statusText)
+                                .appliedOrderId(String.valueOf(order.getId()))
+                                .imageUrl(item.getFood().getImageUrl())
+                                .build());
                     }
-
-                    String dealTitleText = voucher.getCode();
-                    if (voucher.getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.SHIPPING_DISCOUNT) {
-                        dealTitleText = "Giảm giá phí vận chuyển " + voucher.getDiscountPercent() + "%";
-                    } else if (voucher.getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.ORDER_DISCOUNT) {
-                        dealTitleText = "Giảm giá hóa đơn " + voucher.getDiscountPercent() + "%";
-                    }
-
-                    list.add(DealHistoryResponseDTO.builder()
-                            .dealId(order.getId() + "_" + voucher.getId())
-                            .merchantName(order.getRestaurant() != null ? order.getRestaurant().getName() : "Hệ thống")
-                            .purchaseDate(dateStr)
-                            .dealTitle(dealTitleText)
-                            .price("Dùng ví")
-                            .expiryText(expiryStr)
-                            .quantityText("x1")
-                            .statusText("Đã dùng")
-                            .appliedOrderId(String.valueOf(order.getId()))
-                            .build());
                 }
             }
         }
 
-        // 3. Thêm một số deal mock chưa dùng/đã dùng
+        // 3. Thêm các deal mock là món ăn mua ở dạng ưu đãi
         list.add(DealHistoryResponseDTO.builder()
                 .dealId("DEAL_MOCK_1")
                 .merchantName("Trà Sữa An Viên - Đường 30 Tháng 4")
                 .purchaseDate("10/06/2026")
-                .dealTitle("Voucher Giảm 50% Trà Sữa")
-                .price("500 xu")
-                .expiryText("HSD: 30/12/2026")
+                .dealTitle("Trà Sữa Trân Châu Đường Đen")
+                .price("25.000đ")
+                .expiryText("Giá gốc: 50.000đ")
                 .quantityText("x1")
-                .statusText("Chưa dùng")
-                .appliedOrderId(null)
+                .statusText("Đã hoàn thành")
+                .appliedOrderId("1")
+                .imageUrl("https://picsum.photos/seed/milktea/200/200")
                 .build());
 
         list.add(DealHistoryResponseDTO.builder()
                 .dealId("DEAL_MOCK_2")
                 .merchantName("Bánh Mì Huỳnh Hoa")
                 .purchaseDate("08/06/2026")
-                .dealTitle("Khao 30K Bánh Mì Đặc Biệt")
-                .price("300 xu")
-                .expiryText("HSD: 31/12/2026")
+                .dealTitle("Bánh Mì Đặc Biệt")
+                .price("35.000đ")
+                .expiryText("Giá gốc: 65.000đ")
                 .quantityText("x1")
-                .statusText("Chưa dùng")
-                .appliedOrderId(null)
+                .statusText("Đang chuẩn bị")
+                .appliedOrderId("2")
+                .imageUrl("https://picsum.photos/seed/banhmi/200/200")
                 .build());
 
         return list;
+    }
+
+    private String formatCurrency(BigDecimal amount) {
+        if (amount == null) return "0đ";
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols(new java.util.Locale("vi", "VN"));
+        symbols.setGroupingSeparator('.');
+        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###đ", symbols);
+        return formatter.format(amount.doubleValue());
+    }
+
+    private String translateStatus(String status) {
+        if (status == null) return "Đang xử lý";
+        switch (status.toUpperCase()) {
+            case "PENDING": return "Đang chờ";
+            case "PREPARING": return "Đang chuẩn bị";
+            case "DELIVERING": return "Đang giao hàng";
+            case "COMPLETED": return "Đã hoàn thành";
+            case "CANCELLED": return "Đã hủy";
+            default: return status;
+        }
     }
 }

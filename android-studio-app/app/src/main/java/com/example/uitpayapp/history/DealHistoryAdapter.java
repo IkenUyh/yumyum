@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.example.uitpayapp.R;
 import java.util.List;
 
@@ -38,13 +40,27 @@ public class DealHistoryAdapter extends RecyclerView.Adapter<DealHistoryAdapter.
         holder.txtQuantity.setText(model.getQuantityText());
         holder.txtStatus.setText(model.getStatusText());
 
+        // Load image using Glide
+        if (model.getImageUrl() != null && !model.getImageUrl().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(model.getImageUrl())
+                    .placeholder(new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0")))
+                    .into(holder.imgDealThumb);
+        } else {
+            holder.imgDealThumb.setImageResource(android.R.color.darker_gray);
+        }
+
         // CLICK ITEM -> Chuyển trực tiếp sang DealDetailActivity bằng Context
         holder.itemView.setOnClickListener(v -> {
             Context context = holder.itemView.getContext();
             Intent intent = new Intent(context, DealDetailActivity.class);
             intent.putExtra("MERCHANT_NAME", model.getMerchantName());
             intent.putExtra("DEAL_TITLE", model.getDealTitle());
+            intent.putExtra("STATUS_TEXT", model.getStatusText());
+            intent.putExtra("PRICE", model.getPrice());
+            intent.putExtra("EXPIRY_TEXT", model.getExpiryText());
             intent.putExtra("APPLIED_ORDER_ID", model.getAppliedOrderId());
+            intent.putExtra("IMAGE_URL", model.getImageUrl());
             context.startActivity(intent);
         });
     }
@@ -54,6 +70,7 @@ public class DealHistoryAdapter extends RecyclerView.Adapter<DealHistoryAdapter.
 
     static class DealViewHolder extends RecyclerView.ViewHolder {
         TextView txtMerchantName, txtPurchaseDate, txtDealTitle, txtPrice, txtExpiry, txtQuantity, txtStatus;
+        ImageView imgDealThumb;
 
         public DealViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -64,6 +81,7 @@ public class DealHistoryAdapter extends RecyclerView.Adapter<DealHistoryAdapter.
             txtExpiry = itemView.findViewById(R.id.txtDealExpiry);
             txtQuantity = itemView.findViewById(R.id.txtDealQuantity);
             txtStatus = itemView.findViewById(R.id.txtDealStatus);
+            imgDealThumb = itemView.findViewById(R.id.imgDealThumb);
         }
     }
 }

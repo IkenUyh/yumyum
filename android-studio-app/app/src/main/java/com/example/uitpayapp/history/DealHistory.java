@@ -10,11 +10,12 @@ public class DealHistory {
     private String quantityText;
     private String statusText;
     private String appliedOrderId; // ID để liên kết sang màn hình Chi tiết đơn hàng cũ của bạn
+    private String imageUrl;
 
     public DealHistory() {
     }
 
-    public DealHistory(String dealId, String merchantName, String purchaseDate, String dealTitle, String price, String expiryText, String quantityText, String statusText, String appliedOrderId) {
+    public DealHistory(String dealId, String merchantName, String purchaseDate, String dealTitle, String price, String expiryText, String quantityText, String statusText, String appliedOrderId, String imageUrl) {
         this.dealId = dealId;
         this.merchantName = merchantName;
         this.purchaseDate = purchaseDate;
@@ -24,6 +25,7 @@ public class DealHistory {
         this.quantityText = quantityText;
         this.statusText = statusText;
         this.appliedOrderId = appliedOrderId;
+        this.imageUrl = imageUrl;
     }
 
     public String getDealId() { return dealId; }
@@ -35,4 +37,5 @@ public class DealHistory {
     public String getQuantityText() { return quantityText; }
     public String getStatusText() { return statusText; }
     public String getAppliedOrderId() { return appliedOrderId; }
+    public String getImageUrl() { return imageUrl; }
 }
