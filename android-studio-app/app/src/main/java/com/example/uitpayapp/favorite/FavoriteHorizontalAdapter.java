@@ -7,7 +7,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import android.content.Intent;
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.home.StoreDetailActivity;
 import java.util.List;
 
 public class FavoriteHorizontalAdapter extends RecyclerView.Adapter<FavoriteHorizontalAdapter.HorizontalViewHolder> {
@@ -37,9 +39,10 @@ public class FavoriteHorizontalAdapter extends RecyclerView.Adapter<FavoriteHori
         FavoriteShop shop = shopList.get(position);
 
         holder.tvHorizontalName.setText(shop.getName());
-        if (shop.getImageUrl() != null && !shop.getImageUrl().isEmpty()) {
+        String formattedUrl = getFormattedImageUrl(shop.getImageUrl());
+        if (formattedUrl != null) {
             com.bumptech.glide.Glide.with(holder.ivHorizontalImage.getContext())
-                    .load(shop.getImageUrl())
+                    .load(formattedUrl)
                     .placeholder(R.drawable.img_food_chicken)
                     .error(shop.getImageResId() != 0 ? shop.getImageResId() : R.drawable.img_food_chicken)
                     .into(holder.ivHorizontalImage);
@@ -58,6 +61,13 @@ public class FavoriteHorizontalAdapter extends RecyclerView.Adapter<FavoriteHori
                 removeListener.onRemove(shop);
             }
         });
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), StoreDetailActivity.class);
+            intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_NAME, shop.getName());
+            intent.putExtra(StoreDetailActivity.EXTRA_RESTAURANT_ID, Long.parseLong(shop.getId()));
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override
@@ -75,5 +85,28 @@ public class FavoriteHorizontalAdapter extends RecyclerView.Adapter<FavoriteHori
             ivHorizontalImage = itemView.findViewById(R.id.ivHorizontalImage);
             ivHorizontalFavoriteHeart = itemView.findViewById(R.id.ivHorizontalFavoriteHeart);
         }
+    }
+
+    private String getFormattedImageUrl(String path) {
+        if (path == null || path.isEmpty() || "null".equalsIgnoreCase(path)) {
+            return null;
+        }
+        String imageUrl = path;
+        if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+            String baseUrl = com.example.uitpayapp.network.RetrofitClient.getBaseUrl();
+            if (baseUrl != null) {
+                if (baseUrl.endsWith("/") && imageUrl.startsWith("/")) {
+                    imageUrl = baseUrl + imageUrl.substring(1);
+                } else if (!baseUrl.endsWith("/") && !imageUrl.startsWith("/")) {
+                    imageUrl = baseUrl + "/" + imageUrl;
+                } else {
+                    imageUrl = baseUrl + imageUrl;
+                }
+            }
+        }
+        if (imageUrl.startsWith("http://")) {
+            imageUrl = imageUrl.replace("http://", "https://");
+        }
+        return imageUrl;
     }
 }

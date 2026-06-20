@@ -37,6 +37,12 @@ public class FavoriteRestaurantResponseDTO {
     @SerializedName("savedAt")
     private String savedAt;
 
+    @SerializedName("distance")
+    private Double distance;
+
+    @SerializedName("deliveryTime")
+    private Integer deliveryTime;
+
     public Long getFavoriteId() { return favoriteId; }
     public Long getRestaurantId() { return restaurantId; }
     public String getRestaurantName() { return restaurantName; }
@@ -48,4 +54,6 @@ public class FavoriteRestaurantResponseDTO {
     public BigDecimal getRatingAverage() { return ratingAverage; }
     public Integer getReviewCount() { return reviewCount; }
     public String getSavedAt() { return savedAt; }
+    public Double getDistance() { return distance; }
+    public Integer getDeliveryTime() { return deliveryTime; }
 }

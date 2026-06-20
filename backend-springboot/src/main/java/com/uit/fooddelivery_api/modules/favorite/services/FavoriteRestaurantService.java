@@ -7,6 +7,7 @@ import com.uit.fooddelivery_api.modules.favorite.repositories.FavoriteRestaurant
 import com.uit.fooddelivery_api.modules.restaurant.entities.Restaurant;
 import com.uit.fooddelivery_api.modules.restaurant.repositories.RestaurantRepository;
 import com.uit.fooddelivery_api.modules.user.entities.User;
+import com.uit.fooddelivery_api.modules.user.repositories.UserAddressRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class FavoriteRestaurantService {
 
     private final FavoriteRestaurantRepository favoriteRepository;
     private final RestaurantRepository restaurantRepository;
+    private final UserAddressRepository addressRepository;
 
     /**
      * Toggle tim: Nếu chưa thích thì thêm vào, nếu đã thích thì bỏ ra.
@@ -59,9 +61,20 @@ public class FavoriteRestaurantService {
      * Lấy toàn bộ danh sách nhà hàng yêu thích của user hiện tại.
      */
     public List<FavoriteRestaurantResponseDTO> getMyFavorites(User user) {
+        var defaultAddresses = addressRepository.findByUserIdAndIsDefaultTrue(user.getId());
+        Double userLat = 10.8750; // default lat
+        Double userLng = 106.8000; // default lng
+        if (!defaultAddresses.isEmpty() && defaultAddresses.get(0).getLatitude() != null && defaultAddresses.get(0).getLongitude() != null) {
+            userLat = defaultAddresses.get(0).getLatitude().doubleValue();
+            userLng = defaultAddresses.get(0).getLongitude().doubleValue();
+        }
+
+        final Double finalLat = userLat;
+        final Double finalLng = userLng;
+
         return favoriteRepository.findByUserId(user.getId())
                 .stream()
-                .map(FavoriteRestaurantResponseDTO::fromEntity)
+                .map(f -> FavoriteRestaurantResponseDTO.fromEntity(f, finalLat, finalLng))
                 .toList();
     }
 

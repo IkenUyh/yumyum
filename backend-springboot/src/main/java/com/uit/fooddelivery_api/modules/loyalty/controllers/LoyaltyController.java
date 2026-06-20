@@ -2,6 +2,7 @@ package com.uit.fooddelivery_api.modules.loyalty.controllers;
 
 import com.uit.fooddelivery_api.common.responses.ApiResponse;
 import com.uit.fooddelivery_api.modules.loyalty.dtos.LoyaltyResponseDTO;
+import com.uit.fooddelivery_api.modules.loyalty.dtos.DealHistoryResponseDTO;
 import com.uit.fooddelivery_api.modules.loyalty.entities.LoyaltyPoint;
 import com.uit.fooddelivery_api.modules.loyalty.services.LoyaltyService;
 import com.uit.fooddelivery_api.modules.user.entities.User;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/loyalty")
@@ -37,5 +39,13 @@ public class LoyaltyController {
 
         // Sau khi điểm danh thành công thì chắc chắn hôm nay không được điểm danh nữa
         return ApiResponse.success(LoyaltyResponseDTO.fromEntity(updatedLp, false));
+    }
+
+    // API: Xem danh sách Deal đã mua
+    @GetMapping("/deals")
+    public ApiResponse<List<DealHistoryResponseDTO>> getMyDeals(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        List<DealHistoryResponseDTO> deals = loyaltyService.getMyDeals(currentUser);
+        return ApiResponse.success(deals);
     }
 }
