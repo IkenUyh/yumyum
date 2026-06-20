@@ -86,6 +86,34 @@ public class NotificationRepository {
         });
     }
 
+    public void deleteAllNotifications(final ApiCallback<String> callback) {
+        notificationService.deleteAllNotifications().enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void deleteNotification(Long id, final ApiCallback<String> callback) {
+        notificationService.deleteNotification(id).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
     private <T> void handleResponse(Response<ApiResponse<T>> response, ApiCallback<T> callback) {
         if (response.isSuccessful() && response.body() != null) {
             ApiResponse<T> apiResponse = response.body();

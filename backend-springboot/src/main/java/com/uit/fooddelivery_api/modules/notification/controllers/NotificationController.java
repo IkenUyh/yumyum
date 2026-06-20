@@ -6,6 +6,7 @@ import com.uit.fooddelivery_api.modules.notification.services.NotificationServic
 import com.uit.fooddelivery_api.modules.user.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,5 +67,21 @@ public class NotificationController {
         User currentUser = (User) authentication.getPrincipal();
         notificationService.markAllAsRead(currentUser.getId());
         return ApiResponse.success("Đã đánh dấu tất cả là đã đọc");
+    }
+
+    // API 6: Xóa 1 thông báo
+    @DeleteMapping("/{id}")
+    public ApiResponse<String> deleteNotification(@PathVariable Long id, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        notificationService.deleteNotification(id, currentUser.getId());
+        return ApiResponse.success("Đã xóa thông báo thành công");
+    }
+
+    // API 7: Xóa tất cả thông báo
+    @DeleteMapping("/all")
+    public ApiResponse<String> deleteAllNotifications(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        notificationService.deleteAllNotifications(currentUser.getId());
+        return ApiResponse.success("Đã xóa toàn bộ thông báo thành công");
     }
 }

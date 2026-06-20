@@ -72,7 +72,7 @@ public class SellerNotificationAdapter extends RecyclerView.Adapter<SellerNotifi
 
     @Override
     public int getItemCount() {
-        return notifications.size();
+        return notifications == null ? 0 : notifications.size();
     }
 
     static class NotificationViewHolder extends RecyclerView.ViewHolder {

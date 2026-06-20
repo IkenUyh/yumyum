@@ -3,10 +3,8 @@ package com.example.uitpayapp.merchant.notification;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -14,15 +12,10 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.merchant.home.SellerHomeActivity;
 import com.example.uitpayapp.merchant.marketing.SellerMarketingActivity;
 import com.example.uitpayapp.merchant.shop.SellerShopActivity;
-import com.example.uitpayapp.modules.notification.NotificationRepository;
-import com.example.uitpayapp.modules.notification.models.NotificationResponseDTO;
-import com.example.uitpayapp.network.ApiCallback;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +24,6 @@ public class SellerNotificationActivity extends AppCompatActivity {
     private RecyclerView rvNotifications;
     private SellerNotificationAdapter adapter;
     private List<SellerNotification> notificationList;
-    private List<NotificationResponseDTO> rawDtoList; // giữ id gốc để gọi API
-    private NotificationRepository notificationRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,17 +31,15 @@ public class SellerNotificationActivity extends AppCompatActivity {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         setContentView(R.layout.activity_seller_notification);
 
-        notificationRepository = new NotificationRepository();
-
         initViews();
         setupBottomNav();
-        loadNotifications();
+        loadRealData();
     }
 
     private void initViews() {
         rvNotifications = findViewById(R.id.rv_notifications);
-
         findViewById(R.id.tv_mark_all_read).setOnClickListener(v -> markAllAsRead());
+        findViewById(R.id.tv_delete_all).setOnClickListener(v -> deleteAll());
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.seller_notification_container), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -59,98 +48,61 @@ public class SellerNotificationActivity extends AppCompatActivity {
         });
     }
 
-    private void loadNotifications() {
-        notificationRepository.getHistory(null, null, new ApiCallback<List<NotificationResponseDTO>>() {
+    private void loadRealData() {
+        notificationList = new ArrayList<>();
+        adapter = new SellerNotificationAdapter(notificationList, position -> onItemClick(position));
+        rvNotifications.setLayoutManager(new LinearLayoutManager(this));
+        rvNotifications.setAdapter(adapter);
+
+        com.example.uitpayapp.modules.notification.NotificationRepository repository = new com.example.uitpayapp.modules.notification.NotificationRepository();
+        repository.getHistory(null, null, new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO>>() {
             @Override
-            public void onSuccess(List<NotificationResponseDTO> data) {
-                rawDtoList = data;
-                notificationList = convertToDisplayList(data);
-                runOnUiThread(() -> {
-                    adapter = new SellerNotificationAdapter(notificationList, position -> onItemClick(position));
-                    rvNotifications.setLayoutManager(new LinearLayoutManager(SellerNotificationActivity.this));
-                    rvNotifications.setAdapter(adapter);
-                });
+            public void onSuccess(List<com.example.uitpayapp.modules.notification.models.NotificationResponseDTO> data) {
+                notificationList.clear();
+                for (com.example.uitpayapp.modules.notification.models.NotificationResponseDTO dto : data) {
+                    int typeVal = 3; // default System
+                    if ("ORDER_UPDATE".equalsIgnoreCase(dto.getType())) {
+                        typeVal = 1;
+                    } else if ("PROMOTION".equalsIgnoreCase(dto.getType())) {
+                        typeVal = 2;
+                    } else if ("REVIEW".equalsIgnoreCase(dto.getType())) {
+                        typeVal = 4;
+                    }
+                    notificationList.add(new SellerNotification(
+                            String.valueOf(dto.getId()),
+                            dto.getTitle(),
+                            dto.getMessage(),
+                            formatDateTime(dto.getCreatedAt()),
+                            dto.getIsRead() != null && dto.getIsRead(),
+                            typeVal
+                    ));
+                }
+                runOnUiThread(() -> adapter.notifyDataSetChanged());
             }
 
             @Override
-            public void onError(String message) {
-                runOnUiThread(() ->
-                        Toast.makeText(SellerNotificationActivity.this,
-                                "Lỗi tải thông báo: " + message, Toast.LENGTH_SHORT).show()
-                );
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> android.widget.Toast.makeText(SellerNotificationActivity.this, "Lỗi tải thông báo: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show());
             }
         });
     }
 
-    /**
-     * Chuyển đổi DTO từ server sang model hiển thị SellerNotification.
-     * type được map từ String (ORDER, PROMO, SYSTEM, REVIEW) sang int.
-     */
-    private List<SellerNotification> convertToDisplayList(List<NotificationResponseDTO> dtoList) {
-        List<SellerNotification> result = new ArrayList<>();
-        if (dtoList == null) return result;
-        for (NotificationResponseDTO dto : dtoList) {
-            int typeInt = mapTypeStringToInt(dto.getType());
-            boolean isRead = dto.getIsRead() != null && dto.getIsRead();
-            String time = formatTime(dto.getCreatedAt());
-            result.add(new SellerNotification(
-                    String.valueOf(dto.getId()),
-                    dto.getTitle(),
-                    dto.getMessage(),
-                    time,
-                    isRead,
-                    typeInt
-            ));
-        }
-        return result;
-    }
-
-    private int mapTypeStringToInt(String type) {
-        if (type == null) return 3;
-        switch (type.toUpperCase()) {
-            case "ORDER":   return 1;
-            case "PROMO":   return 2;
-            case "REVIEW":  return 4;
-            default:        return 3; // SYSTEM
-        }
-    }
-
-    /**
-     * Format ISO timestamp thành chuỗi hiển thị thân thiện.
-     * Ví dụ: "2024-06-20T10:30:00" → "20/06/2024 10:30"
-     */
-    private String formatTime(String createdAt) {
-        if (createdAt == null || createdAt.isEmpty()) return "";
-        try {
-            // createdAt dạng "yyyy-MM-dd'T'HH:mm:ss" hoặc tương tự
-            String datePart = createdAt.substring(0, 10);   // "yyyy-MM-dd"
-            String timePart = createdAt.length() >= 16 ? createdAt.substring(11, 16) : "";
-            String[] dateParts = datePart.split("-");
-            if (dateParts.length == 3) {
-                return dateParts[2] + "/" + dateParts[1] + "/" + dateParts[0]
-                        + (timePart.isEmpty() ? "" : " " + timePart);
-            }
-        } catch (Exception ignored) {}
-        return createdAt;
-    }
-
-    /** Gọi khi người dùng bấm vào 1 item — đánh dấu đã đọc trên server và UI */
     private void onItemClick(int position) {
         if (notificationList == null || position >= notificationList.size()) return;
         SellerNotification item = notificationList.get(position);
         if (item.isRead()) return;
 
         Long id = Long.parseLong(item.getId());
-        notificationRepository.markAsRead(id, new ApiCallback<String>() {
+        com.example.uitpayapp.modules.notification.NotificationRepository repository = new com.example.uitpayapp.modules.notification.NotificationRepository();
+        repository.markAsRead(id, new com.example.uitpayapp.network.ApiCallback<String>() {
             @Override
-            public void onSuccess(String data) {
+            public void onSuccess(String result) {
                 item.setRead(true);
                 runOnUiThread(() -> adapter.notifyItemChanged(position));
             }
 
             @Override
-            public void onError(String message) {
-                // Đánh dấu local trước, bỏ qua lỗi mạng nhẹ
+            public void onError(String errorMessage) {
                 item.setRead(true);
                 runOnUiThread(() -> adapter.notifyItemChanged(position));
             }
@@ -158,28 +110,81 @@ public class SellerNotificationActivity extends AppCompatActivity {
     }
 
     private void markAllAsRead() {
-        notificationRepository.markAllAsRead(new ApiCallback<String>() {
+        if (notificationList.isEmpty()) return;
+        com.example.uitpayapp.modules.notification.NotificationRepository repository = new com.example.uitpayapp.modules.notification.NotificationRepository();
+        repository.markAllAsRead(new com.example.uitpayapp.network.ApiCallback<String>() {
             @Override
-            public void onSuccess(String data) {
-                if (notificationList != null) {
-                    for (SellerNotification n : notificationList) {
-                        n.setRead(true);
-                    }
+            public void onSuccess(String result) {
+                for (SellerNotification n : notificationList) {
+                    n.setRead(true);
                 }
-                runOnUiThread(() -> adapter.notifyDataSetChanged());
+                adapter.notifyDataSetChanged();
+                android.widget.Toast.makeText(SellerNotificationActivity.this, "Đã đánh dấu đọc tất cả", android.widget.Toast.LENGTH_SHORT).show();
             }
 
             @Override
-            public void onError(String message) {
-                runOnUiThread(() ->
-                        Toast.makeText(SellerNotificationActivity.this,
-                                "Lỗi: " + message, Toast.LENGTH_SHORT).show()
-                );
+            public void onError(String errorMessage) {
+                android.widget.Toast.makeText(SellerNotificationActivity.this, "Lỗi: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    private void deleteAll() {
+        if (notificationList.isEmpty()) return;
+        com.example.uitpayapp.modules.notification.NotificationRepository repository = new com.example.uitpayapp.modules.notification.NotificationRepository();
+        repository.deleteAllNotifications(new com.example.uitpayapp.network.ApiCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                notificationList.clear();
+                adapter.notifyDataSetChanged();
+                android.widget.Toast.makeText(SellerNotificationActivity.this, "Đã xóa tất cả thông báo", android.widget.Toast.LENGTH_SHORT).show();
+            }
 
+            @Override
+            public void onError(String errorMessage) {
+                android.widget.Toast.makeText(SellerNotificationActivity.this, "Lỗi: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private String formatDateTime(String isoString) {
+        if (isoString == null) return "";
+        try {
+            String cleanStr = isoString;
+            if (cleanStr.contains(".")) {
+                int dotIdx = cleanStr.indexOf(".");
+                int tIdx = cleanStr.indexOf("+");
+                if (tIdx == -1) tIdx = cleanStr.indexOf("-", dotIdx);
+                if (tIdx == -1) tIdx = cleanStr.indexOf("Z", dotIdx);
+                if (tIdx != -1) {
+                    cleanStr = cleanStr.substring(0, dotIdx) + cleanStr.substring(tIdx);
+                } else {
+                    cleanStr = cleanStr.substring(0, dotIdx);
+                }
+            }
+            java.text.SimpleDateFormat inputFormat;
+            if (cleanStr.endsWith("Z")) {
+                inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault());
+                inputFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            } else if (cleanStr.contains("+") || (cleanStr.lastIndexOf("-") > 10)) {
+                try {
+                    inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.getDefault());
+                    java.util.Date date = inputFormat.parse(cleanStr);
+                    java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+                    return outputFormat.format(date);
+                } catch (Exception ex) {
+                    inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+                }
+            } else {
+                inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+            }
+            java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+            java.util.Date date = inputFormat.parse(cleanStr);
+            return outputFormat.format(date);
+        } catch (Exception e) {
+            return isoString;
+        }
+    }
 
     private void setupBottomNav() {
         ImageView ivNotification = findViewById(R.id.iv_nav_notification);
