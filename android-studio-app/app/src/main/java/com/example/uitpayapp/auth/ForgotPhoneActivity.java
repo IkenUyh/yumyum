@@ -30,9 +30,10 @@ public class ForgotPhoneActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btn_back);
 
         String phone = getIntent().getStringExtra("PHONE_NUMBER");
-        if (phone != null) {
-            edtPhoneNumber.setText(phone);
-        }
+        // Không tự động điền số điện thoại vào ô Email nữa
+        // if (phone != null) {
+        //     edtPhoneNumber.setText(phone);
+        // }
 
         loadingDialog = new android.app.Dialog(this);
         loadingDialog.setContentView(R.layout.dialog_loading);
@@ -55,20 +56,40 @@ public class ForgotPhoneActivity extends AppCompatActivity {
 
             if (inputPhone.isEmpty()) {
                 edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_error);
-                tvErrorPhone.setText("Vui lòng nhập số điện thoại");
+                tvErrorPhone.setText("Vui lòng nhập email");
+                tvErrorPhone.setVisibility(View.VISIBLE);
+                return;
+            }
+
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(inputPhone).matches()) {
+                edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_error);
+                tvErrorPhone.setText("Email không hợp lệ");
                 tvErrorPhone.setVisibility(View.VISIBLE);
                 return;
             }
 
             if (loadingDialog != null && !isFinishing()) loadingDialog.show();
 
-            // Mocking API call delay
-            new Handler().postDelayed(() -> {
-                if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
-                Intent intent = new Intent(ForgotPhoneActivity.this, ForgotOtpActivity.class);
-                intent.putExtra("PHONE_NUMBER", inputPhone);
-                startActivity(intent);
-            }, 500);
+            com.example.uitpayapp.modules.user.UserRepository userRepository = new com.example.uitpayapp.modules.user.UserRepository();
+            userRepository.forgotPasswordRequest(inputPhone, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String data) {
+                    if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
+                    android.widget.Toast.makeText(ForgotPhoneActivity.this, "Mã xác nhận đã được gửi vào email của bạn", android.widget.Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(ForgotPhoneActivity.this, ForgotOtpActivity.class);
+                    // Giữ key PHONE_NUMBER vì các màn sau vẫn đang lấy key này
+                    intent.putExtra("PHONE_NUMBER", inputPhone); 
+                    startActivity(intent);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
+                    edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_error);
+                    tvErrorPhone.setText(errorMessage != null ? errorMessage : "Có lỗi xảy ra, vui lòng thử lại");
+                    tvErrorPhone.setVisibility(View.VISIBLE);
+                }
+            });
         });
     }
 }
