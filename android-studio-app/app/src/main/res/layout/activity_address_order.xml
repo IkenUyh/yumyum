@@ -24,52 +24,55 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Thứ tự ưu tiên vị trí"
-                    android:textColor="#000000"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:layout_alignParentStart="true"/>
-                <TextView
-                    android:id="@+id/btn_add_address_header"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Thêm vị trí >"
-                    android:textColor="#f24405"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:layout_alignParentEnd="true"
-                    android:clickable="true"
-                    android:focusable="true"/>
-            </RelativeLayout>
+            
+            <TextView
+                android:id="@+id/btn_add_address_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+ Thêm vị trí"
+                android:textColor="#f24405"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_gravity="end"
+                android:clickable="true"
+                android:focusable="true"/>
 
-            <androidx.cardview.widget.CardView
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvPaymentMethods"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/item_delivery_address" />
+                
+            <LinearLayout
+                android:id="@+id/layout_empty_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/tv_empty_message"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="8dp">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvPaymentMethods"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                        android:nestedScrollingEnabled="false"
-                        tools:listitem="@layout/item_delivery_address" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                    android:text="Hiện chưa có vị trí"
+                    android:textColor="#757575"
+                    android:textSize="16sp" />
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_retry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_orange_rounded"
+                    android:paddingHorizontal="16dp"
+                    android:text="Thử lại"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    android:visibility="gone"/>
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

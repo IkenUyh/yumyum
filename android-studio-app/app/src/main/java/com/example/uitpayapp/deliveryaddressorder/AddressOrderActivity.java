@@ -15,35 +15,80 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.modules.user.AddressRepository;
+import com.example.uitpayapp.modules.user.models.requests.CreateAddressDTO;
+import com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO;
+import com.example.uitpayapp.network.ApiCallback;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.activity.EdgeToEdge;
 
 public class AddressOrderActivity extends AppCompatActivity {
 
     private RecyclerView rvPaymentMethods;
     private DeliveryAddressAdapter adapter;
-    private List<DeliveryAddress> deliveryAddresses;
-    private ItemTouchHelper itemTouchHelper;
+    private List<AddressResponseDTO> deliveryAddresses = new ArrayList<>();
     private TextView tvSelectedAddress;
+    private AddressRepository addressRepository;
+    
+    private View layoutEmptyState;
+    private TextView tvEmptyMessage;
+    private View btnRetry;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_address_order);
+        
+        addressRepository = new AddressRepository();
+        
         initView();
-        setUpDataAddress();
         setupRecyclerView();
+        loadAddresses();
         
         findViewById(R.id.btn_add_address_header).setOnClickListener(v -> showAddressBottomSheet(null, -1));
         findViewById(R.id.btnSave).setOnClickListener(v -> finish());
+    }
+
+    private void loadAddresses() {
+        rvPaymentMethods.setVisibility(View.GONE);
+        layoutEmptyState.setVisibility(View.GONE);
+        
+        addressRepository.getMyAddresses(new ApiCallback<List<AddressResponseDTO>>() {
+            @Override
+            public void onSuccess(List<AddressResponseDTO> result) {
+                deliveryAddresses = result;
+                adapter.updateData(deliveryAddresses);
+                
+                if (deliveryAddresses == null || deliveryAddresses.isEmpty()) {
+                    layoutEmptyState.setVisibility(View.VISIBLE);
+                    tvEmptyMessage.setText("Hiện chưa có vị trí");
+                    btnRetry.setVisibility(View.GONE);
+                    rvPaymentMethods.setVisibility(View.GONE);
+                } else {
+                    layoutEmptyState.setVisibility(View.GONE);
+                    rvPaymentMethods.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                layoutEmptyState.setVisibility(View.VISIBLE);
+                tvEmptyMessage.setText("Opps! Đã có lỗi xảy ra"); // Similar to home screen
+                btnRetry.setVisibility(View.VISIBLE);
+                rvPaymentMethods.setVisibility(View.GONE);
+            }
+        });
     }
 
     private void initView() {
@@ -51,27 +96,31 @@ public class AddressOrderActivity extends AppCompatActivity {
         TextView tvTitle = topBar.findViewById(R.id.top_bar_title);
         tvTitle.setText("Vị trí");
         topBar.findViewById(R.id.top_bar_back_btn).setOnClickListener(v -> finish());
+        
+        layoutEmptyState = findViewById(R.id.layout_empty_state);
+        tvEmptyMessage = findViewById(R.id.tv_empty_message);
+        btnRetry = findViewById(R.id.btn_retry);
+        btnRetry.setOnClickListener(v -> loadAddresses());
+        
         View bottomPanel = findViewById(R.id.bottom_panel);
+        
         ViewCompat.setOnApplyWindowInsetsListener(topBar, (v, insets) -> {
+            Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            int safeTopPadding = systemBars.top + 10;
-            v.setPadding(v.getPaddingLeft(), safeTopPadding, v.getPaddingRight(), v.getPaddingBottom());
-            //thanh duoi
-            Insets navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
-            int safeBottomPadding = navInsets.bottom + 10;
-            if (bottomPanel != null) {
-                bottomPanel.setPadding(bottomPanel.getPaddingLeft(), bottomPanel.getPaddingTop(), bottomPanel.getPaddingRight(), safeBottomPadding);
-            }
+            int topInset = Math.max(cutout.top, systemBars.top);
+            int dpToPx = (int) (15 * getResources().getDisplayMetrics().density);
+            v.setPadding(v.getPaddingLeft(), topInset + dpToPx, v.getPaddingRight(), v.getPaddingBottom());
             return insets;
         });
-    }
 
-    private void setUpDataAddress() {
-        deliveryAddresses = new ArrayList<>();
-        deliveryAddresses.add(new DeliveryAddress(DeliveryAddress.AddressType.HOME,"48 Phó Cơ Điều, Phường Chợ Lớn, TP. Hồ Chí Minh","Nguyen Van A","6767676767"));
-        deliveryAddresses.add(new DeliveryAddress(DeliveryAddress.AddressType.WORK,"268 Lý Thường Kiệt, Phường Diên Hồng, TP. Hồ Chí Minh","Nguyen Van B","6868686868"));
-        deliveryAddresses.add(new DeliveryAddress(DeliveryAddress.AddressType.HOME,"803 Kha Vạn Cân, Phường Linh Xuân, TP. Hồ Chí Minh","Nguyen Van C","6969696969"));
-        deliveryAddresses.add(new DeliveryAddress(DeliveryAddress.AddressType.WORK,"215 Điện Biên Phủ, Phường Gia Định, TP. Hồ Chí Minh","Nguyen Van D","6363636363"));
+        if (bottomPanel != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(bottomPanel, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                int bottomDpToPx = (int) (15 * getResources().getDisplayMetrics().density);
+                v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom + bottomDpToPx);
+                return insets;
+            });
+        }
     }
 
     private void setupRecyclerView() {
@@ -79,36 +128,14 @@ public class AddressOrderActivity extends AppCompatActivity {
         rvPaymentMethods.setLayoutManager(new LinearLayoutManager(this));
         adapter = new DeliveryAddressAdapter(deliveryAddresses, new DeliveryAddressAdapter.OnAddressActionListener() {
             @Override
-            public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
-                itemTouchHelper.startDrag(viewHolder);
-            }
-
-            @Override
-            public void onEditClick(DeliveryAddress address, int position) {
+            public void onEditClick(AddressResponseDTO address, int position) {
                 showAddressBottomSheet(address, position);
             }
         });
         rvPaymentMethods.setAdapter(adapter);
-
-        ItemTouchHelper.Callback callback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                adapter.onItemMove(viewHolder.getBindingAdapterPosition(), target.getBindingAdapterPosition());
-                return true;
-            }
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-            }
-            @Override
-            public boolean isLongPressDragEnabled() {
-                return false;
-            }
-        };
-        itemTouchHelper = new ItemTouchHelper(callback);
-        itemTouchHelper.attachToRecyclerView(rvPaymentMethods);
     }
 
-    private void showAddressBottomSheet(DeliveryAddress address, int position) {
+    private void showAddressBottomSheet(AddressResponseDTO address, int position) {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_edit_address, null);
         bottomSheetDialog.setContentView(view);
@@ -120,45 +147,103 @@ public class AddressOrderActivity extends AppCompatActivity {
         TextView btnTypeWork = view.findViewById(R.id.btn_type_work);
         View btnSave = view.findViewById(R.id.btn_save_address);
         View btnClose = view.findViewById(R.id.btn_close_address_sheet);
+        TextView btnDelete = view.findViewById(R.id.btn_delete_address);
+        android.widget.CheckBox cbSetDefault = view.findViewById(R.id.cb_set_default);
         tvSelectedAddress = view.findViewById(R.id.tv_selected_address);
 
-        final DeliveryAddress.AddressType[] selectedType = {DeliveryAddress.AddressType.HOME};
+        final String[] selectedType = {"HOME"};
 
         if (address != null) {
             tvTitle.setText("Chỉnh sửa địa chỉ");
-            etName.setText(address.getReceiverName());
+            etName.setText(address.getRecipientName());
             etPhone.setText(address.getPhoneNumber());
-            tvSelectedAddress.setText(address.getAddressDetail());
-            selectedType[0] = address.getAddressType();
+            tvSelectedAddress.setText(address.getDetailedAddress());
+            selectedType[0] = address.getAddressName() != null ? address.getAddressName() : "HOME";
             updateTypeUI(btnTypeHome, btnTypeWork, selectedType[0]);
+            
+            if (address.getIsDefault() != null) {
+                cbSetDefault.setChecked(address.getIsDefault());
+            }
+            
+            btnDelete.setVisibility(View.VISIBLE);
             btnSave.setEnabled(true);
             btnSave.setAlpha(1.0f);
         } else {
             tvTitle.setText("Thêm địa chỉ mới");
             updateTypeUI(btnTypeHome, btnTypeWork, selectedType[0]);
-            btnSave.setEnabled(true);
+            btnDelete.setVisibility(View.GONE);
+            btnSave.setEnabled(true); // Should enable based on validation ideally
             btnSave.setAlpha(1.0f);
         }
 
         btnTypeHome.setOnClickListener(v -> {
-            selectedType[0] = DeliveryAddress.AddressType.HOME;
+            selectedType[0] = "HOME";
             updateTypeUI(btnTypeHome, btnTypeWork, selectedType[0]);
         });
 
         btnTypeWork.setOnClickListener(v -> {
-            selectedType[0] = DeliveryAddress.AddressType.WORK;
+            selectedType[0] = "WORK";
             updateTypeUI(btnTypeHome, btnTypeWork, selectedType[0]);
         });
 
-        btnSave.setOnClickListener(v -> {
-            if (address!=null) {
-                address.updateAddress(tvSelectedAddress.getText().toString(),etName.getText().toString(),etPhone.getText().toString(),selectedType[0]);
+        btnDelete.setOnClickListener(v -> {
+            if (address != null) {
+                addressRepository.deleteAddress(address.getId(), new ApiCallback<String>() {
+                    @Override
+                    public void onSuccess(String result) {
+                        Toast.makeText(AddressOrderActivity.this, "Đã xóa địa chỉ", Toast.LENGTH_SHORT).show();
+                        bottomSheetDialog.dismiss();
+                        loadAddresses();
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        Toast.makeText(AddressOrderActivity.this, "Lỗi xóa địa chỉ: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
-            else
-                deliveryAddresses.add(new DeliveryAddress(selectedType[0],tvSelectedAddress.getText().toString(),etName.getText().toString(),etPhone.getText().toString()));
-            adapter.notifyDataSetChanged();
-            bottomSheetDialog.dismiss();
         });
+
+        btnSave.setOnClickListener(v -> {
+            String addressName = selectedType[0];
+            String recipientName = etName.getText().toString();
+            String phoneNumber = etPhone.getText().toString();
+            String detailedAddress = tvSelectedAddress.getText().toString();
+            BigDecimal latitude = new BigDecimal(0); // Mock
+            BigDecimal longitude = new BigDecimal(0); // Mock
+            Boolean isDefault = cbSetDefault.isChecked();
+            
+            CreateAddressDTO dto = new CreateAddressDTO(addressName, recipientName, phoneNumber, detailedAddress, latitude, longitude, isDefault);
+
+            if (address != null) {
+                // Update Address
+                addressRepository.updateAddress(address.getId(), dto, new ApiCallback<AddressResponseDTO>() {
+                    @Override
+                    public void onSuccess(AddressResponseDTO result) {
+                        handleSetDefault(address.getId(), cbSetDefault.isChecked(), bottomSheetDialog);
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        Toast.makeText(AddressOrderActivity.this, "Lỗi sửa địa chỉ: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                // Create Address
+                addressRepository.createAddress(dto, new ApiCallback<AddressResponseDTO>() {
+                    @Override
+                    public void onSuccess(AddressResponseDTO result) {
+                        handleSetDefault(result.getId(), cbSetDefault.isChecked(), bottomSheetDialog);
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        Toast.makeText(AddressOrderActivity.this, "Lỗi thêm địa chỉ: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+
         tvSelectedAddress.setOnClickListener(v -> {
             Intent intent = new Intent(this, MapPickerActivity.class);
             intent.putExtra("ADDRESS_PUT",tvSelectedAddress.getText().toString());
@@ -170,8 +255,32 @@ public class AddressOrderActivity extends AppCompatActivity {
         bottomSheetDialog.show();
     }
 
-    private void updateTypeUI(TextView home, TextView work, DeliveryAddress.AddressType type) {
-        if (type == DeliveryAddress.AddressType.HOME) {
+    private void handleSetDefault(Long addressId, boolean isChecked, BottomSheetDialog dialog) {
+        if (isChecked) {
+            addressRepository.setDefaultAddress(addressId, new ApiCallback<AddressResponseDTO>() {
+                @Override
+                public void onSuccess(AddressResponseDTO result) {
+                    Toast.makeText(AddressOrderActivity.this, "Lưu thành công", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                    loadAddresses();
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    Toast.makeText(AddressOrderActivity.this, "Lỗi đặt mặc định: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                    loadAddresses();
+                }
+            });
+        } else {
+            Toast.makeText(AddressOrderActivity.this, "Lưu thành công", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+            loadAddresses();
+        }
+    }
+
+    private void updateTypeUI(TextView home, TextView work, String type) {
+        if ("HOME".equalsIgnoreCase(type)) {
             home.setBackgroundResource(R.drawable.bg_tab_selected);
             home.setTextColor(Color.parseColor("#f24405"));
             work.setBackgroundResource(R.drawable.bg_tab_unselected);
