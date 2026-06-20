@@ -1,6 +1,6 @@
 kienhuy-dev.name.vn {
     tls {
-        issuer zerossl
+        issuer zerossl huykiento@gmail.com
     }
     reverse_proxy backend-app:8081
 }
