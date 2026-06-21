@@ -26,11 +26,11 @@ public interface WalletService {
 
     // Lấy số dư ví cửa hàng (merchant wallet)
     @GET("api/v1/merchant/wallets/balance")
-    Call<ApiResponse<BalanceResponse>> getMerchantBalance();
+    Call<ApiResponse<BalanceResponse>> getMerchantBalance(@retrofit2.http.Query("restaurantId") Long restaurantId);
 
     // Lấy sao kê giao dịch của cửa hàng
     @GET("api/v1/merchant/wallets/transactions")
-    Call<ApiResponse<List<TransactionResponse>>> getMerchantTransactions();
+    Call<ApiResponse<List<TransactionResponse>>> getMerchantTransactions(@retrofit2.http.Query("restaurantId") Long restaurantId);
 
     // Chuyển tiền từ ví cửa hàng sang ví cá nhân
     @POST("api/v1/merchant/wallets/transfer")
