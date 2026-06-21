@@ -126,7 +126,7 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đánh giá!"));
 
         // Check if the merchant owns the restaurant that got the review
-        if (!review.getRestaurant().getUser().getId().equals(merchant.getId())) {
+        if (!review.getRestaurant().getMerchant().getId().equals(merchant.getId())) {
             throw new RuntimeException("Bạn không có quyền trả lời đánh giá của cửa hàng khác!");
         }
 
