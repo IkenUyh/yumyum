@@ -318,7 +318,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         }
     }
 
-    private void executeConfirmCheckout() {
+    private void executeConfirmCheckout(String paymentMethod) {
         com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(this);
         if (addressId == null && session.getDeliveryAddressText() == null) {
             Toast.makeText(this, "Vui lòng chọn địa chỉ giao hàng trước!", Toast.LENGTH_SHORT).show();
@@ -330,7 +330,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                 addressId,
                 "STANDARD",
                 new ArrayList<>(),
-                paymentMethod);
+                paymentMethod,
                 session.getDeliveryLatitude(),
                 session.getDeliveryLongitude(),
                 session.getDeliveryAddressText());

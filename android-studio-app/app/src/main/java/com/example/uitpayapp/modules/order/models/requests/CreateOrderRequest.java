@@ -19,11 +19,6 @@ public class CreateOrderRequest {
     @SerializedName("paymentMethod")
     private String paymentMethod;
 
-    public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes) {
-        this(restaurantId, addressId, deliveryMode, voucherCodes, null);
-    }
-
-    public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes, String paymentMethod) {
     @SerializedName("latitude")
     private Double latitude;
 
@@ -33,7 +28,19 @@ public class CreateOrderRequest {
     @SerializedName("addressText")
     private String addressText;
 
+    public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes) {
+        this(restaurantId, addressId, deliveryMode, voucherCodes, null, null, null, null);
+    }
+
+    public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes, String paymentMethod) {
+        this(restaurantId, addressId, deliveryMode, voucherCodes, paymentMethod, null, null, null);
+    }
+
     public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes, Double latitude, Double longitude, String addressText) {
+        this(restaurantId, addressId, deliveryMode, voucherCodes, null, latitude, longitude, addressText);
+    }
+
+    public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes, String paymentMethod, Double latitude, Double longitude, String addressText) {
         this.restaurantId = restaurantId;
         this.addressId = addressId;
         this.deliveryMode = deliveryMode;
