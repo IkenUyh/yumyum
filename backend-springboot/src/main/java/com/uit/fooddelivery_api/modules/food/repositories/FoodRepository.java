@@ -25,7 +25,7 @@ public interface FoodRepository extends JpaRepository<Food, Long> {
     @org.springframework.data.jpa.repository.Query(value = "SELECT f.* FROM foods f " +
             "JOIN restaurants r ON f.restaurant_id = r.id " +
             "WHERE f.is_available = true AND r.is_active = true AND r.is_accepting_orders = true " +
-            "AND MATCH(f.name) AGAINST(:keyword IN NATURAL LANGUAGE MODE) " +
-            "ORDER BY MATCH(f.name) AGAINST(:keyword IN NATURAL LANGUAGE MODE) DESC", nativeQuery = true)
+            "AND MATCH(f.name) AGAINST(:keyword IN BOOLEAN MODE) " +
+            "ORDER BY MATCH(f.name) AGAINST(:keyword IN BOOLEAN MODE) DESC", nativeQuery = true)
     List<Food> searchFoodsByKeyword(@org.springframework.data.repository.query.Param("keyword") String keyword);
 }

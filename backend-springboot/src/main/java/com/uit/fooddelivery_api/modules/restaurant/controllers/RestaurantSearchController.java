@@ -72,11 +72,16 @@ public class RestaurantSearchController {
         }
 
         // 2. Dự phòng (Fallback): Dùng MySQL Full-Text Search có sắp xếp theo độ trùng khớp
+        String booleanKeyword = java.util.Arrays.stream(cleanKeyword.split("\\s+"))
+                .filter(w -> !w.isEmpty())
+                .map(word -> "+" + word)
+                .collect(java.util.stream.Collectors.joining(" "));
+
         List<RestaurantDistanceView> results;
         if (lat != null && lng != null) {
-            results = restaurantRepository.searchRestaurantsByKeywordAndLocation(cleanKeyword, lat, lng, radiusKm);
+            results = restaurantRepository.searchRestaurantsByKeywordAndLocation(booleanKeyword, lat, lng, radiusKm);
         } else {
-            results = restaurantRepository.searchRestaurantsByKeyword(cleanKeyword);
+            results = restaurantRepository.searchRestaurantsByKeyword(booleanKeyword);
         }
         return ApiResponse.success(results);
     }

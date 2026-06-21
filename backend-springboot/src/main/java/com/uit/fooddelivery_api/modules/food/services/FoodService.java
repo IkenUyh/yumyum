@@ -172,6 +172,13 @@ public class FoodService {
     }
 
     public List<Food> searchFoodsByKeyword(String keyword) {
-        return foodRepository.searchFoodsByKeyword(keyword);
+        String booleanKeyword = java.util.Arrays.stream(keyword.trim().split("\\s+"))
+                .filter(w -> !w.isEmpty())
+                .map(word -> "+" + word)
+                .collect(java.util.stream.Collectors.joining(" "));
+        if (booleanKeyword.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        return foodRepository.searchFoodsByKeyword(booleanKeyword);
     }
 }

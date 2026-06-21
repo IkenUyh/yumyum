@@ -36,8 +36,8 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
             "0.0 AS distance " + // Trả về 0.0 vì ta tìm theo tên, không có tọa độ người dùng ở đây
             "FROM restaurants " +
             "WHERE is_active = true AND is_accepting_orders = true " +
-            "AND MATCH(name) AGAINST(:keyword IN NATURAL LANGUAGE MODE) " +
-            "ORDER BY MATCH(name) AGAINST(:keyword IN NATURAL LANGUAGE MODE) DESC", nativeQuery = true)
+            "AND MATCH(name) AGAINST(:keyword IN BOOLEAN MODE) " +
+            "ORDER BY MATCH(name) AGAINST(:keyword IN BOOLEAN MODE) DESC", nativeQuery = true)
     java.util.List<com.uit.fooddelivery_api.modules.restaurant.dtos.RestaurantDistanceView>
     searchRestaurantsByKeyword(@org.springframework.data.repository.query.Param("keyword") String keyword);
 
@@ -48,9 +48,9 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
             "sin(radians(:userLat)) * sin(radians(latitude)))) AS distance " +
             "FROM restaurants " +
             "WHERE is_active = true AND is_accepting_orders = true " +
-            "AND MATCH(name) AGAINST(:keyword IN NATURAL LANGUAGE MODE) " +
+            "AND MATCH(name) AGAINST(:keyword IN BOOLEAN MODE) " +
             "HAVING distance <= :radius " +
-            "ORDER BY MATCH(name) AGAINST(:keyword IN NATURAL LANGUAGE MODE) DESC, distance ASC", nativeQuery = true)
+            "ORDER BY MATCH(name) AGAINST(:keyword IN BOOLEAN MODE) DESC, distance ASC", nativeQuery = true)
     java.util.List<com.uit.fooddelivery_api.modules.restaurant.dtos.RestaurantDistanceView> searchRestaurantsByKeywordAndLocation(
             @org.springframework.data.repository.query.Param("keyword") String keyword,
             @org.springframework.data.repository.query.Param("userLat") double userLat,
