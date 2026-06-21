@@ -63,6 +63,18 @@ public class UserAddressController {
         return ApiResponse.success(AddressResponseDTO.fromEntity(updatedAddress));
     }
 
+    // API: Cập nhật địa chỉ trong sổ tay
+    @PutMapping("/{id}")
+    public ApiResponse<AddressResponseDTO> updateAddress(
+            @PathVariable("id") Long addressId,
+            Authentication authentication,
+            @RequestBody CreateAddressDTO dto) {
+
+        User currentUser = (User) authentication.getPrincipal();
+        UserAddress updatedAddress = addressService.updateAddress(addressId, dto, currentUser);
+        return ApiResponse.success(AddressResponseDTO.fromEntity(updatedAddress));
+    }
+
     // API: Xóa địa chỉ khỏi danh sách
     @DeleteMapping("/{id}")
     public ApiResponse<String> deleteAddress(

@@ -49,6 +49,29 @@ public class UserAddressService {
         return addressRepository.save(address);
     }
 
+    // Cập nhật địa chỉ hiện tại
+    @Transactional
+    public UserAddress updateAddress(Long addressId, CreateAddressDTO dto, User user) {
+        UserAddress address = addressRepository.findByIdAndUserId(addressId, user.getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ cần cập nhật hoặc bạn không có quyền!"));
+
+        address.setAddressName(dto.getAddressName());
+        address.setRecipientName(dto.getRecipientName());
+        address.setPhoneNumber(dto.getPhoneNumber());
+        address.setDetailedAddress(dto.getDetailedAddress());
+        address.setLatitude(dto.getLatitude());
+        address.setLongitude(dto.getLongitude());
+
+        if (dto.getIsDefault() != null && dto.getIsDefault()) {
+            resetDefaultAddress(user.getId());
+            address.setIsDefault(true);
+        } else {
+            address.setIsDefault(false);
+        }
+
+        return addressRepository.save(address);
+    }
+
     // 3. Đặt một địa chỉ có sẵn thành mặc định
     @Transactional
     public UserAddress setDefaultAddress(Long addressId, User user) {
