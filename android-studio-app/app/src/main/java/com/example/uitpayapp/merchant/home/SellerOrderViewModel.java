@@ -23,6 +23,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import android.annotation.SuppressLint;
+import android.util.Log;
+import ua.naiksoftware.stomp.Stomp;
+import ua.naiksoftware.stomp.StompClient;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
 public class SellerOrderViewModel extends AndroidViewModel {
 
     private final OrderRepository orderRepository;
@@ -33,6 +40,9 @@ public class SellerOrderViewModel extends AndroidViewModel {
     private final MutableLiveData<List<SellerOrder>> confirmedOrders = new MutableLiveData<>(new ArrayList<>());
     // Lịch sử (DELIVERING, COMPLETED, CANCELLED)
     private final MutableLiveData<List<SellerHistoryOrder>> historyOrders = new MutableLiveData<>(new ArrayList<>());
+
+    private StompClient mStompClient;
+    private long connectedStoreId = -1L;
 
     // UI feedback
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
@@ -61,6 +71,10 @@ public class SellerOrderViewModel extends AndroidViewModel {
         android.content.SharedPreferences prefs = getApplication()
                 .getSharedPreferences("SellerPrefs", android.content.Context.MODE_PRIVATE);
         long currentStoreId = prefs.getLong("current_store_id", -1L);
+
+        if (currentStoreId != -1L && connectedStoreId != currentStoreId) {
+            initWebSocket(currentStoreId);
+        }
 
         orderRepository.getMerchantHistory(new ApiCallback<List<OrderResponse>>() {
             @Override
@@ -471,6 +485,52 @@ public class SellerOrderViewModel extends AndroidViewModel {
             }
             order.getDishes().clear();
             order.getDishes().addAll(updatedDishes);
+        }
+    }
+
+    @SuppressLint("CheckResult")
+    private void initWebSocket(long restaurantId) {
+        if (mStompClient != null && mStompClient.isConnected()) {
+            mStompClient.disconnect();
+        }
+        connectedStoreId = restaurantId;
+        String url = "wss://kienhuy-dev.name.vn/ws/chat/websocket";
+        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, url);
+
+        mStompClient.lifecycle()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(lifecycleEvent -> {
+                    switch (lifecycleEvent.getType()) {
+                        case OPENED:
+                            Log.d("WebSocket", "Stomp connection opened");
+                            break;
+                        case ERROR:
+                            Log.e("WebSocket", "Error", lifecycleEvent.getException());
+                            break;
+                        case CLOSED:
+                            Log.d("WebSocket", "Stomp connection closed");
+                            break;
+                    }
+                });
+
+        mStompClient.topic("/topic/restaurant/" + restaurantId + "/orders")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(topicMessage -> {
+                    Log.d("WebSocket", "Received message: " + topicMessage.getPayload());
+                    loadData();
+                }, throwable -> {
+                    Log.e("WebSocket", "Error on subscribe topic", throwable);
+                });
+
+        mStompClient.connect();
+    }
+
+    public void disconnectWebSocket() {
+        if (mStompClient != null) {
+            mStompClient.disconnect();
+            mStompClient = null;
         }
     }
 }
