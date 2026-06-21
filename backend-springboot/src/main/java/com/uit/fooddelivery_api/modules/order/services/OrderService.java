@@ -387,6 +387,7 @@ public class OrderService {
         Order order = Order.builder()
                 .user(customer)
                 .restaurant(restaurant)
+                .address(address)
                 .status("PENDING")
                 .shippingFee(shippingFee)
                 .deliveryMode(deliveryMode)
