@@ -13,6 +13,7 @@ public class OptionItemResponseDTO {
     private Long id;
     private String name;
     private BigDecimal additionalPrice;
+    private String imageUrl;
     private Boolean isAvailable;
 
     public static OptionItemResponseDTO fromEntity(FoodOptionItem item) {
@@ -20,6 +21,7 @@ public class OptionItemResponseDTO {
                 .id(item.getId())
                 .name(item.getName())
                 .additionalPrice(item.getAdditionalPrice())
+                .imageUrl(item.getImageUrl())
                 .isAvailable(item.getIsAvailable())
                 .build();
     }

@@ -52,6 +52,7 @@ public class CartService {
                 java.util.Map<String, Object> map = new java.util.HashMap<>();
                 map.put("name", opt.getName());
                 map.put("price", opt.getAdditionalPrice());
+                map.put("imageUrl", opt.getImageUrl());
                 optionsSnapshot.add(map);
             }
             try {

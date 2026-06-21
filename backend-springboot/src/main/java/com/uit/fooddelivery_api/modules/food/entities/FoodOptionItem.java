@@ -26,6 +26,9 @@ public class FoodOptionItem {
     @Column(name = "additional_price", precision = 19, scale = 2)
     private BigDecimal additionalPrice;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(name = "is_available")
     private Boolean isAvailable;
 }

@@ -52,6 +52,7 @@ public class OrderResponseDTO {
         private String imageUrl;
         private Integer quantity;
         private BigDecimal price;
+        private List<java.util.Map<String, Object>> selectedOptions;
     }
 
     public static OrderResponseDTO fromEntity(Order order) {
@@ -60,11 +61,25 @@ public class OrderResponseDTO {
         if (order.getOrderItems() != null) {
             for (com.uit.fooddelivery_api.modules.order.entities.OrderItem item : order.getOrderItems()) {
                 totalItems += item.getQuantity();
+                
+                List<java.util.Map<String, Object>> parsedOptions = null;
+                if (item.getSelectedOptions() != null && !item.getSelectedOptions().isEmpty()) {
+                    try {
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        parsedOptions = mapper.readValue(item.getSelectedOptions(),
+                                new com.fasterxml.jackson.core.type.TypeReference<List<java.util.Map<String, Object>>>() {
+                                });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 itemDTOs.add(OrderItemDTO.builder()
                         .name(item.getFood().getName())
                         .imageUrl(item.getFood().getImageUrl())
                         .quantity(item.getQuantity())
                         .price(item.getPrice())
+                        .selectedOptions(parsedOptions)
                         .build());
             }
         }
