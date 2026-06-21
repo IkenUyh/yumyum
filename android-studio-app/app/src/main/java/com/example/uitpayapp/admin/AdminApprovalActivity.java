@@ -31,15 +31,10 @@ import java.util.List;
 
 public class AdminApprovalActivity extends AppCompatActivity {
 
-    private TabLayout tabLayout;
     private RecyclerView rvApprovalList;
     private TextView tvFilterPending, tvFilterApproved, tvFilterRejected;
-
     private PendingStoreAdapter storeAdapter;
-    private PendingDishAdapter dishAdapter;
-
     private List<PendingStore> allStores = new ArrayList<>();
-    private List<PendingDish> allDishes = new ArrayList<>();
 
     private String currentFilter = "pending";
     private MerchantRepository merchantRepository;
@@ -68,8 +63,6 @@ public class AdminApprovalActivity extends AppCompatActivity {
         topBar.findViewById(R.id.top_bar_back_btn).setOnClickListener(v -> finish());
         ((TextView) topBar.findViewById(R.id.top_bar_title)).setText("Quản lý duyệt");
 
-        tabLayout = findViewById(R.id.tab_layout);
-        tabLayout.setVisibility(View.GONE);
         rvApprovalList = findViewById(R.id.rv_approval_list);
         rvApprovalList.setLayoutManager(new LinearLayoutManager(this));
 
@@ -89,7 +82,6 @@ public class AdminApprovalActivity extends AppCompatActivity {
 
     private void setupData() {
         allStores.clear();
-        allDishes.clear();
 
         String[] statuses = {"pending", "approved", "rejected"};
 
@@ -98,13 +90,6 @@ public class AdminApprovalActivity extends AppCompatActivity {
             String status = statuses[i % 3];
             allStores.add(new PendingStore("S" + storeId, "Cửa hàng " + storeId, "Chủ cửa hàng " + storeId, "Địa chỉ " + storeId, "Danh mục", 0, status, "20/05/2024"));
             storeId++;
-        }
-
-        int dishId = 1;
-        for (int i = 0; i < 5; i++) {
-            String status = statuses[i % 3];
-            allDishes.add(new PendingDish("D" + dishId, "Món ăn " + dishId, "Cửa hàng " + dishId, "Đồ ăn", 50000, 0, status, "21/05/2024"));
-            dishId++;
         }
     }
 
@@ -197,58 +182,17 @@ public class AdminApprovalActivity extends AppCompatActivity {
         view.findViewById(R.id.btn_close_sheet).setOnClickListener(v -> dialog.dismiss());
         
         view.findViewById(R.id.btn_approve).setOnClickListener(v -> {
-            showApproveDialog(store, null, dialog);
+            showApproveDialog(store, dialog);
         });
 
         view.findViewById(R.id.btn_reject).setOnClickListener(v -> {
-            showRejectDialog(store, null, dialog);
+            showRejectDialog(store, dialog);
         });
 
         dialog.show();
     }
 
-    private void showDishDetailBottomSheet(PendingDish dish) {
-        BottomSheetDialog dialog = new BottomSheetDialog(this);
-        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_dish_approval, null);
-        dialog.setContentView(view);
 
-        ImageView ivImage = view.findViewById(R.id.iv_detail_dish_image);
-        TextView tvName = view.findViewById(R.id.tv_detail_dish_name);
-        TextView tvBadge = view.findViewById(R.id.tv_detail_status_badge);
-        TextView tvRejectReason = view.findViewById(R.id.tv_reject_reason_display);
-        
-        setDetailRow(view.findViewById(R.id.row_detail_store_name), "Cửa hàng", dish.getStoreName(), R.drawable.ic_my_store);
-        setDetailRow(view.findViewById(R.id.row_detail_category), "Danh mục", dish.getCategory(), R.drawable.list_alt_24px);
-        setDetailRow(view.findViewById(R.id.row_detail_price), "Giá bán", String.format("%,.0fđ", dish.getPrice()), R.drawable.ic_dollar_sign);
-        setDetailRow(view.findViewById(R.id.row_detail_date), "Ngày gửi", dish.getSubmittedDate(), R.drawable.icon_transactionhistory_calendar_month_24px);
-
-        if (dish.getImageRes() != 0) ivImage.setImageResource(dish.getImageRes());
-        tvName.setText(dish.getDishName());
-
-        updateBadgeUI(tvBadge, dish.getStatus());
-
-        if (dish.getStatus().equals("rejected") && dish.getRejectReason() != null) {
-            tvRejectReason.setVisibility(View.VISIBLE);
-            tvRejectReason.setText("Lý do từ chối: " + dish.getRejectReason());
-        }
-
-        LinearLayout llAction = view.findViewById(R.id.ll_action_buttons);
-        if (!dish.getStatus().equals("pending")) {
-            llAction.setVisibility(View.GONE);
-        }
-
-        view.findViewById(R.id.btn_close_sheet).setOnClickListener(v -> dialog.dismiss());
-        
-        view.findViewById(R.id.btn_approve).setOnClickListener(v -> {
-            showApproveDialog(null, dish, dialog);
-        });
-
-        view.findViewById(R.id.btn_reject).setOnClickListener(v -> {
-            showRejectDialog(null, dish, dialog);
-        });
-
-        dialog.show();
-    }
 
     private void updateBadgeUI(TextView tvBadge, String status) {
         if (status.equals("pending")) {
@@ -266,7 +210,7 @@ public class AdminApprovalActivity extends AppCompatActivity {
         }
     }
 
-    private void showApproveDialog(PendingStore store, PendingDish dish, BottomSheetDialog parentDialog) {
+    private void showApproveDialog(PendingStore store, BottomSheetDialog parentDialog) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.layout_dialog_confirm_approve, null);
         builder.setView(view);
@@ -281,10 +225,6 @@ public class AdminApprovalActivity extends AppCompatActivity {
             if (store.getImageRes() != 0) ivItem.setImageResource(store.getImageRes());
             tvName.setText(store.getStoreName());
             tvPrompt.setText("Bạn chắc chắn muốn duyệt cửa hàng này?");
-        } else if (dish != null) {
-            if (dish.getImageRes() != 0) ivItem.setImageResource(dish.getImageRes());
-            tvName.setText(dish.getDishName());
-            tvPrompt.setText("Bạn chắc chắn muốn duyệt món ăn này?");
         }
 
         view.findViewById(R.id.btn_dialog_cancel).setOnClickListener(v -> dialog.dismiss());
@@ -305,16 +245,13 @@ public class AdminApprovalActivity extends AppCompatActivity {
                         Toast.makeText(AdminApprovalActivity.this, "Lỗi duyệt: " + error, Toast.LENGTH_SHORT).show();
                     }
                 });
-            } else if (dish != null) {
-                Toast.makeText(this, "Chức năng duyệt món ăn tạm thời chưa khả dụng!", Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
             }
         });
 
         dialog.show();
     }
 
-    private void showRejectDialog(PendingStore store, PendingDish dish, BottomSheetDialog parentDialog) {
+    private void showRejectDialog(PendingStore store, BottomSheetDialog parentDialog) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.layout_dialog_reject_reason, null);
         builder.setView(view);
@@ -347,9 +284,6 @@ public class AdminApprovalActivity extends AppCompatActivity {
                         Toast.makeText(AdminApprovalActivity.this, "Lỗi từ chối: " + error, Toast.LENGTH_SHORT).show();
                     }
                 });
-            } else if (dish != null) {
-                Toast.makeText(this, "Chức năng từ chối món ăn tạm thời chưa khả dụng!", Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
             }
         });
 

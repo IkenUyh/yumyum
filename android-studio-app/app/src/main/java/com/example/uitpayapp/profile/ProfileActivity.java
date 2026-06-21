@@ -45,6 +45,7 @@ public class ProfileActivity extends AppCompatActivity {
     View rlLoginProfile,llUserInfo;
     boolean isLogin = false;
     private long currentCoins = 0;
+    private int currentVouchersCount = 0;
     private java.math.BigDecimal previousBalance = java.math.BigDecimal.ZERO;
     private android.app.AlertDialog statusDialog = null;
 
@@ -87,6 +88,8 @@ public class ProfileActivity extends AppCompatActivity {
             isLogin=true;
             rlLoginProfile.setVisibility(View.GONE);
             llUserInfo.setVisibility(View.VISIBLE);
+            View cvLogout = findViewById(R.id.cv_logout);
+            if (cvLogout != null) cvLogout.setVisibility(View.VISIBLE);
             TextView tvName = findViewById(R.id.tv_account_name);
             TextView tvPhone = findViewById(R.id.tv_account_phone);
             ImageView ivAvatar = findViewById(R.id.iv_account_avatar);
@@ -120,6 +123,8 @@ public class ProfileActivity extends AppCompatActivity {
             isLogin=false;
             rlLoginProfile.setVisibility(View.VISIBLE);
             llUserInfo.setVisibility(View.GONE);
+            View cvLogout = findViewById(R.id.cv_logout);
+            if (cvLogout != null) cvLogout.setVisibility(View.GONE);
         }
     }
     void fetchUserProfileApi() {
@@ -196,10 +201,12 @@ public class ProfileActivity extends AppCompatActivity {
         if (mainMenu == null) return;
         mainMenu.setLayoutManager(new LinearLayoutManager(this));
         List<GroupItemData> ListGroupItem = new ArrayList<>();
-        //Nhóm 1: Ưu đãi
+        SessionManager session = SessionManager.getInstance(this);
         List<MenuItemData> ListItems_uudai = new ArrayList<>();
         ListItems_uudai.add(new MenuItemData("YumYum Priority","Thành viên",R.drawable.ic_priority_yumyum,false));
-        ListItems_uudai.add(new MenuItemData("Ví Voucher", "0 ưu đãi", R.drawable.ic_my_gift,false));
+        if (session.isLoggedIn()) {
+            ListItems_uudai.add(new MenuItemData("Ví Voucher", currentVouchersCount + " ưu đãi", R.drawable.ic_my_gift,false));
+        }
         ListItems_uudai.add(new MenuItemData("Xu tích lũy", currentCoins + " xu", R.drawable.ic_my_coin,false));
         ListGroupItem.add(new GroupItemData("Ưu đãi", ListItems_uudai));
         //Nhóm 2: Quản lý tài chính (Mục đặc chứa thành phần đặc biệt)
@@ -210,10 +217,37 @@ public class ProfileActivity extends AppCompatActivity {
         //Nhóm 3: Tiện ích
         List<MenuItemData> ListItems_tienich = new ArrayList<>();
         ListItems_tienich.add(new MenuItemData("Mời bạn bè", "", R.drawable.ic_invite_friend,false));
-        ListItems_tienich.add(new MenuItemData("Cửa hàng", "", R.drawable.ic_my_store,false));
-        SessionManager session = SessionManager.getInstance(this);
+        if (session.isLoggedIn()) {
+            ListItems_tienich.add(new MenuItemData("Cửa hàng", "", R.drawable.ic_my_store,false));
+        }
         if (session.isLoggedIn() && "ADMIN".equalsIgnoreCase(session.getUserRole())) {
-            ListItems_tienich.add(new MenuItemData("Quản lý duyệt", "chờ duyệt", R.drawable.list_alt_24px,false));
+            MenuItemData adminMenuItem = new MenuItemData("Quản lý duyệt", "Đang tải...", R.drawable.list_alt_24px,false);
+            ListItems_tienich.add(adminMenuItem);
+            
+            // Fetch pending requests to show count
+            com.example.uitpayapp.modules.merchant.MerchantRepository merchantRepo = new com.example.uitpayapp.modules.merchant.MerchantRepository();
+            merchantRepo.getPendingRequests(new com.example.uitpayapp.network.ApiCallback<java.util.List<com.example.uitpayapp.modules.merchant.models.responses.MerchantRequestResponseDTO>>() {
+                @Override
+                public void onSuccess(java.util.List<com.example.uitpayapp.modules.merchant.models.responses.MerchantRequestResponseDTO> data) {
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        int count = data != null ? data.size() : 0;
+                        adminMenuItem.setSubtitle(count + " đơn chờ duyệt");
+                        if (mainMenu.getAdapter() != null) {
+                            mainMenu.getAdapter().notifyDataSetChanged();
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        adminMenuItem.setSubtitle("chờ duyệt");
+                        if (mainMenu.getAdapter() != null) {
+                            mainMenu.getAdapter().notifyDataSetChanged();
+                        }
+                    });
+                }
+            });
         }
         ListGroupItem.add(new GroupItemData("Tiện ích", ListItems_tienich));
         //Nhóm 4: Hỗ trợ
@@ -440,6 +474,7 @@ public class ProfileActivity extends AppCompatActivity {
         checkLoginStatus();
         updateNotificationBadge();
         fetchLoyaltyData();
+        fetchVouchersData();
 
         SharedPreferences paymentPrefs = getSharedPreferences("PaymentPrefs", MODE_PRIVATE);
         boolean isChecking = paymentPrefs.getBoolean("IS_CHECKING_TOP_UP", false);
@@ -448,6 +483,29 @@ public class ProfileActivity extends AppCompatActivity {
             java.math.BigDecimal prevBalance = new java.math.BigDecimal(prevBalanceStr);
             checkTransactionResult(prevBalance);
         }
+    }
+
+    private void fetchVouchersData() {
+        if (!isLogin) {
+            currentVouchersCount = 0;
+            return;
+        }
+        new com.example.uitpayapp.voucher.VoucherRepository().getActiveVouchers(new com.example.uitpayapp.network.ApiCallback<java.util.List<com.example.uitpayapp.voucher.VoucherResponseDTO>>() {
+            @Override
+            public void onSuccess(java.util.List<com.example.uitpayapp.voucher.VoucherResponseDTO> data) {
+                if (data != null) {
+                    runOnUiThread(() -> {
+                        currentVouchersCount = data.size();
+                        SetDataMainMenu(mainMenu);
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Fail silently
+            }
+        });
     }
 
     private void fetchLoyaltyData() {
@@ -820,6 +878,11 @@ public class ProfileActivity extends AppCompatActivity {
                         }
                         editor.putString("current_store_name", selectedStore.getName());
                         editor.putString("current_store_address", selectedStore.getAddress());
+                        if (selectedStore.getImageUrl() != null) {
+                            editor.putString("current_store_image_url", selectedStore.getImageUrl());
+                        } else {
+                            editor.remove("current_store_image_url");
+                        }
                         editor.apply();
 
                         startActivity(intentStore);

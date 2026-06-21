@@ -309,6 +309,19 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     private void applyFilter() {
         displayOrders.clear();
 
+        if (!com.example.uitpayapp.network.SessionManager.getInstance(this).isLoggedIn()) {
+            recyclerView.setVisibility(android.view.View.GONE);
+            rvDeals.setVisibility(android.view.View.GONE);
+            layoutCoinsBanner.setVisibility(android.view.View.GONE);
+            layoutFilters.setVisibility(android.view.View.GONE);
+            layoutRecommendations.setVisibility(android.view.View.GONE);
+            layoutEmpty.setVisibility(android.view.View.VISIBLE);
+            ivEmpty.setImageResource(R.drawable.img_transactionhistory_notransaction);
+            tvEmptyTitle.setText("Vui lòng đăng nhập");
+            tvEmptyDesc.setText("Đăng nhập để xem lịch sử đơn hàng của bạn.");
+            return;
+        }
+
         if ("Đang đến".equalsIgnoreCase(currentTab)) {
             layoutCoinsBanner.setVisibility(View.GONE);
             layoutFilters.setVisibility(View.GONE);
@@ -618,16 +631,34 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     }
 
     private void setupFilterMenus() {
-        String[] categories = {"Tất cả", "Cơm", "Bún Phở", "Bánh mì", "Fastfood", "Lẩu", "Đồ nướng", "Cafe", "Trà sữa", "Ăn vặt", "Tráng miệng", "Hải sản", "Chay", "Đồ uống", "Gà rán", "Pizza"};
+        java.util.List<String> categories = new java.util.ArrayList<>(java.util.Arrays.asList("Tất cả", "Cơm", "Bánh Mì", "Phở & Bún", "Gà Rán & Fastfood", "Trà Sữa", "Cà Phê & Đồ Uống", "Ăn Vặt", "Món Nhật & Hàn", "Ý & Pizza", "Lẩu & Dimsum", "Đồ Nướng & BBQ", "Hải Sản"));
         android.widget.ArrayAdapter<String> serviceAdapter = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_list_item_1, categories);
+        
+        com.example.uitpayapp.modules.food.CategoryRepository categoryRepository = new com.example.uitpayapp.modules.food.CategoryRepository();
+        categoryRepository.getAllCategories(new com.example.uitpayapp.network.ApiCallback<java.util.List<com.example.uitpayapp.modules.food.models.responses.CategoryResponse>>() {
+            @Override
+            public void onSuccess(java.util.List<com.example.uitpayapp.modules.food.models.responses.CategoryResponse> result) {
+                categories.clear();
+                categories.add("Tất cả");
+                for (com.example.uitpayapp.modules.food.models.responses.CategoryResponse cat : result) {
+                    categories.add(cat.getName());
+                }
+                serviceAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+            }
+        });
+
         android.widget.ListPopupWindow servicePopup = new android.widget.ListPopupWindow(this);
         servicePopup.setAdapter(serviceAdapter);
         servicePopup.setAnchorView(tvFilterService);
-        servicePopup.setWidth((int) (150 * getResources().getDisplayMetrics().density));
+        servicePopup.setWidth((int) (220 * getResources().getDisplayMetrics().density));
         servicePopup.setHeight((int) (200 * getResources().getDisplayMetrics().density));
         
         servicePopup.setOnItemClickListener((parent, view, position, id) -> {
-            currentService = categories[position];
+            currentService = categories.get(position);
             if (currentService.equals("Tất cả")) {
                 tvFilterService.setText("Tất cả ▼");
             } else {

@@ -95,10 +95,30 @@
                 android:visibility="gone">
 
                 <ImageView
+                    android:id="@+id/ivEmptyIcon"
                     android:layout_width="110dp"
                     android:layout_height="110dp"
                     android:src="@android:drawable/ic_dialog_map"
                     app:tint="#FFA000" />
+                <TextView
+                    android:id="@+id/tvEmptyTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Chưa có nhà hàng yêu thích"
+                    android:textColor="#212121"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/tvEmptyDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Bạn chưa thả tim nhà hàng nào"
+                    android:textColor="#757575"
+                    android:textSize="14sp"
+                    android:gravity="center"
+                    android:paddingHorizontal="32dp" />
             </LinearLayout>
         </FrameLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

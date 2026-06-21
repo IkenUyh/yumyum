@@ -76,13 +76,15 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
                 
                 LinearLayout layoutBalances = itemView.findViewById(R.id.layout_balances);
 
-                // Add Personal Wallet
-                View personalWalletView = LayoutInflater.from(holder.itemView.getContext()).inflate(R.layout.item_wallet_entry, layoutBalances, false);
-                TextView tvPersonalName = personalWalletView.findViewById(R.id.tv_wallet_name);
-                TextView btnPersonalAction = personalWalletView.findViewById(R.id.btn_action);
-                TextView tvPersonalBalance = personalWalletView.findViewById(R.id.wallet_balance);
-                
-                final boolean[] isPersonalHidden = {true};
+                // Add Personal Wallet if logged in
+                com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(holder.itemView.getContext());
+                if (sessionManager.isLoggedIn()) {
+                    View personalWalletView = LayoutInflater.from(holder.itemView.getContext()).inflate(R.layout.item_wallet_entry, layoutBalances, false);
+                    TextView tvPersonalName = personalWalletView.findViewById(R.id.tv_wallet_name);
+                    TextView btnPersonalAction = personalWalletView.findViewById(R.id.btn_action);
+                    TextView tvPersonalBalance = personalWalletView.findViewById(R.id.wallet_balance);
+                    
+                    final boolean[] isPersonalHidden = {true};
                 
                 tvPersonalName.setText("Ví");
                 btnPersonalAction.setText("Nạp +");
@@ -177,6 +179,14 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
                     }
                 });
                 layoutBalances.addView(personalWalletView);
+                } else {
+                    TextView loginPrompt = new TextView(holder.itemView.getContext());
+                    loginPrompt.setText("Vui lòng đăng nhập để quản lý ví và số dư");
+                    loginPrompt.setTextColor(android.graphics.Color.parseColor("#757575"));
+                    loginPrompt.setTextSize(14f);
+                    loginPrompt.setPadding(32, 16, 32, 16);
+                    layoutBalances.addView(loginPrompt);
+                }
 
 
 

@@ -72,6 +72,9 @@ public class SellerMarketingActivity extends AppCompatActivity {
 
         TextView tvShopName = findViewById(R.id.tv_shop_name);
         TextView tvShopAddress = findViewById(R.id.tv_shop_address);
+        ImageView ivShopLogo = findViewById(R.id.iv_shop_logo);
+        String storeImageUrl = sellerPrefs.getString("current_store_image_url", null);
+
         if (tvShopName != null) {
             if (storeName != null && !storeName.isEmpty()) {
                 tvShopName.setText(storeName);
@@ -79,6 +82,18 @@ public class SellerMarketingActivity extends AppCompatActivity {
             } else {
                 tvShopName.setText("Cửa hàng của bạn");
                 tvShopAddress.setText("Địa chỉ quán");
+            }
+        }
+        
+        if (ivShopLogo != null) {
+            if (storeImageUrl != null && !storeImageUrl.isEmpty()) {
+                com.bumptech.glide.Glide.with(this)
+                        .load(storeImageUrl)
+                        .placeholder(R.drawable.yumyum_demo_logo)
+                        .centerCrop()
+                        .into(ivShopLogo);
+            } else {
+                ivShopLogo.setImageResource(R.drawable.yumyum_demo_logo);
             }
         }
     }
@@ -96,9 +111,7 @@ public class SellerMarketingActivity extends AppCompatActivity {
         
         serviceList.add(new FoodCategory("Thông tin cửa hàng", R.drawable.ic_my_store, Color.parseColor("#E65100")));
         serviceList.add(new FoodCategory("Cài đặt thông báo", R.drawable.ic_notification, iconColor));
-        serviceList.add(new FoodCategory("Cài đặt máy in", R.drawable.ic_print, iconColor));
         serviceList.add(new FoodCategory("Cập nhật mã PIN", R.drawable.ic_security_user, iconColor));
-        serviceList.add(new FoodCategory("Lịch sử chỉnh sửa", R.drawable.ic_history_24px, iconColor));
         serviceList.add(new FoodCategory("Trung tâm Trợ giúp", R.drawable.ic_contact_support_ver2, iconColor));
 
         FoodCategoryAdapter adapter = new FoodCategoryAdapter(serviceList, this::handleServiceClick);
