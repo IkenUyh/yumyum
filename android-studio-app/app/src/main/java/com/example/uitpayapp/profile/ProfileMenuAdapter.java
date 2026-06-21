@@ -98,18 +98,22 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
                     String phoneNumber = session.getUserPhone();
 
                     if (isPersonalHidden[0]) {
-                        // Hiển thị Dialog yêu cầu nhập mã PIN trước khi hiện số dư
-                        android.app.AlertDialog.Builder pinBuilder = new android.app.AlertDialog.Builder(ctx);
-                        pinBuilder.setTitle("Xác thực mã PIN");
-                        pinBuilder.setMessage("Vui lòng nhập mã PIN (6 số) để hiển thị số dư:");
+                        // Hiển thị Dialog yêu cầu nhập mã PIN trước khi hiện số dư (sử dụng custom layout)
+                        android.view.View dialogView = LayoutInflater.from(ctx).inflate(R.layout.dialog_pin_verify, null);
+                        android.app.AlertDialog pinDialog = new android.app.AlertDialog.Builder(ctx)
+                                .setView(dialogView)
+                                .create();
+                        
+                        if (pinDialog.getWindow() != null) {
+                            pinDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                        }
 
-                        final android.widget.EditText pinInput = new android.widget.EditText(ctx);
-                        pinInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-                        pinInput.setTransformationMethod(android.text.method.PasswordTransformationMethod.getInstance());
-                        pinInput.setGravity(android.view.Gravity.CENTER);
-                        pinBuilder.setView(pinInput);
+                        android.widget.EditText pinInput = dialogView.findViewById(R.id.pin_input);
+                        android.widget.TextView btnCancel = dialogView.findViewById(R.id.btn_cancel);
+                        android.widget.TextView btnConfirm = dialogView.findViewById(R.id.btn_confirm);
 
-                        pinBuilder.setPositiveButton("Xác nhận", (dialog, which) -> {
+                        btnCancel.setOnClickListener(dv -> pinDialog.dismiss());
+                        btnConfirm.setOnClickListener(dv -> {
                             String inputPin = pinInput.getText().toString();
                             if (inputPin.length() != 6) {
                                 android.widget.Toast.makeText(ctx, "Mã PIN phải gồm 6 chữ số", android.widget.Toast.LENGTH_SHORT).show();
@@ -127,6 +131,7 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
                                         } else {
                                             tvPersonalBalance.setText("Lỗi tải");
                                         }
+                                        pinDialog.dismiss();
                                     });
                                 }
 
@@ -138,8 +143,7 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
                                 }
                             });
                         });
-                        pinBuilder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
-                        pinBuilder.show();
+                        pinDialog.show();
                     } else {
                         // Ẩn số dư trực tiếp
                         isPersonalHidden[0] = true;
