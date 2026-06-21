@@ -149,7 +149,9 @@ public class StoreDetailActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                         List<FoodMenuItem> menuItems = new ArrayList<>();
                         for (com.example.uitpayapp.modules.food.models.responses.FoodResponse food : response.body().getData()) {
-                            menuItems.add(new FoodMenuItem(String.valueOf(food.getId()), food.getName(), food.getPrice().longValue(), 0, food.getDescription(), food.getImageUrl()));
+                            FoodMenuItem item = new FoodMenuItem(String.valueOf(food.getId()), food.getName(), food.getPrice().longValue(), 0, food.getDescription(), food.getImageUrl());
+                            item.setRestaurantId(id);
+                            menuItems.add(item);
                         }
                         restaurant.getMenu().clear();
                         restaurant.getMenu().addAll(menuItems);
@@ -222,7 +224,7 @@ public class StoreDetailActivity extends AppCompatActivity {
         com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(this, item, null,
                 (selectedItem, quantity, selectedToppings) -> {
                     CartItem newItem = new CartItem(selectedItem, quantity, selectedToppings);
-                    CartManager.getInstance().addItemSync(newItem, new ApiCallback<String>() {
+                    CartManager.getInstance().addItemSync(StoreDetailActivity.this, newItem, new ApiCallback<String>() {
                         @Override
                         public void onSuccess(String data) {
                             runOnUiThread(() -> {

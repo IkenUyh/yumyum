@@ -51,6 +51,14 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(holder.imgItem, url);
         holder.tvName.setText(item.getMenuItem().getName());
         
+        String resName = item.getMenuItem().getRestaurantName();
+        if (resName != null && !resName.isEmpty()) {
+            holder.tvRestaurant.setVisibility(View.VISIBLE);
+            holder.tvRestaurant.setText(resName);
+        } else {
+            holder.tvRestaurant.setVisibility(View.GONE);
+        }
+        
         // Show total price of one single item including toppings (or wait, the price per item including toppings, or just base price?)
         // Total price of an item is item price + toppings. The display in cart usually shows (base + toppings) * 1.
         long unitPrice = item.getTotalPrice() / item.getQuantity();
@@ -116,11 +124,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     static class CartViewHolder extends RecyclerView.ViewHolder {
         ImageView imgItem;
-        TextView tvName, tvPrice, tvToppings, tvEditToppings, tvQuantity, btnIncrease, btnDecrease;
+        TextView tvRestaurant, tvName, tvPrice, tvToppings, tvEditToppings, tvQuantity, btnIncrease, btnDecrease;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
             imgItem = itemView.findViewById(R.id.img_cart_item);
+            tvRestaurant = itemView.findViewById(R.id.tv_cart_item_restaurant);
             tvName = itemView.findViewById(R.id.tv_cart_item_name);
             tvPrice = itemView.findViewById(R.id.tv_cart_item_price);
             tvToppings = itemView.findViewById(R.id.tv_cart_item_toppings);

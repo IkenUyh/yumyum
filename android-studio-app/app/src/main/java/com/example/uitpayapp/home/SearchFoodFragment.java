@@ -165,7 +165,7 @@ public class SearchFoodFragment extends Fragment {
         if (getContext() == null) return;
         com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(getContext(), item, null, (selectedItem, quantity, selectedToppings) -> {
             CartItem newItem = new CartItem(selectedItem, quantity, selectedToppings);
-            CartManager.getInstance().addItemSync(newItem, new com.example.uitpayapp.network.ApiCallback<String>() {
+            CartManager.getInstance().addItemSync(getContext(), newItem, new com.example.uitpayapp.network.ApiCallback<String>() {
                 @Override
                 public void onSuccess(String data) {
                     if (getActivity() != null) {

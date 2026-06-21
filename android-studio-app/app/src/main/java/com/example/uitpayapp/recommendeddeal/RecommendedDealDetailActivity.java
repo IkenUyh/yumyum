@@ -198,7 +198,7 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
     private void showFoodItemDetailPopup(FoodMenuItem item) {
         com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(this, item, null, (selectedItem, quantity, selectedToppings) -> {
             CartItem newItem = new CartItem(selectedItem, quantity, selectedToppings);
-            CartManager.getInstance().addItemSync(newItem, new com.example.uitpayapp.network.ApiCallback<String>() {
+            CartManager.getInstance().addItemSync(RecommendedDealDetailActivity.this, newItem, new com.example.uitpayapp.network.ApiCallback<String>() {
                 @Override
                 public void onSuccess(String data) {
                     runOnUiThread(() -> {

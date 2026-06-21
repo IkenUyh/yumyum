@@ -1233,7 +1233,7 @@ public class HomeActivity extends AppCompatActivity {
         com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(this, item, null,
                 (selectedItem, quantity, selectedToppings) -> {
                     CartItem newItem = new CartItem(selectedItem, quantity, selectedToppings);
-                    CartManager.getInstance().addItemSync(newItem,
+                    CartManager.getInstance().addItemSync(HomeActivity.this, newItem,
                             new com.example.uitpayapp.network.ApiCallback<String>() {
                                 @Override
                                 public void onSuccess(String data) {

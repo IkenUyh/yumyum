@@ -34,7 +34,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
 
     private TextView tvSubtotal, tvSelectedVoucher, tvDiscountAmount;
     private View layoutDiscount;
-    
+
     private SwitchMaterial switchCoins;
     private SwitchMaterial switchUtensils;
     private EditText etNote;
@@ -153,34 +153,36 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         // Fetch wallet balance
         TextView tvWalletBalance = findViewById(R.id.tv_wallet_balance);
         com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
-        walletRepo.getBalance(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse>() {
-            @Override
-            public void onSuccess(com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse data) {
-                runOnUiThread(() -> {
-                    java.text.NumberFormat format = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
-                    String balanceFormatted = format.format(data.getBalance()) + "đ";
-                    if (tvWalletBalance != null) {
-                        tvWalletBalance.setText(balanceFormatted);
+        walletRepo.getBalance(
+                new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse>() {
+                    @Override
+                    public void onSuccess(com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse data) {
+                        runOnUiThread(() -> {
+                            java.text.NumberFormat format = java.text.NumberFormat
+                                    .getInstance(new java.util.Locale("vi", "VN"));
+                            String balanceFormatted = format.format(data.getBalance()) + "đ";
+                            if (tvWalletBalance != null) {
+                                tvWalletBalance.setText(balanceFormatted);
+                            }
+                            if (tvWalletMethodBalance != null) {
+                                tvWalletMethodBalance.setText("Số dư: " + balanceFormatted);
+                            }
+                            currentWalletBalance = data.getBalance().longValue();
+                        });
                     }
-                    if (tvWalletMethodBalance != null) {
-                        tvWalletMethodBalance.setText("Số dư: " + balanceFormatted);
-                    }
-                    currentWalletBalance = data.getBalance().longValue();
-                });
-            }
 
-            @Override
-            public void onError(String errorMessage) {
-                runOnUiThread(() -> {
-                    if (tvWalletBalance != null) {
-                        tvWalletBalance.setText("Lỗi lấy số dư");
-                    }
-                    if (tvWalletMethodBalance != null) {
-                        tvWalletMethodBalance.setText("Lỗi lấy số dư");
+                    @Override
+                    public void onError(String errorMessage) {
+                        runOnUiThread(() -> {
+                            if (tvWalletBalance != null) {
+                                tvWalletBalance.setText("Lỗi lấy số dư");
+                            }
+                            if (tvWalletMethodBalance != null) {
+                                tvWalletMethodBalance.setText("Lỗi lấy số dư");
+                            }
+                        });
                     }
                 });
-            }
-        });
     }
 
     private void updateTotals() {
@@ -226,32 +228,33 @@ public class FoodCheckoutActivity extends AppCompatActivity {
             runOnUiThread(() -> tvDeliveryFee.setText("Chưa chọn địa chỉ"));
             return;
         }
-        com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest request = 
-                new com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest(
+        com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest request = new com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest(
                 restaurantId != null ? restaurantId : 1L,
                 addressId,
                 "STANDARD",
-                new ArrayList<>()
-        );
+                new ArrayList<>());
 
         com.example.uitpayapp.modules.order.OrderRepository orderRepo = new com.example.uitpayapp.modules.order.OrderRepository();
-        orderRepo.previewOrder(request, new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderPreviewResponse>() {
-            @Override
-            public void onSuccess(com.example.uitpayapp.modules.order.models.responses.OrderPreviewResponse data) {
-                runOnUiThread(() -> {
-                    deliveryFee = (long) data.getShippingFee();
-                    subtotalAmount = (long) data.getFoodTotal();
-                    updateTotals();
-                });
-            }
+        orderRepo.previewOrder(request,
+                new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderPreviewResponse>() {
+                    @Override
+                    public void onSuccess(
+                            com.example.uitpayapp.modules.order.models.responses.OrderPreviewResponse data) {
+                        runOnUiThread(() -> {
+                            deliveryFee = (long) data.getShippingFee();
+                            subtotalAmount = (long) data.getFoodTotal();
+                            updateTotals();
+                        });
+                    }
 
-            @Override
-            public void onError(String errorMessage) {
-                runOnUiThread(() -> {
-                    Toast.makeText(FoodCheckoutActivity.this, "Không thể tính phí ship: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onError(String errorMessage) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(FoodCheckoutActivity.this, "Không thể tính phí ship: " + errorMessage,
+                                    Toast.LENGTH_SHORT).show();
+                        });
+                    }
                 });
-            }
-        });
     }
 
     private void showVoucherBottomSheet() {
@@ -269,7 +272,8 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         mockVouchers.add(new VoucherModel("v2", "Giảm 50.000đ", "Áp dụng cho đơn hàng từ 200k", 50000, 200000));
         mockVouchers.add(new VoucherModel("v3", "Freeship 15.000đ", "Áp dụng cho đơn hàng từ 50k", 15000, 50000));
 
-        // Lọc voucher đủ điều kiện (tuỳ chọn, ở đây mình cho hiện hết nhưng cảnh báo nếu không đủ điều kiện)
+        // Lọc voucher đủ điều kiện (tuỳ chọn, ở đây mình cho hiện hết nhưng cảnh báo
+        // nếu không đủ điều kiện)
         VoucherAdapter adapter = new VoucherAdapter(mockVouchers, voucher -> {
             if (subtotalAmount >= voucher.getMinOrderAmount()) {
                 selectedVoucher = voucher;
@@ -299,41 +303,46 @@ public class FoodCheckoutActivity extends AppCompatActivity {
             progress.show();
 
             com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
-            walletRepo.createZaloPayTopUp(totalAmount, new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
-                @Override
-                public void onSuccess(java.util.Map<String, Object> data) {
-                    runOnUiThread(() -> {
-                        progress.dismiss();
-                        if (data != null && data.containsKey("order_url") && data.containsKey("app_trans_id")) {
-                            String orderUrl = (String) data.get("order_url");
-                            String appTransId = (String) data.get("app_trans_id");
+            walletRepo.createZaloPayTopUp(totalAmount,
+                    new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
+                        @Override
+                        public void onSuccess(java.util.Map<String, Object> data) {
+                            runOnUiThread(() -> {
+                                progress.dismiss();
+                                if (data != null && data.containsKey("order_url") && data.containsKey("app_trans_id")) {
+                                    String orderUrl = (String) data.get("order_url");
+                                    String appTransId = (String) data.get("app_trans_id");
 
-                            // Lưu app_trans_id vào SharedPreferences để kiểm tra khi quay lại app
-                            getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
-                                    .putString("PENDING_CHECKOUT_ZALOPAY_TRANS_ID", appTransId)
-                                    .apply();
+                                    // Lưu app_trans_id vào SharedPreferences để kiểm tra khi quay lại app
+                                    getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
+                                            .putString("PENDING_CHECKOUT_ZALOPAY_TRANS_ID", appTransId)
+                                            .apply();
 
-                            // Mở ZaloPay hoặc trình duyệt thanh toán
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(orderUrl));
-                            startActivity(browserIntent);
-                        } else {
-                            Toast.makeText(FoodCheckoutActivity.this, "Không lấy được thông tin thanh toán ZaloPay", Toast.LENGTH_SHORT).show();
+                                    // Mở ZaloPay hoặc trình duyệt thanh toán
+                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                                            android.net.Uri.parse(orderUrl));
+                                    startActivity(browserIntent);
+                                } else {
+                                    Toast.makeText(FoodCheckoutActivity.this,
+                                            "Không lấy được thông tin thanh toán ZaloPay", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            runOnUiThread(() -> {
+                                progress.dismiss();
+                                Toast.makeText(FoodCheckoutActivity.this, "Lỗi tạo đơn ZaloPay: " + errorMessage,
+                                        Toast.LENGTH_LONG).show();
+                            });
                         }
                     });
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    runOnUiThread(() -> {
-                        progress.dismiss();
-                        Toast.makeText(FoodCheckoutActivity.this, "Lỗi tạo đơn ZaloPay: " + errorMessage, Toast.LENGTH_LONG).show();
-                    });
-                }
-            });
         } else {
             // Thanh toán qua Ví nội bộ
             if (currentWalletBalance < totalAmount) {
-                Toast.makeText(this, "Số dư ví không đủ! Vui lòng chọn ZaloPay hoặc nạp thêm tiền.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Số dư ví không đủ! Vui lòng chọn ZaloPay hoặc nạp thêm tiền.", Toast.LENGTH_LONG)
+                        .show();
                 return;
             }
             executeConfirmCheckout();
@@ -347,57 +356,57 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         }
         String productNames = cartManager.getProductSummary();
 
-        com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest request = 
-                new com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest(
+        com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest request = new com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest(
                 restaurantId != null ? restaurantId : 1L,
                 addressId,
                 "STANDARD",
-                new ArrayList<>()
-        );
+                new ArrayList<>());
 
         com.example.uitpayapp.modules.order.OrderRepository orderRepo = new com.example.uitpayapp.modules.order.OrderRepository();
-        orderRepo.createOrder(request, new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderResponse>() {
-            @Override
-            public void onSuccess(com.example.uitpayapp.modules.order.models.responses.OrderResponse data) {
-                runOnUiThread(() -> {
-                    Intent intent = new Intent(FoodCheckoutActivity.this, TransferSuccessActivity.class);
-                    intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
-                    intent.putExtra("KEY_IS_FOOD_ORDER", true);
-                    intent.putExtra("KEY_FOOD_PRODUCTS", productNames);
-                    intent.putExtra("KEY_DELIVERY_FEE", deliveryFee);
-                    
-                    long discountAmount = selectedVoucher != null ? selectedVoucher.getDiscountAmount() : 0;
-                    intent.putExtra("KEY_DISCOUNT", discountAmount);
-                    
-                    startActivity(intent);
+        orderRepo.createOrder(request,
+                new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderResponse>() {
+                    @Override
+                    public void onSuccess(com.example.uitpayapp.modules.order.models.responses.OrderResponse data) {
+                        runOnUiThread(() -> {
+                            Intent intent = new Intent(FoodCheckoutActivity.this, TransferSuccessActivity.class);
+                            intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
+                            intent.putExtra("KEY_IS_FOOD_ORDER", true);
+                            intent.putExtra("KEY_FOOD_PRODUCTS", productNames);
+                            intent.putExtra("KEY_DELIVERY_FEE", deliveryFee);
 
-                    cartManager.clearCartSync(new com.example.uitpayapp.network.ApiCallback<String>() {
-                        @Override
-                        public void onSuccess(String data) {
-                            runOnUiThread(() -> finish());
-                        }
+                            long discountAmount = selectedVoucher != null ? selectedVoucher.getDiscountAmount() : 0;
+                            intent.putExtra("KEY_DISCOUNT", discountAmount);
 
-                        @Override
-                        public void onError(String errorMessage) {
-                            runOnUiThread(() -> finish());
-                        }
-                    });
+                            startActivity(intent);
+
+                            cartManager.clearCartSync(new com.example.uitpayapp.network.ApiCallback<String>() {
+                                @Override
+                                public void onSuccess(String data) {
+                                    runOnUiThread(() -> finish());
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    runOnUiThread(() -> finish());
+                                }
+                            });
+                        });
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(FoodCheckoutActivity.this, "Lỗi đặt đơn: " + errorMessage, Toast.LENGTH_LONG)
+                                    .show();
+                        });
+                    }
                 });
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                runOnUiThread(() -> {
-                    Toast.makeText(FoodCheckoutActivity.this, "Lỗi đặt đơn: " + errorMessage, Toast.LENGTH_LONG).show();
-                });
-            }
-        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        
+
         // Reload wallet balance to get the most updated balance
         loadCartData();
 
@@ -411,7 +420,8 @@ public class FoodCheckoutActivity extends AppCompatActivity {
     private void showZaloPayCheckStatusDialog(String appTransId) {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
         builder.setTitle("Đang chờ thanh toán");
-        builder.setMessage("Vui lòng hoàn tất thanh toán trên ZaloPay. Sau khi thanh toán xong, hãy bấm nút dưới đây để hoàn tất đặt đơn hàng!");
+        builder.setMessage(
+                "Vui lòng hoàn tất thanh toán trên ZaloPay. Sau khi thanh toán xong, hãy bấm nút dưới đây để hoàn tất đặt đơn hàng!");
         builder.setCancelable(false);
 
         builder.setPositiveButton("Xác nhận đã thanh toán", null);
@@ -433,43 +443,51 @@ public class FoodCheckoutActivity extends AppCompatActivity {
             progress.show();
 
             com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
-            walletRepo.queryZaloPayOrderStatus(appTransId, new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
-                @Override
-                public void onSuccess(java.util.Map<String, Object> data) {
-                    runOnUiThread(() -> {
-                        progress.dismiss();
-                        if (data != null && data.containsKey("return_code")) {
-                            int returnCode = ((Number) data.get("return_code")).intValue();
-                            if (returnCode == 1) {
-                                getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
-                                        .remove("PENDING_CHECKOUT_ZALOPAY_TRANS_ID")
-                                        .apply();
-                                dialog.dismiss();
-                                Toast.makeText(FoodCheckoutActivity.this, "Thanh toán ZaloPay thành công!", Toast.LENGTH_SHORT).show();
-                                executeConfirmCheckout();
-                            } else {
-                                String msg = data.containsKey("return_message") ? (String) data.get("return_message") : "Chưa hoàn tất thanh toán";
-                                Toast.makeText(FoodCheckoutActivity.this, "Giao dịch chưa hoàn tất: " + msg, Toast.LENGTH_LONG).show();
-                            }
-                        } else {
-                            Toast.makeText(FoodCheckoutActivity.this, "Không thể xác định trạng thái giao dịch", Toast.LENGTH_SHORT).show();
+            walletRepo.queryZaloPayOrderStatus(appTransId,
+                    new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
+                        @Override
+                        public void onSuccess(java.util.Map<String, Object> data) {
+                            runOnUiThread(() -> {
+                                progress.dismiss();
+                                if (data != null && data.containsKey("return_code")) {
+                                    int returnCode = ((Number) data.get("return_code")).intValue();
+                                    if (returnCode == 1) {
+                                        getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
+                                                .remove("PENDING_CHECKOUT_ZALOPAY_TRANS_ID")
+                                                .apply();
+                                        dialog.dismiss();
+                                        Toast.makeText(FoodCheckoutActivity.this, "Thanh toán ZaloPay thành công!",
+                                                Toast.LENGTH_SHORT).show();
+                                        executeConfirmCheckout();
+                                    } else {
+                                        String msg = data.containsKey("return_message")
+                                                ? (String) data.get("return_message")
+                                                : "Chưa hoàn tất thanh toán";
+                                        Toast.makeText(FoodCheckoutActivity.this, "Giao dịch chưa hoàn tất: " + msg,
+                                                Toast.LENGTH_LONG).show();
+                                    }
+                                } else {
+                                    Toast.makeText(FoodCheckoutActivity.this, "Không thể xác định trạng thái giao dịch",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            runOnUiThread(() -> {
+                                progress.dismiss();
+                                Toast.makeText(FoodCheckoutActivity.this, "Lỗi kiểm tra trạng thái: " + errorMessage,
+                                        Toast.LENGTH_SHORT).show();
+                            });
                         }
                     });
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    runOnUiThread(() -> {
-                        progress.dismiss();
-                        Toast.makeText(FoodCheckoutActivity.this, "Lỗi kiểm tra trạng thái: " + errorMessage, Toast.LENGTH_SHORT).show();
-                    });
-                }
-            });
         });
     }
 
     private void initAddress() {
-        com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager
+                .getInstance(this);
         addressId = session.getDeliveryAddressId();
         String addressText = session.getDeliveryAddressText();
 
@@ -480,39 +498,42 @@ public class FoodCheckoutActivity extends AppCompatActivity {
             fetchPreviewData();
         } else {
             new com.example.uitpayapp.modules.user.AddressRepository().getMyAddresses(
-                new com.example.uitpayapp.network.ApiCallback<java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>>() {
-                    @Override
-                    public void onSuccess(java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO> result) {
-                        if (result != null && !result.isEmpty()) {
-                            com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO defaultAddress = result.get(0);
-                            for (com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO addr : result) {
-                                if (addr.getIsDefault() != null && addr.getIsDefault()) {
-                                    defaultAddress = addr;
-                                    break;
+                    new com.example.uitpayapp.network.ApiCallback<java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>>() {
+                        @Override
+                        public void onSuccess(
+                                java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO> result) {
+                            if (result != null && !result.isEmpty()) {
+                                com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO defaultAddress = result
+                                        .get(0);
+                                for (com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO addr : result) {
+                                    if (addr.getIsDefault() != null && addr.getIsDefault()) {
+                                        defaultAddress = addr;
+                                        break;
+                                    }
                                 }
+                                final com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO selected = defaultAddress;
+                                session.saveDeliveryAddress(selected.getId(), selected.getDetailedAddress());
+                                runOnUiThread(() -> {
+                                    addressId = selected.getId();
+                                    updateAddressUI(selected.getRecipientName(), selected.getPhoneNumber(),
+                                            selected.getDetailedAddress());
+                                    fetchPreviewData();
+                                });
+                            } else {
+                                runOnUiThread(() -> {
+                                    updateAddressUI(null, null,
+                                            "Chưa có địa chỉ giao hàng. Vui lòng bấm để chọn/thêm!");
+                                });
                             }
-                            final com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO selected = defaultAddress;
-                            session.saveDeliveryAddress(selected.getId(), selected.getDetailedAddress());
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
                             runOnUiThread(() -> {
-                                addressId = selected.getId();
-                                updateAddressUI(selected.getRecipientName(), selected.getPhoneNumber(), selected.getDetailedAddress());
-                                fetchPreviewData();
-                            });
-                        } else {
-                            runOnUiThread(() -> {
-                                updateAddressUI(null, null, "Chưa có địa chỉ giao hàng. Vui lòng bấm để chọn/thêm!");
+                                updateAddressUI(null, null, "Không thể tải địa chỉ giao hàng: " + errorMessage);
                             });
                         }
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-                        runOnUiThread(() -> {
-                            updateAddressUI(null, null, "Không thể tải địa chỉ giao hàng: " + errorMessage);
-                        });
-                    }
-                }
-            );
+                    });
         }
     }
 
@@ -524,11 +545,13 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                 displayText += recipient;
             }
             if (phone != null && !phone.isEmpty()) {
-                if (!displayText.isEmpty()) displayText += " | ";
+                if (!displayText.isEmpty())
+                    displayText += " | ";
                 displayText += phone;
             }
             if (detailedAddress != null && !detailedAddress.isEmpty()) {
-                if (!displayText.isEmpty()) displayText += "\n";
+                if (!displayText.isEmpty())
+                    displayText += "\n";
                 displayText += detailedAddress;
             }
             tvAddressDesc.setText(displayText.trim().isEmpty() ? "Bấm để chọn địa điểm giao hàng" : displayText.trim());
@@ -536,33 +559,36 @@ public class FoodCheckoutActivity extends AppCompatActivity {
     }
 
     private void selectDeliveryAddress() {
-        com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager
+                .getInstance(this);
         new com.example.uitpayapp.modules.user.AddressRepository().getMyAddresses(
-            new com.example.uitpayapp.network.ApiCallback<java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>>() {
-                @Override
-                public void onSuccess(java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO> result) {
-                    runOnUiThread(() -> {
-                        com.example.uitpayapp.utils.AddressBottomSheetHelper.showAddressBottomSheet(
-                            FoodCheckoutActivity.this,
-                            result,
-                            addressId,
-                            selectedAddress -> {
-                                addressId = selectedAddress.getId();
-                                session.saveDeliveryAddress(selectedAddress.getId(), selectedAddress.getDetailedAddress());
-                                updateAddressUI(selectedAddress.getRecipientName(), selectedAddress.getPhoneNumber(), selectedAddress.getDetailedAddress());
-                                fetchPreviewData();
-                            }
-                        );
-                    });
-                }
+                new com.example.uitpayapp.network.ApiCallback<java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>>() {
+                    @Override
+                    public void onSuccess(
+                            java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO> result) {
+                        runOnUiThread(() -> {
+                            com.example.uitpayapp.utils.AddressBottomSheetHelper.showAddressBottomSheet(
+                                    FoodCheckoutActivity.this,
+                                    result,
+                                    addressId,
+                                    selectedAddress -> {
+                                        addressId = selectedAddress.getId();
+                                        session.saveDeliveryAddress(selectedAddress.getId(),
+                                                selectedAddress.getDetailedAddress());
+                                        updateAddressUI(selectedAddress.getRecipientName(),
+                                                selectedAddress.getPhoneNumber(), selectedAddress.getDetailedAddress());
+                                        fetchPreviewData();
+                                    });
+                        });
+                    }
 
-                @Override
-                public void onError(String errorMessage) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(FoodCheckoutActivity.this, "Không thể lấy danh sách địa chỉ: " + errorMessage, Toast.LENGTH_SHORT).show();
-                    });
-                }
-            }
-        );
+                    @Override
+                    public void onError(String errorMessage) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(FoodCheckoutActivity.this,
+                                    "Không thể lấy danh sách địa chỉ: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                });
     }
 }
