@@ -82,8 +82,8 @@ public class UserRepository {
     }
 
     // 2.1 Cập nhật thông tin cá nhân
-    public void updateProfile(String fullName, String email, ApiCallback<UserResponseDTO> callback) {
-        UpdateProfileDTO dto = new UpdateProfileDTO(fullName, email);
+    public void updateProfile(String fullName, String email, String gender, String birthday, String job, ApiCallback<UserResponseDTO> callback) {
+        UpdateProfileDTO dto = new UpdateProfileDTO(fullName, email, gender, birthday, job);
         userService.updateProfile(dto).enqueue(new Callback<ApiResponse<UserResponseDTO>>() {
             @Override
             public void onResponse(Call<ApiResponse<UserResponseDTO>> call, Response<ApiResponse<UserResponseDTO>> response) {

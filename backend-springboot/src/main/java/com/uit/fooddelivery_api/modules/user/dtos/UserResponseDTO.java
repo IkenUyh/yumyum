@@ -15,6 +15,9 @@ public class UserResponseDTO {
     private String email;
     private String avatarUrl;
     private String role;
+    private String gender;
+    private String birthday;
+    private String job;
 
     // Viết hàm tiện ích để chuyển từ Entity gốc sang DTO an toàn
     public static UserResponseDTO fromEntity(User user) {
@@ -25,6 +28,9 @@ public class UserResponseDTO {
                 .email(user.getEmail())
                 .avatarUrl(user.getAvatarUrl())
                 .role(user.getRole() != null ? user.getRole().name() : null)
+                .gender(user.getGender())
+                .birthday(user.getBirthday())
+                .job(user.getJob())
                 .build();
     }
 }

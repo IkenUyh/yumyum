@@ -8,4 +8,7 @@ import lombok.Setter;
 public class UpdateProfileDTO {
     private String fullName;
     private String email;
+    private String gender;
+    private String birthday;
+    private String job;
 }

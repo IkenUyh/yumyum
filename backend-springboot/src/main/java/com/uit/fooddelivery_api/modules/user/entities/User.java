@@ -83,4 +83,13 @@ public class User implements UserDetails {
 
     @Column(name = "referred_by_id")
     private Long referredById;
+
+    @Column(name = "gender")
+    private String gender;
+
+    @Column(name = "birthday")
+    private String birthday;
+
+    @Column(name = "job")
+    private String job;
 }
