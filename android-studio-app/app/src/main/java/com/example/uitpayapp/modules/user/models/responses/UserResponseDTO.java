@@ -30,6 +30,9 @@ public class UserResponseDTO {
     @SerializedName("job")
     private String job;
 
+    @SerializedName("referralCode")
+    private String referralCode;
+
     public Long getId() { return id; }
     public String getPhoneNumber() { return phoneNumber; }
     public String getFullName() { return fullName; }
@@ -39,4 +42,5 @@ public class UserResponseDTO {
     public String getGender() { return gender; }
     public String getBirthday() { return birthday; }
     public String getJob() { return job; }
+    public String getReferralCode() { return referralCode; }
 }

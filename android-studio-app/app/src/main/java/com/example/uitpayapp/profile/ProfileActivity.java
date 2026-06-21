@@ -154,6 +154,7 @@ public class ProfileActivity extends AppCompatActivity {
                             .putString("FULL_NAME", data.getFullName())
                             .putString("PHONE_NUMBER", data.getPhoneNumber())
                             .putString("AVATAR_URL", data.getAvatarUrl() != null ? data.getAvatarUrl() : "")
+                            .putString("REFERRAL_CODE", data.getReferralCode() != null ? data.getReferralCode() : "")
                             .apply();
 
                     SessionManager sessionManager = SessionManager.getInstance(ProfileActivity.this);
@@ -237,7 +238,10 @@ public class ProfileActivity extends AppCompatActivity {
         ListGroupItem.add(new GroupItemData("Quản lý thông tin đơn hàng", ListItems_finance));
         //Nhóm 3: Tiện ích
         List<MenuItemData> ListItems_tienich = new ArrayList<>();
-        ListItems_tienich.add(new MenuItemData("Mời bạn bè", "", R.drawable.ic_invite_friend,false));
+        SharedPreferences userPrefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String refCode = userPrefs.getString("REFERRAL_CODE", "");
+        String inviteSubtitle = refCode.isEmpty() ? "" : "Mã mời: " + refCode;
+        ListItems_tienich.add(new MenuItemData("Mời bạn bè", inviteSubtitle, R.drawable.ic_invite_friend,false));
         if (session.isLoggedIn()) {
             ListItems_tienich.add(new MenuItemData("Cửa hàng", "", R.drawable.ic_my_store,false));
         }
@@ -341,7 +345,6 @@ public class ProfileActivity extends AppCompatActivity {
             case "Mời bạn bè":
                 ListItems.add(new MenuItemData("Gửi qua SMS","",R.drawable.ic_bold_check,false));
                 ListItems.add(new MenuItemData("Gửi qua Email","",R.drawable.ic_bold_check,false));
-                ListItems.add(new MenuItemData("Sao chép đường dẫn tải ứng dụng","",R.drawable.ic_bold_check,false));
                 ListGroupItem.add(new GroupItemData("",ListItems));
                 ShowBottomSheet("Mời bạn bè",ListGroupItem);
                 break;
@@ -423,7 +426,12 @@ public class ProfileActivity extends AppCompatActivity {
         bottomSheetDialog.show();
     }
     private void HanleDetailItemClick(MenuItemData item) {
-        String message="YumYum ứng dụng đặt thức ăn online siêu tiện lợi. Hãy tham gia YumYum ngay để nhận nhiều ưu đãi hấp dẫn";
+        SharedPreferences userPrefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String refCode = userPrefs.getString("REFERRAL_CODE", "");
+        String message="YumYum ứng dụng đặt thức ăn online siêu tiện lợi. Hãy tham gia YumYum ngay để nhận nhiều ưu đãi hấp dẫn.";
+        if (!refCode.isEmpty()) {
+            message += " Nhập mã mời " + refCode + " để nhận quà nhé!";
+        }
         switch (item.getTitle()) {
             case "Thông tin ứng dụng":
                 Intent intentInfo=new Intent(this,InfoApplication.class);
@@ -444,11 +452,6 @@ public class ProfileActivity extends AppCompatActivity {
                 String subject="Lời mời tham gia YumYum";
                 intentEmail.setData(android.net.Uri.parse("mailto:?subject="+android.net.Uri.encode(subject)+"&body=" + android.net.Uri.encode(message)));
                 startActivity(intentEmail);
-                break;
-            case "Sao chép đường dẫn tải ứng dụng":
-                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(android.content.Context.CLIPBOARD_SERVICE);
-                android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text",message);
-                clipboard.setPrimaryClip(clip);
                 break;
         }
     }

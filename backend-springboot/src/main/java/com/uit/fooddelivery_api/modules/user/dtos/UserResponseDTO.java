@@ -18,6 +18,7 @@ public class UserResponseDTO {
     private String gender;
     private String birthday;
     private String job;
+    private String referralCode;
 
     // Viết hàm tiện ích để chuyển từ Entity gốc sang DTO an toàn
     public static UserResponseDTO fromEntity(User user) {
@@ -31,6 +32,7 @@ public class UserResponseDTO {
                 .gender(user.getGender())
                 .birthday(user.getBirthday())
                 .job(user.getJob())
+                .referralCode(user.getReferralCode())
                 .build();
     }
 }
