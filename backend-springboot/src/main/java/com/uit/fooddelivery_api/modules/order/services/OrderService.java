@@ -28,6 +28,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    @org.springframework.context.annotation.Lazy
+    private OrderService self;
+
+    private final java.util.concurrent.ScheduledExecutorService executorService = 
+            java.util.concurrent.Executors.newScheduledThreadPool(2);
+
     private final OrderRepository orderRepository;
     private final RestaurantRepository restaurantRepository;
     private final WalletRepository walletRepository;
@@ -600,7 +607,9 @@ public class OrderService {
 
         order.setDriver(driver);
         order.setStatus("DELIVERING");
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        self.scheduleAutoDeliveryStages(savedOrder.getId());
+        return savedOrder;
     }
 
     // 3. Tài xế giao xong -> Chuyển tiền cho chủ quán
@@ -706,6 +715,8 @@ public class OrderService {
                         + " đang mang món ăn đến cho bạn. Hãy đưa mã PIN này cho tài xế khi nhận đồ: "
                         + generatedDeliveryPin,
                 "ORDER_UPDATE");
+
+        self.scheduleAutoDeliveryStages(savedOrder.getId());
 
         return savedOrder;
     }
@@ -818,7 +829,34 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    // 5. CHỦ QUÁN: Hoàn thành trực tiếp đơn hàng (không qua tài xế)
+    // 5. CHỦ QUÁN: Bàn giao cho shipper để chuyển sang trạng thái ĐANG GIAO
+    @Transactional
+    public Order merchantDeliverOrder(Long orderId, User merchant) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+
+        if (!order.getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền xử lý đơn hàng của quán khác!");
+        }
+
+        if (!"PREPARING".equals(order.getStatus())) {
+            throw new RuntimeException("Chỉ có thể bàn giao shipper khi đơn hàng ở trạng thái ĐANG CHUẨN BỊ!");
+        }
+
+        order.setStatus("DELIVERING");
+
+        notificationService.pushNotification(
+                order.getUser().getId(),
+                "Đơn hàng đang được giao 🚴",
+                "Đơn hàng #" + order.getId() + " từ " + order.getRestaurant().getName() + " đang trên đường giao đến bạn!",
+                "ORDER_UPDATE");
+
+        Order savedOrder = orderRepository.save(order);
+        self.scheduleAutoDeliveryStages(savedOrder.getId());
+        return savedOrder;
+    }
+
+    // 6. CHỦ QUÁN: Hoàn thành trực tiếp đơn hàng (không qua tài xế)
     @Transactional
     public Order merchantCompleteOrder(Long orderId, User merchant) {
         Order order = orderRepository.findById(orderId)
@@ -828,8 +866,8 @@ public class OrderService {
             throw new RuntimeException("Bạn không có quyền hoàn thành đơn hàng của quán khác!");
         }
 
-        if (!"PREPARING".equals(order.getStatus()) && !"PENDING".equals(order.getStatus())) {
-            throw new RuntimeException("Chỉ có thể hoàn thành đơn hàng ở trạng thái ĐANG CHUẨN BỊ hoặc CHỜ XỬ LÝ!");
+        if (!"PREPARING".equals(order.getStatus()) && !"PENDING".equals(order.getStatus()) && !"DELIVERING".equals(order.getStatus())) {
+            throw new RuntimeException("Chỉ có thể hoàn thành đơn hàng ở trạng thái ĐANG CHUẨN BỊ, CHỜ XỬ LÝ hoặc ĐANG GIAO!");
         }
 
         order.setStatus("COMPLETED");
@@ -865,5 +903,77 @@ public class OrderService {
     public Order getOrderById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+    }
+
+    public void scheduleAutoDeliveryStages(Long orderId) {
+        // Giai đoạn 1: Sau 15 giây, tài xế đến nơi
+        executorService.schedule(() -> {
+            try {
+                notifyDriverArrived(orderId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 15, java.util.concurrent.TimeUnit.SECONDS);
+
+        // Giai đoạn 2: Sau 30 giây, tự động hoàn tất đơn hàng
+        executorService.schedule(() -> {
+            try {
+                self.autoCompleteOrder(orderId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 30, java.util.concurrent.TimeUnit.SECONDS);
+    }
+
+    private void notifyDriverArrived(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order != null && "DELIVERING".equals(order.getStatus())) {
+            notificationService.pushNotification(
+                    order.getUser().getId(),
+                    "Tài xế đã đến nơi 🚴",
+                    "Tài xế giao hàng đã đến địa chỉ của bạn. Vui lòng chuẩn bị nhận món ăn!",
+                    "ORDER_UPDATE");
+        }
+    }
+
+    @Transactional
+    public void autoCompleteOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order != null && "DELIVERING".equals(order.getStatus())) {
+            order.setStatus("COMPLETED");
+            orderRepository.save(order);
+
+            // Cộng tiền doanh thu vào số dư nhà hàng (Merchant Balance)
+            BigDecimal revenue = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
+            BigDecimal shipping = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
+            BigDecimal amountToAdd = revenue.subtract(shipping);
+
+            Restaurant restaurant = order.getRestaurant();
+            restaurant.setBalance(restaurant.getBalance().add(amountToAdd));
+            restaurantRepository.save(restaurant);
+
+            restaurantTransactionRepository.save(
+                com.uit.fooddelivery_api.modules.restaurant.entities.RestaurantTransaction.builder()
+                        .restaurant(restaurant)
+                        .amount(amountToAdd)
+                        .balanceAfter(restaurant.getBalance())
+                        .type("REVENUE")
+                        .referenceId("ORDER_" + order.getId())
+                        .description("Doanh thu bán hàng (Tự động hoàn thành) đơn #" + order.getId())
+                        .build()
+            );
+
+            notificationService.pushNotification(
+                    order.getUser().getId(),
+                    "Đơn hàng hoàn tất 🎉",
+                    "Đơn hàng #" + order.getId() + " từ " + order.getRestaurant().getName() + " đã giao thành công!",
+                    "ORDER_UPDATE");
+
+            notificationService.pushNotification(
+                    order.getRestaurant().getMerchant().getId(),
+                    "Đơn hàng hoàn tất 🎉",
+                    "Đơn hàng #" + order.getId() + " đã giao thành công!",
+                    "ORDER_UPDATE");
+        }
     }
 }

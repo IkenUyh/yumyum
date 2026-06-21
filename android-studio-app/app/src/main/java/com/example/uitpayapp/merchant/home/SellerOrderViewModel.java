@@ -101,6 +101,7 @@ public class SellerOrderViewModel extends AndroidViewModel {
             switch (status) {
                 case "PENDING":
                 case "PREPARING":
+                case "DELIVERING":
                     SellerOrder sellerOrder = mapToSellerOrder(o);
                     if ("PENDING".equals(status)) {
                         pending.add(sellerOrder);
@@ -333,6 +334,42 @@ public class SellerOrderViewModel extends AndroidViewModel {
         List<SellerHistoryOrder> currentHistory = new ArrayList<>(historyOrders.getValue());
         currentHistory.add(0, historyOrder);
         historyOrders.setValue(currentHistory);
+    }
+
+    /**
+     * Bàn giao đơn hàng cho Shipper (PREPARING → DELIVERING) bằng cách gọi API merchant-deliver.
+     */
+    public void deliverOrder(SellerOrder order) {
+        if (order.getOrderId() == null) {
+            // Fallback local
+            moveLocalOrderToDelivering(order);
+            return;
+        }
+
+        isLoading.setValue(true);
+        orderRepository.merchantDeliverOrder(order.getOrderId(), new ApiCallback<OrderResponse>() {
+            @Override
+            public void onSuccess(OrderResponse result) {
+                isLoading.setValue(false);
+                successMessage.setValue("Đã bàn giao cho Shipper");
+                loadData(); // Reload toàn bộ
+            }
+
+            @Override
+            public void onError(String message) {
+                isLoading.setValue(false);
+                errorMessage.setValue("Bàn giao thất bại: " + message);
+            }
+        });
+    }
+
+    private void moveLocalOrderToDelivering(SellerOrder order) {
+        List<SellerOrder> currentConfirmed = new ArrayList<>(confirmedOrders.getValue());
+        currentConfirmed.remove(order);
+        
+        order.setStatus("DELIVERING");
+        currentConfirmed.add(0, order);
+        confirmedOrders.setValue(currentConfirmed);
     }
 
     /**

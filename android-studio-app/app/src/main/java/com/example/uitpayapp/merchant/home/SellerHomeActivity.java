@@ -271,6 +271,10 @@ public class SellerHomeActivity extends AppCompatActivity {
         String status = order.getStatus() != null ? order.getStatus().toUpperCase() : "";
         if ("PENDING".equals(status)) {
             btnComplete.setText("Xác nhận đơn");
+        } else if ("PREPARING".equals(status)) {
+            btnComplete.setText("Bàn giao cho Shipper");
+        } else if ("DELIVERING".equals(status)) {
+            btnComplete.setText("Hoàn thành");
         } else {
             btnComplete.setText("Đóng");
         }
@@ -278,6 +282,10 @@ public class SellerHomeActivity extends AppCompatActivity {
         btnComplete.setOnClickListener(v -> {
             if ("PENDING".equals(status)) {
                 viewModel.acceptOrder(order);
+            } else if ("PREPARING".equals(status)) {
+                viewModel.deliverOrder(order);
+            } else if ("DELIVERING".equals(status)) {
+                viewModel.completeOrder(order);
             }
             dialog.dismiss();
         });

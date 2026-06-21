@@ -66,12 +66,19 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
             holder.llDishesContainer.addView(dishView);
         }
         
-        if ("confirmed".equalsIgnoreCase(order.getStatus()) || "PREPARING".equalsIgnoreCase(order.getStatus())) {
-            holder.btnAccept.setText("Đã xong");
-        } else {
+        String status = order.getStatus() != null ? order.getStatus().toUpperCase() : "";
+        if ("PREPARING".equals(status) || "CONFIRMED".equals(status)) {
+            holder.btnAccept.setText("Bàn giao cho Shipper");
+            holder.btnAccept.setVisibility(View.VISIBLE);
+        } else if ("DELIVERING".equals(status)) {
+            holder.btnAccept.setText("Hoàn thành");
+            holder.btnAccept.setVisibility(View.VISIBLE);
+        } else if ("PENDING".equals(status)) {
             holder.btnAccept.setText("Xác nhận");
+            holder.btnAccept.setVisibility(View.VISIBLE);
+        } else {
+            holder.btnAccept.setVisibility(View.GONE);
         }
-        holder.btnAccept.setVisibility(View.VISIBLE);
 
         holder.btnAccept.setOnClickListener(v -> listener.onAccept(order));
         holder.btnSeeMore.setOnClickListener(v -> listener.onSeeMore(order));
