@@ -18,6 +18,17 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="RoundedSquareImage" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FFFFFF</item>
+        <item name="windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+        <item name="postSplashScreenTheme">@style/Theme.Androidstudioapp</item>
+    </style>
+
     <style name="CustomMaterialCalendar" parent="Widget.MaterialComponents.MaterialCalendar">
         <item name="colorPrimary">@color/primary_orange</item>
     </style>
