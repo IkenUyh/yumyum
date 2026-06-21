@@ -70,6 +70,7 @@ public class CartManager {
             dto.getFoodName() != null ? dto.getFoodName() : "",
             dto.getFoodImageUrl()
         );
+        menuItem.setRestaurantId(dto.getRestaurantId());
 
         List<CartTopping> toppings = new ArrayList<>();
         if (dto.getSelectedOptions() != null) {

@@ -24,6 +24,9 @@ public class CartItemResponseDTO {
     @SerializedName("quantity")
     private Integer quantity;
 
+    @SerializedName("restaurantId")
+    private Long restaurantId;
+
     @SerializedName("selectedOptions")
     private List<Map<String, Object>> selectedOptions; // Trả về list mapping map chứa thông tin topping để vẽ UI
 
@@ -36,6 +39,9 @@ public class CartItemResponseDTO {
 
     public Long getFoodId() { return foodId; }
     public void setFoodId(Long foodId) { this.foodId = foodId; }
+
+    public Long getRestaurantId() { return restaurantId; }
+    public void setRestaurantId(Long restaurantId) { this.restaurantId = restaurantId; }
 
     public String getFoodName() { return foodName; }
     public void setFoodName(String foodName) { this.foodName = foodName; }
