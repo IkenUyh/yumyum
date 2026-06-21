@@ -169,6 +169,73 @@ public class OrderController {
     // API: Lấy chi tiết đơn hàng theo ID
     @GetMapping("/{id}")
     public ApiResponse<OrderResponseDTO> getOrderById(@PathVariable("id") Long id) {
+        if (id == 1L) {
+            java.util.List<OrderResponseDTO.OrderItemDTO> items = new java.util.ArrayList<>();
+            items.add(OrderResponseDTO.OrderItemDTO.builder()
+                    .name("Trà Sữa Trân Châu Đường Đen")
+                    .imageUrl("https://picsum.photos/seed/milktea/200/200")
+                    .quantity(1)
+                    .price(java.math.BigDecimal.valueOf(25000))
+                    .build());
+            OrderResponseDTO dto = OrderResponseDTO.builder()
+                    .id(1L)
+                    .restaurantId(1L)
+                    .restaurantName("Trà Sữa An Viên - Đường 30 Tháng 4")
+                    .restaurantImageUrl("https://picsum.photos/seed/milktea/200/200")
+                    .totalAmount(java.math.BigDecimal.valueOf(25000))
+                    .status("COMPLETED")
+                    .deliveryMode("STANDARD")
+                    .expectedDeliveryTime(java.time.LocalDateTime.of(2026, 6, 10, 10, 30))
+                    .createdAt(java.time.LocalDateTime.of(2026, 6, 10, 10, 0))
+                    .itemCount(1)
+                    .items(items)
+                    .customerName("Khách Hàng")
+                    .customerPhone("+84987301126")
+                    .reviewed(false)
+                    .reviewExpired(false)
+                    .shippingFee(java.math.BigDecimal.valueOf(15000))
+                    .discountAmount(java.math.BigDecimal.valueOf(25000))
+                    .destAddress("Ký túc xá khu A, ĐHQG TP.HCM")
+                    .restaurantLatitude(java.math.BigDecimal.valueOf(10.8800))
+                    .restaurantLongitude(java.math.BigDecimal.valueOf(106.8000))
+                    .destLatitude(java.math.BigDecimal.valueOf(10.8750))
+                    .destLongitude(java.math.BigDecimal.valueOf(106.7900))
+                    .build();
+            return ApiResponse.success(dto);
+        } else if (id == 2L) {
+            java.util.List<OrderResponseDTO.OrderItemDTO> items = new java.util.ArrayList<>();
+            items.add(OrderResponseDTO.OrderItemDTO.builder()
+                    .name("Bánh Mì Đặc Biệt")
+                    .imageUrl("https://picsum.photos/seed/banhmi/200/200")
+                    .quantity(1)
+                    .price(java.math.BigDecimal.valueOf(35000))
+                    .build());
+            OrderResponseDTO dto = OrderResponseDTO.builder()
+                    .id(2L)
+                    .restaurantId(2L)
+                    .restaurantName("Bánh Mì Huỳnh Hoa")
+                    .restaurantImageUrl("https://picsum.photos/seed/banhmi/200/200")
+                    .totalAmount(java.math.BigDecimal.valueOf(35000))
+                    .status("PREPARING")
+                    .deliveryMode("STANDARD")
+                    .expectedDeliveryTime(java.time.LocalDateTime.of(2026, 6, 8, 10, 30))
+                    .createdAt(java.time.LocalDateTime.of(2026, 6, 8, 10, 0))
+                    .itemCount(1)
+                    .items(items)
+                    .customerName("Khách Hàng")
+                    .customerPhone("+84987301126")
+                    .reviewed(false)
+                    .reviewExpired(false)
+                    .shippingFee(java.math.BigDecimal.valueOf(15000))
+                    .discountAmount(java.math.BigDecimal.valueOf(30000))
+                    .destAddress("Ký túc xá khu A, ĐHQG TP.HCM")
+                    .restaurantLatitude(java.math.BigDecimal.valueOf(10.8800))
+                    .restaurantLongitude(java.math.BigDecimal.valueOf(106.8000))
+                    .destLatitude(java.math.BigDecimal.valueOf(10.8750))
+                    .destLongitude(java.math.BigDecimal.valueOf(106.7900))
+                    .build();
+            return ApiResponse.success(dto);
+        }
         Order order = orderService.getOrderById(id);
         return ApiResponse.success(OrderResponseDTO.fromEntity(order));
     }
