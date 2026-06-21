@@ -47,6 +47,8 @@ public class OrderService {
     private final com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository;
     private final com.uit.fooddelivery_api.modules.wallet.services.WalletService walletService;
     private final com.uit.fooddelivery_api.modules.restaurant.repositories.RestaurantTransactionRepository restaurantTransactionRepository;
+    private final com.uit.fooddelivery_api.modules.loyalty.services.LoyaltyService loyaltyService;
+    private final com.uit.fooddelivery_api.modules.loyalty.repositories.LoyaltyPointRepository loyaltyPointRepository;
     private final com.uit.fooddelivery_api.modules.payment.services.ZaloPayService zaloPayService;
 
     // Phí ship cơ bản: 5.000 VNĐ / 1 Km
@@ -249,6 +251,14 @@ public class OrderService {
                 .build();
     }
 
+    public com.uit.fooddelivery_api.modules.loyalty.services.LoyaltyService getLoyaltyService() {
+        return self.loyaltyService;
+    }
+
+    public com.uit.fooddelivery_api.modules.loyalty.repositories.LoyaltyPointRepository getLoyaltyPointRepository() {
+        return self.loyaltyPointRepository;
+    }
+
     @Transactional
     public Order createOrder(CreateOrderDTO dto, User customer) {
         // 1. Lấy Giỏ hàng
@@ -374,6 +384,9 @@ public class OrderService {
                 .shippingFee(shippingFee)
                 .deliveryMode(deliveryMode)
                 .expectedDeliveryTime(expectedDeliveryTime)
+                .note(dto.getNote())
+                .isCutleryRequested(dto.getIsCutleryRequested())
+                .paymentMethod(dto.getPaymentMethod() != null ? dto.getPaymentMethod().toUpperCase() : "WALLET")
                 .build();
 
         for (CartItem item : cartItems) {
@@ -448,8 +461,6 @@ public class OrderService {
         BigDecimal totalShippingDiscount = BigDecimal.ZERO; // Tổng tiền giảm của nhóm ship
 
         List<com.uit.fooddelivery_api.modules.voucher.entities.Voucher> appliedVouchers = new ArrayList<>();
-        boolean hasShippingDiscountType = false;
-        boolean hasOrderDiscountType = false;
 
         if (dto.getVoucherCodes() != null && !dto.getVoucherCodes().isEmpty()) {
             for (String code : dto.getVoucherCodes()) {
@@ -480,32 +491,19 @@ public class OrderService {
                 }
 
                 // Phân loại xử lý dựa trên loại Voucher
-                if (voucher
-                        .getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.SHIPPING_DISCOUNT) {
-                    // Chặn việc áp dụng từ 2 mã giảm ship trở lên
-                    if (hasShippingDiscountType) {
-                        throw new RuntimeException(
-                                "Hệ thống chỉ cho phép áp dụng tối đa 1 mã giảm giá phí vận chuyển trên một đơn hàng!");
-                    }
-                    hasShippingDiscountType = true;
-
+                if (voucher.getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.SHIPPING_DISCOUNT) {
                     BigDecimal calc = shippingFee.multiply(BigDecimal.valueOf(voucher.getDiscountPercent()))
                             .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
-                    totalShippingDiscount = calc.min(voucher.getMaxDiscount()).min(shippingFee);
-
-                } else if (voucher
-                        .getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.ORDER_DISCOUNT) {
-                    // Chặn việc áp dụng từ 2 mã giảm đơn hàng trở lên
-                    if (hasOrderDiscountType) {
-                        throw new RuntimeException(
-                                "Hệ thống chỉ cho phép áp dụng tối đa 1 mã giảm giá hóa đơn trên một đơn hàng!");
-                    }
-                    hasOrderDiscountType = true;
-
+                    totalShippingDiscount = totalShippingDiscount.add(calc.min(voucher.getMaxDiscount()));
+                } else if (voucher.getType() == com.uit.fooddelivery_api.modules.voucher.entities.VoucherType.ORDER_DISCOUNT) {
                     BigDecimal calc = foodTotal.multiply(BigDecimal.valueOf(voucher.getDiscountPercent()))
                             .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
-                    totalOrderDiscount = calc.min(voucher.getMaxDiscount()).min(foodTotal);
+                    totalOrderDiscount = totalOrderDiscount.add(calc.min(voucher.getMaxDiscount()));
                 }
+
+                // Đảm bảo không giảm quá tiền ship hoặc tiền đồ ăn
+                totalShippingDiscount = totalShippingDiscount.min(shippingFee);
+                totalOrderDiscount = totalOrderDiscount.min(foodTotal);
 
                 // Trừ đi một lượt sử dụng trong kho và đưa vào danh sách lưu vết đơn hàng
                 voucher.setStockQuantity(voucher.getStockQuantity() - 1);
@@ -517,17 +515,52 @@ public class OrderService {
         // Tính toán tổng số tiền giảm cuối cùng của cả đơn hàng
         BigDecimal totalDiscountAmount = totalOrderDiscount.add(totalShippingDiscount);
 
+        // ÁP DỤNG GIẢM GIÁ HẠNG THÀNH VIÊN VÀ XU
+        LoyaltyPoint lp = self.getLoyaltyService().getMyLoyaltyInfo(customer);
+        String currentRank = self.getLoyaltyService().getRankName(lp.getTotalSpending());
+        BigDecimal rankShippingDiscount = self.getLoyaltyService().getRankShippingDiscount(currentRank);
+
+        // Thêm giảm giá ship từ hạng
+        totalShippingDiscount = totalShippingDiscount.add(rankShippingDiscount).min(shippingFee);
+        totalDiscountAmount = totalOrderDiscount.add(totalShippingDiscount);
+
         // 9. CHỐT TỔNG TIỀN VÀ TRỪ VÍ
         BigDecimal finalTotal = foodTotal.add(shippingFee).subtract(totalDiscountAmount);
-        if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
-            finalTotal = BigDecimal.ZERO;
+
+        // Dùng xu (Coins)
+        int usedCoins = 0;
+        if (Boolean.TRUE.equals(dto.getUseCoins()) && lp.getCurrentPoints() > 0) {
+            // 1 xu = 1 VNĐ
+            BigDecimal coinDiscount = BigDecimal.valueOf(lp.getCurrentPoints());
+            // Đảm bảo sau khi trừ xu, tổng tiền còn lại ít nhất 10.000đ
+            BigDecimal maxCoinDiscount = finalTotal.subtract(BigDecimal.valueOf(10000));
+            if (maxCoinDiscount.compareTo(BigDecimal.ZERO) > 0) {
+                if (coinDiscount.compareTo(maxCoinDiscount) > 0) {
+                    coinDiscount = maxCoinDiscount;
+                }
+                usedCoins = coinDiscount.intValue();
+                finalTotal = finalTotal.subtract(coinDiscount);
+                totalDiscountAmount = totalDiscountAmount.add(coinDiscount);
+
+                // Trừ xu người dùng
+                lp.setCurrentPoints(lp.getCurrentPoints() - usedCoins);
+                self.getLoyaltyPointRepository().save(lp);
+            }
+        }
+
+        if (finalTotal.compareTo(BigDecimal.valueOf(10000)) < 0) {
+            throw new RuntimeException("Tổng số tiền phải trả (sau khi áp dụng giảm giá và xu) phải từ 10.000đ trở lên!");
         }
 
         order.setTotalAmount(finalTotal);
         order.setDiscountAmount(totalDiscountAmount);
         order.setVouchers(appliedVouchers); // Lưu danh sách các mã đã dùng vào bảng trung gian
         order.setOrderItems(orderItems);
+        order.setUsedCoins(usedCoins);
 
+        if (!"CASH".equals(order.getPaymentMethod())) {
+            Wallet wallet = walletRepository.findByUserId(customer.getId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin ví điện tử cá nhân!"));
         String paymentMethod = (dto.getPaymentMethod() != null) ? dto.getPaymentMethod().toUpperCase() : "WALLET";
         order.setPaymentMethod(paymentMethod);
 
@@ -566,6 +599,9 @@ public class OrderService {
                         "Số dư tài khoản ví không đủ để thực hiện thanh toán! Tổng tiền: " + finalTotal + "đ.");
             }
 
+            walletService.processTransaction(customer.getId(), finalTotal.negate(), "PAYMENT", "ORDER_" + order.getId(),
+                    "Thanh toán đơn hàng đồ ăn");
+        }
             walletService.processTransaction(customer.getId(), finalTotal.negate(), "PAYMENT", "ORDER_" + order.getId(),
                     "Thanh toán đơn hàng đồ ăn");
 
@@ -764,6 +800,9 @@ public class OrderService {
                 "Giao hàng thành công",
                 "Đơn hàng #" + order.getId() + " đã được giao đến bạn. Chúc bạn ngon miệng!",
                 "ORDER_UPDATE");
+
+        // TÍCH ĐIỂM HẠNG VÀ XU KHI HOÀN THÀNH ĐƠN
+        self.getLoyaltyService().addPointsAndSpending(order.getUser(), order.getTotalAmount());
 
         return orderRepository.save(order);
     }
