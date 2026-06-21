@@ -82,8 +82,9 @@ public class UserRepository {
     }
 
     // 2.1 Cập nhật thông tin cá nhân
-    public void updateProfile(String fullName, String email, String gender, String birthday, String job, ApiCallback<UserResponseDTO> callback) {
+    public void updateProfile(String fullName, String email, String gender, String birthday, String job, String emailOtp, ApiCallback<UserResponseDTO> callback) {
         UpdateProfileDTO dto = new UpdateProfileDTO(fullName, email, gender, birthday, job);
+        dto.setEmailOtp(emailOtp);
         userService.updateProfile(dto).enqueue(new Callback<ApiResponse<UserResponseDTO>>() {
             @Override
             public void onResponse(Call<ApiResponse<UserResponseDTO>> call, Response<ApiResponse<UserResponseDTO>> response) {
@@ -171,6 +172,20 @@ public class UserRepository {
     public void forgotPasswordReset(String email, String otp, String newPassword, String confirmPassword, ApiCallback<String> callback) {
         ResetPasswordRequestDTO dto = new ResetPasswordRequestDTO(email, otp, newPassword, confirmPassword);
         userService.forgotPasswordReset(dto).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
+    public void sendEmailOtp(String email, ApiCallback<String> callback) {
+        userService.sendEmailOtp(email).enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 handleResponse(response, callback);

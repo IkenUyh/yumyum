@@ -310,13 +310,74 @@ public class AccountDetailActivity extends AppCompatActivity {
             String gender = spGender.getSelectedItem().toString();
             String job = spJob.getSelectedItem().toString();
 
-            // Gọi API cập nhật lên backend
-            new UserRepository().updateProfile(fullName, email, gender, birthday, job, new com.example.uitpayapp.network.ApiCallback<UserResponseDTO>() {
-                @Override
-                public void onSuccess(UserResponseDTO userResponse) {
+            if (!email.isEmpty() && !email.equalsIgnoreCase(currentEmail)) {
+                // Gửi mã OTP xác nhận về email mới
+                android.app.ProgressDialog sendProgress = new android.app.ProgressDialog(AccountDetailActivity.this);
+                sendProgress.setMessage("Đang gửi mã xác thực đến email mới...");
+                sendProgress.setCancelable(false);
+                sendProgress.show();
+
+                new UserRepository().sendEmailOtp(email, new com.example.uitpayapp.network.ApiCallback<String>() {
+                    @Override
+                    public void onSuccess(String result) {
+                        runOnUiThread(() -> {
+                            sendProgress.dismiss();
+                            
+                            // Hiển thị Dialog nhập mã OTP
+                            android.app.AlertDialog.Builder otpBuilder = new android.app.AlertDialog.Builder(AccountDetailActivity.this);
+                            otpBuilder.setTitle("Xác thực Email mới");
+                            otpBuilder.setMessage("Vui lòng nhập mã xác thực (6 số) đã gửi đến email " + email + ":");
+
+                            final android.widget.EditText otpInput = new android.widget.EditText(AccountDetailActivity.this);
+                            otpInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+                            otpInput.setTransformationMethod(android.text.method.PasswordTransformationMethod.getInstance());
+                            otpInput.setGravity(android.view.Gravity.CENTER);
+                            otpBuilder.setView(otpInput);
+
+                            otpBuilder.setPositiveButton("Xác nhận", (dialog, which) -> {
+                                String otp = otpInput.getText().toString().trim();
+                                if (otp.length() != 6) {
+                                    Toast.makeText(AccountDetailActivity.this, "Mã OTP phải gồm 6 chữ số", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                performProfileUpdate(fullName, email, gender, birthday, job, otp, bottomSheetDialog);
+                            });
+                            otpBuilder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
+                            otpBuilder.show();
+                        });
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        runOnUiThread(() -> {
+                            sendProgress.dismiss();
+                            Toast.makeText(AccountDetailActivity.this, "Gửi OTP thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                });
+            } else {
+                // Không đổi email, cập nhật trực tiếp không cần OTP
+                performProfileUpdate(fullName, email, gender, birthday, job, null, bottomSheetDialog);
+            }
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private void performProfileUpdate(String fullName, String email, String gender, String birthday, String job, String emailOtp, BottomSheetDialog bottomSheetDialog) {
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+        progressDialog.setMessage("Đang cập nhật thông tin...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        new UserRepository().updateProfile(fullName, email, gender, birthday, job, emailOtp, new com.example.uitpayapp.network.ApiCallback<UserResponseDTO>() {
+            @Override
+            public void onSuccess(UserResponseDTO userResponse) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
                     if (userResponse != null) {
-                        if (!email.isEmpty()) setRowData(R.id.inforow_email, "Email", email);
-                        if (!fullName.isEmpty()) {
+                        if (email != null && !email.isEmpty()) setRowData(R.id.inforow_email, "Email", email);
+                        if (fullName != null && !fullName.isEmpty()) {
                             setRowData(R.id.inforow_username, "Tên", fullName);
                             tvFullName.setText(fullName);
                         }
@@ -330,9 +391,9 @@ public class AccountDetailActivity extends AppCompatActivity {
                         editor.putString("JOB", job);
                         editor.apply();
 
-                        if (!birthday.isEmpty()) setRowData(R.id.inforow_birthday, "Ngày sinh", birthday);
-                        setRowData(R.id.inforow_gender, "Giới tính", gender);
-                        setRowData(R.id.inforow_job, "Nghề nghiệp", job);
+                        if (birthday != null && !birthday.isEmpty()) setRowData(R.id.inforow_birthday, "Ngày sinh", birthday);
+                        if (gender != null) setRowData(R.id.inforow_gender, "Giới tính", gender);
+                        if (job != null) setRowData(R.id.inforow_job, "Nghề nghiệp", job);
 
                         SessionManager sessionManager = SessionManager.getInstance(AccountDetailActivity.this);
                         sessionManager.updateProfileSession(fullName, userResponse.getAvatarUrl(), email);
@@ -340,15 +401,16 @@ public class AccountDetailActivity extends AppCompatActivity {
                         Toast.makeText(AccountDetailActivity.this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
                         bottomSheetDialog.dismiss();
                     }
-                }
+                });
+            }
 
-                @Override
-                public void onError(String errorMessage) {
-                    Toast.makeText(AccountDetailActivity.this, "Cập nhật thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
-                }
-            });
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(AccountDetailActivity.this, "Cập nhật thất bại: " + errorMessage, Toast.LENGTH_LONG).show();
+                });
+            }
         });
-
-        bottomSheetDialog.show();
     }
 }

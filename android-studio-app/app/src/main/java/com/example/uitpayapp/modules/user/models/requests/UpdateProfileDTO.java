@@ -18,6 +18,9 @@ public class UpdateProfileDTO {
     @SerializedName("job")
     private String job;
 
+    @SerializedName("emailOtp")
+    private String emailOtp;
+
     public UpdateProfileDTO(String fullName, String email, String gender, String birthday, String job) {
         this.fullName = fullName;
         this.email = email;
@@ -40,4 +43,7 @@ public class UpdateProfileDTO {
 
     public String getJob() { return job; }
     public void setJob(String job) { this.job = job; }
+
+    public String getEmailOtp() { return emailOtp; }
+    public void setEmailOtp(String emailOtp) { this.emailOtp = emailOtp; }
 }

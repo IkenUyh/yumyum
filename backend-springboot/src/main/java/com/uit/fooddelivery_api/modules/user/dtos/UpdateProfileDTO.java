@@ -11,4 +11,5 @@ public class UpdateProfileDTO {
     private String gender;
     private String birthday;
     private String job;
+    private String emailOtp;
 }
