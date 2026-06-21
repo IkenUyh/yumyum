@@ -229,7 +229,8 @@ public class FoodCheckoutActivity extends AppCompatActivity {
     }
 
     private void fetchPreviewData() {
-        if (addressId == null) {
+        com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        if (addressId == null && session.getDeliveryAddressText() == null) {
             runOnUiThread(() -> tvDeliveryFee.setText("Chưa chọn địa chỉ"));
             return;
         }
@@ -237,7 +238,10 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                 restaurantId != null ? restaurantId : 1L,
                 addressId,
                 "STANDARD",
-                new ArrayList<>());
+                new ArrayList<>(),
+                session.getDeliveryLatitude(),
+                session.getDeliveryLongitude(),
+                session.getDeliveryAddressText());
 
         com.example.uitpayapp.modules.order.OrderRepository orderRepo = new com.example.uitpayapp.modules.order.OrderRepository();
         orderRepo.previewOrder(request,
@@ -314,19 +318,22 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         }
     }
 
-    private void executeConfirmCheckout(String paymentMethod) {
-        if (addressId == null) {
+    private void executeConfirmCheckout() {
+        com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        if (addressId == null && session.getDeliveryAddressText() == null) {
             Toast.makeText(this, "Vui lòng chọn địa chỉ giao hàng trước!", Toast.LENGTH_SHORT).show();
             return;
         }
         String productNames = cartManager.getProductSummary();
-
         com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest request = new com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest(
                 restaurantId != null ? restaurantId : 1L,
                 addressId,
                 "STANDARD",
                 new ArrayList<>(),
                 paymentMethod);
+                session.getDeliveryLatitude(),
+                session.getDeliveryLongitude(),
+                session.getDeliveryAddressText());
 
         com.example.uitpayapp.modules.order.OrderRepository orderRepo = new com.example.uitpayapp.modules.order.OrderRepository();
         orderRepo.createOrder(request,
@@ -495,7 +502,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         addressId = session.getDeliveryAddressId();
         String addressText = session.getDeliveryAddressText();
 
-        if (addressId != null && addressText != null) {
+        if (addressText != null) {
             String name = session.getUserName();
             String phone = session.getUserPhone();
             updateAddressUI(name, phone, addressText);
@@ -517,6 +524,9 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                                 }
                                 final com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO selected = defaultAddress;
                                 session.saveDeliveryAddress(selected.getId(), selected.getDetailedAddress());
+                                if (selected.getLatitude() != null && selected.getLongitude() != null) {
+                                    session.saveDeliveryCoordinates(selected.getLatitude().doubleValue(), selected.getLongitude().doubleValue());
+                                }
                                 runOnUiThread(() -> {
                                     addressId = selected.getId();
                                     updateAddressUI(selected.getRecipientName(), selected.getPhoneNumber(),
@@ -579,6 +589,9 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                                         addressId = selectedAddress.getId();
                                         session.saveDeliveryAddress(selectedAddress.getId(),
                                                 selectedAddress.getDetailedAddress());
+                                        if (selectedAddress.getLatitude() != null && selectedAddress.getLongitude() != null) {
+                                            session.saveDeliveryCoordinates(selectedAddress.getLatitude().doubleValue(), selectedAddress.getLongitude().doubleValue());
+                                        }
                                         updateAddressUI(selectedAddress.getRecipientName(),
                                                 selectedAddress.getPhoneNumber(), selectedAddress.getDetailedAddress());
                                         fetchPreviewData();

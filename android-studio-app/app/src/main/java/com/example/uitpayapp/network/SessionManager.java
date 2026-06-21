@@ -24,6 +24,8 @@ public class SessionManager {
     // Address storage
     private static final String KEY_DELIVERY_ADDRESS_ID = "delivery_address_id";
     private static final String KEY_DELIVERY_ADDRESS_TEXT = "delivery_address_text";
+    private static final String KEY_DELIVERY_LAT = "delivery_lat";
+    private static final String KEY_DELIVERY_LNG = "delivery_lng";
 
     // FCM Storage
     private static final String KEY_FCM_TOKEN = "fcm_token";
@@ -182,6 +184,32 @@ public class SessionManager {
     public Long getDeliveryAddressId() {
         long id = sharedPreferences.getLong(KEY_DELIVERY_ADDRESS_ID, -1L);
         return id == -1L ? null : id;
+    }
+
+    /**
+     * LƯU TỌA ĐỘ GIAO HÀNG ĐANG CHỌN
+     */
+    public void saveDeliveryCoordinates(Double lat, Double lng) {
+        if (lat == null || lng == null) {
+            editor.remove(KEY_DELIVERY_LAT);
+            editor.remove(KEY_DELIVERY_LNG);
+        } else {
+            editor.putString(KEY_DELIVERY_LAT, String.valueOf(lat));
+            editor.putString(KEY_DELIVERY_LNG, String.valueOf(lng));
+        }
+        editor.apply();
+    }
+
+    public Double getDeliveryLatitude() {
+        String val = sharedPreferences.getString(KEY_DELIVERY_LAT, null);
+        if (val != null) return Double.parseDouble(val);
+        return null;
+    }
+
+    public Double getDeliveryLongitude() {
+        String val = sharedPreferences.getString(KEY_DELIVERY_LNG, null);
+        if (val != null) return Double.parseDouble(val);
+        return null;
     }
 
     public void saveFcmToken(String fcmToken) {
