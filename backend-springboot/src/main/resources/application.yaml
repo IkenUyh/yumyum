@@ -65,6 +65,6 @@ zalopay:
 
 vnpay:
   tmn-code: "YMY7CP24"
-  hash-secret: "5Q2UU0H6QTW8K88FVCXUVRCYTUHH4KCR"
+  hash-secret: "EW6F4H7PAO8YH574K2KI7W8R8HEZ4IJ3"
   url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
   return-url: "http://10.0.2.2:8081/api/v1/payments/vnpay/return"
