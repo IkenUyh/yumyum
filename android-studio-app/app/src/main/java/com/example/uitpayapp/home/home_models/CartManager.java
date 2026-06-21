@@ -71,6 +71,7 @@ public class CartManager {
             dto.getFoodImageUrl()
         );
         menuItem.setRestaurantId(dto.getRestaurantId());
+        menuItem.setRestaurantName(dto.getRestaurantName());
 
         List<CartTopping> toppings = new ArrayList<>();
         if (dto.getSelectedOptions() != null) {
@@ -137,7 +138,53 @@ public class CartManager {
         return toppingIds;
     }
 
+    public boolean isDifferentRestaurant(Long newRestaurantId) {
+        if (cartItems.isEmpty()) return false;
+        Long currentRestaurantId = cartItems.get(0).getMenuItem().getRestaurantId();
+        if (currentRestaurantId == null || newRestaurantId == null) return false;
+        return !currentRestaurantId.equals(newRestaurantId);
+    }
+
     public void addItemSync(CartItem item, final ApiCallback<String> callback) {
+        addItemSync(null, item, callback);
+    }
+
+    public void addItemSync(final android.content.Context context, final CartItem item, final ApiCallback<String> callback) {
+        if (context != null && isDifferentRestaurant(item.getMenuItem().getRestaurantId())) {
+            if (context instanceof android.app.Activity) {
+                final android.app.Activity activity = (android.app.Activity) context;
+                activity.runOnUiThread(() -> {
+                    new android.app.AlertDialog.Builder(activity)
+                        .setTitle("Khác cửa hàng")
+                        .setMessage("Bạn có muốn xóa giỏ hàng hiện tại để thêm món từ cửa hàng này không?")
+                        .setPositiveButton("Xác nhận", (dialog, which) -> {
+                            clearCartSync(new ApiCallback<String>() {
+                                @Override
+                                public void onSuccess(String data) {
+                                    executeAddItemSync(item, callback);
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    callback.onError(errorMessage);
+                                }
+                            });
+                        })
+                        .setNegativeButton("Hủy bỏ", (dialog, which) -> {
+                            dialog.dismiss();
+                            callback.onError("Đã hủy bỏ.");
+                        })
+                        .show();
+                });
+            } else {
+                executeAddItemSync(item, callback);
+            }
+        } else {
+            executeAddItemSync(item, callback);
+        }
+    }
+
+    private void executeAddItemSync(CartItem item, final ApiCallback<String> callback) {
         Long foodId = getDbFoodId(item.getMenuItem().getId());
         List<Long> toppingIds = getToppingIds(item);
         CartItemRequestDTO dto = new CartItemRequestDTO(foodId, item.getQuantity(), toppingIds);

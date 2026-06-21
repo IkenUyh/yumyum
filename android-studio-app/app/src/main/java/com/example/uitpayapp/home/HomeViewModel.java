@@ -240,14 +240,16 @@ public class HomeViewModel extends ViewModel {
             }
             List<com.example.uitpayapp.home.home_models.FoodMenuItem> items = new ArrayList<>();
             for (FoodResponse f : foods) {
-                items.add(new com.example.uitpayapp.home.home_models.FoodMenuItem(
+                com.example.uitpayapp.home.home_models.FoodMenuItem item = new com.example.uitpayapp.home.home_models.FoodMenuItem(
                         "f_" + f.getId(),
                         f.getName(),
                         f.getPrice() != null ? f.getPrice().longValue() : 0,
                         0,
                         f.getDescription() != null ? f.getDescription() : "",
                         f.getImageUrl()
-                ));
+                );
+                item.setRestaurantId(f.getRestaurantId());
+                items.add(item);
             }
             if (!items.isEmpty()) {
                 result.add(new TopicResponse(cat.getName(), "", cat.getId(), items));

@@ -22,6 +22,7 @@ public class CartItemResponseDTO {
     private BigDecimal basePrice;
     private Integer quantity;
     private Long restaurantId;
+    private String restaurantName;
     private List<Map<String, Object>> selectedOptions; // Trả về list topping cho frontend dễ vẽ UI
     private BigDecimal itemTotal;
 
@@ -72,6 +73,7 @@ public class CartItemResponseDTO {
                 .id(cartItem.getId())
                 .foodId(cartItem.getFood().getId())
                 .restaurantId(cartItem.getFood().getRestaurant().getId())
+                .restaurantName(cartItem.getFood().getRestaurant().getName())
                 .foodName(cartItem.getFood().getName())
                 .foodImageUrl(cartItem.getFood().getImageUrl())
                 .basePrice(basePrice)
