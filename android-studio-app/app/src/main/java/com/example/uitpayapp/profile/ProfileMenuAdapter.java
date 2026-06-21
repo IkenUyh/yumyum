@@ -57,6 +57,10 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
             {
                 itemView=LayoutInflater.from(holder.itemView.getContext()).inflate(R.layout.menuitem_profile_screen,null);
                 ProfileActivity.SetDetailMenuItem(itemView,MenuItem.getTitle(),MenuItem.getSubtitle(),MenuItem.getIcon());
+                if (MenuItem.hideArrow) {
+                    ImageView arrow = itemView.findViewById(R.id.menu_less_than);
+                    if (arrow != null) arrow.setVisibility(View.GONE);
+                }
                 itemView.setOnClickListener(v->
                 {
                     if (Listener!=null) {

@@ -46,4 +46,26 @@ public class LoyaltyResponseDTO {
     public void setCanCheckInToday(Boolean canCheckInToday) {
         this.canCheckInToday = canCheckInToday;
     }
+
+    @SerializedName("totalSpending")
+    private Long totalSpending;
+
+    @SerializedName("rankName")
+    private String rankName;
+
+    public Long getTotalSpending() {
+        return totalSpending;
+    }
+
+    public void setTotalSpending(Long totalSpending) {
+        this.totalSpending = totalSpending;
+    }
+
+    public String getRankName() {
+        return rankName;
+    }
+
+    public void setRankName(String rankName) {
+        this.rankName = rankName;
+    }
 }
