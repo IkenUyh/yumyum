@@ -38,6 +38,8 @@ public class AddressOrderActivity extends AppCompatActivity {
     private List<AddressResponseDTO> deliveryAddresses = new ArrayList<>();
     private TextView tvSelectedAddress;
     private AddressRepository addressRepository;
+    private BigDecimal selectedLatitude = BigDecimal.ZERO;
+    private BigDecimal selectedLongitude = BigDecimal.ZERO;
     
     private View layoutEmptyState;
     private TextView tvEmptyMessage;
@@ -165,6 +167,9 @@ public class AddressOrderActivity extends AppCompatActivity {
                 cbSetDefault.setChecked(address.getIsDefault());
             }
             
+            selectedLatitude = address.getLatitude() != null ? address.getLatitude() : BigDecimal.ZERO;
+            selectedLongitude = address.getLongitude() != null ? address.getLongitude() : BigDecimal.ZERO;
+            
             btnDelete.setVisibility(View.VISIBLE);
             btnSave.setEnabled(true);
             btnSave.setAlpha(1.0f);
@@ -174,6 +179,9 @@ public class AddressOrderActivity extends AppCompatActivity {
             btnDelete.setVisibility(View.GONE);
             btnSave.setEnabled(true); // Should enable based on validation ideally
             btnSave.setAlpha(1.0f);
+            
+            selectedLatitude = BigDecimal.ZERO;
+            selectedLongitude = BigDecimal.ZERO;
         }
 
         btnTypeHome.setOnClickListener(v -> {
@@ -209,8 +217,8 @@ public class AddressOrderActivity extends AppCompatActivity {
             String recipientName = etName.getText().toString();
             String phoneNumber = etPhone.getText().toString();
             String detailedAddress = tvSelectedAddress.getText().toString();
-            BigDecimal latitude = new BigDecimal(0); // Mock
-            BigDecimal longitude = new BigDecimal(0); // Mock
+            BigDecimal latitude = selectedLatitude;
+            BigDecimal longitude = selectedLongitude;
             Boolean isDefault = cbSetDefault.isChecked();
             
             CreateAddressDTO dto = new CreateAddressDTO(addressName, recipientName, phoneNumber, detailedAddress, latitude, longitude, isDefault);
@@ -295,8 +303,12 @@ public class AddressOrderActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == RESULT_OK) {
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
             String address = data.getStringExtra("ADDRESS_SELECTED");
+            double lat = data.getDoubleExtra("LATITUDE_SELECTED", 0.0);
+            double lon = data.getDoubleExtra("LONGITUDE_SELECTED", 0.0);
+            selectedLatitude = BigDecimal.valueOf(lat);
+            selectedLongitude = BigDecimal.valueOf(lon);
             if (address != null) {
                 Toast.makeText(this, "Address: " + address, Toast.LENGTH_SHORT).show();
                 tvSelectedAddress.setText(address);
