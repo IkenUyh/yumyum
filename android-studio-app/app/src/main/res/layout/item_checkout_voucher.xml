@@ -70,6 +70,14 @@
                     android:text="Đặt tối thiểu 20.000đ"
                     android:textColor="#757575"
                     android:textSize="12sp"/>
+                <TextView
+                    android:id="@+id/tv_min_order"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Đơn tối thiểu: 20.000đ"
+                    android:textColor="#757575"
+                    android:textSize="12sp"/>
             </LinearLayout>
 
             <TextView
