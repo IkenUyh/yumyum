@@ -102,6 +102,14 @@ public class AccountDetailActivity extends AppCompatActivity {
         fetchUserProfile();
         findViewById(R.id.update_secondary_info).setOnClickListener(v -> HanleUpdateSecondaryInfo());
 
+        findViewById(R.id.btn_delete_account).setOnClickListener(v -> {
+            startActivity(new android.content.Intent(this, DeleteAccountActivity.class));
+        });
+
+        findViewById(R.id.inforow_email).setOnClickListener(v -> showUpdateEmailBottomSheet());
+        findViewById(R.id.inforow_phone).setOnClickListener(v -> showUpdatePhoneBottomSheet());
+        findViewById(R.id.inforow_password).setOnClickListener(v -> showUpdatePasswordBottomSheet());
+
         findViewById(R.id.btn_change_avatar).setOnClickListener(v -> {
             pickMedia.launch(new PickVisualMediaRequest.Builder()
                     .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
@@ -171,7 +179,9 @@ public class AccountDetailActivity extends AppCompatActivity {
                     }
 
                     setRowData(R.id.inforow_username, "Tên", data.getFullName());
+                    setRowData(R.id.inforow_phone, "Số điện thoại", data.getPhoneNumber());
                     setRowData(R.id.inforow_email, "Email", data.getEmail() != null && !data.getEmail().isEmpty() ? data.getEmail() : "Chưa cập nhật");
+                    setRowData(R.id.inforow_password, "Mật khẩu", "********");
                     setRowData(R.id.inforow_birthday, "Ngày sinh", birthday);
                     setRowData(R.id.inforow_gender, "Giới tính", gender);
                     setRowData(R.id.inforow_job, "Nghề nghiệp", job);
@@ -205,7 +215,9 @@ public class AccountDetailActivity extends AppCompatActivity {
         }
 
         setRowData(R.id.inforow_username, "Tên", savedName);
+        setRowData(R.id.inforow_phone, "Số điện thoại", savedPhone);
         setRowData(R.id.inforow_email, "Email", email);
+        setRowData(R.id.inforow_password, "Mật khẩu", "********");
         setRowData(R.id.inforow_birthday, "Ngày sinh", birthday);
         setRowData(R.id.inforow_gender, "Giới tính", gender);
         setRowData(R.id.inforow_job, "Nghề nghiệp", job);
@@ -301,6 +313,9 @@ public class AccountDetailActivity extends AppCompatActivity {
             dialog.show();
         });
 
+        // Hide email field in the main update dialog since it's handled separately
+        etEmail.setVisibility(View.GONE);
+        
         view.findViewById(R.id.btn_close_update_secondary_info).setOnClickListener(v -> bottomSheetDialog.dismiss());
 
         view.findViewById(R.id.btn_save_update).setOnClickListener(v -> {
@@ -412,5 +427,156 @@ public class AccountDetailActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void showUpdateEmailBottomSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_update_email, null);
+        bottomSheetDialog.setContentView(view);
+
+        EditText etNewEmail = view.findViewById(R.id.et_new_email);
+        view.findViewById(R.id.btn_close_update_email).setOnClickListener(v -> bottomSheetDialog.dismiss());
+
+        view.findViewById(R.id.btn_save_email).setOnClickListener(v -> {
+            String newEmail = etNewEmail.getText().toString().trim();
+            if (newEmail.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập email mới", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            android.app.ProgressDialog sendProgress = new android.app.ProgressDialog(AccountDetailActivity.this);
+            sendProgress.setMessage("Đang gửi mã xác thực đến email mới...");
+            sendProgress.setCancelable(false);
+            sendProgress.show();
+
+            new UserRepository().sendEmailOtp(newEmail, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    runOnUiThread(() -> {
+                        sendProgress.dismiss();
+                        bottomSheetDialog.dismiss();
+
+                        android.app.AlertDialog.Builder otpBuilder = new android.app.AlertDialog.Builder(AccountDetailActivity.this);
+                        otpBuilder.setTitle("Xác thực Email mới");
+                        otpBuilder.setMessage("Vui lòng nhập mã xác thực (6 số) đã gửi đến email " + newEmail + ":");
+
+                        final android.widget.EditText otpInput = new android.widget.EditText(AccountDetailActivity.this);
+                        otpInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+                        otpInput.setTransformationMethod(android.text.method.PasswordTransformationMethod.getInstance());
+                        otpInput.setGravity(android.view.Gravity.CENTER);
+                        otpBuilder.setView(otpInput);
+
+                        otpBuilder.setPositiveButton("Xác nhận", (dialog, which) -> {
+                            String otp = otpInput.getText().toString().trim();
+                            if (otp.length() != 6) {
+                                Toast.makeText(AccountDetailActivity.this, "Mã OTP phải gồm 6 chữ số", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            // Cập nhật lại chỉ email (giữ nguyên các trường khác)
+                            String currentJob = ((TextView) findViewById(R.id.inforow_job).findViewById(R.id.tv_value)).getText().toString();
+                            String currentFullName =((TextView) findViewById(R.id.inforow_username).findViewById(R.id.tv_value)).getText().toString();
+                            String currentBirthday =((TextView) findViewById(R.id.inforow_birthday).findViewById(R.id.tv_value)).getText().toString();
+                            String currentGender =((TextView) findViewById(R.id.inforow_gender).findViewById(R.id.tv_value)).getText().toString();
+                            
+                            performProfileUpdate(currentFullName, newEmail, currentGender.equals("Chưa cập nhật") ? null : currentGender, currentBirthday.equals("Chưa cập nhật") ? null : currentBirthday, currentJob.equals("Chưa cập nhật") ? null : currentJob, otp, new BottomSheetDialog(AccountDetailActivity.this));
+                        });
+                        otpBuilder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
+                        otpBuilder.show();
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    runOnUiThread(() -> {
+                        sendProgress.dismiss();
+                        Toast.makeText(AccountDetailActivity.this, "Gửi OTP thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private void showUpdatePhoneBottomSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_update_phone, null);
+        bottomSheetDialog.setContentView(view);
+
+        EditText etNewPhone = view.findViewById(R.id.et_new_phone);
+        view.findViewById(R.id.btn_close_update_phone).setOnClickListener(v -> bottomSheetDialog.dismiss());
+
+        view.findViewById(R.id.btn_save_phone).setOnClickListener(v -> {
+            String newPhone = etNewPhone.getText().toString().trim();
+            if (newPhone.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập số điện thoại mới", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Mocking phone update since backend doesn't support it directly in updateProfile
+            SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            sharedPreferences.edit().putString("PHONE_NUMBER", newPhone).apply();
+            setRowData(R.id.inforow_phone, "Số điện thoại", newPhone);
+            if (tvPhone != null) tvPhone.setText(newPhone);
+            
+            Toast.makeText(this, "Cập nhật số điện thoại thành công!", Toast.LENGTH_SHORT).show();
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private void showUpdatePasswordBottomSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_update_password, null);
+        bottomSheetDialog.setContentView(view);
+
+        EditText etOldPassword = view.findViewById(R.id.et_old_password);
+        EditText etNewPassword = view.findViewById(R.id.et_new_password);
+        EditText etConfirmPassword = view.findViewById(R.id.et_confirm_password);
+
+        view.findViewById(R.id.btn_close_update_password).setOnClickListener(v -> bottomSheetDialog.dismiss());
+
+        view.findViewById(R.id.btn_save_password).setOnClickListener(v -> {
+            String oldPw = etOldPassword.getText().toString();
+            String newPw = etNewPassword.getText().toString();
+            String confirmPw = etConfirmPassword.getText().toString();
+
+            if (oldPw.isEmpty() || newPw.isEmpty() || confirmPw.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!newPw.equals(confirmPw)) {
+                Toast.makeText(this, "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+            progressDialog.setMessage("Đang cập nhật mật khẩu...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
+            new UserRepository().changePassword(oldPw, newPw, confirmPw, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(AccountDetailActivity.this, "Cập nhật mật khẩu thành công!", Toast.LENGTH_SHORT).show();
+                        bottomSheetDialog.dismiss();
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(AccountDetailActivity.this, "Đổi mật khẩu thất bại: " + errorMessage, Toast.LENGTH_LONG).show();
+                    });
+                }
+            });
+        });
+
+        bottomSheetDialog.show();
     }
 }

@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- Top Bar -->
+    <include layout="@layout/layout_top_bar"
+        android:id="@+id/top_bar_delete_account" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/top_bar_delete_account"
+        android:layout_above="@id/bottom_container">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp"
+                android:src="@android:drawable/ic_dialog_alert"
+                app:tint="#F44336" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="YumYum rất tiếc khi phải tạm biệt bạn. Nếu không sử dụng Ứng dụng, bạn có thể đăng xuất và đăng nhập lại khi cần.\nNếu muốn xóa tài khoản vĩnh viễn, bạn sẽ mất các quyền lợi sau:"
+                android:textColor="#333333"
+                android:textSize="16sp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Bullet point 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textColor="#757575"
+                    android:textSize="18sp"
+                    android:layout_marginEnd="8dp"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Quyền truy cập YumYum bằng tài khoản hiện tại"
+                        android:textColor="#555555"
+                        android:textSize="15sp"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Voucher, chương trình ưu đãi, cơ hội tích lũy/sử dụng Xu, Danh sách quán yêu thích và địa chỉ giao hàng, v.v..."
+                        android:textColor="#757575"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Bullet point 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textColor="#757575"
+                    android:textSize="18sp"
+                    android:layout_marginEnd="8dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Lịch sử đơn hàng và thông báo"
+                    android:textColor="#555555"
+                    android:textSize="15sp"/>
+            </LinearLayout>
+
+            <!-- Bullet point 3 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textColor="#757575"
+                    android:textSize="18sp"
+                    android:layout_marginEnd="8dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Thông tin thanh toán"
+                    android:textColor="#555555"
+                    android:textSize="15sp"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Trước khi tiếp tục, vui lòng đảm bảo tất cả đơn hàng và yêu cầu hỗ trợ của bạn đều đã hoàn tất, đồng thời không có giao dịch nào đang trong quá trình xử lý."
+                android:textColor="#555555"
+                android:textSize="15sp"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Thông báo:"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Notice Bullet 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textColor="#757575"
+                    android:textSize="18sp"
+                    android:layout_marginEnd="8dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tài khoản sẽ không thể kích hoạt lại sau khi xóa. Bạn sẽ không thể đăng nhập và xem lịch sử hoạt động của tài khoản này nữa."
+                    android:textColor="#555555"
+                    android:textSize="15sp"/>
+            </LinearLayout>
+
+            <!-- Notice Bullet 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textColor="#757575"
+                    android:textSize="18sp"
+                    android:layout_marginEnd="8dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Bạn không thể xóa tài khoản nếu vẫn còn vấn đề đang trong quá trình xử lý với YumYum, bao gồm cả các vấn đề pháp lý."
+                    android:textColor="#555555"
+                    android:textSize="15sp"/>
+            </LinearLayout>
+
+            <!-- Notice Bullet 3 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textColor="#757575"
+                    android:textSize="18sp"
+                    android:layout_marginEnd="8dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Theo Chính sách bảo mật của YumYum và pháp luật hiện hành, YumYum có quyền lưu lại một số dữ liệu liên quan đến tài khoản của bạn sau khi tài khoản bị xóa."
+                    android:textColor="#555555"
+                    android:textSize="15sp"/>
+            </LinearLayout>
+
+            <!-- Notice Bullet 4 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textColor="#757575"
+                    android:textSize="18sp"
+                    android:layout_marginEnd="8dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="YumYum có quyền từ chối yêu cầu đăng ký tài khoản của bạn trong tương lai."
+                    android:textColor="#555555"
+                    android:textSize="15sp"/>
+            </LinearLayout>
+
+            <!-- Notice Bullet 5 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textColor="#757575"
+                    android:textSize="18sp"
+                    android:layout_marginEnd="8dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Việc xóa tài khoản của bạn không miễn trừ bạn khỏi bất kỳ khoản nợ và/hoặc nghĩa vụ nào còn tồn đọng với YumYum."
+                    android:textColor="#555555"
+                    android:textSize="15sp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/bottom_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:padding="16dp"
+        android:elevation="8dp">
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Bằng việc &quot;Tiếp tục&quot;, tài khoản của bạn sẽ bị xoá vĩnh viễn."
+            android:textColor="#757575"
+            android:textSize="13sp"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btn_continue_delete"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Tiếp tục"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:backgroundTint="#F44336"
+            app:cornerRadius="8dp" />
+    </LinearLayout>
+
+</RelativeLayout>

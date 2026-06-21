@@ -68,7 +68,7 @@
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
                     android:text="Thay đổi ảnh đại diện >"
-                    android:textColor="#0034C8"
+                    android:textColor="@color/primary_orange"
                     android:textSize="13sp"
                     android:clickable="true"
                     android:focusable="true"
@@ -90,7 +90,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Cập nhật ngay"
-                    android:textColor="#0034c8"
+                    android:textColor="@color/primary_orange"
                     android:textSize="14sp"
                     android:layout_alignParentEnd="true"/>
             </RelativeLayout>
@@ -100,24 +100,30 @@
                 android:background="#FFFFFF"
                 android:orientation="vertical">
                 <include layout="@layout/item_info_row" android:id="@+id/inforow_username"/>
+                <include layout="@layout/item_info_row" android:id="@+id/inforow_phone"/>
                 <include layout="@layout/item_info_row" android:id="@+id/inforow_email"/>
+                <include layout="@layout/item_info_row" android:id="@+id/inforow_password"/>
                 <include layout="@layout/item_info_row" android:id="@+id/inforow_gender"/>
                 <include layout="@layout/item_info_row" android:id="@+id/inforow_birthday"/>
                 <include layout="@layout/item_info_row" android:id="@+id/inforow_job"/>
             </LinearLayout>
 
             <RelativeLayout
+                android:id="@+id/btn_delete_account"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="20dp"
                 android:background="#FFFFFF"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:text="Đóng tài khoản"
-                    android:textColor="#757575"/>
+                    android:text="Xóa tài khoản"
+                    android:textColor="#F44336"/>
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
