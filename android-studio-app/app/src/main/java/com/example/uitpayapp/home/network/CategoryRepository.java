@@ -54,6 +54,7 @@ public class CategoryRepository {
                                     fr.getImageUrl() != null ? fr.getImageUrl() : ""
                             );
                             item.setRestaurantId(fr.getRestaurantId());
+                            item.setRestaurantName(fr.getRestaurantName());
                             foods.add(item);
                         }
                         callback.onSuccess(foods);

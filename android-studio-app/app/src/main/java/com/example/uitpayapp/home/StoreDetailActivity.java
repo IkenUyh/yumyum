@@ -151,6 +151,7 @@ public class StoreDetailActivity extends AppCompatActivity {
                         for (com.example.uitpayapp.modules.food.models.responses.FoodResponse food : response.body().getData()) {
                             FoodMenuItem item = new FoodMenuItem(String.valueOf(food.getId()), food.getName(), food.getPrice().longValue(), 0, food.getDescription(), food.getImageUrl());
                             item.setRestaurantId(id);
+                            item.setRestaurantName(food.getRestaurantName());
                             menuItems.add(item);
                         }
                         restaurant.getMenu().clear();

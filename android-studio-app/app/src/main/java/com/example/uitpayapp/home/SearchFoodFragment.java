@@ -139,6 +139,7 @@ public class SearchFoodFragment extends Fragment {
                                         res.getImageUrl()
                                 );
                                 item.setRestaurantId(res.getRestaurantId());
+                                item.setRestaurantName(res.getRestaurantName());
                                 filteredFoods.add(item);
                             }
                         }
@@ -224,6 +225,13 @@ public class SearchFoodFragment extends Fragment {
             if(holder.ivImage != null) {
                 com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(holder.ivImage, item.getImageUrl());
             }
+            if(holder.tvStoreName != null) {
+                if (item.getRestaurantName() != null && !item.getRestaurantName().isEmpty()) {
+                    holder.tvStoreName.setText(item.getRestaurantName());
+                } else {
+                    holder.tvStoreName.setText("Cửa hàng");
+                }
+            }
             
             holder.itemView.setOnClickListener(v -> listener.onItemClick(item, holder.ivImage));
         }
@@ -234,13 +242,27 @@ public class SearchFoodFragment extends Fragment {
         }
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
-            TextView tvName, tvPrice;
+            TextView tvName, tvPrice, tvStoreName;
             ImageView ivImage;
             public ViewHolder(View itemView) {
                 super(itemView);
                 tvName = itemView.findViewById(R.id.tv_food_title);
                 tvPrice = itemView.findViewById(R.id.tv_discount_price);
                 ivImage = itemView.findViewById(R.id.iv_food_image);
+                tvStoreName = itemView.findViewById(R.id.tv_store_name);
+                
+                // Hide unnecessary elements for search view
+                View discountTag = itemView.findViewById(R.id.tv_discount_tag);
+                if (discountTag != null) discountTag.setVisibility(View.GONE);
+
+                View soldInfo = itemView.findViewById(R.id.ll_sold_info);
+                if (soldInfo != null) soldInfo.setVisibility(View.GONE);
+
+                View originalPrice = itemView.findViewById(R.id.tv_original_price);
+                if (originalPrice != null) originalPrice.setVisibility(View.GONE);
+
+                View btnBuyNow = itemView.findViewById(R.id.btn_buy_now);
+                if (btnBuyNow != null) btnBuyNow.setVisibility(View.GONE);
             }
         }
     }

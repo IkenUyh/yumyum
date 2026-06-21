@@ -10,6 +10,9 @@ public class FoodResponse {
     @SerializedName("restaurantId")
     private Long restaurantId;
 
+    @SerializedName("restaurantName")
+    private String restaurantName;
+
     @SerializedName("categoryId")
     private Long categoryId;
 
@@ -31,6 +34,7 @@ public class FoodResponse {
     // Getters
     public Long getId() { return id; }
     public Long getRestaurantId() { return restaurantId; }
+    public String getRestaurantName() { return restaurantName; }
     public Long getCategoryId() { return categoryId; }
     public String getName() { return name; }
     public String getDescription() { return description; }
@@ -39,4 +43,5 @@ public class FoodResponse {
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public Boolean getIsAvailable() { return isAvailable; }
+    public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
 }
