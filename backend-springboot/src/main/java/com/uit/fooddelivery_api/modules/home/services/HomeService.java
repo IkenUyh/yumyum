@@ -192,11 +192,11 @@ public class HomeService {
                                 .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
                                 .map(f -> {
                                         double distance = 0.0;
+                                        java.util.Random itemRandom = new java.util.Random(f.getId() != null ? f.getId().hashCode() : 0);
                                         if (lat != null && lng != null && f.getRestaurant() != null && f.getRestaurant().getLatitude() != null && f.getRestaurant().getLongitude() != null) {
-                                                distance = calculateDistance(lat, lng, f.getRestaurant().getLatitude(), f.getRestaurant().getLongitude());
+                                                distance = calculateDistance(lat, lng, f.getRestaurant().getLatitude().doubleValue(), f.getRestaurant().getLongitude().doubleValue());
                                                 distance = Math.round(distance * 10.0) / 10.0;
                                         } else {
-                                                java.util.Random itemRandom = new java.util.Random(f.getId() != null ? f.getId().hashCode() : 0);
                                                 distance = 0.5 + itemRandom.nextDouble() * 5.0;
                                                 distance = Math.round(distance * 10.0) / 10.0;
                                         }
