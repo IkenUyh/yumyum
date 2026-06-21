@@ -39,4 +39,22 @@ public class VoucherController {
         Voucher voucher = voucherService.exchangeCoinsForVoucher(currentUser, request);
         return ApiResponse.success(voucher);
     }
+
+    @PostMapping("/{id}/exchange")
+    public ApiResponse<String> exchangeVoucher(@PathVariable("id") Long voucherId, Authentication authentication) {
+        try {
+            User user = (User) authentication.getPrincipal();
+            String message = voucherService.exchangeVoucher(user, voucherId);
+            return ApiResponse.success(message);
+        } catch (Exception e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
+    }
+
+    @GetMapping("/my-vouchers")
+    public ApiResponse<List<Voucher>> getMyVouchers(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        List<Voucher> vouchers = voucherService.getMyVouchers(user.getId());
+        return ApiResponse.success(vouchers);
+    }
 }

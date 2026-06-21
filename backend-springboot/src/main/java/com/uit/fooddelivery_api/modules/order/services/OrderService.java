@@ -44,6 +44,7 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final UserAddressRepository addressRepository;
     private final com.uit.fooddelivery_api.modules.voucher.repositories.VoucherRepository voucherRepository;
+    private final com.uit.fooddelivery_api.modules.voucher.repositories.UserVoucherRepository userVoucherRepository;
     private final com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository;
     private final com.uit.fooddelivery_api.modules.wallet.services.WalletService walletService;
     private final com.uit.fooddelivery_api.modules.restaurant.repositories.RestaurantTransactionRepository restaurantTransactionRepository;
@@ -211,6 +212,12 @@ public class OrderService {
                 }
                 if (voucher.getStockQuantity() <= 0) {
                     throw new RuntimeException("Mã giảm giá [" + code + "] đã hết lượt sử dụng trên hệ thống!");
+                }
+                if (voucher.getRequiredPoints() != null && voucher.getRequiredPoints() > 0) {
+                    boolean ownsVoucher = userVoucherRepository.findUnusedByUserIdAndVoucherId(customer.getId(), voucher.getId()).isPresent();
+                    if (!ownsVoucher) {
+                        throw new RuntimeException("Mã [" + code + "] yêu cầu bạn phải dùng xu đổi trước khi sử dụng hoặc đã được sử dụng!");
+                    }
                 }
                 if (foodTotal.compareTo(voucher.getMinOrderValue()) < 0) {
                     throw new RuntimeException("Mã [" + code + "] yêu cầu giá trị đơn hàng tối thiểu từ "
@@ -495,6 +502,14 @@ public class OrderService {
                     throw new RuntimeException("Mã giảm giá [" + code + "] đã hết lượt sử dụng trên hệ thống!");
                 }
 
+                // Kiểm tra xu voucher
+                if (voucher.getRequiredPoints() != null && voucher.getRequiredPoints() > 0) {
+                    boolean ownsVoucher = userVoucherRepository.findUnusedByUserIdAndVoucherId(customer.getId(), voucher.getId()).isPresent();
+                    if (!ownsVoucher) {
+                        throw new RuntimeException("Mã [" + code + "] yêu cầu bạn phải dùng xu đổi trước khi sử dụng hoặc mã này đã được sử dụng!");
+                    }
+                }
+
                 // Kiểm tra điều kiện giá trị đơn hàng tối thiểu
                 if (foodTotal.compareTo(voucher.getMinOrderValue()) < 0) {
                     throw new RuntimeException("Mã [" + code + "] yêu cầu giá trị đơn hàng tối thiểu từ "
@@ -566,6 +581,16 @@ public class OrderService {
         order.setTotalAmount(finalTotal);
         order.setDiscountAmount(totalDiscountAmount);
         order.setVouchers(appliedVouchers); // Lưu danh sách các mã đã dùng vào bảng trung gian
+        
+        for (com.uit.fooddelivery_api.modules.voucher.entities.Voucher v : appliedVouchers) {
+            if (v.getRequiredPoints() != null && v.getRequiredPoints() > 0) {
+                userVoucherRepository.findUnusedByUserIdAndVoucherId(customer.getId(), v.getId()).ifPresent(uv -> {
+                    uv.setIsUsed(true);
+                    userVoucherRepository.save(uv);
+                });
+            }
+        }
+        
         order.setOrderItems(orderItems);
         order.setUsedCoins(usedCoins);
 
@@ -703,6 +728,14 @@ public class OrderService {
             for (com.uit.fooddelivery_api.modules.voucher.entities.Voucher v : order.getVouchers()) {
                 v.setStockQuantity(v.getStockQuantity() + 1); // Trả lại 1 lượt
                 voucherRepository.save(v);
+                
+                // Hoàn lại trạng thái cho user_vouchers nếu có
+                if (v.getRequiredPoints() != null && v.getRequiredPoints() > 0) {
+                    userVoucherRepository.findFirstUsedByUserIdAndVoucherId(order.getUser().getId(), v.getId()).ifPresent(uv -> {
+                        uv.setIsUsed(false);
+                        userVoucherRepository.save(uv);
+                    });
+                }
             }
         }
 
