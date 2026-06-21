@@ -191,7 +191,7 @@ public class PaymentController {
                     }
                 }
                 
-                return "<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'></head><body style='text-align:center; padding: 50px;'><h1 style='color: green;'>Thanh toán thành công!</h1><p>Tiền đã được cộng vào ví UITpay.</p><p>Bạn có thể đóng trình duyệt này và quay lại ứng dụng.</p></body></html>";
+                return "<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'></head><body style='text-align:center; padding: 50px;'><h1 style='color: green;'>Thanh toán thành công!</h1><p>Tiền đã được cộng vào ví YumYumPay.</p><p>Bạn có thể đóng trình duyệt này và quay lại ứng dụng.</p></body></html>";
             } else {
                 return "<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'></head><body style='text-align:center; padding: 50px;'><h1 style='color: red;'>Thanh toán thất bại!</h1><p>Giao dịch của bạn đã bị hủy hoặc có lỗi xảy ra.</p></body></html>";
             }

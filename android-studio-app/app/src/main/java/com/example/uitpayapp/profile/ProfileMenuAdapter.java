@@ -93,15 +93,61 @@ public class ProfileMenuAdapter extends RecyclerView.Adapter<ProfileMenuAdapter.
                     }
                 });
                 tvPersonalBalance.setOnClickListener(v -> {
-                    isPersonalHidden[0] = !isPersonalHidden[0];
+                    android.content.Context ctx = holder.itemView.getContext();
+                    com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(ctx);
+                    String phoneNumber = session.getUserPhone();
+
                     if (isPersonalHidden[0]) {
-                        tvPersonalBalance.setText("***");
-                    } else {
-                        if (tvPersonalBalance.getTag() != null) {
-                            tvPersonalBalance.setText((String)tvPersonalBalance.getTag());
-                        } else {
-                            tvPersonalBalance.setText("Lỗi tải");
+                        // Hiển thị Dialog yêu cầu nhập mã PIN trước khi hiện số dư (sử dụng custom layout)
+                        android.view.View dialogView = LayoutInflater.from(ctx).inflate(R.layout.dialog_pin_verify, null);
+                        android.app.AlertDialog pinDialog = new android.app.AlertDialog.Builder(ctx)
+                                .setView(dialogView)
+                                .create();
+                        
+                        if (pinDialog.getWindow() != null) {
+                            pinDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
                         }
+
+                        android.widget.EditText pinInput = dialogView.findViewById(R.id.pin_input);
+                        android.widget.TextView btnCancel = dialogView.findViewById(R.id.btn_cancel);
+                        android.widget.TextView btnConfirm = dialogView.findViewById(R.id.btn_confirm);
+
+                        btnCancel.setOnClickListener(dv -> pinDialog.dismiss());
+                        btnConfirm.setOnClickListener(dv -> {
+                            String inputPin = pinInput.getText().toString();
+                            if (inputPin.length() != 6) {
+                                android.widget.Toast.makeText(ctx, "Mã PIN phải gồm 6 chữ số", android.widget.Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            com.example.uitpayapp.modules.user.UserRepository userRepo = new com.example.uitpayapp.modules.user.UserRepository();
+                            userRepo.login(phoneNumber, inputPin, new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.user.models.responses.AuthResponseDTO>() {
+                                @Override
+                                public void onSuccess(com.example.uitpayapp.modules.user.models.responses.AuthResponseDTO data) {
+                                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                                        isPersonalHidden[0] = false;
+                                        if (tvPersonalBalance.getTag() != null) {
+                                            tvPersonalBalance.setText((String)tvPersonalBalance.getTag());
+                                        } else {
+                                            tvPersonalBalance.setText("Lỗi tải");
+                                        }
+                                        pinDialog.dismiss();
+                                    });
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                                        android.widget.Toast.makeText(ctx, "Mã PIN không chính xác!", android.widget.Toast.LENGTH_SHORT).show();
+                                    });
+                                }
+                            });
+                        });
+                        pinDialog.show();
+                    } else {
+                        // Ẩn số dư trực tiếp
+                        isPersonalHidden[0] = true;
+                        tvPersonalBalance.setText("***");
                     }
                 });
                 

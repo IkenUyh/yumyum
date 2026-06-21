@@ -1,5 +1,6 @@
 package com.example.uitpayapp.profile;
 
+// Feature: Wallet PIN entry and Topup Status check
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -44,6 +45,8 @@ public class ProfileActivity extends AppCompatActivity {
     View rlLoginProfile,llUserInfo;
     boolean isLogin = false;
     private long currentCoins = 0;
+    private java.math.BigDecimal previousBalance = java.math.BigDecimal.ZERO;
+    private android.app.AlertDialog statusDialog = null;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -437,6 +440,14 @@ public class ProfileActivity extends AppCompatActivity {
         checkLoginStatus();
         updateNotificationBadge();
         fetchLoyaltyData();
+
+        SharedPreferences paymentPrefs = getSharedPreferences("PaymentPrefs", MODE_PRIVATE);
+        boolean isChecking = paymentPrefs.getBoolean("IS_CHECKING_TOP_UP", false);
+        if (isChecking) {
+            String prevBalanceStr = paymentPrefs.getString("PREVIOUS_BALANCE", "0");
+            java.math.BigDecimal prevBalance = new java.math.BigDecimal(prevBalanceStr);
+            checkTransactionResult(prevBalance);
+        }
     }
 
     private void fetchLoyaltyData() {
@@ -506,29 +517,77 @@ public class ProfileActivity extends AppCompatActivity {
                 }
                 
                 com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
-                walletRepo.createVNPayTopUp(amount, new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
+                
+                // Lấy số dư hiện tại trước khi gọi API nạp
+                walletRepo.getBalance(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse>() {
                     @Override
-                    public void onSuccess(java.util.Map<String, Object> data) {
-                        runOnUiThread(() -> {
-                            if (data != null && data.containsKey("paymentUrl")) {
-                                String paymentUrl = (String) data.get("paymentUrl");
-                                
-                                // Mở trang thanh toán VNPay
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(paymentUrl));
-                                startActivity(browserIntent);
-                                
-                                // Hiện dialog để người dùng tự bấm cập nhật số dư sau khi thanh toán
-                                showRefreshBalanceDialog();
-                            } else {
-                                Toast.makeText(ProfileActivity.this, "Không lấy được link thanh toán VNPay", Toast.LENGTH_SHORT).show();
+                    public void onSuccess(com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse balanceData) {
+                        if (balanceData != null && balanceData.getBalance() != null) {
+                            previousBalance = balanceData.getBalance();
+                        }
+                        
+                        // Tiếp tục gọi API tạo giao dịch nạp tiền
+                        walletRepo.createVNPayTopUp(amount, new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
+                            @Override
+                            public void onSuccess(java.util.Map<String, Object> data) {
+                                runOnUiThread(() -> {
+                                    if (data != null && data.containsKey("paymentUrl")) {
+                                        String paymentUrl = (String) data.get("paymentUrl");
+                                        
+                                        // Lưu thông tin trước khi nạp để check tự động khi onResume
+                                        getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
+                                             .putString("PREVIOUS_BALANCE", previousBalance.toString())
+                                             .putBoolean("IS_CHECKING_TOP_UP", true)
+                                             .apply();
+
+                                        // Mở trang thanh toán VNPay
+                                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(paymentUrl));
+                                        startActivity(browserIntent);
+                                    } else {
+                                        Toast.makeText(ProfileActivity.this, "Không lấy được link thanh toán VNPay", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                runOnUiThread(() -> {
+                                    Toast.makeText(ProfileActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                });
                             }
                         });
                     }
 
                     @Override
                     public void onError(String errorMessage) {
-                        runOnUiThread(() -> {
-                            Toast.makeText(ProfileActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        // Nếu lấy số dư lỗi, vẫn cho phép tạo link nạp tiền
+                        walletRepo.createVNPayTopUp(amount, new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
+                            @Override
+                            public void onSuccess(java.util.Map<String, Object> data) {
+                                runOnUiThread(() -> {
+                                    if (data != null && data.containsKey("paymentUrl")) {
+                                        String paymentUrl = (String) data.get("paymentUrl");
+                                        
+                                        // Lưu thông tin trước khi nạp để check tự động khi onResume
+                                        getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
+                                             .putString("PREVIOUS_BALANCE", previousBalance.toString())
+                                             .putBoolean("IS_CHECKING_TOP_UP", true)
+                                             .apply();
+
+                                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(paymentUrl));
+                                        startActivity(browserIntent);
+                                    } else {
+                                        Toast.makeText(ProfileActivity.this, "Không lấy được link thanh toán VNPay", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(String err) {
+                                runOnUiThread(() -> {
+                                    Toast.makeText(ProfileActivity.this, "Lỗi: " + err, Toast.LENGTH_SHORT).show();
+                                });
+                            }
                         });
                     }
                 });
@@ -538,18 +597,131 @@ public class ProfileActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void showRefreshBalanceDialog() {
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-        builder.setTitle("Đang chờ thanh toán");
-        builder.setMessage("Sau khi thanh toán xong trên VNPay, hãy bấm nút dưới đây để cập nhật số dư nhé!");
-        builder.setCancelable(false);
+    private void checkTransactionResult(java.math.BigDecimal prevBalance) {
+        if (statusDialog != null && statusDialog.isShowing()) {
+            return;
+        }
 
-        builder.setPositiveButton("Cập nhật số dư", (dialog, which) -> {
-            recreate();
-            dialog.dismiss();
-            Toast.makeText(this, "Đã cập nhật số dư", Toast.LENGTH_SHORT).show();
+        android.view.View dialogView = getLayoutInflater().inflate(R.layout.dialog_transaction_status, null);
+        statusDialog = new android.app.AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+
+        if (statusDialog.getWindow() != null) {
+            statusDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        android.widget.ImageView ivStatusIcon = dialogView.findViewById(R.id.iv_status_icon);
+        android.widget.ProgressBar pbStatusLoading = dialogView.findViewById(R.id.pb_status_loading);
+        android.widget.TextView tvStatusTitle = dialogView.findViewById(R.id.tv_status_title);
+        android.widget.TextView tvStatusMessage = dialogView.findViewById(R.id.tv_status_message);
+        android.widget.TextView btnStatusClose = dialogView.findViewById(R.id.btn_status_close);
+        android.widget.TextView btnStatusAction = dialogView.findViewById(R.id.btn_status_action);
+
+        // Show loading state initially
+        pbStatusLoading.setVisibility(android.view.View.VISIBLE);
+        ivStatusIcon.setVisibility(android.view.View.GONE);
+        tvStatusTitle.setText("Đang kiểm tra kết quả");
+        tvStatusMessage.setText("Hệ thống đang kiểm tra trạng thái giao dịch nạp tiền, vui lòng chờ trong giây lát...");
+        btnStatusClose.setVisibility(android.view.View.GONE);
+        btnStatusAction.setVisibility(android.view.View.GONE);
+
+        statusDialog.show();
+
+        // Perform balance API call
+        com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
+        walletRepo.getBalance(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse>() {
+            @Override
+            public void onSuccess(com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse balanceData) {
+                runOnUiThread(() -> {
+                    if (balanceData != null && balanceData.getBalance() != null) {
+                        java.math.BigDecimal newBalance = balanceData.getBalance();
+                        if (newBalance.compareTo(prevBalance) > 0) {
+                            // Success!
+                            pbStatusLoading.setVisibility(android.view.View.GONE);
+                            ivStatusIcon.setImageResource(R.drawable.ic_circle_check);
+                            ivStatusIcon.setColorFilter(android.graphics.Color.parseColor("#4CAF50"));
+                            ivStatusIcon.setVisibility(android.view.View.VISIBLE);
+                            
+                            tvStatusTitle.setText("Giao dịch thành công!");
+                            java.text.NumberFormat format = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+                            tvStatusMessage.setText("Nạp tiền vào ví thành công.\nSố dư mới: " + format.format(newBalance) + "đ");
+                            
+                            btnStatusAction.setText("Đồng ý");
+                            btnStatusAction.setVisibility(android.view.View.VISIBLE);
+                            btnStatusAction.setOnClickListener(v -> {
+                                getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
+                                     .putBoolean("IS_CHECKING_TOP_UP", false)
+                                     .apply();
+                                statusDialog.dismiss();
+                                recreate();
+                            });
+                        } else {
+                            // Failure (balance hasn't increased yet)
+                            pbStatusLoading.setVisibility(android.view.View.GONE);
+                            ivStatusIcon.setImageResource(R.drawable.ic_bold_close);
+                            ivStatusIcon.setColorFilter(android.graphics.Color.parseColor("#F44336"));
+                            ivStatusIcon.setVisibility(android.view.View.VISIBLE);
+                            
+                            tvStatusTitle.setText("Giao dịch thất bại");
+                            tvStatusMessage.setText("Không tìm thấy giao dịch thành công. Vui lòng thanh toán và thử lại.");
+                            
+                            btnStatusAction.setText("Kiểm tra lại");
+                            btnStatusAction.setVisibility(android.view.View.VISIBLE);
+                            btnStatusAction.setOnClickListener(v -> {
+                                statusDialog.dismiss();
+                                checkTransactionResult(prevBalance);
+                            });
+
+                            btnStatusClose.setText("Hủy bỏ");
+                            btnStatusClose.setVisibility(android.view.View.VISIBLE);
+                            btnStatusClose.setOnClickListener(v -> {
+                                getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
+                                     .putBoolean("IS_CHECKING_TOP_UP", false)
+                                     .apply();
+                                statusDialog.dismiss();
+                            });
+                        }
+                    } else {
+                        showError("Không lấy được thông tin số dư mới.");
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    showError("Lỗi kết nối: " + errorMessage);
+                });
+            }
+
+            private void showError(String errorMsg) {
+                pbStatusLoading.setVisibility(android.view.View.GONE);
+                ivStatusIcon.setImageResource(R.drawable.ic_bold_close);
+                ivStatusIcon.setColorFilter(android.graphics.Color.parseColor("#F44336"));
+                ivStatusIcon.setVisibility(android.view.View.VISIBLE);
+                
+                tvStatusTitle.setText("Lỗi kiểm tra");
+                tvStatusMessage.setText(errorMsg);
+                
+                btnStatusAction.setText("Thử lại");
+                btnStatusAction.setVisibility(android.view.View.VISIBLE);
+                btnStatusAction.setOnClickListener(v -> {
+                    statusDialog.dismiss();
+                    checkTransactionResult(prevBalance);
+                });
+
+                btnStatusClose.setText("Hủy");
+                btnStatusClose.setVisibility(android.view.View.VISIBLE);
+                btnStatusClose.setOnClickListener(v -> {
+                    getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
+                         .putBoolean("IS_CHECKING_TOP_UP", false)
+                         .apply();
+                    statusDialog.dismiss();
+                });
+            }
         });
-        builder.show();
     }
 
     private void showCheckStatusDialog(String appTransId) {
