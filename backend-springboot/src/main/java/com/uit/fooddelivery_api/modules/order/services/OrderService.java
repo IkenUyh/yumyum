@@ -558,16 +558,13 @@ public class OrderService {
         order.setOrderItems(orderItems);
         order.setUsedCoins(usedCoins);
 
-        if (!"CASH".equals(order.getPaymentMethod())) {
-            Wallet wallet = walletRepository.findByUserId(customer.getId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin ví điện tử cá nhân!"));
         String paymentMethod = (dto.getPaymentMethod() != null) ? dto.getPaymentMethod().toUpperCase() : "WALLET";
         order.setPaymentMethod(paymentMethod);
 
         if ("ZALOPAY".equals(paymentMethod)) {
             order.setPaymentStatus("UNPAID");
             order.setStatus("UNPAID");
-
+            
             Order savedOrder = orderRepository.save(order);
             cartItemRepository.deleteByUserId(customer.getId());
 
@@ -587,10 +584,9 @@ public class OrderService {
             }
 
             return savedOrder;
-        } else {
-            order.setPaymentStatus("PAID");
-            order.setStatus("PENDING");
-
+        } 
+        
+        if ("WALLET".equals(paymentMethod)) {
             Wallet wallet = walletRepository.findByUserId(customer.getId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin ví điện tử cá nhân!"));
 
@@ -598,24 +594,28 @@ public class OrderService {
                 throw new RuntimeException(
                         "Số dư tài khoản ví không đủ để thực hiện thanh toán! Tổng tiền: " + finalTotal + "đ.");
             }
+            order.setPaymentStatus("PAID");
+        } else {
+            // CASH
+            order.setPaymentStatus("UNPAID");
+        }
+        order.setStatus("PENDING");
 
-            walletService.processTransaction(customer.getId(), finalTotal.negate(), "PAYMENT", "ORDER_" + order.getId(),
+        Order savedOrder = orderRepository.save(order);
+        cartItemRepository.deleteByUserId(customer.getId());
+
+        if ("WALLET".equals(paymentMethod)) {
+            walletService.processTransaction(customer.getId(), finalTotal.negate(), "PAYMENT", "ORDER_" + savedOrder.getId(),
                     "Thanh toán đơn hàng đồ ăn");
         }
-            walletService.processTransaction(customer.getId(), finalTotal.negate(), "PAYMENT", "ORDER_" + order.getId(),
-                    "Thanh toán đơn hàng đồ ăn");
 
-            Order savedOrder = orderRepository.save(order);
-            cartItemRepository.deleteByUserId(customer.getId());
+        notificationService.pushNotification(
+                restaurant.getMerchant().getId(),
+                "Đơn hàng mới",
+                "Bạn có đơn hàng mới từ " + customer.getFullName() + ". Mã đơn: #" + savedOrder.getId(),
+                "ORDER_UPDATE");
 
-            notificationService.pushNotification(
-                    restaurant.getMerchant().getId(),
-                    "Đơn hàng mới",
-                    "Bạn có đơn hàng mới từ " + customer.getFullName() + ". Mã đơn: #" + savedOrder.getId(),
-                    "ORDER_UPDATE");
-
-            return savedOrder;
-        }
+        return savedOrder;
     }
 
     @Transactional
