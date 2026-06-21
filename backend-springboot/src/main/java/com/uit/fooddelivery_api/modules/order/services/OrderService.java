@@ -19,7 +19,6 @@ import com.uit.fooddelivery_api.modules.loyalty.entities.LoyaltyPoint;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -850,7 +849,7 @@ public class OrderService {
 
         notificationService.pushNotification(
                 order.getUser().getId(),
-                "Đơn hàng đang được giao 🚴",
+                "Đơn hàng đang được giao \uD83D\uDEB4",
                 "Đơn hàng #" + order.getId() + " từ " + order.getRestaurant().getName()
                         + " đang trên đường giao đến bạn!",
                 "ORDER_UPDATE");
@@ -899,7 +898,7 @@ public class OrderService {
 
         notificationService.pushNotification(
                 order.getUser().getId(),
-                "Đơn hàng hoàn tất 🎉",
+                "Đơn hàng hoàn tất \uD83C\uDF89",
                 "Đơn hàng #" + order.getId() + " từ " + order.getRestaurant().getName() + " đã hoàn tất!",
                 "ORDER_UPDATE");
 
@@ -911,11 +910,7 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
     }
 
-    private void broadcastOrderUpdate(Long restaurantId) {
-        if (messagingTemplate != null && restaurantId != null) {
-            messagingTemplate.convertAndSend("/topic/restaurant/" + restaurantId + "/orders", "UPDATE");
-        }
-    }
+
 
     public void scheduleAutoDeliveryStages(Long orderId) {
         // Giai đoạn 1: Sau 15 giây, tài xế đến nơi
@@ -942,7 +937,7 @@ public class OrderService {
         if (order != null && "DELIVERING".equals(order.getStatus())) {
             notificationService.pushNotification(
                     order.getUser().getId(),
-                    "Tài xế đã đến nơi 🚴",
+                    "Tài xế đã đến nơi \uD83D\uDEB4",
                     "Tài xế giao hàng đã đến địa chỉ của bạn. Vui lòng chuẩn bị nhận món ăn!",
                     "ORDER_UPDATE");
         }
@@ -976,13 +971,13 @@ public class OrderService {
 
             notificationService.pushNotification(
                     order.getUser().getId(),
-                    "Đơn hàng hoàn tất 🎉",
+                    "Đơn hàng hoàn tất \uD83C\uDF89",
                     "Đơn hàng #" + order.getId() + " từ " + order.getRestaurant().getName() + " đã giao thành công!",
                     "ORDER_UPDATE");
 
             notificationService.pushNotification(
                     order.getRestaurant().getMerchant().getId(),
-                    "Đơn hàng hoàn tất 🎉",
+                    "Đơn hàng hoàn tất \uD83C\uDF89",
                     "Đơn hàng #" + order.getId() + " đã giao thành công!",
                     "ORDER_UPDATE");
         }
