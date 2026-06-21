@@ -63,6 +63,11 @@ public class HomeViewModel extends ViewModel {
         fetchRandomTopics();
     }
 
+    /** Gọi từ HomeActivity khi Flashsale hết hạn để tải lại dữ liệu mới */
+    public void refreshCoreData() {
+        fetchCoreData();
+    }
+
     private void fetchCoreData() {
         coreData.setValue(UiState.loading(null));
         apiService.getHomeCore(currentAddressId).enqueue(new Callback<ApiResponse<HomeCoreResponse>>() {

@@ -64,36 +64,52 @@ public class HomeService {
                 List<FoodMenuItemDTO> flashSales = new ArrayList<>();
                 if (!activeFS.isEmpty()) {
                         flashSales = activeFS.stream()
-                                        .map(fs -> FoodMenuItemDTO.builder()
+                                        .map(fs -> {
+                                                long salePrice = fs.getSalePrice().longValue();
+                                                long origPrice = fs.getFood().getPrice().longValue();
+                                                int discount = origPrice > 0
+                                                        ? (int) Math.round((1.0 - (double) salePrice / origPrice) * 100)
+                                                        : 0;
+                                                return FoodMenuItemDTO.builder()
                                                         .id("fs_" + fs.getFood().getId())
                                                         .name(fs.getFood().getName())
-                                                        .price(fs.getSalePrice().longValue())
+                                                        .price(salePrice)
+                                                        .originalPrice(origPrice)
+                                                        .discountPercent(discount)
                                                         .imageResId(0)
                                                         .imageUrl(fs.getFood().getImageUrl())
                                                         .description(fs.getFood().getDescription())
                                                         .restaurantId(fs.getFood().getRestaurant() != null ? fs.getFood().getRestaurant().getId() : null)
                                                         .restaurantName(fs.getFood().getRestaurant() != null ? fs.getFood().getRestaurant().getName() : null)
-                                                        .build())
+                                                        .build();
+                                        })
                                         .limit(5)
                                         .collect(Collectors.toList());
                 } else {
                         // Fallback: use first 3 available foods from database
                         flashSales = allFoodsWithRestaurant.stream()
                                         .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
-                                        .map(f -> FoodMenuItemDTO.builder()
+                                        .map(f -> {
+                                                long origPrice = f.getPrice().longValue();
+                                                long salePrice = f.getPrice().multiply(BigDecimal.valueOf(0.5))
+                                                                .longValue();
+                                                return FoodMenuItemDTO.builder()
                                                         .id("f_" + f.getId())
                                                         .name(f.getName())
-                                                        .price(f.getPrice().multiply(BigDecimal.valueOf(0.5))
-                                                                        .longValue()) // 50% off for flashsale
+                                                        .price(salePrice)
+                                                        .originalPrice(origPrice)
+                                                        .discountPercent(50)
                                                         .imageResId(0)
                                                         .imageUrl(f.getImageUrl())
                                                         .description(f.getDescription())
                                                         .restaurantId(f.getRestaurant() != null ? f.getRestaurant().getId() : null)
                                                         .restaurantName(f.getRestaurant() != null ? f.getRestaurant().getName() : null)
-                                                        .build())
+                                                        .build();
+                                        })
                                         .limit(3)
                                         .collect(Collectors.toList());
                 }
+
 
                 return HomeCoreResponseDTO.builder()
                                 .banners(banners)
