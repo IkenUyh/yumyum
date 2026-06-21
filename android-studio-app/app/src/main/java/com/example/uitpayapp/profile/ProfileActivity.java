@@ -46,6 +46,7 @@ public class ProfileActivity extends AppCompatActivity {
     boolean isLogin = false;
     private long currentCoins = 0;
     private int currentVouchersCount = 0;
+    private String currentRankName = "Thành viên";
     private java.math.BigDecimal previousBalance = java.math.BigDecimal.ZERO;
     private android.app.AlertDialog statusDialog = null;
 
@@ -178,17 +179,23 @@ public class ProfileActivity extends AppCompatActivity {
             startActivity(intentAccount);
         });
         findViewById(R.id.btn_logout).setOnClickListener(v->{
-            SessionManager.getInstance(this).clearSession();
-            SharedPreferences.Editor editor = getSharedPreferences("UserPrefs", MODE_PRIVATE).edit();
-            editor.clear();
-            editor.apply();
-            checkLoginStatus();
-            Toast.makeText(this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
+            SessionManager sessionManager = SessionManager.getInstance(this);
+            String fcmToken = sessionManager.getFcmToken();
+            if (fcmToken != null) {
+                new com.example.uitpayapp.modules.notification.NotificationRepository().deregisterFcmToken(fcmToken, new com.example.uitpayapp.network.ApiCallback<String>() {
+                    @Override
+                    public void onSuccess(String data) {
+                        performLogout();
+                    }
 
-            Intent intent = new Intent(this, com.example.uitpayapp.home.HomeActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+                    @Override
+                    public void onError(String errorMessage) {
+                        performLogout();
+                    }
+                });
+            } else {
+                performLogout();
+            }
         });
         findViewById(R.id.btn_login_profile).setOnClickListener(v->
         {
@@ -197,13 +204,27 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    private void performLogout() {
+        SessionManager.getInstance(this).clearSession();
+        SharedPreferences.Editor editor = getSharedPreferences("UserPrefs", MODE_PRIVATE).edit();
+        editor.clear();
+        editor.apply();
+        checkLoginStatus();
+        Toast.makeText(this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(this, com.example.uitpayapp.home.HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
     void SetDataMainMenu(RecyclerView mainMenu) {
         if (mainMenu == null) return;
         mainMenu.setLayoutManager(new LinearLayoutManager(this));
         List<GroupItemData> ListGroupItem = new ArrayList<>();
         SessionManager session = SessionManager.getInstance(this);
         List<MenuItemData> ListItems_uudai = new ArrayList<>();
-        ListItems_uudai.add(new MenuItemData("YumYum Priority","Thành viên",R.drawable.ic_priority_yumyum,false));
+        ListItems_uudai.add(new MenuItemData("YumYum Priority", currentRankName, R.drawable.ic_priority_yumyum, false));
         if (session.isLoggedIn()) {
             ListItems_uudai.add(new MenuItemData("Ví Voucher", currentVouchersCount + " ưu đãi", R.drawable.ic_my_gift,false));
         }
@@ -511,14 +532,25 @@ public class ProfileActivity extends AppCompatActivity {
     private void fetchLoyaltyData() {
         if (!isLogin) {
             currentCoins = 0;
+            currentRankName = "Thành viên";
             return;
         }
         new com.example.uitpayapp.modules.loyalty.LoyaltyRepository().getMyLoyaltyInfo(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO>() {
             @Override
             public void onSuccess(com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO data) {
-                if (data != null && data.getCurrentPoints() != null) {
+                if (data != null) {
                     runOnUiThread(() -> {
-                        currentCoins = data.getCurrentPoints();
+                        if (data.getCurrentPoints() != null) {
+                            currentCoins = data.getCurrentPoints();
+                        }
+                        if (data.getRankName() != null) {
+                            switch (data.getRankName()) {
+                                case "DIAMOND": currentRankName = "Hạng Kim Cương"; break;
+                                case "GOLD": currentRankName = "Hạng Vàng"; break;
+                                case "SILVER": currentRankName = "Hạng Bạc"; break;
+                                default: currentRankName = "Hạng Thành Viên"; break;
+                            }
+                        }
                         SetDataMainMenu(mainMenu);
                     });
                 }

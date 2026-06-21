@@ -191,6 +191,9 @@ public class PasscodeActivity extends AppCompatActivity {
                             data.getUser().getEmail(),
                             data.getUser().getRole()
                     );
+ 
+                    // Sync FCM Token
+                    syncFcmToken(sessionManager);
 
                     Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
@@ -235,5 +238,27 @@ public class PasscodeActivity extends AppCompatActivity {
                 dots[i].setTextColor(COLOR_INACTIVE);
             }
         }
+    }
+
+    private void syncFcmToken(SessionManager sessionManager) {
+        com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                String token = task.getResult();
+                sessionManager.saveFcmToken(token);
+
+                com.example.uitpayapp.modules.notification.NotificationRepository repo = new com.example.uitpayapp.modules.notification.NotificationRepository();
+                repo.registerFcmToken(token, new ApiCallback<String>() {
+                    @Override
+                    public void onSuccess(String data) {
+                        sessionManager.setFcmTokenSynced(true);
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        sessionManager.setFcmTokenSynced(false);
+                    }
+                });
+            }
+        });
     }
 }

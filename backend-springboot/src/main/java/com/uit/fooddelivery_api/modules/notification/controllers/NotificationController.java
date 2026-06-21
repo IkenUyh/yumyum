@@ -24,6 +24,7 @@ import java.util.Map;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final com.uit.fooddelivery_api.modules.notification.repositories.UserFcmTokenRepository userFcmTokenRepository;
 
     // API 1: Frontend gọi API này để mở kết nối nghe (Subscribe).
     // Trả về luồng Text/Event-Stream thay vì JSON
@@ -83,5 +84,44 @@ public class NotificationController {
         User currentUser = (User) authentication.getPrincipal();
         notificationService.deleteAllNotifications(currentUser.getId());
         return ApiResponse.success("Đã xóa toàn bộ thông báo thành công");
+    }
+
+    // API 8: Đăng ký/cập nhật FCM Token
+    @org.springframework.web.bind.annotation.PostMapping("/fcm-token")
+    public ApiResponse<String> registerFcmToken(@org.springframework.web.bind.annotation.RequestBody Map<String, String> body, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        String fcmToken = body.get("fcmToken");
+        if (fcmToken == null || fcmToken.trim().isEmpty()) {
+            throw new RuntimeException("FCM Token không hợp lệ!");
+        }
+
+        java.util.Optional<com.uit.fooddelivery_api.modules.notification.entities.UserFcmToken> existingTokenOpt = userFcmTokenRepository.findByFcmToken(fcmToken);
+        if (existingTokenOpt.isPresent()) {
+            com.uit.fooddelivery_api.modules.notification.entities.UserFcmToken existingToken = existingTokenOpt.get();
+            if (!existingToken.getUser().getId().equals(currentUser.getId())) {
+                existingToken.setUser(currentUser);
+                userFcmTokenRepository.save(existingToken);
+            }
+        } else {
+            com.uit.fooddelivery_api.modules.notification.entities.UserFcmToken userFcmToken = com.uit.fooddelivery_api.modules.notification.entities.UserFcmToken.builder()
+                    .user(currentUser)
+                    .fcmToken(fcmToken)
+                    .build();
+            userFcmTokenRepository.save(userFcmToken);
+        }
+
+        return ApiResponse.success("Đăng ký token FCM thành công");
+    }
+
+    // API 9: Hủy đăng ký FCM Token (khi logout)
+    @org.springframework.web.bind.annotation.PostMapping("/fcm-token/deregister")
+    @jakarta.transaction.Transactional
+    public ApiResponse<String> deregisterFcmToken(@org.springframework.web.bind.annotation.RequestBody Map<String, String> body, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        String fcmToken = body.get("fcmToken");
+        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+            userFcmTokenRepository.deleteByUserIdAndFcmToken(currentUser.getId(), fcmToken);
+        }
+        return ApiResponse.success("Hủy đăng ký token FCM thành công");
     }
 }

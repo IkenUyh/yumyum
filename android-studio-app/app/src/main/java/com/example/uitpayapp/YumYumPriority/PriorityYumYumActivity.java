@@ -57,27 +57,34 @@ public class PriorityYumYumActivity extends AppCompatActivity {
         RankSlider = findViewById(R.id.priority_account_rank_slider);
         ((TextView)topBar.findViewById(R.id.top_bar_title)).setText("UITpay Priority");
         topBar.findViewById(R.id.top_bar_back_btn).setOnClickListener(v->finish());
-        SetAccountRankingData();
         SetBannerData();
-        setListener();
+        fetchLoyaltyData();
     }
-    private void setListener() {
-        findViewById(R.id.priority_question_contact).setOnClickListener(v->{
-            Intent intent=new Intent(PriorityYumYumActivity.this, ProfileWebView.class);
-            intent.putExtra("URL_KEY","https://help.shopee.vn/portal/4/article/79254-[Shopee-Rewards]-C%C3%A1c-c%C3%A2u-h%E1%BB%8Fi-th%C6%B0%E1%BB%9Dng-g%E1%BA%B7p-v%E1%BB%81-Ch%C6%B0%C6%A1ng-tr%C3%ACnh-Kh%C3%A1ch-h%C3%A0ng-th%C3%A2n-thi%E1%BA%BFt-Shopee-(Shopee-Rewards)");
-            startActivity(intent);
-        });
-        findViewById(R.id.priority_change_gift).setOnClickListener(v->{
-            Intent intent=new Intent(PriorityYumYumActivity.this, VoucherActivity.class);
-            startActivity(intent);
-            this.finish();
-        });
-        findViewById(R.id.priority_coin).setOnClickListener(v->{
-            Intent intent=new Intent(PriorityYumYumActivity.this, GiftExchangeActivity.class);
-            startActivity(intent);
-            this.finish();
+
+    private void fetchLoyaltyData() {
+        com.example.uitpayapp.network.RetrofitClient.getLoyaltyService().getMyLoyaltyInfo().enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO>>() {
+            @Override
+            public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    Long totalSpent = response.body().getData().getTotalSpending();
+                    if (totalSpent != null) {
+                        currentSpending = totalSpent;
+                    } else {
+                        currentSpending = 0;
+                    }
+                    SetAccountRankingData();
+                } else {
+                    SetAccountRankingData(); // default
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO>> call, Throwable t) {
+                SetAccountRankingData();
+            }
         });
     }
+
     private void SetAccountRankingData() {
         List<RankModel> rankList = new ArrayList<>();
         rankList.add(new RankModel(RankModel.RankType.NEW, currentSpending, "Mê hay hông mê?"));
@@ -86,6 +93,56 @@ public class PriorityYumYumActivity extends AppCompatActivity {
         rankList.add(new RankModel(RankModel.RankType.DIAMOND, currentSpending, "Voucher duy trì hạng"));
         PriorityAccountRankAdapter adapter = new PriorityAccountRankAdapter(rankList);
         RankSlider.setAdapter(adapter);
+
+        RankModel.RankType currentRankType = RankModel.RankType.NEW;
+        if (currentSpending >= RankModel.RankType.DIAMOND.getThreshold()) {
+            currentRankType = RankModel.RankType.DIAMOND;
+        } else if (currentSpending >= RankModel.RankType.GOLD.getThreshold()) {
+            currentRankType = RankModel.RankType.GOLD;
+        } else if (currentSpending >= RankModel.RankType.SILVER.getThreshold()) {
+            currentRankType = RankModel.RankType.SILVER;
+        }
+        RankModel currentRankModel = new RankModel(currentRankType, currentSpending, "");
+        List<com.example.uitpayapp.profile.MenuItemData> benefits = currentRankModel.getRankBenefits();
+        RecyclerView rvCurrentBenefits = findViewById(R.id.rv_current_benefits);
+        if (rvCurrentBenefits != null) {
+            rvCurrentBenefits.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+            List<com.example.uitpayapp.profile.GroupItemData> group = new ArrayList<>();
+            group.add(new com.example.uitpayapp.profile.GroupItemData("Chi tiết đặc quyền hiện tại", benefits));
+            rvCurrentBenefits.setAdapter(new com.example.uitpayapp.profile.ProfileMenuAdapter(this, group, null));
+        }
+    }
+
+    public void showRankBenefitsBottomSheet() {
+        com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog = new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        
+        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
+        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+        layout.setPadding(32, 32, 32, 32);
+        layout.setBackgroundColor(android.graphics.Color.WHITE);
+
+        TextView title = new TextView(this);
+        title.setText("Tất cả các Đặc quyền");
+        title.setTextSize(18);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setTextColor(android.graphics.Color.BLACK);
+        title.setPadding(0, 0, 0, 32);
+        layout.addView(title);
+
+        RecyclerView rv = new RecyclerView(this);
+        rv.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+        
+        List<com.example.uitpayapp.profile.GroupItemData> allGroups = new ArrayList<>();
+        allGroups.add(new com.example.uitpayapp.profile.GroupItemData("Hạng Kim Cương", new RankModel(RankModel.RankType.DIAMOND, 0, "").getRankBenefits()));
+        allGroups.add(new com.example.uitpayapp.profile.GroupItemData("Hạng Vàng", new RankModel(RankModel.RankType.GOLD, 0, "").getRankBenefits()));
+        allGroups.add(new com.example.uitpayapp.profile.GroupItemData("Hạng Bạc", new RankModel(RankModel.RankType.SILVER, 0, "").getRankBenefits()));
+        allGroups.add(new com.example.uitpayapp.profile.GroupItemData("Hạng Mới", new RankModel(RankModel.RankType.NEW, 0, "").getRankBenefits()));
+        
+        rv.setAdapter(new com.example.uitpayapp.profile.ProfileMenuAdapter(this, allGroups, null));
+        layout.addView(rv);
+
+        bottomSheetDialog.setContentView(layout);
+        bottomSheetDialog.show();
     }
     private void SetBannerData() {
         ImageSliderAdapter adapter = new ImageSliderAdapter(new ArrayList<>());

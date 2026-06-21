@@ -35,4 +35,10 @@ public interface NotificationService {
 
     @DELETE("api/v1/notifications/{id}")
     Call<ApiResponse<String>> deleteNotification(@Path("id") Long id);
+
+    @retrofit2.http.POST("api/v1/notifications/fcm-token")
+    Call<com.example.uitpayapp.models.ApiResponse<String>> registerFcmToken(@retrofit2.http.Body java.util.Map<String, String> body);
+
+    @retrofit2.http.POST("api/v1/notifications/fcm-token/deregister")
+    Call<com.example.uitpayapp.models.ApiResponse<String>> deregisterFcmToken(@retrofit2.http.Body java.util.Map<String, String> body);
 }

@@ -15,13 +15,17 @@ public class LoyaltyResponseDTO {
     private Integer checkinStreak;
     private LocalDate lastCheckinDate;
     private Boolean canCheckInToday; // Trả về cho Frontend biết hôm nay nút Điểm danh có sáng lên không
+    private java.math.BigDecimal totalSpending;
+    private String rankName;
 
-    public static LoyaltyResponseDTO fromEntity(LoyaltyPoint lp, boolean canCheckIn) {
+    public static LoyaltyResponseDTO fromEntity(LoyaltyPoint lp, boolean canCheckIn, String rankName) {
         return LoyaltyResponseDTO.builder()
                 .currentPoints(lp.getCurrentPoints())
                 .checkinStreak(lp.getCheckinStreak())
                 .lastCheckinDate(lp.getLastCheckinDate())
                 .canCheckInToday(canCheckIn)
+                .totalSpending(lp.getTotalSpending() != null ? lp.getTotalSpending() : java.math.BigDecimal.ZERO)
+                .rankName(rankName)
                 .build();
     }
 }
