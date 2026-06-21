@@ -57,7 +57,7 @@ public class VoucherRepository {
                     try {
                         String errorBody = response.errorBody() != null ? response.errorBody().string() : "";
                         if (errorBody.contains("message")) {
-                            com.google.gson.JsonObject json = com.google.gson.JsonParser.parseString(errorBody).getAsJsonObject();
+                            com.google.gson.JsonObject json = new com.google.gson.JsonParser().parse(errorBody).getAsJsonObject();
                             if (json.has("message")) {
                                 callback.onError(json.get("message").getAsString());
                                 return;
