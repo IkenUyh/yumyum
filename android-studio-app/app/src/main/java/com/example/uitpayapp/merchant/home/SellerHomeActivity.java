@@ -242,7 +242,6 @@ public class SellerHomeActivity extends AppCompatActivity {
         LinearLayout llItems = view.findViewById(R.id.ll_items_container);
         llItems.removeAllViews();
 
-        long subtotal = 0;
         for (OrderItem item : order.getDishes()) {
             View itemView = getLayoutInflater().inflate(R.layout.item_order_sub_item, llItems, false);
             ((TextView) itemView.findViewById(R.id.tv_sub_item_name)).setText(item.getQuantity() + " x " + item.getDishName());
@@ -250,10 +249,23 @@ public class SellerHomeActivity extends AppCompatActivity {
             tvPrice.setVisibility(View.VISIBLE);
             tvPrice.setText(String.format("%,dđ", item.getPrice()));
             llItems.addView(itemView);
-            subtotal += ((long) item.getPrice() * item.getQuantity());
         }
 
+        long totalAmount = 0;
+        try {
+            totalAmount = Long.parseLong(order.getTotalPrice().replaceAll("[^0-9]", ""));
+        } catch (Exception ignored) {}
+
+        long subtotal = totalAmount - order.getShippingFee() + order.getDiscountAmount();
+
         ((TextView) view.findViewById(R.id.tv_subtotal)).setText(String.format("%,dđ", subtotal));
+        
+        TextView tvDeliveryFee = view.findViewById(R.id.tv_delivery_fee);
+        if (tvDeliveryFee != null) tvDeliveryFee.setText(String.format("%,dđ", order.getShippingFee()));
+
+        TextView tvDiscount = view.findViewById(R.id.tv_discount);
+        if (tvDiscount != null) tvDiscount.setText(String.format("-%,dđ", order.getDiscountAmount()));
+
         ((TextView) view.findViewById(R.id.tv_total_received)).setText(order.getTotalPrice());
         ((TextView) view.findViewById(R.id.tv_order_id)).setText(order.getId());
         

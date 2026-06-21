@@ -108,8 +108,6 @@ public class SellerReviewAdapter extends RecyclerView.Adapter<SellerReviewAdapte
             holder.tvBtnReply.setVisibility(View.VISIBLE);
             holder.tvBtnReply.setOnClickListener(v -> showReplyBottomSheet(v, position));
         }
-
-        holder.ivAvatar.setImageResource(R.drawable.bg_circle_gray);
     }
 
     private void showReplyBottomSheet(View view, int position) {
