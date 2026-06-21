@@ -98,6 +98,35 @@ public class UserRepository {
         });
     }
 
+    public void changePassword(String oldPassword, String newPassword, String confirmPassword, ApiCallback<String> callback) {
+        ChangePasswordDTO dto = new ChangePasswordDTO(oldPassword, newPassword, confirmPassword);
+        userService.changePassword(dto).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
+    public void deleteAccount(ApiCallback<String> callback) {
+        userService.deleteAccount().enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
     // 2.2 Tải ảnh đại diện lên
     public void uploadAvatar(java.io.File file, ApiCallback<String> callback) {
         MultipartBody.Part filePart = null;

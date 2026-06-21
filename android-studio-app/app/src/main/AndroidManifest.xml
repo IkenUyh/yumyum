@@ -133,6 +133,9 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".profile.DeleteAccountActivity"
+            android:exported="false" />
+        <activity
             android:name=".deliveryaddressorder.AddressOrderActivity"
             android:exported="false" />
 
