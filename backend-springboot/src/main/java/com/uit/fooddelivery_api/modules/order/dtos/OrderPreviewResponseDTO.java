@@ -17,6 +17,7 @@ public class OrderPreviewResponseDTO {
     private BigDecimal shippingFee;
     private BigDecimal totalOrderDiscount;
     private BigDecimal totalShippingDiscount;
+    private BigDecimal rankDiscount;
     private BigDecimal totalDiscountAmount;
     private BigDecimal finalTotal;
     private Double distanceKm;

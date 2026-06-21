@@ -60,4 +60,15 @@ public class OrderPreviewResponse {
     public void setDistanceKm(double distanceKm) {
         this.distanceKm = distanceKm;
     }
+
+    @SerializedName("rankDiscount")
+    private double rankDiscount;
+
+    public double getRankDiscount() {
+        return rankDiscount;
+    }
+
+    public void setRankDiscount(double rankDiscount) {
+        this.rankDiscount = rankDiscount;
+    }
 }

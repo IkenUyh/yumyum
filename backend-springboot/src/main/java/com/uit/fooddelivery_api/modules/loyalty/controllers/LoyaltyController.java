@@ -21,14 +21,14 @@ public class LoyaltyController {
 
     private final LoyaltyService loyaltyService;
 
-    // API: Xem thông tin Xu hiện tại
     @GetMapping("/me")
     public ApiResponse<LoyaltyResponseDTO> getMyLoyaltyInfo(Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
         LoyaltyPoint lp = loyaltyService.getMyLoyaltyInfo(currentUser);
         boolean canCheckIn = loyaltyService.canCheckInToday(lp);
+        String rankName = loyaltyService.getRankName(lp.getTotalSpending());
 
-        return ApiResponse.success(LoyaltyResponseDTO.fromEntity(lp, canCheckIn));
+        return ApiResponse.success(LoyaltyResponseDTO.fromEntity(lp, canCheckIn, rankName));
     }
 
     // API: Bấm nút Điểm danh nhận Xu
@@ -37,8 +37,8 @@ public class LoyaltyController {
         User currentUser = (User) authentication.getPrincipal();
         LoyaltyPoint updatedLp = loyaltyService.dailyCheckIn(currentUser);
 
-        // Sau khi điểm danh thành công thì chắc chắn hôm nay không được điểm danh nữa
-        return ApiResponse.success(LoyaltyResponseDTO.fromEntity(updatedLp, false));
+        String rankName = loyaltyService.getRankName(updatedLp.getTotalSpending());
+        return ApiResponse.success(LoyaltyResponseDTO.fromEntity(updatedLp, false, rankName));
     }
 
     // API: Xem danh sách Deal đã mua

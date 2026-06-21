@@ -31,4 +31,7 @@ public class LoyaltyPoint {
 
     @Column(name = "last_checkin_date")
     private LocalDate lastCheckinDate;
+
+    @Column(name = "total_spending")
+    private java.math.BigDecimal totalSpending;
 }
