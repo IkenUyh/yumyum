@@ -53,6 +53,17 @@
         tools:text="Combo gà rán + khoai" />
 
     <TextView
+        android:id="@+id/tv_store_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="2dp"
+        android:textColor="#EE4D2D"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@+id/tv_food_name"
+        tools:text="Gà Rán Popeyes" />
+
+    <TextView
         android:id="@+id/tv_food_desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -60,7 +71,7 @@
         android:layout_marginTop="4dp"
         android:textColor="#757575"
         android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@+id/tv_food_name"
+        app:layout_constraintTop_toBottomOf="@+id/tv_store_name"
         tools:text="2 miếng gà + khoai tây" />
 
     <TextView

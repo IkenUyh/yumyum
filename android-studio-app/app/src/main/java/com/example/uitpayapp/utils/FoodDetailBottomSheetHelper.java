@@ -49,6 +49,7 @@ public class FoodDetailBottomSheetHelper {
 
         ImageView ivFoodImage = view.findViewById(R.id.iv_food_image);
         TextView tvFoodName = view.findViewById(R.id.tv_food_name);
+        TextView tvStoreName = view.findViewById(R.id.tv_store_name);
         TextView tvFoodDesc = view.findViewById(R.id.tv_food_desc);
         TextView tvFoodPrice = view.findViewById(R.id.tv_food_price);
 
@@ -86,6 +87,14 @@ public class FoodDetailBottomSheetHelper {
         }
         
         tvFoodName.setText(item.getName());
+        if (tvStoreName != null) {
+            if (item.getRestaurantName() != null && !item.getRestaurantName().isEmpty()) {
+                tvStoreName.setText(item.getRestaurantName());
+                tvStoreName.setVisibility(View.VISIBLE);
+            } else {
+                tvStoreName.setVisibility(View.GONE);
+            }
+        }
         tvFoodDesc.setText(item.getDescription());
         tvFoodPrice.setText(item.getFormattedPrice());
 

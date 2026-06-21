@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 public class FoodResponseDTO {
     private Long id;
     private Long restaurantId;
+    private String restaurantName;
     private Long categoryId;
     private String name;
     private String description;
@@ -23,6 +24,7 @@ public class FoodResponseDTO {
         return FoodResponseDTO.builder()
                 .id(food.getId())
                 .restaurantId(food.getRestaurant().getId())
+                .restaurantName(food.getRestaurant().getName())
                 .categoryId(food.getCategory() != null ? food.getCategory().getId() : null)
                 .name(food.getName())
                 .description(food.getDescription())

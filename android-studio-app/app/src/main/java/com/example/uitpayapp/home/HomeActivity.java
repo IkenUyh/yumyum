@@ -756,6 +756,7 @@ public class HomeActivity extends AppCompatActivity {
                         item.getDescription(),
                         item.getImageUrl());
                 discountedItem.setRestaurantId(item.getRestaurantId());
+                discountedItem.setRestaurantName(item.getRestaurantName());
                 showFoodItemDetailPopup(discountedItem, iv);
             });
         }
