@@ -35,8 +35,8 @@ public class OrderService {
     @org.springframework.context.annotation.Lazy
     private OrderService self;
 
-    private final java.util.concurrent.ScheduledExecutorService executorService = 
-            java.util.concurrent.Executors.newScheduledThreadPool(2);
+    private final java.util.concurrent.ScheduledExecutorService executorService = java.util.concurrent.Executors
+            .newScheduledThreadPool(2);
 
     private final OrderRepository orderRepository;
     private final RestaurantRepository restaurantRepository;
@@ -851,7 +851,8 @@ public class OrderService {
         notificationService.pushNotification(
                 order.getUser().getId(),
                 "Đơn hàng đang được giao 🚴",
-                "Đơn hàng #" + order.getId() + " từ " + order.getRestaurant().getName() + " đang trên đường giao đến bạn!",
+                "Đơn hàng #" + order.getId() + " từ " + order.getRestaurant().getName()
+                        + " đang trên đường giao đến bạn!",
                 "ORDER_UPDATE");
 
         Order savedOrder = orderRepository.save(order);
@@ -869,8 +870,10 @@ public class OrderService {
             throw new RuntimeException("Bạn không có quyền hoàn thành đơn hàng của quán khác!");
         }
 
-        if (!"PREPARING".equals(order.getStatus()) && !"PENDING".equals(order.getStatus()) && !"DELIVERING".equals(order.getStatus())) {
-            throw new RuntimeException("Chỉ có thể hoàn thành đơn hàng ở trạng thái ĐANG CHUẨN BỊ, CHỜ XỬ LÝ hoặc ĐANG GIAO!");
+        if (!"PREPARING".equals(order.getStatus()) && !"PENDING".equals(order.getStatus())
+                && !"DELIVERING".equals(order.getStatus())) {
+            throw new RuntimeException(
+                    "Chỉ có thể hoàn thành đơn hàng ở trạng thái ĐANG CHUẨN BỊ, CHỜ XỬ LÝ hoặc ĐANG GIAO!");
         }
 
         order.setStatus("COMPLETED");
@@ -906,6 +909,12 @@ public class OrderService {
     public Order getOrderById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+    }
+
+    private void broadcastOrderUpdate(Long restaurantId) {
+        if (messagingTemplate != null && restaurantId != null) {
+            messagingTemplate.convertAndSend("/topic/restaurant/" + restaurantId + "/orders", "UPDATE");
+        }
     }
 
     public void scheduleAutoDeliveryStages(Long orderId) {
@@ -956,15 +965,14 @@ public class OrderService {
             restaurantRepository.save(restaurant);
 
             restaurantTransactionRepository.save(
-                com.uit.fooddelivery_api.modules.restaurant.entities.RestaurantTransaction.builder()
-                        .restaurant(restaurant)
-                        .amount(amountToAdd)
-                        .balanceAfter(restaurant.getBalance())
-                        .type("REVENUE")
-                        .referenceId("ORDER_" + order.getId())
-                        .description("Doanh thu bán hàng (Tự động hoàn thành) đơn #" + order.getId())
-                        .build()
-            );
+                    com.uit.fooddelivery_api.modules.restaurant.entities.RestaurantTransaction.builder()
+                            .restaurant(restaurant)
+                            .amount(amountToAdd)
+                            .balanceAfter(restaurant.getBalance())
+                            .type("REVENUE")
+                            .referenceId("ORDER_" + order.getId())
+                            .description("Doanh thu bán hàng (Tự động hoàn thành) đơn #" + order.getId())
+                            .build());
 
             notificationService.pushNotification(
                     order.getUser().getId(),
