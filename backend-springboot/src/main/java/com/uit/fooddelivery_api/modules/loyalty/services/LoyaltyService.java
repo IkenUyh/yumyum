@@ -82,8 +82,60 @@ public class LoyaltyService {
                 .user(user)
                 .currentPoints(0)
                 .checkinStreak(0)
+                .totalSpending(BigDecimal.ZERO)
                 .build();
         return loyaltyPointRepository.save(lp);
+    }
+
+    public String getRankName(BigDecimal totalSpending) {
+        if (totalSpending == null) return "NEW";
+        long spent = totalSpending.longValue();
+        if (spent >= 15000000) return "DIAMOND";
+        if (spent >= 5000000) return "GOLD";
+        if (spent >= 1000000) return "SILVER";
+        return "NEW";
+    }
+
+    public double getCoinMultiplier(String rank) {
+        switch(rank) {
+            case "DIAMOND": return 1.5;
+            case "GOLD": return 1.2;
+            case "SILVER": return 1.1;
+            default: return 1.0;
+        }
+    }
+
+    public BigDecimal getRankShippingDiscount(String rank) {
+        switch(rank) {
+            case "DIAMOND": return BigDecimal.valueOf(30000);
+            case "GOLD": return BigDecimal.valueOf(15000);
+            default: return BigDecimal.ZERO;
+        }
+    }
+
+    @Transactional
+    public void addPointsAndSpending(User user, BigDecimal orderTotal) {
+        if (orderTotal == null || orderTotal.compareTo(BigDecimal.ZERO) <= 0) return;
+
+        LoyaltyPoint lp = getMyLoyaltyInfo(user);
+        BigDecimal currentSpending = lp.getTotalSpending() != null ? lp.getTotalSpending() : BigDecimal.ZERO;
+
+        // Xếp hạng hiện tại
+        String currentRank = getRankName(currentSpending);
+        
+        // Cập nhật tổng chi tiêu
+        BigDecimal newSpending = currentSpending.add(orderTotal);
+        lp.setTotalSpending(newSpending);
+
+        // Hạng mới sau khi cộng chi tiêu
+        String newRank = getRankName(newSpending);
+
+        // Tích Xu: 100đ = 1 Xu. Nhân với hệ số hạng MỚI.
+        double multiplier = getCoinMultiplier(newRank);
+        int earnedCoins = (int) (orderTotal.longValue() / 100 * multiplier);
+
+        lp.setCurrentPoints(lp.getCurrentPoints() + earnedCoins);
+        loyaltyPointRepository.save(lp);
     }
 
     public List<DealHistoryResponseDTO> getMyDeals(User user) {

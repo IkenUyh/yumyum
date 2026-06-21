@@ -44,6 +44,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
     private Button btnConfirmCheckout;
     private long deliveryFee = 15000;
     private long coinsDiscount = 10000;
+    private long rankDiscount = 0;
 
     // Payment Selection Views
     private View layoutPayWallet, layoutPayZaloPay;
@@ -199,7 +200,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
             layoutCoinsDiscount.setVisibility(View.GONE);
         }
 
-        long totalDiscount = discount + totalCoinsDiscount;
+        long totalDiscount = discount + totalCoinsDiscount + rankDiscount;
         // Ensure total doesn't go below 0
         if (totalDiscount > subtotalAmount + deliveryFee) {
             totalDiscount = subtotalAmount + deliveryFee;
@@ -211,10 +212,14 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         tvDeliveryFee.setText(String.format("%,dđ", deliveryFee).replace(',', '.'));
         btnConfirmCheckout.setText("Đặt đơn - " + String.format("%,dđ", totalAmount).replace(',', '.'));
 
-        if (discount > 0) {
+        if (discount > 0 || rankDiscount > 0) {
             layoutDiscount.setVisibility(View.VISIBLE);
-            tvDiscountAmount.setText("-" + String.format("%,dđ", discount).replace(',', '.'));
-            tvSelectedVoucher.setText(selectedVoucher.getTitle());
+            tvDiscountAmount.setText("-" + String.format("%,dđ", discount + rankDiscount).replace(',', '.'));
+            if (selectedVoucher != null) {
+                tvSelectedVoucher.setText(selectedVoucher.getTitle() + (rankDiscount > 0 ? " (+Hạng)" : ""));
+            } else {
+                tvSelectedVoucher.setText("Ưu đãi Hạng Thành viên");
+            }
             tvSelectedVoucher.setTextColor(android.graphics.Color.parseColor("#388E3C"));
         } else {
             layoutDiscount.setVisibility(View.GONE);
@@ -243,6 +248,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                         runOnUiThread(() -> {
                             deliveryFee = (long) data.getShippingFee();
                             subtotalAmount = (long) data.getFoodTotal();
+                            rankDiscount = (long) data.getRankDiscount();
                             updateTotals();
                         });
                     }

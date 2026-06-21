@@ -14,6 +14,8 @@ import com.uit.fooddelivery_api.modules.user.entities.UserAddress;
 import com.uit.fooddelivery_api.modules.user.repositories.UserAddressRepository;
 import com.uit.fooddelivery_api.modules.wallet.entities.Wallet;
 import com.uit.fooddelivery_api.modules.wallet.repositories.WalletRepository;
+import com.uit.fooddelivery_api.modules.loyalty.services.LoyaltyService;
+import com.uit.fooddelivery_api.modules.loyalty.entities.LoyaltyPoint;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,7 +48,6 @@ public class OrderService {
     private final com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository;
     private final com.uit.fooddelivery_api.modules.wallet.services.WalletService walletService;
     private final com.uit.fooddelivery_api.modules.restaurant.repositories.RestaurantTransactionRepository restaurantTransactionRepository;
-    private final SimpMessagingTemplate messagingTemplate;
 
     // Phí ship cơ bản: 5.000 VNĐ / 1 Km
     private static final BigDecimal FEE_PER_KM = BigDecimal.valueOf(5000);
@@ -509,7 +510,6 @@ public class OrderService {
                 "Bạn có đơn hàng mới từ " + customer.getFullName() + ". Mã đơn: #" + savedOrder.getId(),
                 "ORDER_UPDATE");
 
-        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
         return savedOrder;
     }
 
@@ -590,9 +590,7 @@ public class OrderService {
             // Có thể thêm logic gọi DriverDispatchService để set tài xế về ONLINE ở đây.
         }
 
-        Order savedOrder = orderRepository.save(order);
-        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
-        return savedOrder;
+        return orderRepository.save(order);
     }
 
     // 1. Lấy danh sách đơn đang chờ tài xế
@@ -613,7 +611,7 @@ public class OrderService {
         order.setDriver(driver);
         order.setStatus("DELIVERING");
         Order savedOrder = orderRepository.save(order);
-        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
+        self.scheduleAutoDeliveryStages(savedOrder.getId());
         return savedOrder;
     }
 
@@ -655,9 +653,7 @@ public class OrderService {
                 "Đơn hàng #" + order.getId() + " đã được giao đến bạn. Chúc bạn ngon miệng!",
                 "ORDER_UPDATE");
 
-        Order savedOrder = orderRepository.save(order);
-        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
-        return savedOrder;
+        return orderRepository.save(order);
     }
 
     // 1. QUÁN ĂN: Bấm xác nhận nấu xong món ăn -> Sinh mã Pickup Code
@@ -689,7 +685,6 @@ public class OrderService {
                         + generatedPickupCode,
                 "ORDER_UPDATE");
 
-        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
         return savedOrder;
     }
 
@@ -724,7 +719,8 @@ public class OrderService {
                         + generatedDeliveryPin,
                 "ORDER_UPDATE");
 
-        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
+        self.scheduleAutoDeliveryStages(savedOrder.getId());
+
         return savedOrder;
     }
 
@@ -779,9 +775,7 @@ public class OrderService {
                 "Cảm ơn bạn đã đặt hàng tại FoodDelivery! Đơn hàng #" + order.getId() + " đã giao thành công.",
                 "ORDER_UPDATE");
 
-        Order savedOrder = orderRepository.save(order);
-        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
-        return savedOrder;
+        return orderRepository.save(order);
     }
 
     // Lấy lịch sử đơn hàng cho Khách hàng
@@ -835,9 +829,7 @@ public class OrderService {
         BigDecimal discount = order.getDiscountAmount() != null ? order.getDiscountAmount() : BigDecimal.ZERO;
         order.setTotalAmount(newFoodTotal.add(shipping).subtract(discount));
 
-        Order savedOrder = orderRepository.save(order);
-        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
-        return savedOrder;
+        return orderRepository.save(order);
     }
 
     // 5. CHỦ QUÁN: Bàn giao cho shipper để chuyển sang trạng thái ĐANG GIAO
@@ -911,9 +903,7 @@ public class OrderService {
                 "Đơn hàng #" + order.getId() + " từ " + order.getRestaurant().getName() + " đã hoàn tất!",
                 "ORDER_UPDATE");
 
-        Order savedOrder = orderRepository.save(order);
-        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
-        return savedOrder;
+        return orderRepository.save(order);
     }
 
     public Order getOrderById(Long id) {
