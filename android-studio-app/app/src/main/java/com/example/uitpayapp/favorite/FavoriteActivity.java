@@ -111,6 +111,10 @@ public class FavoriteActivity extends AppCompatActivity {
     }
 
     private void loadDatabaseShops() {
+        if (!com.example.uitpayapp.network.SessionManager.getInstance(this).isLoggedIn()) {
+            applyFilterAndSorting();
+            return;
+        }
         if (baseShops == null) {
             baseShops = new ArrayList<>();
         } else {
@@ -210,20 +214,36 @@ public class FavoriteActivity extends AppCompatActivity {
     }
 
     private void setupDropdownFilters() {
-        String[] categories = { "Tất cả", "Cơm", "Bún Phở", "Bánh mì", "Fastfood", "Lẩu", "Đồ nướng", "Cafe", "Trà sữa",
-                "Ăn vặt", "Tráng miệng", "Hải sản", "Chay", "Đồ uống", "Gà rán", "Pizza" };
+        java.util.List<String> categories = new java.util.ArrayList<>(java.util.Arrays.asList("Tất cả", "Cơm", "Bánh Mì", "Phở & Bún", "Gà Rán & Fastfood", "Trà Sữa", "Cà Phê & Đồ Uống", "Ăn Vặt", "Món Nhật & Hàn", "Ý & Pizza", "Lẩu & Dimsum", "Đồ Nướng & BBQ", "Hải Sản"));
 
         android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, categories);
 
+        com.example.uitpayapp.modules.food.CategoryRepository categoryRepository = new com.example.uitpayapp.modules.food.CategoryRepository();
+        categoryRepository.getAllCategories(new com.example.uitpayapp.network.ApiCallback<java.util.List<com.example.uitpayapp.modules.food.models.responses.CategoryResponse>>() {
+            @Override
+            public void onSuccess(java.util.List<com.example.uitpayapp.modules.food.models.responses.CategoryResponse> result) {
+                categories.clear();
+                categories.add("Tất cả");
+                for (com.example.uitpayapp.modules.food.models.responses.CategoryResponse cat : result) {
+                    categories.add(cat.getName());
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+            }
+        });
+
         android.widget.ListPopupWindow listPopupWindow = new android.widget.ListPopupWindow(this);
         listPopupWindow.setAdapter(adapter);
         listPopupWindow.setAnchorView(tvFilterService);
-        listPopupWindow.setWidth((int) (150 * getResources().getDisplayMetrics().density));
+        listPopupWindow.setWidth((int) (220 * getResources().getDisplayMetrics().density));
         listPopupWindow.setHeight((int) (200 * getResources().getDisplayMetrics().density));
 
         listPopupWindow.setOnItemClickListener((parent, view, position, id) -> {
-            currentCategory = categories[position];
+            currentCategory = categories.get(position);
             if (currentCategory.equals("Tất cả")) {
                 tvFilterService.setText("Tất cả ▼");
             } else {
@@ -275,12 +295,24 @@ public class FavoriteActivity extends AppCompatActivity {
         mainAdapter.notifyDataSetChanged();
 
         // 3. Kiểm tra rỗng để hiển thị xe đẩy trống (Ảnh 1)
-        if (filteredShops.isEmpty() && topOrderedShops.isEmpty()) {
-            rvMainFavorite.setVisibility(View.GONE);
-            layoutEmptyState.setVisibility(View.VISIBLE);
+        // 3. Kiểm tra rỗng để hiển thị xe đẩy trống (Ảnh 1)
+        if (!com.example.uitpayapp.network.SessionManager.getInstance(this).isLoggedIn()) {
+            rvMainFavorite.setVisibility(android.view.View.GONE);
+            layoutEmptyState.setVisibility(android.view.View.VISIBLE);
+            android.widget.TextView tvTitle = findViewById(R.id.tvEmptyTitle);
+            android.widget.TextView tvDesc = findViewById(R.id.tvEmptyDesc);
+            if (tvTitle != null) tvTitle.setText("Vui lòng đăng nhập");
+            if (tvDesc != null) tvDesc.setText("Đăng nhập để xem danh sách quán yêu thích của bạn.");
+        } else if (filteredShops.isEmpty() && topOrderedShops.isEmpty()) {
+            rvMainFavorite.setVisibility(android.view.View.GONE);
+            layoutEmptyState.setVisibility(android.view.View.VISIBLE);
+            android.widget.TextView tvTitle = findViewById(R.id.tvEmptyTitle);
+            android.widget.TextView tvDesc = findViewById(R.id.tvEmptyDesc);
+            if (tvTitle != null) tvTitle.setText("Chưa có nhà hàng yêu thích");
+            if (tvDesc != null) tvDesc.setText("Bạn chưa thả tim nhà hàng nào");
         } else {
-            rvMainFavorite.setVisibility(View.VISIBLE);
-            layoutEmptyState.setVisibility(View.GONE);
+            rvMainFavorite.setVisibility(android.view.View.VISIBLE);
+            layoutEmptyState.setVisibility(android.view.View.GONE);
         }
     }
 

@@ -174,9 +174,9 @@ public class WalletRepository {
 
     // Hàm chuyển tiền từ ví cửa hàng về ví cá nhân
     public void transferMerchantToPersonal(MerchantWalletTransferRequest request, final ApiCallback<String> callback) {
-        walletService.transferToPersonalWallet(request).enqueue(new Callback<ApiResponse<Void>>() {
+        walletService.transferToPersonalWallet(request).enqueue(new Callback<ApiResponse<String>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     callback.onSuccess(response.body().getMessage());
                 } else {
@@ -192,7 +192,7 @@ public class WalletRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
                 callback.onError("Lỗi kết nối hệ thống: " + t.getMessage());
             }
         });
@@ -200,9 +200,9 @@ public class WalletRepository {
 
     // Hàm rút tiền từ ví cửa hàng ra ngoài
     public void withdrawMerchantBalance(MerchantWalletWithdrawRequest request, final ApiCallback<String> callback) {
-        walletService.withdrawMerchantBalance(request).enqueue(new Callback<ApiResponse<Void>>() {
+        walletService.withdrawMerchantBalance(request).enqueue(new Callback<ApiResponse<String>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     callback.onSuccess(response.body().getMessage());
                 } else {
@@ -218,7 +218,7 @@ public class WalletRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
                 callback.onError("Lỗi kết nối hệ thống: " + t.getMessage());
             }
         });

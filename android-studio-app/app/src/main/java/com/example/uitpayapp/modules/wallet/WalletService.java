@@ -34,11 +34,11 @@ public interface WalletService {
 
     // Chuyển tiền từ ví cửa hàng sang ví cá nhân
     @POST("api/v1/merchant/wallets/transfer")
-    Call<ApiResponse<Void>> transferToPersonalWallet(@Body MerchantWalletTransferRequest request);
+    Call<ApiResponse<String>> transferToPersonalWallet(@Body MerchantWalletTransferRequest request);
 
     // Rút tiền khỏi hệ thống
     @POST("api/v1/merchant/wallets/withdraw")
-    Call<ApiResponse<Void>> withdrawMerchantBalance(@Body MerchantWalletWithdrawRequest request);
+    Call<ApiResponse<String>> withdrawMerchantBalance(@Body MerchantWalletWithdrawRequest request);
 
 
     // Dự phóng thêm API nạp tiền (vì backend đã cung cấp TopUpRequestDTO)

@@ -156,11 +156,11 @@ public class SellerShopInfoActivity extends AppCompatActivity {
         setRowData(R.id.row_shop_name, "Tên cửa hàng", data.getName() != null ? data.getName() : "—");
         setRowData(R.id.row_address, "Địa chỉ", data.getAddress() != null ? data.getAddress() : "—");
 
-        // Đồng bộ dữ liệu vào SharedPreferences
         android.content.SharedPreferences prefs = getSharedPreferences("SellerPrefs", MODE_PRIVATE);
         android.content.SharedPreferences.Editor editor = prefs.edit();
         if (data.getName() != null) editor.putString("current_store_name", data.getName());
         if (data.getAddress() != null) editor.putString("current_store_address", data.getAddress());
+        if (data.getImageUrl() != null) editor.putString("current_store_image_url", data.getImageUrl());
         editor.apply();
 
         String openTime = data.getOpenTime() != null ? data.getOpenTime() : "";

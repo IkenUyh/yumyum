@@ -37,24 +37,6 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tab_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        app:tabIndicatorColor="#f24405"
-        app:tabSelectedTextColor="#f24405"
-        app:tabTextColor="#757575"
-        app:tabTextAppearance="@style/CustomTabTextAppearance">
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cửa hàng" />
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Món ăn" />
-    </com.google.android.material.tabs.TabLayout>
 
     <LinearLayout
         android:id="@+id/ll_filters"

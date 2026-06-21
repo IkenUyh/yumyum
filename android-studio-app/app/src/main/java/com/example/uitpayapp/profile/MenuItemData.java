@@ -10,5 +10,6 @@ public class MenuItemData {
     }
     public String getTitle() { return title; }
     public String getSubtitle() { return subtitle; }
+    public void setSubtitle(String subtitle) { this.subtitle = subtitle; }
     public int getIcon() { return icon; }
 }

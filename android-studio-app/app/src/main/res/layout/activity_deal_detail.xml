@@ -4,11 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F5F5"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <RelativeLayout
+        android:id="@+id/layoutHeader"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
         android:background="@android:color/white"
         android:paddingHorizontal="16dp">
         <ImageView
