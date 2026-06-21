@@ -264,11 +264,11 @@ public class OrderService {
     }
 
     public com.uit.fooddelivery_api.modules.loyalty.services.LoyaltyService getLoyaltyService() {
-        return self.loyaltyService;
+        return this.loyaltyService;
     }
 
     public com.uit.fooddelivery_api.modules.loyalty.repositories.LoyaltyPointRepository getLoyaltyPointRepository() {
-        return self.loyaltyPointRepository;
+        return this.loyaltyPointRepository;
     }
 
     @Transactional
@@ -542,9 +542,9 @@ public class OrderService {
         BigDecimal totalDiscountAmount = totalOrderDiscount.add(totalShippingDiscount);
 
         // ÁP DỤNG GIẢM GIÁ HẠNG THÀNH VIÊN VÀ XU
-        LoyaltyPoint lp = self.getLoyaltyService().getMyLoyaltyInfo(customer);
-        String currentRank = self.getLoyaltyService().getRankName(lp.getTotalSpending());
-        BigDecimal rankShippingDiscount = self.getLoyaltyService().getRankShippingDiscount(currentRank);
+        LoyaltyPoint lp = loyaltyService.getMyLoyaltyInfo(customer);
+        String currentRank = loyaltyService.getRankName(lp.getTotalSpending());
+        BigDecimal rankShippingDiscount = loyaltyService.getRankShippingDiscount(currentRank);
 
         // Thêm giảm giá ship từ hạng
         totalShippingDiscount = totalShippingDiscount.add(rankShippingDiscount).min(shippingFee);
@@ -570,7 +570,7 @@ public class OrderService {
 
                 // Trừ xu người dùng
                 lp.setCurrentPoints(lp.getCurrentPoints() - usedCoins);
-                self.getLoyaltyPointRepository().save(lp);
+                loyaltyPointRepository.save(lp);
             }
         }
 
@@ -846,7 +846,7 @@ public class OrderService {
                 "ORDER_UPDATE");
 
         // TÍCH ĐIỂM HẠNG VÀ XU KHI HOÀN THÀNH ĐƠN
-        self.getLoyaltyService().addPointsAndSpending(order.getUser(), order.getTotalAmount());
+        loyaltyService.addPointsAndSpending(order.getUser(), order.getTotalAmount());
 
         return orderRepository.save(order);
     }
