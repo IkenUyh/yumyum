@@ -114,6 +114,38 @@ public class NotificationRepository {
         });
     }
 
+    public void registerFcmToken(String fcmToken, final ApiCallback<String> callback) {
+        java.util.Map<String, String> body = new java.util.HashMap<>();
+        body.put("fcmToken", fcmToken);
+        notificationService.registerFcmToken(body).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void deregisterFcmToken(String fcmToken, final ApiCallback<String> callback) {
+        java.util.Map<String, String> body = new java.util.HashMap<>();
+        body.put("fcmToken", fcmToken);
+        notificationService.deregisterFcmToken(body).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<String>> call, Response<ApiResponse<String>> response) {
+                handleResponse(response, callback);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<String>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
     private <T> void handleResponse(Response<ApiResponse<T>> response, ApiCallback<T> callback) {
         if (response.isSuccessful() && response.body() != null) {
             ApiResponse<T> apiResponse = response.body();

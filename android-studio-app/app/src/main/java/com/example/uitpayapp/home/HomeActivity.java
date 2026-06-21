@@ -178,6 +178,7 @@ public class HomeActivity extends AppCompatActivity {
                 swipeRefreshLayout.setRefreshing(false);
             });
         }
+        checkAndSyncFcmToken();
     }
 
     private void loadInitialAddressWithOverlay() {
@@ -282,6 +283,10 @@ public class HomeActivity extends AppCompatActivity {
             } else {
                 com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
                 fallbackToApiAddress(sessionManager);
+            }
+        } else if (requestCode == 1002) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                checkAndSyncFcmToken();
             }
         }
     }
@@ -1607,5 +1612,47 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
         return list;
+    }
+
+    private void checkAndSyncFcmToken() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1002);
+                return;
+            }
+        }
+
+        com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        if (!sessionManager.isLoggedIn()) {
+            return;
+        }
+
+        if (sessionManager.isFcmTokenSynced() && sessionManager.getFcmToken() != null) {
+            return;
+        }
+
+        com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.w("HomeActivity", "Fetching FCM registration token failed", task.getException());
+                return;
+            }
+            String token = task.getResult();
+            sessionManager.saveFcmToken(token);
+
+            com.example.uitpayapp.modules.notification.NotificationRepository repo = new com.example.uitpayapp.modules.notification.NotificationRepository();
+            repo.registerFcmToken(token, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String data) {
+                    Log.i("HomeActivity", "FCM token successfully registered on server.");
+                    sessionManager.setFcmTokenSynced(true);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    Log.e("HomeActivity", "FCM token registration failed on server: " + errorMessage);
+                    sessionManager.setFcmTokenSynced(false);
+                }
+            });
+        });
     }
 }

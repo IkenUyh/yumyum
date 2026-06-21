@@ -19,10 +19,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final FcmService fcmService;
 
     // Lưu trữ các kết nối đang mở của Client. Dùng ConcurrentHashMap để Thread-safe (Chống đụng độ luồng)
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
@@ -74,6 +76,14 @@ public class NotificationService {
                 // Nếu đang bắn mà rớt mạng thì xóa connection
                 emitters.remove(userId);
             }
+        }
+
+        // Bước C: Bắn thông báo qua FCM (Firebase Cloud Messaging) cho tất cả thiết bị của User này
+        try {
+            fcmService.sendPushNotification(userId, title, message, type);
+        } catch (Exception e) {
+            // Đảm bảo không làm rollback transaction chính nếu FCM lỗi
+            log.error("Failed to send FCM push notification for user {}: {}", userId, e.getMessage());
         }
     }
 
