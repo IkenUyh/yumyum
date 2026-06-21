@@ -18,9 +18,13 @@ public class UserResponseDTO {
     @SerializedName("avatarUrl")
     private String avatarUrl;
 
+    @SerializedName("role")
+    private String role;
+
     public Long getId() { return id; }
     public String getPhoneNumber() { return phoneNumber; }
     public String getFullName() { return fullName; }
     public String getEmail() { return email; }
     public String getAvatarUrl() { return avatarUrl; }
+    public String getRole() { return role; }
 }

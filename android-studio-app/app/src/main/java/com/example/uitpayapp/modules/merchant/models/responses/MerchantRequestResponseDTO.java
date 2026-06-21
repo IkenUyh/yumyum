@@ -30,6 +30,15 @@ public class MerchantRequestResponseDTO {
     @SerializedName("createdAt")
     private String createdAt; // Ánh xạ từ LocalDateTime sang dạng String để dễ format ở Client
 
+    @SerializedName("ownerName")
+    private String ownerName;
+
+    @SerializedName("latitude")
+    private Double latitude;
+
+    @SerializedName("longitude")
+    private Double longitude;
+
     // Getters and Setters
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
@@ -40,4 +49,7 @@ public class MerchantRequestResponseDTO {
     public String getStatus() { return status; }
     public String getConfirmationCode() { return confirmationCode; }
     public String getCreatedAt() { return createdAt; }
+    public String getOwnerName() { return ownerName; }
+    public Double getLatitude() { return latitude; }
+    public Double getLongitude() { return longitude; }
 }

@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Thông tin cửa hàng"
+            android:text="Cập nhật thông tin cửa hàng"
             android:textColor="#000000"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -65,37 +65,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Số điện thoại quán"
-                android:textColor="#757575"
-                android:textSize="13sp"/>
-
-            <EditText
-                android:id="@+id/et_store_phone"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_edittext_rounded"
-                android:hint="Nhập số điện thoại..."
-                android:paddingHorizontal="16dp"
-                android:textColor="#000000"
-                android:textSize="14sp"
-                android:inputType="phone"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="Địa chỉ quán"
+                android:text="Địa chỉ cửa hàng"
                 android:textColor="#757575"
                 android:textSize="13sp"/>
 
             <RelativeLayout
                 android:id="@+id/layout_select_store_address"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_edittext_rounded"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp">
                 <TextView
                     android:id="@+id/tv_selected_store_address"
                     android:layout_width="match_parent"
@@ -105,7 +87,7 @@
                     android:text="Chọn địa chỉ từ bản đồ"
                     android:textColor="#9E9E9E"
                     android:textSize="14sp"
-                    android:maxLines="1"
+                    android:maxLines="2"
                     android:ellipsize="end"/>
                 <ImageView
                     android:id="@+id/iv_chevron_address"
@@ -115,41 +97,6 @@
                     android:layout_centerVertical="true"
                     android:src="@drawable/ic_right_arrow"
                     app:tint="#9E9E9E"/>
-            </RelativeLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="Loại hình kinh doanh"
-                android:textColor="#757575"
-                android:textSize="13sp"/>
-
-            <RelativeLayout
-                android:id="@+id/layout_select_store_type"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_edittext_rounded"
-                android:paddingHorizontal="16dp">
-                <TextView
-                    android:id="@+id/tv_selected_store_type"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_toStartOf="@id/iv_chevron_type"
-                    android:text="Chọn loại hình quán"
-                    android:textColor="#9E9E9E"
-                    android:textSize="14sp"/>
-                <ImageView
-                    android:id="@+id/iv_chevron_type"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_right_arrow"
-                    app:tint="#9E9E9E"
-                    android:rotation="90"/>
             </RelativeLayout>
 
             <androidx.appcompat.widget.AppCompatButton

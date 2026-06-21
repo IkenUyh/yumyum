@@ -15,11 +15,19 @@ public class SubmitRequestDTO {
     @SerializedName("confirmationCode")
     private String confirmationCode;
 
-    public SubmitRequestDTO(String storeName, String storeAddress, String storePhone, String confirmationCode) {
+    @SerializedName("latitude")
+    private Double latitude;
+
+    @SerializedName("longitude")
+    private Double longitude;
+
+    public SubmitRequestDTO(String storeName, String storeAddress, String storePhone, String confirmationCode, Double latitude, Double longitude) {
         this.storeName = storeName;
         this.storeAddress = storeAddress;
         this.storePhone = storePhone;
         this.confirmationCode = confirmationCode;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     // Getters and Setters
@@ -34,4 +42,10 @@ public class SubmitRequestDTO {
 
     public String getConfirmationCode() { return confirmationCode; }
     public void setConfirmationCode(String confirmationCode) { this.confirmationCode = confirmationCode; }
+
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
 }

@@ -24,11 +24,13 @@ public interface MerchantService {
             @Part("storeAddress") RequestBody storeAddress,
             @Part("storePhone") RequestBody storePhone,
             @Part("confirmationCode") RequestBody confirmationCode,
+            @Part("latitude") RequestBody latitude,
+            @Part("longitude") RequestBody longitude,
             @Part MultipartBody.Part licenseFile
     );
 
-    @GET("api/v1/merchant-requests/pending")
-    Call<ApiResponse<List<MerchantRequestResponseDTO>>> getPendingRequests();
+    @GET("api/v1/merchant-requests")
+    Call<ApiResponse<List<MerchantRequestResponseDTO>>> getRequestsByStatus(@retrofit2.http.Query("status") String status);
 
     @PUT("api/v1/merchant-requests/{id}/approve")
     Call<ApiResponse<MerchantRequestResponseDTO>> approveRequest(@Path("id") Long id);

@@ -40,6 +40,12 @@ public class MerchantRequest {
     @Column(name = "confirmation_code", length = 20)
     private String confirmationCode;
 
+    @Column(precision = 10, scale = 8)
+    private java.math.BigDecimal latitude;
+
+    @Column(precision = 11, scale = 8)
+    private java.math.BigDecimal longitude;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 }

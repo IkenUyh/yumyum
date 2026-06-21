@@ -30,6 +30,8 @@ public class MerchantRepository {
         RequestBody storeAddress = RequestBody.create(MediaType.parse("text/plain"), dto.getStoreAddress());
         RequestBody storePhone = RequestBody.create(MediaType.parse("text/plain"), dto.getStorePhone());
         RequestBody confirmationCode = RequestBody.create(MediaType.parse("text/plain"), dto.getConfirmationCode());
+        RequestBody latitude = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(dto.getLatitude() != null ? dto.getLatitude() : 0.0));
+        RequestBody longitude = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(dto.getLongitude() != null ? dto.getLongitude() : 0.0));
 
         MultipartBody.Part filePart = null;
         if (file != null && file.exists()) {
@@ -38,7 +40,7 @@ public class MerchantRepository {
             filePart = MultipartBody.Part.createFormData("licenseFile", file.getName(), fileBody);
         }
 
-        merchantService.submitRequest(storeName, storeAddress, storePhone, confirmationCode, filePart)
+        merchantService.submitRequest(storeName, storeAddress, storePhone, confirmationCode, latitude, longitude, filePart)
                 .enqueue(new Callback<ApiResponse<MerchantRequestResponseDTO>>() {
                     @Override
                     public void onResponse(Call<ApiResponse<MerchantRequestResponseDTO>> call, Response<ApiResponse<MerchantRequestResponseDTO>> response) {
@@ -54,7 +56,11 @@ public class MerchantRepository {
 
     // 2. Lấy danh sách đơn đang chờ duyệt (Admin)
     public void getPendingRequests(ApiCallback<List<MerchantRequestResponseDTO>> callback) {
-        merchantService.getPendingRequests().enqueue(new Callback<ApiResponse<List<MerchantRequestResponseDTO>>>() {
+        getRequestsByStatus("PENDING", callback);
+    }
+
+    public void getRequestsByStatus(String status, ApiCallback<List<MerchantRequestResponseDTO>> callback) {
+        merchantService.getRequestsByStatus(status).enqueue(new Callback<ApiResponse<List<MerchantRequestResponseDTO>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<MerchantRequestResponseDTO>>> call, Response<ApiResponse<List<MerchantRequestResponseDTO>>> response) {
                 handleResponse(response, callback);

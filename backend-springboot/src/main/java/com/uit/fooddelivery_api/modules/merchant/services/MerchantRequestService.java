@@ -48,6 +48,8 @@ public class MerchantRequestService {
                 .storeAddress(dto.getStoreAddress())
                 .storePhone(dto.getStorePhone())
                 .confirmationCode(dto.getConfirmationCode())
+                .latitude(dto.getLatitude())
+                .longitude(dto.getLongitude())
                 .businessLicenseUrl(licenseUrl)
                 .status("PENDING")
                 .build();
@@ -57,6 +59,13 @@ public class MerchantRequestService {
 
     public List<MerchantRequest> getPendingRequests() {
         return requestRepository.findByStatus("PENDING");
+    }
+
+    public List<MerchantRequest> getRequestsByStatus(String status) {
+        if (status == null || status.isEmpty()) {
+            return requestRepository.findAll();
+        }
+        return requestRepository.findByStatus(status.toUpperCase());
     }
 
     @Transactional
@@ -81,6 +90,8 @@ public class MerchantRequestService {
                 .merchant(user)
                 .name(req.getStoreName())
                 .address(req.getStoreAddress())
+                .latitude(req.getLatitude() != null ? req.getLatitude() : java.math.BigDecimal.ZERO)
+                .longitude(req.getLongitude() != null ? req.getLongitude() : java.math.BigDecimal.ZERO)
                 .openTime(LocalTime.of(8, 0)) // Set mặc định 8h sáng
                 .closeTime(LocalTime.of(22, 0)) // Đóng lúc 10h tối
                 .isActive(true)
