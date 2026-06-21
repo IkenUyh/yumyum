@@ -31,6 +31,9 @@ public class FoodResponse {
     @SerializedName("isAvailable")
     private Boolean isAvailable;
 
+    @SerializedName("distance")
+    private Double distance;
+
     // Getters
     public Long getId() { return id; }
     public Long getRestaurantId() { return restaurantId; }
@@ -44,4 +47,6 @@ public class FoodResponse {
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public Boolean getIsAvailable() { return isAvailable; }
     public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
+    public Double getDistance() { return distance; }
+    public void setDistance(Double distance) { this.distance = distance; }
 }

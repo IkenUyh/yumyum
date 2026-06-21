@@ -132,6 +132,7 @@ public class StoreDetailActivity extends AppCompatActivity {
                         updateStoreUI(dto);
                         checkFavoriteStatus();
                         fetchRestaurantFoods(id);
+                        fetchStoreDistance(id);
                     }
                 }
 
@@ -139,6 +140,31 @@ public class StoreDetailActivity extends AppCompatActivity {
                 public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.modules.restaurant.models.RestaurantResponseDTO>> call, Throwable t) {
                 }
             });
+    }
+
+    private void fetchStoreDistance(Long id) {
+        com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        double lat = session.getDeliveryLatitude();
+        double lng = session.getDeliveryLongitude();
+        if (lat == 0.0 || lng == 0.0) return;
+
+        new com.example.uitpayapp.modules.restaurant.RestaurantRepository().getRestaurantDistance(id, lat, lng, new ApiCallback<Double>() {
+            @Override
+            public void onSuccess(Double distance) {
+                runOnUiThread(() -> {
+                    TextView tvDistance = findViewById(R.id.tv_store_distance);
+                    View separator = findViewById(R.id.view_distance_separator);
+                    if (tvDistance != null && separator != null && distance != null) {
+                        tvDistance.setText(String.format(java.util.Locale.US, "%.1f km", distance));
+                        tvDistance.setVisibility(View.VISIBLE);
+                        separator.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {}
+        });
     }
 
     private void fetchRestaurantFoods(Long id) {
@@ -186,7 +212,6 @@ public class StoreDetailActivity extends AppCompatActivity {
         TextView tvStoreName = findViewById(R.id.tv_store_name);
         TextView tvStoreAddress = findViewById(R.id.tv_store_address);
         TextView tvStoreRating = findViewById(R.id.tv_store_rating);
-        TextView tvDeliveryTime = findViewById(R.id.tv_delivery_time);
 
         if (dto.getImageUrl() != null && !dto.getImageUrl().isEmpty()) {
             com.bumptech.glide.Glide.with(this).load(dto.getImageUrl()).into(ivBanner);
@@ -200,7 +225,6 @@ public class StoreDetailActivity extends AppCompatActivity {
         } else {
             tvStoreRating.setText(String.format(java.util.Locale.US, "%.1f (Chưa có bình luận)", ratingVal));
         }
-        tvDeliveryTime.setText("30 phút");
     }
 
     private void updateMenuUI(List<FoodMenuItem> menuItems) {

@@ -14,6 +14,7 @@ public class FoodMenuItem {
     private String restaurantName;
     private long originalPrice;
     private int discountPercent;
+    private Double distance;
 
     public FoodMenuItem(String id, String name, long price, int imageResId, String description) {
         this.id = id;
@@ -48,6 +49,8 @@ public class FoodMenuItem {
     public void setOriginalPrice(long originalPrice) { this.originalPrice = originalPrice; }
     public int getDiscountPercent() { return discountPercent; }
     public void setDiscountPercent(int discountPercent) { this.discountPercent = discountPercent; }
+    public Double getDistance() { return distance; }
+    public void setDistance(Double distance) { this.distance = distance; }
 
     public String getFormattedPrice() {
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));

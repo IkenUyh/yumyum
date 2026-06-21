@@ -18,6 +18,8 @@ public interface HomeApiService {
             @Query("addressId") String addressId,
             @Query("tabId") int tabId,
             @Query("page") int page,
-            @Query("size") int size
+            @Query("size") int size,
+            @Query("lat") Double lat,
+            @Query("lng") Double lng
     );
 }

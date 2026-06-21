@@ -44,6 +44,7 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.VoucherV
         VoucherModel.VoucherType type = voucher.getVoucherType();
         holder.imgIcon.setImageResource(type.getIconResId());
         holder.tvType.setText(type.getDisplayName());
+        holder.llLeftSide.setBackgroundColor(android.graphics.Color.parseColor(type.getColorHex()));
         holder.tvMainTitle.setText(voucher.getMainTitle());
         holder.tvSubTitle.setText(voucher.getSubTitle());
         holder.tvExpiration.setText(voucher.getVoucherExpiration());
@@ -71,6 +72,7 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.VoucherV
     static class VoucherViewHolder extends RecyclerView.ViewHolder {
         ImageView imgIcon;
         TextView tvType, tvMainTitle, tvSubTitle, tvExpiration;
+        android.widget.LinearLayout llLeftSide;
 
         public VoucherViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -79,6 +81,7 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.VoucherV
             tvMainTitle = itemView.findViewById(R.id.tv_main_title_voucher);
             tvSubTitle = itemView.findViewById(R.id.tv_sub_title_voucher);
             tvExpiration = itemView.findViewById(R.id.tv_voucher_expiration);
+            llLeftSide = itemView.findViewById(R.id.ll_left_side);
         }
     }
 }

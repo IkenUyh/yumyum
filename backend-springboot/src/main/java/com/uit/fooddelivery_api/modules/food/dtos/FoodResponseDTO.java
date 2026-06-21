@@ -19,6 +19,7 @@ public class FoodResponseDTO {
     private BigDecimal price;
     private String imageUrl;
     private Boolean isAvailable;
+    private Double distance;
 
     public static FoodResponseDTO fromEntity(Food food) {
         return FoodResponseDTO.builder()

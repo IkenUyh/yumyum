@@ -158,8 +158,8 @@ public class RestaurantRepository {
         });
     }
 
-    public void searchByKeyword(String keyword, final ApiCallback<List<RestaurantDistanceViewDTO>> callback) {
-        restaurantSearchService.searchByKeyword(keyword).enqueue(new Callback<ApiResponse<List<RestaurantDistanceViewDTO>>>() {
+    public void searchByKeyword(String keyword, Double lat, Double lng, Double radiusKm, final ApiCallback<List<RestaurantDistanceViewDTO>> callback) {
+        restaurantSearchService.searchByKeyword(keyword, lat, lng, radiusKm).enqueue(new Callback<ApiResponse<List<RestaurantDistanceViewDTO>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<RestaurantDistanceViewDTO>>> call, Response<ApiResponse<List<RestaurantDistanceViewDTO>>> response) {
                 handleResponse(response, callback);

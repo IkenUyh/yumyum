@@ -29,6 +29,17 @@ public class HomeService {
         private final FlashSaleItemRepository flashSaleItemRepository;
         private final Random random = new Random();
 
+        private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+                final int R = 6371; // Radius of the earth in km
+                double latDistance = Math.toRadians(lat2 - lat1);
+                double lonDistance = Math.toRadians(lon2 - lon1);
+                double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                        + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                        * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+                double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c; 
+        }
+
         public HomeCoreResponseDTO getHomeCore(String addressId) {
                 // 1. Banners
                 List<BannerDTO> banners = List.of(
@@ -166,7 +177,7 @@ public class HomeService {
                 return BrandResponseDTO.builder().brands(brands).build();
         }
 
-        public DealResponseDTO getRecommendedDeals(String addressId, int tabId, int page, int size) {
+        public DealResponseDTO getRecommendedDeals(String addressId, int tabId, int page, int size, Double lat, Double lng) {
                 List<Food> allFoods = foodRepository.findAllWithRestaurant();
                 if (allFoods.isEmpty()) {
                         return DealResponseDTO.builder()
@@ -180,9 +191,15 @@ public class HomeService {
                                 .distinct()
                                 .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
                                 .map(f -> {
-                                        java.util.Random itemRandom = new java.util.Random(f.getId() != null ? f.getId().hashCode() : 0);
-                                        double distance = 0.5 + itemRandom.nextDouble() * 5.0;
-                                        distance = Math.round(distance * 10.0) / 10.0;
+                                        double distance = 0.0;
+                                        if (lat != null && lng != null && f.getRestaurant() != null && f.getRestaurant().getLatitude() != null && f.getRestaurant().getLongitude() != null) {
+                                                distance = calculateDistance(lat, lng, f.getRestaurant().getLatitude(), f.getRestaurant().getLongitude());
+                                                distance = Math.round(distance * 10.0) / 10.0;
+                                        } else {
+                                                java.util.Random itemRandom = new java.util.Random(f.getId() != null ? f.getId().hashCode() : 0);
+                                                distance = 0.5 + itemRandom.nextDouble() * 5.0;
+                                                distance = Math.round(distance * 10.0) / 10.0;
+                                        }
                                         int delTime = (int) (distance * 4 + 10);
                                         double origPrice = f.getPrice().doubleValue();
                                         double discPrice = origPrice * 0.8;
