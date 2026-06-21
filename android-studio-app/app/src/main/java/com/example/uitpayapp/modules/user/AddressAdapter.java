@@ -42,12 +42,18 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.AddressV
         holder.tvAddressReceiver.setText((address.getRecipientName() != null ? address.getRecipientName() : "") + " - " + (address.getPhoneNumber() != null ? address.getPhoneNumber() : ""));
         
         String type = address.getAddressName() != null ? address.getAddressName() : "HOME";
-        if ("WORK".equalsIgnoreCase(type)) {
+        if ("GPS".equalsIgnoreCase(type) || (address.getId() != null && address.getId() == -1L)) {
+            holder.ivAddressIcon.setImageResource(R.drawable.ic_location);
+            holder.tvAddressTitle.setText("Địa điểm hiện tại");
+            holder.tvAddressReceiver.setVisibility(View.GONE);
+        } else if ("WORK".equalsIgnoreCase(type)) {
             holder.ivAddressIcon.setImageResource(R.drawable.ic_location); 
             holder.tvAddressTitle.setText("Công ty");
+            holder.tvAddressReceiver.setVisibility(View.VISIBLE);
         } else {
-            holder.ivAddressIcon.setImageResource(R.drawable.ic_home_24px); // Assumes exist
+            holder.ivAddressIcon.setImageResource(R.drawable.ic_home_24px);
             holder.tvAddressTitle.setText("Nhà");
+            holder.tvAddressReceiver.setVisibility(View.VISIBLE);
         }
 
         if (selectedAddressId != null && selectedAddressId.equals(address.getId())) {

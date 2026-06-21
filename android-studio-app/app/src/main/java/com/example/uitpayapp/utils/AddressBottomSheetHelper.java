@@ -43,11 +43,21 @@ public class AddressBottomSheetHelper {
         }
 
         TextView btnAddNew = view.findViewById(R.id.btn_add_new_address);
-        btnAddNew.setOnClickListener(v -> {
-            bottomSheetDialog.dismiss();
-            Intent intent = new Intent(context, AddressOrderActivity.class);
-            context.startActivity(intent);
-        });
+        boolean isLoggedIn = com.example.uitpayapp.network.SessionManager.getInstance(context).isLoggedIn();
+        
+        if (!isLoggedIn) {
+            btnAddNew.setText("Đăng nhập để thêm địa chỉ lưu sẵn");
+            btnAddNew.setOnClickListener(v -> {
+                bottomSheetDialog.dismiss();
+                com.example.uitpayapp.utils.LoginPopupHelper.showLoginRequiredPopup(context);
+            });
+        } else {
+            btnAddNew.setOnClickListener(v -> {
+                bottomSheetDialog.dismiss();
+                Intent intent = new Intent(context, AddressOrderActivity.class);
+                context.startActivity(intent);
+            });
+        }
 
         bottomSheetDialog.show();
     }

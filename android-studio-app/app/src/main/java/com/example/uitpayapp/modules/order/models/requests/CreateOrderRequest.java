@@ -16,11 +16,23 @@ public class CreateOrderRequest {
     @SerializedName("voucherCodes")
     private List<String> voucherCodes;
 
-    public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes) {
+    @SerializedName("latitude")
+    private Double latitude;
+
+    @SerializedName("longitude")
+    private Double longitude;
+
+    @SerializedName("addressText")
+    private String addressText;
+
+    public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes, Double latitude, Double longitude, String addressText) {
         this.restaurantId = restaurantId;
         this.addressId = addressId;
         this.deliveryMode = deliveryMode;
         this.voucherCodes = voucherCodes;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.addressText = addressText;
     }
 
     // Getters and Setters
@@ -35,4 +47,13 @@ public class CreateOrderRequest {
 
     public List<String> getVoucherCodes() { return voucherCodes; }
     public void setVoucherCodes(List<String> voucherCodes) { this.voucherCodes = voucherCodes; }
+
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public String getAddressText() { return addressText; }
+    public void setAddressText(String addressText) { this.addressText = addressText; }
 }

@@ -258,8 +258,9 @@ public class HomeActivity extends AppCompatActivity {
                                 Address address = addresses.get(0);
                                 String addressText = address.getAddressLine(0);
                                 sessionManager.saveDeliveryAddress(-1L, addressText);
+                                sessionManager.saveDeliveryCoordinates(address.getLatitude(), address.getLongitude());
                                 hideLocationOverlay(addressText);
-                                updateAddressUI(addressText);
+                                updateAddressUI(addressText, true);
                                 return;
                             }
                         } catch (IOException e) {
@@ -296,7 +297,8 @@ public class HomeActivity extends AppCompatActivity {
         String cachedAddress = sessionManager.getDeliveryAddressText();
         if (cachedAddress != null && !cachedAddress.isEmpty()) {
             hideLocationOverlay(cachedAddress);
-            updateAddressUI(cachedAddress);
+            boolean isGPSCached = (sessionManager.getDeliveryAddressId() == null);
+            updateAddressUI(cachedAddress, isGPSCached);
             return;
         }
 
@@ -311,27 +313,30 @@ public class HomeActivity extends AppCompatActivity {
                                 if (addr == null || addr.isEmpty())
                                     addr = "Vui lòng chọn địa chỉ";
                                 sessionManager.saveDeliveryAddress(result.getId(), addr);
+                                if (result.getLatitude() != null && result.getLongitude() != null) {
+                                    sessionManager.saveDeliveryCoordinates(result.getLatitude().doubleValue(), result.getLongitude().doubleValue());
+                                }
                                 hideLocationOverlay(addr);
-                                updateAddressUI(addr);
+                                updateAddressUI(addr, false);
                             } else {
                                 hideLocationOverlay("Vui lòng chọn địa chỉ");
-                                updateAddressUI("Vui lòng chọn địa chỉ");
+                                updateAddressUI("Vui lòng chọn địa chỉ", false);
                             }
                         }
 
                         @Override
                         public void onError(String errorMessage) {
                             hideLocationOverlay("Vui lòng chọn địa chỉ");
-                            updateAddressUI("Vui lòng chọn địa chỉ");
+                            updateAddressUI("Vui lòng chọn địa chỉ", false);
                         }
                     });
         } else {
             hideLocationOverlay("Vui lòng chọn địa chỉ");
-            updateAddressUI("Vui lòng chọn địa chỉ");
+            updateAddressUI("Vui lòng chọn địa chỉ", false);
         }
     }
 
-    private void updateAddressUI(String address) {
+    private void updateAddressUI(String address, boolean isCurrentLocation) {
         currentDeliveryAddress = address;
         if (tvDeliveryAddress != null)
             tvDeliveryAddress.setText(address);
@@ -361,10 +366,14 @@ public class HomeActivity extends AppCompatActivity {
             if (tvDummy != null)
                 tvDummy.setText("Vui lòng đăng nhập để chọn địa chỉ");
         } else {
-            if (tvLabel != null)
+            if (tvLabel != null) {
                 tvLabel.setVisibility(View.VISIBLE);
-            if (tvLabelDummy != null)
+                tvLabel.setText("Giao đến:");
+            }
+            if (tvLabelDummy != null) {
                 tvLabelDummy.setVisibility(View.VISIBLE);
+                tvLabelDummy.setText("Giao đến:");
+            }
             if (tvArrow != null)
                 tvArrow.setVisibility(View.VISIBLE);
             if (addressBar != null)
@@ -1102,37 +1111,72 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void showAddressSelection() {
-        com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager
-                .getInstance(this);
-        if (sessionManager.getAuthToken() == null || sessionManager.getAuthToken().isEmpty()) {
-            android.widget.Toast.makeText(this, "Vui lòng đăng nhập để chọn địa chỉ", android.widget.Toast.LENGTH_SHORT)
-                    .show();
-            // Optional: Chuyển sang màn đăng nhập
+        com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        boolean isLoggedIn = sessionManager.getAuthToken() != null && !sessionManager.getAuthToken().isEmpty();
+
+        if (!isLoggedIn) {
+            processAndShowAddressList(new java.util.ArrayList<>(), sessionManager);
             return;
         }
 
         new com.example.uitpayapp.modules.user.AddressRepository().getMyAddresses(
                 new com.example.uitpayapp.network.ApiCallback<java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>>() {
                     @Override
-                    public void onSuccess(
-                            java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO> result) {
-                        Long currentId = sessionManager.getDeliveryAddressId();
-                        com.example.uitpayapp.utils.AddressBottomSheetHelper.showAddressBottomSheet(
-                                HomeActivity.this,
-                                result,
-                                currentId,
-                                selectedAddress -> {
-                                    sessionManager.saveDeliveryAddress(selectedAddress.getId(),
-                                            selectedAddress.getDetailedAddress());
-                                    updateAddressUI(selectedAddress.getDetailedAddress());
-                                });
+                    public void onSuccess(java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO> result) {
+                        processAndShowAddressList(result, sessionManager);
                     }
 
                     @Override
                     public void onError(String errorMessage) {
-                        android.widget.Toast
-                                .makeText(HomeActivity.this, errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                        android.widget.Toast.makeText(HomeActivity.this, errorMessage, android.widget.Toast.LENGTH_SHORT).show();
                     }
+                });
+    }
+
+    private void processAndShowAddressList(java.util.List<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO> result, com.example.uitpayapp.network.SessionManager sessionManager) {
+        Long currentId = sessionManager.getDeliveryAddressId();
+
+        String sessionAddressText = sessionManager.getDeliveryAddressText();
+        Double gpsLat = sessionManager.getDeliveryLatitude();
+        Double gpsLon = sessionManager.getDeliveryLongitude();
+        
+        if (sessionAddressText != null && !sessionAddressText.isEmpty() && gpsLat != null && gpsLon != null) {
+            com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO gpsDto = new com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO();
+            gpsDto.setId(-1L);
+            gpsDto.setDetailedAddress(sessionAddressText);
+            gpsDto.setAddressName("GPS");
+            gpsDto.setLatitude(java.math.BigDecimal.valueOf(gpsLat));
+            gpsDto.setLongitude(java.math.BigDecimal.valueOf(gpsLon));
+            gpsDto.setRecipientName("Vị trí hiện tại");
+            gpsDto.setPhoneNumber("");
+            
+            // Check if this GPS address is already in the list
+            boolean alreadyExists = false;
+            if (result == null) {
+                result = new java.util.ArrayList<>();
+            }
+            for (com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO existing : result) {
+                if (existing.getId() != null && existing.getId() == -1L) {
+                    alreadyExists = true;
+                    break;
+                }
+            }
+            if (!alreadyExists) {
+                result.add(0, gpsDto);
+            }
+        }
+
+        com.example.uitpayapp.utils.AddressBottomSheetHelper.showAddressBottomSheet(
+                HomeActivity.this,
+                result,
+                currentId,
+                selectedAddress -> {
+                    sessionManager.saveDeliveryAddress(selectedAddress.getId(),
+                            selectedAddress.getDetailedAddress());
+                    if (selectedAddress.getLatitude() != null && selectedAddress.getLongitude() != null) {
+                        sessionManager.saveDeliveryCoordinates(selectedAddress.getLatitude().doubleValue(), selectedAddress.getLongitude().doubleValue());
+                    }
+                    updateAddressUI(selectedAddress.getDetailedAddress(), selectedAddress.getId() != null && selectedAddress.getId() == -1L);
                 });
     }
 
