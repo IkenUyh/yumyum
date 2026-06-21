@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">YumYum</string>
+    <string name="no_internet_message">Mất kết nối mạng. Kiểm tra kết nối và thử lại bạn nhé.</string>
+    <string name="no_internet_retry">Thử lại</string>
 </resources>
