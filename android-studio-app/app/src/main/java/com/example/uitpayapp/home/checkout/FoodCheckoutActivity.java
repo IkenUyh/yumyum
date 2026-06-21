@@ -30,7 +30,8 @@ public class FoodCheckoutActivity extends AppCompatActivity {
     private CartManager cartManager;
     private long subtotalAmount;
     private long totalAmount;
-    private VoucherModel selectedVoucher = null;
+    private List<VoucherModel> selectedVouchers = new ArrayList<>();
+    private long maxUsableCoins = 0;
 
     private TextView tvSubtotal, tvSelectedVoucher, tvDiscountAmount;
     private View layoutDiscount;
@@ -45,12 +46,13 @@ public class FoodCheckoutActivity extends AppCompatActivity {
     private long deliveryFee = 15000;
     private long coinsDiscount = 10000;
     private long rankDiscount = 0;
+    private long discountFromVoucher = 0;
 
     // Payment Selection Views
-    private View layoutPayWallet, layoutPayZaloPay;
-    private RadioButton rbPayWallet, rbPayZaloPay;
+    private View layoutPayWallet, layoutPayCash;
+    private RadioButton rbPayWallet, rbPayCash;
     private TextView tvWalletMethodBalance;
-    private boolean isZaloPaySelected = false;
+    private boolean isCashSelected = false;
     private long currentWalletBalance = 0;
 
     private Long restaurantId = null;
@@ -84,7 +86,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         tvCoinsDiscountAmount = findViewById(R.id.tv_coins_discount_amount);
 
         switchCoins = findViewById(R.id.switch_coins);
-        switchCoins.setOnCheckedChangeListener((buttonView, isChecked) -> updateTotals());
+        switchCoins.setOnCheckedChangeListener((buttonView, isChecked) -> fetchPreviewData());
 
         switchUtensils = findViewById(R.id.switch_utensils);
         etNote = findViewById(R.id.et_note);
@@ -99,21 +101,21 @@ public class FoodCheckoutActivity extends AppCompatActivity {
 
         // Bind Payment Selector Views
         layoutPayWallet = findViewById(R.id.layout_pay_wallet);
-        layoutPayZaloPay = findViewById(R.id.layout_pay_zalopay);
+        layoutPayCash = findViewById(R.id.layout_pay_cash);
         rbPayWallet = findViewById(R.id.rb_pay_wallet);
-        rbPayZaloPay = findViewById(R.id.rb_pay_zalopay);
+        rbPayCash = findViewById(R.id.rb_pay_cash);
         tvWalletMethodBalance = findViewById(R.id.tv_wallet_method_balance);
 
         layoutPayWallet.setOnClickListener(v -> {
             rbPayWallet.setChecked(true);
-            rbPayZaloPay.setChecked(false);
-            isZaloPaySelected = false;
+            rbPayCash.setChecked(false);
+            isCashSelected = false;
         });
 
-        layoutPayZaloPay.setOnClickListener(v -> {
+        layoutPayCash.setOnClickListener(v -> {
             rbPayWallet.setChecked(false);
-            rbPayZaloPay.setChecked(true);
-            isZaloPaySelected = true;
+            rbPayCash.setChecked(true);
+            isCashSelected = true;
         });
 
         btnConfirmCheckout = findViewById(R.id.btn_confirm_checkout);
@@ -122,11 +124,8 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         // Init suggested items
         RecyclerView rvSuggested = findViewById(R.id.rv_suggested_items);
         rvSuggested.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        List<SuggestedItemAdapter.SuggestedItem> suggestedItems = new ArrayList<>();
-        suggestedItems.add(new SuggestedItemAdapter.SuggestedItem("Trà sữa trân châu", 25000, 0));
-        suggestedItems.add(new SuggestedItemAdapter.SuggestedItem("Gà rán giòn", 35000, 0));
-        suggestedItems.add(new SuggestedItemAdapter.SuggestedItem("Pizza phô mai", 45000, 0));
-        rvSuggested.setAdapter(new SuggestedItemAdapter(suggestedItems));
+        loadSuggestedItems(rvSuggested);
+        loadLoyaltyCoins();
     }
 
     private void loadCartData() {
@@ -184,18 +183,141 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                         });
                     }
                 });
+                
+        loadAvailableVouchers();
+    }
+    
+    private void loadAvailableVouchers() {
+        new com.example.uitpayapp.voucher.VoucherRepository().getActiveVouchers(new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.voucher.VoucherResponseDTO>>() {
+            @Override
+            public void onSuccess(List<com.example.uitpayapp.voucher.VoucherResponseDTO> data) {
+                runOnUiThread(() -> {
+                    if (data != null && !data.isEmpty()) {
+                        int validVouchers = 0;
+                        for (com.example.uitpayapp.voucher.VoucherResponseDTO v : data) {
+                            if (subtotalAmount >= (v.getMinOrderValue() != null ? v.getMinOrderValue().longValue() : 0)) {
+                                validVouchers++;
+                            }
+                        }
+                        if (selectedVouchers.isEmpty() && validVouchers > 0) {
+                            tvSelectedVoucher.setText("Có " + validVouchers + " mã giảm giá có thể dùng");
+                            tvSelectedVoucher.setTextColor(android.graphics.Color.parseColor("#F57C00"));
+                        } else if (selectedVouchers.isEmpty() && validVouchers == 0) {
+                            tvSelectedVoucher.setText("Không có mã giảm giá khả dụng");
+                            tvSelectedVoucher.setTextColor(android.graphics.Color.parseColor("#757575"));
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {}
+        });
+    }
+
+    private void loadLoyaltyCoins() {
+        new com.example.uitpayapp.modules.loyalty.LoyaltyRepository().getMyLoyaltyInfo(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO>() {
+            @Override
+            public void onSuccess(com.example.uitpayapp.modules.loyalty.models.LoyaltyResponseDTO data) {
+                runOnUiThread(() -> {
+                    maxUsableCoins = data.getCurrentPoints();
+                    TextView tvCoinsTitle = findViewById(R.id.tv_coins_title);
+                    TextView tvCoinsSubtitle = findViewById(R.id.tv_coins_subtitle);
+                    
+                    if (maxUsableCoins > 0) {
+                        if (tvCoinsTitle != null) tvCoinsTitle.setText(String.format("Dùng %,d Xu", maxUsableCoins).replace(',', '.'));
+                        if (tvCoinsSubtitle != null) tvCoinsSubtitle.setText(String.format("Giảm thêm %,dđ", maxUsableCoins).replace(',', '.'));
+                        coinsDiscount = maxUsableCoins; // 1 coin = 1 vnd
+                        switchCoins.setEnabled(true);
+                    } else {
+                        switchCoins.setEnabled(false);
+                        if (tvCoinsTitle != null) tvCoinsTitle.setText("Dùng Xu");
+                        if (tvCoinsSubtitle != null) tvCoinsSubtitle.setText("Không có Xu");
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    switchCoins.setEnabled(false);
+                    TextView tvCoinsTitle = findViewById(R.id.tv_coins_title);
+                    TextView tvCoinsSubtitle = findViewById(R.id.tv_coins_subtitle);
+                    if (tvCoinsTitle != null) tvCoinsTitle.setText("Dùng Xu");
+                    if (tvCoinsSubtitle != null) tvCoinsSubtitle.setText("Không có Xu");
+                });
+            }
+        });
+    }
+
+    private void loadSuggestedItems(RecyclerView rvSuggested) {
+        if (restaurantId == null) return;
+        new com.example.uitpayapp.modules.food.FoodRepository().getRestaurantMenu(restaurantId, new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.food.models.responses.FoodResponse>>() {
+            @Override
+            public void onSuccess(List<com.example.uitpayapp.modules.food.models.responses.FoodResponse> data) {
+                runOnUiThread(() -> {
+                    if (data != null && !data.isEmpty()) {
+                        List<Long> cartFoodIds = new ArrayList<>();
+                        for (CartItem item : cartManager.getCart()) {
+                            if (item.getMenuItem() != null && item.getMenuItem().getId() != null) {
+                                try {
+                                    cartFoodIds.add(Long.parseLong(item.getMenuItem().getId()));
+                                } catch (NumberFormatException e) {
+                                    // Ignore
+                                }
+                            }
+                        }
+                        
+                        List<Long> cartCategoryIds = new ArrayList<>();
+                        for (com.example.uitpayapp.modules.food.models.responses.FoodResponse food : data) {
+                            if (cartFoodIds.contains(food.getId()) && food.getCategoryId() != null) {
+                                cartCategoryIds.add(food.getCategoryId());
+                            }
+                        }
+                        
+                        List<com.example.uitpayapp.modules.food.models.responses.FoodResponse> filteredData = new ArrayList<>();
+                        for (com.example.uitpayapp.modules.food.models.responses.FoodResponse food : data) {
+                            if (!cartFoodIds.contains(food.getId()) && cartCategoryIds.contains(food.getCategoryId())) {
+                                filteredData.add(food);
+                            }
+                        }
+                        
+                        if (filteredData.isEmpty()) {
+                            for (com.example.uitpayapp.modules.food.models.responses.FoodResponse food : data) {
+                                if (!cartFoodIds.contains(food.getId())) {
+                                    filteredData.add(food);
+                                }
+                            }
+                        }
+                        
+                        java.util.Collections.shuffle(filteredData);
+                        int count = Math.min(5, filteredData.size());
+                        List<SuggestedItemAdapter.SuggestedItem> suggestedItems = new ArrayList<>();
+                        for (int i = 0; i < count; i++) {
+                            suggestedItems.add(new SuggestedItemAdapter.SuggestedItem(
+                                    filteredData.get(i).getName(),
+                                    filteredData.get(i).getPrice().longValue(),
+                                    0
+                            ));
+                        }
+                        rvSuggested.setAdapter(new SuggestedItemAdapter(suggestedItems));
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {}
+        });
     }
 
     private void updateTotals() {
-        long discount = 0;
-        if (selectedVoucher != null) {
-            discount = selectedVoucher.getDiscountAmount();
-        }
+        long discount = discountFromVoucher;
 
         long totalCoinsDiscount = 0;
         if (switchCoins.isChecked()) {
             totalCoinsDiscount = coinsDiscount;
             layoutCoinsDiscount.setVisibility(View.VISIBLE);
+            tvCoinsDiscountAmount.setText("-" + String.format("%,dđ", totalCoinsDiscount).replace(',', '.'));
         } else {
             layoutCoinsDiscount.setVisibility(View.GONE);
         }
@@ -215,8 +337,8 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         if (discount > 0 || rankDiscount > 0) {
             layoutDiscount.setVisibility(View.VISIBLE);
             tvDiscountAmount.setText("-" + String.format("%,dđ", discount + rankDiscount).replace(',', '.'));
-            if (selectedVoucher != null) {
-                tvSelectedVoucher.setText(selectedVoucher.getTitle() + (rankDiscount > 0 ? " (+Hạng)" : ""));
+            if (!selectedVouchers.isEmpty()) {
+                tvSelectedVoucher.setText(selectedVouchers.size() + " voucher áp dụng" + (rankDiscount > 0 ? " (+Hạng)" : ""));
             } else {
                 tvSelectedVoucher.setText("Ưu đãi Hạng Thành viên");
             }
@@ -234,14 +356,21 @@ public class FoodCheckoutActivity extends AppCompatActivity {
             runOnUiThread(() -> tvDeliveryFee.setText("Chưa chọn địa chỉ"));
             return;
         }
+        List<String> codes = new ArrayList<>();
+        for (VoucherModel v : selectedVouchers) codes.add(v.getId());
+
         com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest request = new com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest(
                 restaurantId != null ? restaurantId : 1L,
                 addressId,
                 "STANDARD",
-                new ArrayList<>(),
+                codes,
                 session.getDeliveryLatitude(),
                 session.getDeliveryLongitude(),
-                session.getDeliveryAddressText());
+                session.getDeliveryAddressText(),
+                etNote.getText().toString(),
+                switchUtensils.isChecked(),
+                switchCoins.isChecked(),
+                isCashSelected ? "CASH" : "WALLET");
 
         com.example.uitpayapp.modules.order.OrderRepository orderRepo = new com.example.uitpayapp.modules.order.OrderRepository();
         orderRepo.previewOrder(request,
@@ -253,6 +382,12 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                             deliveryFee = (long) data.getShippingFee();
                             subtotalAmount = (long) data.getFoodTotal();
                             rankDiscount = (long) data.getRankDiscount();
+                            totalAmount = (long) data.getFinalTotal();
+                            discountFromVoucher = (long) data.getTotalDiscountAmount() - rankDiscount;
+                            if (switchCoins.isChecked()) {
+                                long coinsUsed = ((long)data.getTotalDiscountAmount() - discountFromVoucher - rankDiscount);
+                                coinsDiscount = coinsUsed > 0 ? coinsUsed : 0;
+                            }
                             updateTotals();
                         });
                     }
@@ -277,26 +412,55 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         RecyclerView rvVouchers = sheetView.findViewById(R.id.rv_vouchers);
         rvVouchers.setLayoutManager(new LinearLayoutManager(this));
 
-        List<VoucherModel> mockVouchers = new ArrayList<>();
-        mockVouchers.add(new VoucherModel("v1", "Giảm 20.000đ", "Áp dụng cho đơn hàng từ 100k", 20000, 100000));
-        mockVouchers.add(new VoucherModel("v2", "Giảm 50.000đ", "Áp dụng cho đơn hàng từ 200k", 50000, 200000));
-        mockVouchers.add(new VoucherModel("v3", "Freeship 15.000đ", "Áp dụng cho đơn hàng từ 50k", 15000, 50000));
+        new com.example.uitpayapp.voucher.VoucherRepository().getActiveVouchers(new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.voucher.VoucherResponseDTO>>() {
+            @Override
+            public void onSuccess(List<com.example.uitpayapp.voucher.VoucherResponseDTO> data) {
+                runOnUiThread(() -> {
+                    List<VoucherModel> activeVouchers = new ArrayList<>();
+                    for (com.example.uitpayapp.voucher.VoucherResponseDTO dto : data) {
+                        String title = "SHIPPING_DISCOUNT".equals(dto.getType()) ? "Giảm ship " + dto.getDiscountPercent() + "%" : "Giảm đơn " + dto.getDiscountPercent() + "%";
+                        String description = "Tối đa " + String.format("%,dđ", dto.getMaxDiscount().longValue()) + " đơn từ " + String.format("%,dđ", dto.getMinOrderValue().longValue());
+                        activeVouchers.add(new VoucherModel(
+                                dto.getCode(),
+                                title,
+                                description,
+                                dto.getMaxDiscount() != null ? dto.getMaxDiscount().longValue() : 0,
+                                dto.getMinOrderValue() != null ? dto.getMinOrderValue().longValue() : 0
+                        ));
+                    }
 
-        // Lọc voucher đủ điều kiện (tuỳ chọn, ở đây mình cho hiện hết nhưng cảnh báo
-        // nếu không đủ điều kiện)
-        VoucherAdapter adapter = new VoucherAdapter(mockVouchers, voucher -> {
-            if (subtotalAmount >= voucher.getMinOrderAmount()) {
-                selectedVoucher = voucher;
-                updateTotals();
-                bottomSheetDialog.dismiss();
-                Toast.makeText(this, "Đã áp dụng mã: " + voucher.getTitle(), Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Đơn hàng chưa đạt giá trị tối thiểu để dùng mã này!", Toast.LENGTH_SHORT).show();
+                    VoucherAdapter adapter = new VoucherAdapter(activeVouchers, voucher -> {
+                        if (subtotalAmount >= voucher.getMinOrderAmount()) {
+                            boolean isSelected = false;
+                            for (VoucherModel v : selectedVouchers) {
+                                if (v.getId().equals(voucher.getId())) {
+                                    isSelected = true;
+                                    selectedVouchers.remove(v);
+                                    break;
+                                }
+                            }
+                            if (isSelected) {
+                                Toast.makeText(FoodCheckoutActivity.this, "Đã bỏ chọn mã: " + voucher.getTitle(), Toast.LENGTH_SHORT).show();
+                            } else {
+                                selectedVouchers.add(voucher);
+                                Toast.makeText(FoodCheckoutActivity.this, "Đã áp dụng mã: " + voucher.getTitle(), Toast.LENGTH_SHORT).show();
+                            }
+                            fetchPreviewData();
+                        } else {
+                            Toast.makeText(FoodCheckoutActivity.this, "Đơn hàng chưa đạt giá trị tối thiểu để dùng mã này!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    rvVouchers.setAdapter(adapter);
+                    bottomSheetDialog.show();
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> Toast.makeText(FoodCheckoutActivity.this, "Không thể tải mã giảm giá: " + errorMessage, Toast.LENGTH_SHORT).show());
             }
         });
-
-        rvVouchers.setAdapter(adapter);
-        bottomSheetDialog.show();
     }
 
     private void processCheckout() {
@@ -305,35 +469,41 @@ public class FoodCheckoutActivity extends AppCompatActivity {
             return;
         }
 
-        if (isZaloPaySelected) {
-            executeConfirmCheckout("ZALOPAY");
+        if (isCashSelected) {
+            executeConfirmCheckout();
         } else {
             // Thanh toán qua Ví nội bộ
             if (currentWalletBalance < totalAmount) {
-                Toast.makeText(this, "Số dư ví không đủ! Vui lòng chọn ZaloPay hoặc nạp thêm tiền.", Toast.LENGTH_LONG)
+                Toast.makeText(this, "Số dư ví không đủ! Vui lòng chọn Thanh toán tiền mặt hoặc nạp thêm tiền.", Toast.LENGTH_LONG)
                         .show();
                 return;
             }
-            executeConfirmCheckout("WALLET");
+            executeConfirmCheckout();
         }
     }
 
-    private void executeConfirmCheckout(String paymentMethod) {
+    private void executeConfirmCheckout() {
         com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(this);
         if (addressId == null && session.getDeliveryAddressText() == null) {
             Toast.makeText(this, "Vui lòng chọn địa chỉ giao hàng trước!", Toast.LENGTH_SHORT).show();
             return;
         }
         String productNames = cartManager.getProductSummary();
+        List<String> codes = new ArrayList<>();
+        for (VoucherModel v : selectedVouchers) codes.add(v.getId());
+
         com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest request = new com.example.uitpayapp.modules.order.models.requests.CreateOrderRequest(
                 restaurantId != null ? restaurantId : 1L,
                 addressId,
                 "STANDARD",
-                new ArrayList<>(),
-                paymentMethod,
+                codes,
                 session.getDeliveryLatitude(),
                 session.getDeliveryLongitude(),
-                session.getDeliveryAddressText());
+                session.getDeliveryAddressText(),
+                etNote.getText().toString(),
+                switchUtensils.isChecked(),
+                switchCoins.isChecked(),
+                isCashSelected ? "CASH" : "WALLET");
 
         com.example.uitpayapp.modules.order.OrderRepository orderRepo = new com.example.uitpayapp.modules.order.OrderRepository();
         orderRepo.createOrder(request,
@@ -341,59 +511,29 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(com.example.uitpayapp.modules.order.models.responses.OrderResponse data) {
                         runOnUiThread(() -> {
-                            if ("ZALOPAY".equalsIgnoreCase(paymentMethod)) {
-                                if (data != null && data.getPaymentUrl() != null) {
-                                    // Lưu order ID vào SharedPreferences để kiểm tra khi quay lại app
-                                    getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
-                                            .putLong("PENDING_CHECKOUT_ZALOPAY_ORDER_ID", data.getId())
-                                            .apply();
+                            Intent intent = new Intent(FoodCheckoutActivity.this, TransferSuccessActivity.class);
+                            intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
+                            intent.putExtra("KEY_IS_FOOD_ORDER", true);
+                            intent.putExtra("KEY_FOOD_PRODUCTS", productNames);
+                            intent.putExtra("KEY_DELIVERY_FEE", deliveryFee);
+                            intent.putExtra("KEY_ORDER_ID", String.valueOf(data.getId()));
 
-                                    // Mở ZaloPay hoặc trình duyệt thanh toán
-                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                            android.net.Uri.parse(data.getPaymentUrl()));
-                                    startActivity(browserIntent);
+                            long discountAmount = discountFromVoucher;
+                            intent.putExtra("KEY_DISCOUNT", discountAmount);
 
-                                    // Xóa giỏ hàng
-                                    cartManager.clearCartSync(new com.example.uitpayapp.network.ApiCallback<String>() {
-                                        @Override
-                                        public void onSuccess(String d) {
-                                            runOnUiThread(() -> finish());
-                                        }
+                            startActivity(intent);
 
-                                        @Override
-                                        public void onError(String errorMessage) {
-                                            runOnUiThread(() -> finish());
-                                        }
-                                    });
-                                } else {
-                                    Toast.makeText(FoodCheckoutActivity.this,
-                                            "Không lấy được thông tin thanh toán ZaloPay", Toast.LENGTH_SHORT).show();
+                            cartManager.clearCartSync(new com.example.uitpayapp.network.ApiCallback<String>() {
+                                @Override
+                                public void onSuccess(String data2) {
+                                    runOnUiThread(() -> finish());
                                 }
-                            } else {
-                                Intent intent = new Intent(FoodCheckoutActivity.this, TransferSuccessActivity.class);
-                                intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
-                                intent.putExtra("KEY_IS_FOOD_ORDER", true);
-                                intent.putExtra("KEY_FOOD_PRODUCTS", productNames);
-                                intent.putExtra("KEY_DELIVERY_FEE", deliveryFee);
-                                intent.putExtra("KEY_ORDER_ID", String.valueOf(data.getId()));
 
-                                long discountAmount = selectedVoucher != null ? selectedVoucher.getDiscountAmount() : 0;
-                                intent.putExtra("KEY_DISCOUNT", discountAmount);
-
-                                startActivity(intent);
-
-                                cartManager.clearCartSync(new com.example.uitpayapp.network.ApiCallback<String>() {
-                                    @Override
-                                    public void onSuccess(String data) {
-                                        runOnUiThread(() -> finish());
-                                    }
-
-                                    @Override
-                                    public void onError(String errorMessage) {
-                                        runOnUiThread(() -> finish());
-                                    }
-                                });
-                            }
+                                @Override
+                                public void onError(String errorMessage) {
+                                    runOnUiThread(() -> finish());
+                                }
+                            });
                         });
                     }
 
@@ -410,90 +550,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        // Reload wallet balance to get the most updated balance
         loadCartData();
-
-        android.content.SharedPreferences paymentPrefs = getSharedPreferences("PaymentPrefs", MODE_PRIVATE);
-        long pendingOrderId = paymentPrefs.getLong("PENDING_CHECKOUT_ZALOPAY_ORDER_ID", -1L);
-        if (pendingOrderId != -1L) {
-            showZaloPayCheckStatusDialog(pendingOrderId);
-        }
-    }
-
-    private void showZaloPayCheckStatusDialog(long orderId) {
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-        builder.setTitle("Đang chờ thanh toán");
-        builder.setMessage(
-                "Vui lòng hoàn tất thanh toán trên ZaloPay. Sau khi thanh toán xong, hãy bấm nút dưới đây để hoàn tất đặt đơn hàng!");
-        builder.setCancelable(false);
-
-        builder.setPositiveButton("Xác nhận đã thanh toán", null);
-        builder.setNegativeButton("Hủy bỏ", (dialog, which) -> {
-            getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
-                    .remove("PENDING_CHECKOUT_ZALOPAY_ORDER_ID")
-                    .apply();
-            dialog.dismiss();
-            Toast.makeText(this, "Đã hủy giao dịch thanh toán ZaloPay", Toast.LENGTH_SHORT).show();
-        });
-
-        android.app.AlertDialog dialog = builder.create();
-        dialog.show();
-
-        dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            android.app.ProgressDialog progress = new android.app.ProgressDialog(this);
-            progress.setMessage("Đang kiểm tra giao dịch...");
-            progress.setCancelable(false);
-            progress.show();
-
-            com.example.uitpayapp.modules.order.OrderRepository orderRepo = new com.example.uitpayapp.modules.order.OrderRepository();
-            orderRepo.getOrderById(orderId,
-                    new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderResponse>() {
-                        @Override
-                        public void onSuccess(com.example.uitpayapp.modules.order.models.responses.OrderResponse data) {
-                            runOnUiThread(() -> {
-                                progress.dismiss();
-                                if (data != null && data.getStatus() != null) {
-                                    if (!"UNPAID".equalsIgnoreCase(data.getStatus())) {
-                                        getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
-                                                .remove("PENDING_CHECKOUT_ZALOPAY_ORDER_ID")
-                                                .apply();
-                                        dialog.dismiss();
-                                        Toast.makeText(FoodCheckoutActivity.this, "Đơn hàng đã được ghi nhận thanh toán thành công!",
-                                                Toast.LENGTH_SHORT).show();
-
-                                        String productNames = cartManager.getProductSummary();
-                                        Intent intent = new Intent(FoodCheckoutActivity.this, TransferSuccessActivity.class);
-                                        intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
-                                        intent.putExtra("KEY_IS_FOOD_ORDER", true);
-                                        intent.putExtra("KEY_FOOD_PRODUCTS", productNames);
-                                        intent.putExtra("KEY_DELIVERY_FEE", deliveryFee);
-                                        intent.putExtra("KEY_ORDER_ID", String.valueOf(data.getId()));
-                                        long discountAmount = selectedVoucher != null ? selectedVoucher.getDiscountAmount() : 0;
-                                        intent.putExtra("KEY_DISCOUNT", discountAmount);
-                                        startActivity(intent);
-                                        finish();
-                                    } else {
-                                        Toast.makeText(FoodCheckoutActivity.this, "Giao dịch chưa hoàn tất. Vui lòng hoàn tất thanh toán trên ZaloPay trước!",
-                                                Toast.LENGTH_LONG).show();
-                                    }
-                                } else {
-                                    Toast.makeText(FoodCheckoutActivity.this, "Không thể xác định trạng thái giao dịch",
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onError(String errorMessage) {
-                            runOnUiThread(() -> {
-                                progress.dismiss();
-                                Toast.makeText(FoodCheckoutActivity.this, "Lỗi kiểm tra trạng thái: " + errorMessage,
-                                        Toast.LENGTH_SHORT).show();
-                            });
-                        }
-                    });
-        });
     }
 
     private void initAddress() {

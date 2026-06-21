@@ -92,6 +92,18 @@ public class Order {
     @Transient
     private String paymentUrl;
 
+    @Column(name = "note", columnDefinition = "TEXT")
+    private String note;
+
+    @Column(name = "is_cutlery_requested")
+    private Boolean isCutleryRequested;
+
+    @Column(name = "used_coins")
+    private Integer usedCoins;
+
+    @Column(name = "payment_method", length = 20)
+    private String paymentMethod;
+
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private com.uit.fooddelivery_api.modules.review.entities.Review review;
 }

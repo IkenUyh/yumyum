@@ -16,8 +16,6 @@ public class CreateOrderRequest {
     @SerializedName("voucherCodes")
     private List<String> voucherCodes;
 
-    @SerializedName("paymentMethod")
-    private String paymentMethod;
 
     @SerializedName("latitude")
     private Double latitude;
@@ -28,33 +26,49 @@ public class CreateOrderRequest {
     @SerializedName("addressText")
     private String addressText;
 
+    @SerializedName("note")
+    private String note;
+
+    @SerializedName("isCutleryRequested")
+    private Boolean isCutleryRequested;
+
+    @SerializedName("useCoins")
+    private Boolean useCoins;
+
+    @SerializedName("paymentMethod")
+    private String paymentMethod;
+
     public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes) {
-        this(restaurantId, addressId, deliveryMode, voucherCodes, null, null, null, null);
+        this(restaurantId, addressId, deliveryMode, voucherCodes, null, null, null, null, null, null, null);
     }
 
     public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes, String paymentMethod) {
-        this(restaurantId, addressId, deliveryMode, voucherCodes, paymentMethod, null, null, null);
+        this(restaurantId, addressId, deliveryMode, voucherCodes, null, null, null, null, null, null, paymentMethod);
     }
 
     public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes, Double latitude, Double longitude, String addressText) {
-        this(restaurantId, addressId, deliveryMode, voucherCodes, null, latitude, longitude, addressText);
+        this(restaurantId, addressId, deliveryMode, voucherCodes, latitude, longitude, addressText, null, null, null, null);
     }
 
     public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes, String paymentMethod, Double latitude, Double longitude, String addressText) {
+        this(restaurantId, addressId, deliveryMode, voucherCodes, latitude, longitude, addressText, null, null, null, paymentMethod);
+    }
+
+    public CreateOrderRequest(Long restaurantId, Long addressId, String deliveryMode, List<String> voucherCodes, Double latitude, Double longitude, String addressText, String note, Boolean isCutleryRequested, Boolean useCoins, String paymentMethod) {
         this.restaurantId = restaurantId;
         this.addressId = addressId;
         this.deliveryMode = deliveryMode;
         this.voucherCodes = voucherCodes;
-        this.paymentMethod = paymentMethod;
         this.latitude = latitude;
         this.longitude = longitude;
         this.addressText = addressText;
+        this.note = note;
+        this.isCutleryRequested = isCutleryRequested;
+        this.useCoins = useCoins;
+        this.paymentMethod = paymentMethod;
     }
 
     // Getters and Setters
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
-
     public Long getRestaurantId() { return restaurantId; }
     public void setRestaurantId(Long restaurantId) { this.restaurantId = restaurantId; }
 
@@ -75,4 +89,16 @@ public class CreateOrderRequest {
 
     public String getAddressText() { return addressText; }
     public void setAddressText(String addressText) { this.addressText = addressText; }
+
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
+
+    public Boolean getIsCutleryRequested() { return isCutleryRequested; }
+    public void setIsCutleryRequested(Boolean isCutleryRequested) { this.isCutleryRequested = isCutleryRequested; }
+
+    public Boolean getUseCoins() { return useCoins; }
+    public void setUseCoins(Boolean useCoins) { this.useCoins = useCoins; }
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
 }

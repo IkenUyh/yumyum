@@ -320,16 +320,18 @@
                         android:orientation="vertical"
                         android:layout_marginStart="12dp">
                         <TextView
+                            android:id="@+id/tv_coins_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Dùng 10.000 Xu"
+                            android:text="Dùng Xu"
                             android:textColor="#000000"
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <TextView
+                            android:id="@+id/tv_coins_subtitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Giảm thêm 10.000đ"
+                            android:text="Không có Xu"
                             android:textColor="#388E3C"
                             android:textSize="13sp"
                             android:layout_marginTop="2dp" />
@@ -378,20 +380,12 @@
                         android:background="?android:attr/selectableItemBackground"
                         android:paddingVertical="8dp">
 
-                        <ImageView
-                            android:id="@+id/iv_wallet_icon"
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
-                            android:src="@drawable/ic_wallet"
-                            android:layout_centerVertical="true" />
-
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:layout_toEndOf="@id/iv_wallet_icon"
+                            android:layout_alignParentStart="true"
                             android:layout_toStartOf="@id/rb_pay_wallet"
-                            android:layout_marginStart="12dp"
                             android:layout_centerVertical="true">
 
                             <TextView
@@ -428,9 +422,9 @@
                         android:background="#F0F0F0"
                         android:layout_marginVertical="8dp" />
 
-                    <!-- ZaloPay Option -->
+                    <!-- Cash Option -->
                     <RelativeLayout
-                        android:id="@+id/layout_pay_zalopay"
+                        android:id="@+id/layout_pay_cash"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:clickable="true"
@@ -438,26 +432,18 @@
                         android:background="?android:attr/selectableItemBackground"
                         android:paddingVertical="8dp">
 
-                        <ImageView
-                            android:id="@+id/iv_zalopay_icon"
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
-                            android:src="@drawable/ic_account_card_payment"
-                            android:layout_centerVertical="true" />
-
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:layout_toEndOf="@id/iv_zalopay_icon"
-                            android:layout_toStartOf="@id/rb_pay_zalopay"
-                            android:layout_marginStart="12dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_toStartOf="@id/rb_pay_cash"
                             android:layout_centerVertical="true">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Cổng thanh toán ZaloPay"
+                                android:text="Thanh toán tiền mặt"
                                 android:textColor="#000000"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
@@ -465,13 +451,13 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Thanh toán trực tiếp bằng ứng dụng ZaloPay"
+                                android:text="Thanh toán cho tài xế khi nhận hàng"
                                 android:textColor="#757575"
                                 android:textSize="12sp" />
                         </LinearLayout>
 
                         <RadioButton
-                            android:id="@+id/rb_pay_zalopay"
+                            android:id="@+id/rb_pay_cash"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
