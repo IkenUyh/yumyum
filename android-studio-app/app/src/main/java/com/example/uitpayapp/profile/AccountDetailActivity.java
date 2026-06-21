@@ -115,6 +115,8 @@ public class AccountDetailActivity extends AppCompatActivity {
         ((TextView) topBar.findViewById(R.id.top_bar_title)).setText("Thông tin chi tiết");
         View mainContainer = findViewById(R.id.account_detail_container);
         ivAvatar = findViewById(R.id.iv_avatar);
+        tvFullName = findViewById(R.id.tv_full_name);
+        tvPhone = findViewById(R.id.tv_phone_number);
 
         ViewCompat.setOnApplyWindowInsetsListener(topBar, (v, insets) -> {
             Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
@@ -145,6 +147,14 @@ public class AccountDetailActivity extends AppCompatActivity {
                     if (data.getEmail() != null) {
                         editor.putString("EMAIL", data.getEmail());
                     }
+                    
+                    String birthday = data.getBirthday() != null && !data.getBirthday().isEmpty() ? data.getBirthday() : "Chưa cập nhật";
+                    String gender = data.getGender() != null && !data.getGender().isEmpty() ? data.getGender() : "Chưa cập nhật";
+                    String job = data.getJob() != null && !data.getJob().isEmpty() ? data.getJob() : "Chưa cập nhật";
+                    
+                    editor.putString("BIRTHDAY", birthday);
+                    editor.putString("GENDER", gender);
+                    editor.putString("JOB", job);
                     editor.apply();
 
                     SessionManager sessionManager = SessionManager.getInstance(AccountDetailActivity.this);
@@ -162,10 +172,6 @@ public class AccountDetailActivity extends AppCompatActivity {
 
                     setRowData(R.id.inforow_username, "Tên", data.getFullName());
                     setRowData(R.id.inforow_email, "Email", data.getEmail() != null && !data.getEmail().isEmpty() ? data.getEmail() : "Chưa cập nhật");
-
-                    String birthday = sharedPreferences.getString("BIRTHDAY", "Chưa cập nhật");
-                    String gender = sharedPreferences.getString("GENDER", "Chưa cập nhật");
-                    String job = sharedPreferences.getString("JOB", "Chưa cập nhật");
                     setRowData(R.id.inforow_birthday, "Ngày sinh", birthday);
                     setRowData(R.id.inforow_gender, "Giới tính", gender);
                     setRowData(R.id.inforow_job, "Nghề nghiệp", job);
@@ -305,7 +311,7 @@ public class AccountDetailActivity extends AppCompatActivity {
             String job = spJob.getSelectedItem().toString();
 
             // Gọi API cập nhật lên backend
-            new UserRepository().updateProfile(fullName, email, new com.example.uitpayapp.network.ApiCallback<UserResponseDTO>() {
+            new UserRepository().updateProfile(fullName, email, gender, birthday, job, new com.example.uitpayapp.network.ApiCallback<UserResponseDTO>() {
                 @Override
                 public void onSuccess(UserResponseDTO userResponse) {
                     if (userResponse != null) {

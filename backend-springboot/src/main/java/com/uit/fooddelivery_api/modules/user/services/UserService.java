@@ -158,6 +158,16 @@ public class UserService {
             }
         }
 
+        if (dto.getGender() != null) {
+            user.setGender(dto.getGender());
+        }
+        if (dto.getBirthday() != null) {
+            user.setBirthday(dto.getBirthday());
+        }
+        if (dto.getJob() != null) {
+            user.setJob(dto.getJob());
+        }
+
         return userRepository.save(user);
     }
 
