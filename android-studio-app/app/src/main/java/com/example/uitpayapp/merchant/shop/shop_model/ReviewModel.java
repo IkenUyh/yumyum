@@ -1,6 +1,7 @@
 package com.example.uitpayapp.merchant.shop.shop_model;
 
 public class ReviewModel {
+    private String id;
     private String userName;
     private String userAvatar;
     private float rating;
@@ -16,7 +17,8 @@ public class ReviewModel {
     private String replyContent;
     private boolean hasReply;
 
-    public ReviewModel(String userName, String userAvatar, float rating, String ratingText, String orderId, String date, String content, String reviewImage) {
+    public ReviewModel(String id, String userName, String userAvatar, float rating, String ratingText, String orderId, String date, String content, String reviewImage) {
+        this.id = id;
         this.userName = userName;
         this.userAvatar = userAvatar;
         this.rating = rating;
@@ -27,6 +29,8 @@ public class ReviewModel {
         this.reviewImage = reviewImage;
         this.hasReply = false;
     }
+
+    public String getId() { return id; }
 
     public void setReply(String replyName, String replyDate, String replyContent) {
         this.replyName = replyName;

@@ -17,6 +17,7 @@ public class ReviewResponseDTO {
     private String customerName; // Tên khách hàng để quán còn biết ai khen/chê
     private Integer rating;
     private String comment;
+    private String merchantReply;
     private LocalDateTime createdAt;
 
     public static ReviewResponseDTO fromEntity(Review review) {
@@ -27,6 +28,7 @@ public class ReviewResponseDTO {
                 .customerName(review.getOrder().getUser().getFullName())
                 .rating(review.getRating())
                 .comment(review.getComment())
+                .merchantReply(review.getMerchantReply())
                 .createdAt(review.getCreatedAt())
                 .build();
     }

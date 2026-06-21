@@ -59,4 +59,23 @@ public class ReviewRepository {
             }
         });
     }
+
+    public void replyReview(Long reviewId, String reply, final ApiCallback<ReviewResponse> callback) {
+        com.example.uitpayapp.modules.review.models.requests.ReplyReviewRequest request = new com.example.uitpayapp.modules.review.models.requests.ReplyReviewRequest(reply);
+        reviewService.replyReview(reviewId, request).enqueue(new Callback<ApiResponse<ReviewResponse>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<ReviewResponse>> call, Response<ApiResponse<ReviewResponse>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body().getData());
+                } else {
+                    callback.onError("Trả lời đánh giá thất bại: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<ReviewResponse>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
 }

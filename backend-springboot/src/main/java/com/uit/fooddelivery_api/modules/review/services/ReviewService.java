@@ -119,4 +119,18 @@ public class ReviewService {
     public List<Review> getRestaurantReviews(Long restaurantId) {
         return reviewRepository.findByRestaurantIdOrderByCreatedAtDesc(restaurantId); //[cite: 1]
     }
+
+    @Transactional
+    public Review replyReview(Long reviewId, String reply, User merchant) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đánh giá!"));
+
+        // Check if the merchant owns the restaurant that got the review
+        if (!review.getRestaurant().getUser().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Bạn không có quyền trả lời đánh giá của cửa hàng khác!");
+        }
+
+        review.setMerchantReply(reply);
+        return reviewRepository.save(review);
+    }
 }

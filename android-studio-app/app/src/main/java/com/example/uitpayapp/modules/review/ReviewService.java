@@ -26,4 +26,11 @@ public interface ReviewService {
     Call<ApiResponse<List<ReviewResponse>>> getReviewsByRestaurant(
             @Path("id") Long restaurantId
     );
+
+    // API Chủ quán trả lời đánh giá
+    @POST("api/v1/reviews/{id}/reply")
+    Call<ApiResponse<ReviewResponse>> replyReview(
+            @Path("id") Long reviewId,
+            @Body com.example.uitpayapp.modules.review.models.requests.ReplyReviewRequest request
+    );
 }

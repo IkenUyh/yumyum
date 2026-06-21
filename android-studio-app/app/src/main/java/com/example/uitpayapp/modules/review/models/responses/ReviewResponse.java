@@ -24,6 +24,9 @@ public class ReviewResponse {
     @SerializedName("createdAt")
     private String createdAt; // Nhận dạng chuỗi ISO từ LocalDateTime của Spring Boot
 
+    @SerializedName("merchantReply")
+    private String merchantReply;
+
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -45,4 +48,7 @@ public class ReviewResponse {
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+    public String getMerchantReply() { return merchantReply; }
+    public void setMerchantReply(String merchantReply) { this.merchantReply = merchantReply; }
 }
