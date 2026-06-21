@@ -32,9 +32,9 @@ public class HomeService {
         public HomeCoreResponseDTO getHomeCore(String addressId) {
                 // 1. Banners
                 List<BannerDTO> banners = List.of(
-                                BannerDTO.builder().id("b1").imageUrl("img_priority_banner1").link("").build(),
-                                BannerDTO.builder().id("b2").imageUrl("img_priority_banner2").link("").build(),
-                                BannerDTO.builder().id("b3").imageUrl("img_priority_banner3").link("").build());
+                                BannerDTO.builder().id("b1").imageUrl("https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1782014543/img_advertisment1_hocxi6.png").link("").build(),
+                                BannerDTO.builder().id("b2").imageUrl("https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1782014558/img_advertisment2_f2gda5.png").link("").build(),
+                                BannerDTO.builder().id("b3").imageUrl("https://res.cloudinary.com/dmhgfnxh9/image/upload/q_auto/f_auto/v1782014648/img_advertisment3_upzkv7.png").link("").build());
 
                 // 2. Categories
                 List<Category> dbCategories = categoryRepository.findAll();
