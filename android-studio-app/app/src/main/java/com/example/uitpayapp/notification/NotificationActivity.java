@@ -59,7 +59,9 @@ public class NotificationActivity extends AppCompatActivity {
 
         rvPromotions = findViewById(R.id.rvPromotions);
         promoList = new ArrayList<>();
-        promoAdapter = new PromoAdapter(promoList);
+        promoAdapter = new PromoAdapter(promoList, () -> {
+            updateNotificationBadge();
+        });
         rvPromotions.setAdapter(promoAdapter);
         rvPromotions.setLayoutManager(new LinearLayoutManager(this));
 
@@ -103,7 +105,8 @@ public class NotificationActivity extends AppCompatActivity {
                                 dto.getTitle(),
                                 dto.getMessage(),
                                 formatDateTime(dto.getCreatedAt()),
-                                android.R.drawable.ic_menu_gallery
+                                android.R.drawable.ic_menu_gallery,
+                                dto.getIsRead() != null && dto.getIsRead()
                         ));
                     } else if ("ORDER_UPDATE".equalsIgnoreCase(dto.getType()) || "SYSTEM".equalsIgnoreCase(dto.getType())) {
                         if (latestOrderTitle == null) {
@@ -130,36 +133,16 @@ public class NotificationActivity extends AppCompatActivity {
                     }
                 }
 
-                // Update order notifications badge count using backend API, fallback to local count on failure
-                final int finalUnreadOrderCount = unreadOrderCount;
-                notificationRepository.getUnreadCount(new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Long>>() {
-                    @Override
-                    public void onSuccess(java.util.Map<String, Long> countData) {
-                        TextView tvOrderBadge = findViewById(R.id.tvOrderBadge);
-                        if (tvOrderBadge != null) {
-                            long unreadCount = countData != null && countData.containsKey("unreadCount") ? countData.get("unreadCount") : 0;
-                            if (unreadCount > 0) {
-                                tvOrderBadge.setText(String.valueOf(unreadCount));
-                                tvOrderBadge.setVisibility(View.VISIBLE);
-                            } else {
-                                tvOrderBadge.setVisibility(View.GONE);
-                            }
-                        }
+                // Update order notifications badge count directly using computed local count
+                TextView tvOrderBadge = findViewById(R.id.tvOrderBadge);
+                if (tvOrderBadge != null) {
+                    if (unreadOrderCount > 0) {
+                        tvOrderBadge.setText(String.valueOf(unreadOrderCount));
+                        tvOrderBadge.setVisibility(View.VISIBLE);
+                    } else {
+                        tvOrderBadge.setVisibility(View.GONE);
                     }
-
-                    @Override
-                    public void onError(String errorMessage) {
-                        TextView tvOrderBadge = findViewById(R.id.tvOrderBadge);
-                        if (tvOrderBadge != null) {
-                            if (finalUnreadOrderCount > 0) {
-                                tvOrderBadge.setText(String.valueOf(finalUnreadOrderCount));
-                                tvOrderBadge.setVisibility(View.VISIBLE);
-                            } else {
-                                tvOrderBadge.setVisibility(View.GONE);
-                            }
-                        }
-                    }
-                });
+                }
             }
 
             @Override
