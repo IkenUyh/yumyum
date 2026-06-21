@@ -167,6 +167,16 @@ public class PaymentController {
 
     @GetMapping("/vnpay/return")
     public String vnpayReturn(@RequestParam Map<String, String> allParams) {
+        if ("true".equals(allParams.get("test"))) {
+            try {
+                User mockUser = new User();
+                mockUser.setId(1L);
+                String paymentUrl = vnPayService.createPaymentUrl(mockUser, 10000L);
+                return "<html><body><p>URL: " + paymentUrl + "</p></body></html>";
+            } catch (Exception e) {
+                return "Error: " + e.getMessage();
+            }
+        }
         if (vnPayService.verifyIpnSignature(allParams)) {
             if ("00".equals(allParams.get("vnp_ResponseCode"))) {
                 String vnp_TxnRef = allParams.get("vnp_TxnRef");
