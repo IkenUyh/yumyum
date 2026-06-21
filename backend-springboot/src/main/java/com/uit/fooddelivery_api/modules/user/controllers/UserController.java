@@ -110,4 +110,13 @@ public class UserController {
         userService.forgotPasswordReset(dto);
         return ApiResponse.success("Đặt lại mật khẩu thành công!");
     }
+
+    // API: Yêu cầu OTP để xác thực đổi email mới
+    @PostMapping("/send-email-otp")
+    public ApiResponse<String> sendEmailOtp(
+            Authentication authentication,
+            @RequestParam("email") String email) {
+        userService.sendEmailVerificationOtp(email);
+        return ApiResponse.success("Mã OTP xác nhận đã được gửi đến email mới của bạn!");
+    }
 }

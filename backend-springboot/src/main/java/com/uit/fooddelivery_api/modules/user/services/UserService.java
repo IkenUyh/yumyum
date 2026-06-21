@@ -149,12 +149,23 @@ public class UserService {
             String email = dto.getEmail().trim();
             if (email.isEmpty()) {
                 user.setEmail(null);
-            } else {
+            } else if (!email.equalsIgnoreCase(user.getEmail())) {
+                if (dto.getEmailOtp() == null || dto.getEmailOtp().trim().isEmpty()) {
+                    throw new RuntimeException("Vui lòng nhập mã xác thực gửi đến email mới!");
+                }
+                String redisKey = "otp:verify-email:" + email;
+                String storedOtp = redisTemplate.opsForValue().get(redisKey);
+                if (storedOtp == null || !storedOtp.equals(dto.getEmailOtp().trim())) {
+                    throw new RuntimeException("Mã xác thực email không chính xác hoặc đã hết hạn!");
+                }
+                
                 java.util.Optional<User> existingUser = userRepository.findByEmail(email);
                 if (existingUser.isPresent() && !existingUser.get().getId().equals(user.getId())) {
                     throw new RuntimeException("Email này đã được đăng ký bởi người dùng khác!");
                 }
+                
                 user.setEmail(email);
+                redisTemplate.delete(redisKey);
             }
         }
 
@@ -260,5 +271,28 @@ public class UserService {
 
         // Xóa OTP khỏi Redis
         redisTemplate.delete(redisKey);
+    }
+
+    public void sendEmailVerificationOtp(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            throw new RuntimeException("Email không được để trống!");
+        }
+        String cleanEmail = email.trim();
+        
+        // Kiểm tra xem email đã được đăng ký bởi người dùng khác chưa
+        java.util.Optional<User> existingUser = userRepository.findByEmail(cleanEmail);
+        if (existingUser.isPresent()) {
+            throw new RuntimeException("Email này đã được đăng ký bởi tài khoản khác!");
+        }
+
+        // Sinh mã OTP ngẫu nhiên gồm 6 chữ số
+        String otp = String.format("%06d", new java.util.Random().nextInt(1000000));
+
+        // Lưu vào Redis với TTL là 5 phút
+        String redisKey = "otp:verify-email:" + cleanEmail;
+        redisTemplate.opsForValue().set(redisKey, otp, 5, java.util.concurrent.TimeUnit.MINUTES);
+
+        // Gửi qua Email
+        emailService.sendOtpEmail(cleanEmail, otp);
     }
 }

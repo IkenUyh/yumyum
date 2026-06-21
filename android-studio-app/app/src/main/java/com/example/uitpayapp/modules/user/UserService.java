@@ -57,4 +57,7 @@ public interface UserService {
 
     @POST("api/v1/users/forgot-password/reset")
     Call<ApiResponse<String>> forgotPasswordReset(@Body ResetPasswordRequestDTO request);
+
+    @POST("api/v1/users/send-email-otp")
+    Call<ApiResponse<String>> sendEmailOtp(@retrofit2.http.Query("email") String email);
 }
