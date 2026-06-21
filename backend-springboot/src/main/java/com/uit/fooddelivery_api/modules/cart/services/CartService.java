@@ -63,6 +63,13 @@ public class CartService {
 
         // 2. Tìm xem có giỏ hàng nào TRÙNG MÓN và TRÙNG Y HỆT TOPPING không?
         List<CartItem> existingItems = cartItemRepository.findByUserId(user.getId());
+        if (!existingItems.isEmpty()) {
+            Long existingRestaurantId = existingItems.get(0).getFood().getRestaurant().getId();
+            if (!existingRestaurantId.equals(food.getRestaurant().getId())) {
+                cartItemRepository.deleteByUserId(user.getId());
+                existingItems = new java.util.ArrayList<>();
+            }
+        }
         CartItem targetItem = null;
 
         for (CartItem item : existingItems) {
