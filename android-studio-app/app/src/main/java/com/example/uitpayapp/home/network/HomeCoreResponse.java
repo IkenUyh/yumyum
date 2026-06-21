@@ -8,10 +8,7 @@ public class HomeCoreResponse {
     private List<Banner> banners;
     private List<FoodCategory> categories;
     private List<FoodMenuItem> flashSales;
-    private List<TopicResponse> topics;
-
     public List<Banner> getBanners() { return banners; }
     public List<FoodCategory> getCategories() { return categories; }
     public List<FoodMenuItem> getFlashSales() { return flashSales; }
-    public List<TopicResponse> getTopics() { return topics; }
 }

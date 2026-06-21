@@ -10,7 +10,7 @@
         android:id="@+id/bg_top_gradient"
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:background="@drawable/bg_orange_gradient"
+        android:background="@color/primary_orange"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Header Bar -->

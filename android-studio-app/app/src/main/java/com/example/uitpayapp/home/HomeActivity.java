@@ -65,10 +65,21 @@ import com.example.uitpayapp.home.network.HomeCoreResponse;
 import com.example.uitpayapp.home.network.BrandResponse;
 import com.example.uitpayapp.home.network.TopicResponse;
 import android.util.Log;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import android.location.Geocoder;
+import android.location.Address;
+import java.io.IOException;
 
 public class HomeActivity extends AppCompatActivity {
 
     private HomeViewModel viewModel;
+    private FusedLocationProviderClient fusedLocationClient;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
     private List<Restaurant> restaurants;
     private List<Restaurant> filteredRestaurants;
@@ -155,7 +166,9 @@ public class HomeActivity extends AppCompatActivity {
         setupBottomNavigation();
         setupObservers();
 
-        loadInitialAddress();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        loadInitialAddressWithOverlay();
 
         androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout = findViewById(
                 R.id.swipe_refresh_home);
@@ -167,38 +180,149 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    private void loadInitialAddressWithOverlay() {
+        View overlay = findViewById(R.id.layout_location_finding_overlay);
+        if (overlay != null) {
+            overlay.setVisibility(View.VISIBLE);
+            
+            // Pulsing animation for map circle
+            View mapCircle = overlay.findViewById(R.id.iv_location_pin);
+            if (mapCircle != null) {
+                android.view.animation.Animation pulse = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
+                pulse.setDuration(800);
+                pulse.setRepeatMode(android.view.animation.Animation.REVERSE);
+                pulse.setRepeatCount(android.view.animation.Animation.INFINITE);
+                mapCircle.startAnimation(pulse);
+            }
+        }
+
+        // Add an artificial delay to show the "finding location" UI
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            loadInitialAddress();
+        }, 1500);
+    }
+
+    private void hideLocationOverlay(String address) {
+        View overlay = findViewById(R.id.layout_location_finding_overlay);
+        if (overlay == null || overlay.getVisibility() != View.VISIBLE) return;
+
+        TextView tvStatus = overlay.findViewById(R.id.tv_finding_location_status);
+        ImageView ivPin = overlay.findViewById(R.id.iv_location_pin);
+        TextView tvAddress = overlay.findViewById(R.id.tv_found_address_center);
+
+        if (tvStatus != null) {
+            tvStatus.setText("Đã xác định vị trí");
+        }
+        if (ivPin != null) {
+            ivPin.clearAnimation();
+        }
+        if (tvAddress != null) {
+            tvAddress.setText(address);
+            tvAddress.setVisibility(View.VISIBLE);
+        }
+
+        // Wait a bit to let the user read the address, then fade out
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            overlay.animate()
+                .alpha(0f)
+                .setDuration(500)
+                .withEndAction(() -> {
+                    overlay.setVisibility(View.GONE);
+                    overlay.setAlpha(1f);
+                })
+                .start();
+        }, 1500);
+    }
+
     private void loadInitialAddress() {
         com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager
                 .getInstance(this);
-        if (sessionManager.getAuthToken() != null && !sessionManager.getAuthToken().isEmpty()) {
-            String savedAddress = sessionManager.getDeliveryAddressText();
-            if (savedAddress != null && !savedAddress.isEmpty()) {
-                updateAddressUI(savedAddress);
-            } else {
-                new com.example.uitpayapp.modules.user.AddressRepository().getDefaultAddress(
-                        new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>() {
-                            @Override
-                            public void onSuccess(
-                                    com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO result) {
-                                if (result != null) {
-                                    String addr = result.getDetailedAddress();
-                                    if (addr == null || addr.isEmpty())
-                                        addr = "Hiện chưa có địa chỉ";
-                                    sessionManager.saveDeliveryAddress(result.getId(), addr);
-                                    updateAddressUI(addr);
-                                } else {
-                                    updateAddressUI("Hiện chưa có địa chỉ");
-                                }
-                            }
+        // Always try to get GPS location first on startup to check for fresh coordinates
+        fetchGPSLocation(sessionManager);
+    }
 
-                            @Override
-                            public void onError(String errorMessage) {
-                                updateAddressUI("Hiện chưa có địa chỉ");
+    private void fetchGPSLocation(com.example.uitpayapp.network.SessionManager sessionManager) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+            return;
+        }
+
+        fusedLocationClient.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener(this, location -> {
+                    if (location != null) {
+                        try {
+                            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                            List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                            if (addresses != null && !addresses.isEmpty()) {
+                                Address address = addresses.get(0);
+                                String addressText = address.getAddressLine(0);
+                                sessionManager.saveDeliveryAddress(-1L, addressText);
+                                hideLocationOverlay(addressText);
+                                updateAddressUI(addressText);
+                                return;
                             }
-                        });
+                        } catch (IOException e) {
+                            Log.e("HomeActivity", "Geocoder failed", e);
+                        }
+                    }
+                    // Fallback to API if GPS fails or no address found
+                    fallbackToApiAddress(sessionManager);
+                }).addOnFailureListener(e -> {
+                    fallbackToApiAddress(sessionManager);
+                });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @androidx.annotation.NonNull String[] permissions, @androidx.annotation.NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
+                fetchGPSLocation(sessionManager);
+            } else {
+                com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
+                fallbackToApiAddress(sessionManager);
             }
+        }
+    }
+
+    private void fallbackToApiAddress(com.example.uitpayapp.network.SessionManager sessionManager) {
+        // Fallback to cached address first if available
+        String cachedAddress = sessionManager.getDeliveryAddressText();
+        if (cachedAddress != null && !cachedAddress.isEmpty()) {
+            hideLocationOverlay(cachedAddress);
+            updateAddressUI(cachedAddress);
+            return;
+        }
+
+        if (sessionManager.getAuthToken() != null && !sessionManager.getAuthToken().isEmpty()) {
+            new com.example.uitpayapp.modules.user.AddressRepository().getDefaultAddress(
+                    new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>() {
+                        @Override
+                        public void onSuccess(
+                                com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO result) {
+                            if (result != null) {
+                                String addr = result.getDetailedAddress();
+                                if (addr == null || addr.isEmpty())
+                                    addr = "Vui lòng chọn địa chỉ";
+                                sessionManager.saveDeliveryAddress(result.getId(), addr);
+                                hideLocationOverlay(addr);
+                                updateAddressUI(addr);
+                            } else {
+                                hideLocationOverlay("Vui lòng chọn địa chỉ");
+                                updateAddressUI("Vui lòng chọn địa chỉ");
+                            }
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            hideLocationOverlay("Vui lòng chọn địa chỉ");
+                            updateAddressUI("Vui lòng chọn địa chỉ");
+                        }
+                    });
         } else {
-            updateAddressUI("Vui lòng đăng nhập");
+            hideLocationOverlay("Vui lòng chọn địa chỉ");
+            updateAddressUI("Vui lòng chọn địa chỉ");
         }
     }
 
@@ -350,39 +474,7 @@ public class HomeActivity extends AppCompatActivity {
                                 tvFsError.setText("Chưa có dữ liệu");
                         }
                     }
-                    if (data.getTopics() != null && data.getTopics().size() >= 2) {
-                        if (t1Error != null)
-                            t1Error.setVisibility(View.GONE);
-                        if (t1Section != null)
-                            t1Section.setVisibility(View.VISIBLE);
-                        updateTopicUI(findViewById(R.id.random_topic_section_1), data.getTopics().get(0));
-
-                        if (t2Error != null)
-                            t2Error.setVisibility(View.GONE);
-                        if (t2Section != null)
-                            t2Section.setVisibility(View.VISIBLE);
-                        updateTopicUI(findViewById(R.id.random_topic_section_2), data.getTopics().get(1));
-
-                        applyRandomSubtitles();
-                    } else {
-                        if (t1Section != null)
-                            t1Section.setVisibility(View.GONE);
-                        if (t1Error != null) {
-                            t1Error.setVisibility(View.VISIBLE);
-                            android.widget.TextView tvT1Error = findViewById(R.id.tv_topic1_error);
-                            if (tvT1Error != null)
-                                tvT1Error.setText("Chưa có dữ liệu");
-                        }
-
-                        if (t2Section != null)
-                            t2Section.setVisibility(View.GONE);
-                        if (t2Error != null) {
-                            t2Error.setVisibility(View.VISIBLE);
-                            android.widget.TextView tvT2Error = findViewById(R.id.tv_topic2_error);
-                            if (tvT2Error != null)
-                                tvT2Error.setText("Chưa có dữ liệu");
-                        }
-                    }
+                    // topics are now exclusively handled by getRandomTopicsData()
 
                     if (data.getBanners() != null && !data.getBanners().isEmpty()) {
                         if (bannerError != null)
@@ -433,27 +525,8 @@ public class HomeActivity extends AppCompatActivity {
                         tvCatError.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
                 }
 
-                if (t1Loading != null)
-                    t1Loading.setVisibility(View.GONE);
-                if (t1Section != null)
-                    t1Section.setVisibility(View.GONE);
-                if (t1Error != null) {
-                    t1Error.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvT1Error = findViewById(R.id.tv_topic1_error);
-                    if (tvT1Error != null)
-                        tvT1Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
-                }
 
-                if (t2Loading != null)
-                    t2Loading.setVisibility(View.GONE);
-                if (t2Section != null)
-                    t2Section.setVisibility(View.GONE);
-                if (t2Error != null) {
-                    t2Error.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvT2Error = findViewById(R.id.tv_topic2_error);
-                    if (tvT2Error != null)
-                        tvT2Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
-                }
+
 
                 View bannerLoading = findViewById(R.id.layout_banner_loading);
                 View bannerError = findViewById(R.id.layout_banner_error);
@@ -680,8 +753,10 @@ public class HomeActivity extends AppCompatActivity {
         int[] cardIds = { R.id.card_flashsale_1, R.id.card_flashsale_2, R.id.card_flashsale_3 };
         int[] ivIds = { R.id.iv_flashsale_1, R.id.iv_flashsale_2, R.id.iv_flashsale_3 };
         int[] nameIds = { R.id.tv_name_1, R.id.tv_name_2, R.id.tv_name_3 };
+        int[] storeNameIds = { R.id.tv_store_name_1, R.id.tv_store_name_2, R.id.tv_store_name_3 };
         int[] origPriceIds = { R.id.tv_orig_price_1, R.id.tv_orig_price_2, R.id.tv_orig_price_3 };
         int[] discPriceIds = { R.id.tv_disc_price_1, R.id.tv_disc_price_2, R.id.tv_disc_price_3 };
+        int[] badgeIds = { R.id.tv_discount_badge_1, R.id.tv_discount_badge_2, R.id.tv_discount_badge_3 };
 
         for (int i = 0; i < 3; i++) {
             FoodMenuItem item = flashsaleFoods.get(i);
@@ -691,6 +766,7 @@ public class HomeActivity extends AppCompatActivity {
 
             android.widget.ImageView iv = card.findViewById(ivIds[i]);
             android.widget.TextView tvName = card.findViewById(nameIds[i]);
+            android.widget.TextView tvStoreName = card.findViewById(storeNameIds[i]);
             android.widget.TextView tvOrigPrice = card.findViewById(origPriceIds[i]);
             android.widget.TextView tvDiscPrice = card.findViewById(discPriceIds[i]);
 
@@ -738,14 +814,29 @@ public class HomeActivity extends AppCompatActivity {
                 iv.setImageDrawable(grayPlaceholder);
             }
             tvName.setText(item.getName());
+            
+            if (item.getRestaurantName() != null && !item.getRestaurantName().isEmpty()) {
+                tvStoreName.setText(item.getRestaurantName());
+                tvStoreName.setVisibility(android.view.View.VISIBLE);
+            } else {
+                tvStoreName.setVisibility(android.view.View.GONE);
+            }
 
+            // Sử dụng giá gốc và phần trăm giảm giá từ API
             long discountedPrice = item.getPrice();
-            long originalPrice = discountedPrice * 2;
+            long originalPrice = item.getOriginalPrice() > 0 ? item.getOriginalPrice() : discountedPrice * 2;
+            int discountPct = item.getDiscountPercent() > 0 ? item.getDiscountPercent() : 50;
 
             tvOrigPrice.setText(String.format("%,dđ", originalPrice).replace(',', '.'));
             tvOrigPrice.setPaintFlags(tvOrigPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
 
             tvDiscPrice.setText(String.format("%,dđ", discountedPrice).replace(',', '.'));
+
+            // Cập nhật badge giảm giá động
+            android.widget.TextView tvBadge = findViewById(badgeIds[i]);
+            if (tvBadge != null) {
+                tvBadge.setText("Giảm " + discountPct + "%");
+            }
 
             card.setOnClickListener(v -> {
                 FoodMenuItem discountedItem = new FoodMenuItem(
@@ -757,6 +848,8 @@ public class HomeActivity extends AppCompatActivity {
                         item.getImageUrl());
                 discountedItem.setRestaurantId(item.getRestaurantId());
                 discountedItem.setRestaurantName(item.getRestaurantName());
+                discountedItem.setOriginalPrice(originalPrice);
+                discountedItem.setDiscountPercent(discountPct);
                 showFoodItemDetailPopup(discountedItem, iv);
             });
         }
@@ -799,7 +892,15 @@ public class HomeActivity extends AppCompatActivity {
             }
 
             public void onFinish() {
-                startFlashSaleTimer();
+                // Đã hết giờ -> Tải lại Flashsale mới từ server (đợt mới mỗi giờ)
+                tvHours.setText("00");
+                tvMinutes.setText("00");
+                tvSeconds.setText("00");
+
+                if (viewModel != null) {
+                    android.util.Log.d("HomeActivity", "⚡ Flash sale hết hạn -> tải lại dữ liệu mới...");
+                    viewModel.refreshCoreData();
+                }
             }
         }.start();
     }

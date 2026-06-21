@@ -63,6 +63,11 @@ public class HomeViewModel extends ViewModel {
         fetchRandomTopics();
     }
 
+    /** Gọi từ HomeActivity khi Flashsale hết hạn để tải lại dữ liệu mới */
+    public void refreshCoreData() {
+        fetchCoreData();
+    }
+
     private void fetchCoreData() {
         coreData.setValue(UiState.loading(null));
         apiService.getHomeCore(currentAddressId).enqueue(new Callback<ApiResponse<HomeCoreResponse>>() {
@@ -95,18 +100,21 @@ public class HomeViewModel extends ViewModel {
                     if (dtos.isEmpty()) {
                         brandsData.setValue(UiState.empty());
                     } else {
-                        // Map RestaurantResponseDTO -> Restaurant (giới hạn tối đa 10)
+                        // Map RestaurantResponseDTO -> Restaurant (giới hạn tối đa 10, random)
+                        java.util.Collections.shuffle(dtos);
                         List<com.example.uitpayapp.home.home_models.Restaurant> mappedRestaurants = new ArrayList<>();
                         int limit = Math.min(dtos.size(), 10);
                         for (int i = 0; i < limit; i++) {
                             RestaurantResponseDTO dto = dtos.get(i);
                             String shortName = dto.getName() != null && dto.getName().length() > 0
                                     ? dto.getName().substring(0, 1) : "A";
+                            double rating = dto.getRatingAverage() != null ? dto.getRatingAverage() : 0.0;
+                            int reviewCount = dto.getReviewCount() != null ? dto.getReviewCount() : 0;
                             mappedRestaurants.add(new com.example.uitpayapp.home.home_models.Restaurant(
                                     dto.getId(), dto.getName(), shortName,
                                     android.graphics.Color.parseColor("#E4002B"), "Danh mục",
                                     new ArrayList<>(), 0,
-                                    4.5, 100, 30, dto.getAddress(), dto.getImageUrl()));
+                                    rating, reviewCount, 30, dto.getAddress(), dto.getImageUrl()));
                         }
                         BrandResponse brandResponse = new BrandResponse();
                         brandResponse.setBrands(mappedRestaurants);
@@ -249,6 +257,7 @@ public class HomeViewModel extends ViewModel {
                         f.getImageUrl()
                 );
                 item.setRestaurantId(f.getRestaurantId());
+                item.setRestaurantName(f.getRestaurantName());
                 items.add(item);
             }
             if (!items.isEmpty()) {
@@ -288,26 +297,6 @@ public class HomeViewModel extends ViewModel {
                 "    { \"id\": \"d_1\", \"name\": \"Gà rán truyền thống\", \"price\": 45000, \"imageResId\": " + 0 + ", \"description\": \"1 miếng gà rán giòn\" }," +
                 "    { \"id\": \"d_2\", \"name\": \"Combo gà rán + khoai\", \"price\": 89000, \"imageResId\": " + 0 + ", \"description\": \"2 miếng gà + khoai tây\" }," +
                 "    { \"id\": \"d_3\", \"name\": \"Burger gà giòn\", \"price\": 39000, \"imageResId\": " + 0 + ", \"description\": \"Burger gà với rau tươi\" }" +
-                "  ]," +
-                "  \"topics\": [" +
-                "    {" +
-                "      \"title\": \"Món Ngon Gần Bạn\"," +
-                "      \"subtitle\": \"Khám phá ẩm thực xung quanh bạn\"," +
-                "      \"items\": [" +
-                "        { \"id\": \"f_1\", \"name\": \"Gà rán KFC\", \"price\": 45000, \"imageResId\": " + 0 + ", \"description\": \"Gà rán giòn rụm\" }," +
-                "        { \"id\": \"f_2\", \"name\": \"Trà sữa thái\", \"price\": 25000, \"imageResId\": " + 0 + ", \"description\": \"Trà sữa thái xanh trân châu\" }," +
-                "        { \"id\": \"f_3\", \"name\": \"Cà phê đen đá\", \"price\": 15000, \"imageResId\": " + 0 + ", \"description\": \"Cà phê phin truyền thống\" }" +
-                "      ]" +
-                "    }," +
-                "    {" +
-                "      \"title\": \"Ưu Đãi Hôm Nay\"," +
-                "      \"subtitle\": \"Khuyến mãi cực hot dành riêng cho bạn\"," +
-                "      \"items\": [" +
-                "        { \"id\": \"f_4\", \"name\": \"Pizza xúc xích\", \"price\": 89000, \"imageResId\": " + 0 + ", \"description\": \"Pizza phô mai xúc xích\" }," +
-                "        { \"id\": \"f_5\", \"name\": \"Gà cay phô mai\", \"price\": 55000, \"imageResId\": " + 0 + ", \"description\": \"Gà xào bắp cải phô mai\" }," +
-                "        { \"id\": \"f_6\", \"name\": \"Trà đào\", \"price\": 30000, \"imageResId\": " + 0 + ", \"description\": \"Trà đào cam sả thanh mát\" }" +
-                "      ]" +
-                "    }" +
                 "  ]" +
                 "}";
         return new com.google.gson.Gson().fromJson(json, HomeCoreResponse.class);

@@ -42,6 +42,13 @@ public class TopicStoreAdapter extends RecyclerView.Adapter<TopicStoreAdapter.Vi
         holder.tvName.setText(food.getName());
         holder.tvPrice.setText(food.getFormattedPrice());
         
+        if (food.getRestaurantName() != null && !food.getRestaurantName().isEmpty()) {
+            holder.tvStoreName.setText(food.getRestaurantName());
+            holder.tvStoreName.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvStoreName.setVisibility(View.GONE);
+        }
+        
         holder.ivImage.clearAnimation();
         String imageUrl = food.getImageUrl();
         android.graphics.drawable.ColorDrawable grayPlaceholder = new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#E0E0E0"));
@@ -95,12 +102,13 @@ public class TopicStoreAdapter extends RecyclerView.Adapter<TopicStoreAdapter.Vi
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView ivImage;
-        TextView tvName, tvPrice;
+        TextView tvName, tvStoreName, tvPrice;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivImage = itemView.findViewById(R.id.iv_topic_store_image);
             tvName = itemView.findViewById(R.id.tv_topic_food_name);
+            tvStoreName = itemView.findViewById(R.id.tv_topic_store_name);
             tvPrice = itemView.findViewById(R.id.tv_topic_food_price);
         }
     }
