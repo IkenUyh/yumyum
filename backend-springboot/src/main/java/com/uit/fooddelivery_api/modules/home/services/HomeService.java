@@ -72,6 +72,7 @@ public class HomeService {
                                                         .imageUrl(fs.getFood().getImageUrl())
                                                         .description(fs.getFood().getDescription())
                                                         .restaurantId(fs.getFood().getRestaurant() != null ? fs.getFood().getRestaurant().getId() : null)
+                                                        .restaurantName(fs.getFood().getRestaurant() != null ? fs.getFood().getRestaurant().getName() : null)
                                                         .build())
                                         .limit(5)
                                         .collect(Collectors.toList());
@@ -88,58 +89,16 @@ public class HomeService {
                                                         .imageUrl(f.getImageUrl())
                                                         .description(f.getDescription())
                                                         .restaurantId(f.getRestaurant() != null ? f.getRestaurant().getId() : null)
+                                                        .restaurantName(f.getRestaurant() != null ? f.getRestaurant().getName() : null)
                                                         .build())
                                         .limit(3)
                                         .collect(Collectors.toList());
                 }
 
-                // 4. Topics
-                List<FoodMenuItemDTO> topic1Items = allFoodsWithRestaurant.stream()
-                                .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
-                                .map(f -> FoodMenuItemDTO.builder()
-                                                .id("t1_" + f.getId())
-                                                .name(f.getName())
-                                                .price(f.getPrice().longValue())
-                                                .imageResId(0)
-                                                .imageUrl(f.getImageUrl())
-                                                .description(f.getDescription())
-                                                .restaurantId(f.getRestaurant() != null ? f.getRestaurant().getId() : null)
-                                                .build())
-                                .limit(4)
-                                .collect(Collectors.toList());
-
-                List<FoodMenuItemDTO> topic2Items = allFoodsWithRestaurant.stream()
-                                .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
-                                .skip(4)
-                                .map(f -> FoodMenuItemDTO.builder()
-                                                .id("t2_" + f.getId())
-                                                .name(f.getName())
-                                                .price(f.getPrice().longValue())
-                                                .imageResId(0)
-                                                .imageUrl(f.getImageUrl())
-                                                .description(f.getDescription())
-                                                .restaurantId(f.getRestaurant() != null ? f.getRestaurant().getId() : null)
-                                                .build())
-                                .limit(4)
-                                .collect(Collectors.toList());
-
-                List<TopicResponseDTO> topics = List.of(
-                                TopicResponseDTO.builder()
-                                                .title("Món Ngon Gần Bạn")
-                                                .subtitle("Khám phá ẩm thực xung quanh bạn")
-                                                .items(topic1Items)
-                                                .build(),
-                                TopicResponseDTO.builder()
-                                                .title("Ưu Đãi Hôm Nay")
-                                                .subtitle("Khuyến mãi cực hot dành riêng cho bạn")
-                                                .items(topic2Items)
-                                                .build());
-
                 return HomeCoreResponseDTO.builder()
                                 .banners(banners)
                                 .categories(categories)
                                 .flashSales(flashSales)
-                                .topics(topics)
                                 .build();
         }
 

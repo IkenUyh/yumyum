@@ -249,6 +249,7 @@ public class HomeViewModel extends ViewModel {
                         f.getImageUrl()
                 );
                 item.setRestaurantId(f.getRestaurantId());
+                item.setRestaurantName(f.getRestaurantName());
                 items.add(item);
             }
             if (!items.isEmpty()) {
@@ -288,26 +289,6 @@ public class HomeViewModel extends ViewModel {
                 "    { \"id\": \"d_1\", \"name\": \"Gà rán truyền thống\", \"price\": 45000, \"imageResId\": " + 0 + ", \"description\": \"1 miếng gà rán giòn\" }," +
                 "    { \"id\": \"d_2\", \"name\": \"Combo gà rán + khoai\", \"price\": 89000, \"imageResId\": " + 0 + ", \"description\": \"2 miếng gà + khoai tây\" }," +
                 "    { \"id\": \"d_3\", \"name\": \"Burger gà giòn\", \"price\": 39000, \"imageResId\": " + 0 + ", \"description\": \"Burger gà với rau tươi\" }" +
-                "  ]," +
-                "  \"topics\": [" +
-                "    {" +
-                "      \"title\": \"Món Ngon Gần Bạn\"," +
-                "      \"subtitle\": \"Khám phá ẩm thực xung quanh bạn\"," +
-                "      \"items\": [" +
-                "        { \"id\": \"f_1\", \"name\": \"Gà rán KFC\", \"price\": 45000, \"imageResId\": " + 0 + ", \"description\": \"Gà rán giòn rụm\" }," +
-                "        { \"id\": \"f_2\", \"name\": \"Trà sữa thái\", \"price\": 25000, \"imageResId\": " + 0 + ", \"description\": \"Trà sữa thái xanh trân châu\" }," +
-                "        { \"id\": \"f_3\", \"name\": \"Cà phê đen đá\", \"price\": 15000, \"imageResId\": " + 0 + ", \"description\": \"Cà phê phin truyền thống\" }" +
-                "      ]" +
-                "    }," +
-                "    {" +
-                "      \"title\": \"Ưu Đãi Hôm Nay\"," +
-                "      \"subtitle\": \"Khuyến mãi cực hot dành riêng cho bạn\"," +
-                "      \"items\": [" +
-                "        { \"id\": \"f_4\", \"name\": \"Pizza xúc xích\", \"price\": 89000, \"imageResId\": " + 0 + ", \"description\": \"Pizza phô mai xúc xích\" }," +
-                "        { \"id\": \"f_5\", \"name\": \"Gà cay phô mai\", \"price\": 55000, \"imageResId\": " + 0 + ", \"description\": \"Gà xào bắp cải phô mai\" }," +
-                "        { \"id\": \"f_6\", \"name\": \"Trà đào\", \"price\": 30000, \"imageResId\": " + 0 + ", \"description\": \"Trà đào cam sả thanh mát\" }" +
-                "      ]" +
-                "    }" +
                 "  ]" +
                 "}";
         return new com.google.gson.Gson().fromJson(json, HomeCoreResponse.class);

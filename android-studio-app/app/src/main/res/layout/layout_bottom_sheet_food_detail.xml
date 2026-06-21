@@ -53,26 +53,52 @@
         tools:text="Combo gà rán + khoai" />
 
     <TextView
-        android:id="@+id/tv_store_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="2dp"
-        android:textColor="#EE4D2D"
-        android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@+id/tv_food_name"
-        tools:text="Gà Rán Popeyes" />
-
-    <TextView
         android:id="@+id/tv_food_desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="8dp"
         android:textColor="#757575"
         android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@+id/tv_store_name"
+        app:layout_constraintTop_toBottomOf="@+id/tv_food_name"
         tools:text="2 miếng gà + khoai tây" />
+
+    <LinearLayout
+        android:id="@+id/layout_store_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:background="#FFF5F2"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/tv_food_desc">
+
+        <TextView
+            android:id="@+id/tv_store_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textColor="#EE4D2D"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="Gà Rán Popeyes" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Xem quán ›"
+            android:textColor="#EE4D2D"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_food_price"
@@ -83,7 +109,7 @@
         android:textColor="#D32F2F"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@+id/tv_food_desc"
+        app:layout_constraintTop_toBottomOf="@+id/layout_store_info"
         tools:text="89.000đ" />
 
     <View

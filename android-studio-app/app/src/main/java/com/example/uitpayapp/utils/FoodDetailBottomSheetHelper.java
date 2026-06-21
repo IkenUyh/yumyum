@@ -87,12 +87,23 @@ public class FoodDetailBottomSheetHelper {
         }
         
         tvFoodName.setText(item.getName());
-        if (tvStoreName != null) {
+        tvStoreName = dialog.findViewById(R.id.tv_store_name);
+        View layoutStoreInfo = dialog.findViewById(R.id.layout_store_info);
+        if (tvStoreName != null && layoutStoreInfo != null) {
             if (item.getRestaurantName() != null && !item.getRestaurantName().isEmpty()) {
                 tvStoreName.setText(item.getRestaurantName());
-                tvStoreName.setVisibility(View.VISIBLE);
+                layoutStoreInfo.setVisibility(View.VISIBLE);
+                
+                layoutStoreInfo.setOnClickListener(v -> {
+                    dialog.dismiss();
+                    if (item.getRestaurantId() != null && item.getRestaurantId() != -1) {
+                        android.content.Intent intent = new android.content.Intent(context, com.example.uitpayapp.home.StoreDetailActivity.class);
+                        intent.putExtra(com.example.uitpayapp.home.StoreDetailActivity.EXTRA_RESTAURANT_ID, item.getRestaurantId());
+                        context.startActivity(intent);
+                    }
+                });
             } else {
-                tvStoreName.setVisibility(View.GONE);
+                layoutStoreInfo.setVisibility(View.GONE);
             }
         }
         tvFoodDesc.setText(item.getDescription());
