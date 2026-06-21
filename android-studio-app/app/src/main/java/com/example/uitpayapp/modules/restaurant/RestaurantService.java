@@ -17,6 +17,7 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface RestaurantService {
 
@@ -36,6 +37,13 @@ public interface RestaurantService {
     @GET("api/v1/restaurants/{id}/foods")
     Call<ApiResponse<List<FoodResponse>>> getRestaurantMenu(
             @Path("id") Long restaurantId
+    );
+
+    @GET("api/v1/restaurants/{id}/distance")
+    Call<ApiResponse<Double>> getRestaurantDistance(
+            @Path("id") Long restaurantId,
+            @Query("lat") double lat,
+            @Query("lng") double lng
     );
 
     @PUT("api/v1/restaurants/{id}/settings")

@@ -53,6 +53,31 @@ public class RestaurantController {
         return ApiResponse.success(menu);
     }
 
+    // 4. Lấy khoảng cách từ vị trí hiện tại đến nhà hàng
+    @GetMapping("/{id}/distance")
+    public ApiResponse<Double> getRestaurantDistance(
+            @PathVariable("id") Long restaurantId,
+            @RequestParam("lat") double userLat,
+            @RequestParam("lng") double userLng) {
+
+        Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
+        if (restaurant.getLatitude() == null || restaurant.getLongitude() == null) {
+            return ApiResponse.success(-1.0); // Không có toạ độ
+        }
+
+        double distanceKm = com.uit.fooddelivery_api.common.utils.DistanceUtil.calculateDistance(
+                restaurant.getLatitude().doubleValue(),
+                restaurant.getLongitude().doubleValue(),
+                userLat,
+                userLng
+        );
+        
+        // Làm tròn 1 chữ số thập phân
+        distanceKm = Math.round(distanceKm * 10.0) / 10.0;
+
+        return ApiResponse.success(distanceKm);
+    }
+
     // =====================================================
     // PROTECTED ENDPOINTS - Yêu cầu đăng nhập (Chủ quán)
     // =====================================================

@@ -105,6 +105,19 @@ public class RestaurantRepository {
         });
     }
 
+    public void getRestaurantDistance(Long restaurantId, double lat, double lng, final ApiCallback<Double> callback) {
+        restaurantService.getRestaurantDistance(restaurantId, lat, lng).enqueue(new Callback<ApiResponse<Double>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Double>> call, Response<ApiResponse<Double>> response) {
+                handleResponse(response, callback);
+            }
+            @Override
+            public void onFailure(Call<ApiResponse<Double>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
     public void updateRestaurantInfo(Long restaurantId, UpdateRestaurantInfoDTO dto, final ApiCallback<RestaurantResponseDTO> callback) {
         restaurantService.updateRestaurantInfo(restaurantId, dto).enqueue(new Callback<ApiResponse<RestaurantResponseDTO>>() {
             @Override
