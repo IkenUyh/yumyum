@@ -180,6 +180,15 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tv_store_name_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textColor="#E0E0E0"
+                        android:textSize="12sp" />
+
+                    <TextView
                         android:id="@+id/tv_orig_price_1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -257,6 +266,15 @@
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
+                        <TextView
+                            android:id="@+id/tv_store_name_2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textColor="#E0E0E0"
+                            android:textSize="10sp" />
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -331,6 +349,15 @@
                             android:textColor="#FFFFFF"
                             android:textSize="12sp"
                             android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_store_name_3"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textColor="#E0E0E0"
+                            android:textSize="10sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"

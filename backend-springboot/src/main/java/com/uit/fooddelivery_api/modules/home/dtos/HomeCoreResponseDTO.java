@@ -11,5 +11,4 @@ public class HomeCoreResponseDTO {
     private List<BannerDTO> banners;
     private List<FoodCategoryDTO> categories;
     private List<FoodMenuItemDTO> flashSales;
-    private List<TopicResponseDTO> topics;
 }

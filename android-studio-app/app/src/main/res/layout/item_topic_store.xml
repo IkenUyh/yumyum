@@ -29,11 +29,22 @@
         android:layout_weight="1"
         android:layout_marginTop="6dp"
         android:ellipsize="end"
-        android:maxLines="2"
+        android:maxLines="1"
         android:text="Tên món"
         android:textColor="#333333"
         android:textSize="13sp"
         android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tv_topic_store_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="Tên quán"
+        android:textColor="#757575"
+        android:textSize="11sp" />
 
     <TextView
         android:id="@+id/tv_topic_food_price"

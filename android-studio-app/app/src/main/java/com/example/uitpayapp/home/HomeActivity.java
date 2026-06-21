@@ -350,39 +350,7 @@ public class HomeActivity extends AppCompatActivity {
                                 tvFsError.setText("Chưa có dữ liệu");
                         }
                     }
-                    if (data.getTopics() != null && data.getTopics().size() >= 2) {
-                        if (t1Error != null)
-                            t1Error.setVisibility(View.GONE);
-                        if (t1Section != null)
-                            t1Section.setVisibility(View.VISIBLE);
-                        updateTopicUI(findViewById(R.id.random_topic_section_1), data.getTopics().get(0));
-
-                        if (t2Error != null)
-                            t2Error.setVisibility(View.GONE);
-                        if (t2Section != null)
-                            t2Section.setVisibility(View.VISIBLE);
-                        updateTopicUI(findViewById(R.id.random_topic_section_2), data.getTopics().get(1));
-
-                        applyRandomSubtitles();
-                    } else {
-                        if (t1Section != null)
-                            t1Section.setVisibility(View.GONE);
-                        if (t1Error != null) {
-                            t1Error.setVisibility(View.VISIBLE);
-                            android.widget.TextView tvT1Error = findViewById(R.id.tv_topic1_error);
-                            if (tvT1Error != null)
-                                tvT1Error.setText("Chưa có dữ liệu");
-                        }
-
-                        if (t2Section != null)
-                            t2Section.setVisibility(View.GONE);
-                        if (t2Error != null) {
-                            t2Error.setVisibility(View.VISIBLE);
-                            android.widget.TextView tvT2Error = findViewById(R.id.tv_topic2_error);
-                            if (tvT2Error != null)
-                                tvT2Error.setText("Chưa có dữ liệu");
-                        }
-                    }
+                    // topics are now exclusively handled by getRandomTopicsData()
 
                     if (data.getBanners() != null && !data.getBanners().isEmpty()) {
                         if (bannerError != null)
@@ -433,27 +401,8 @@ public class HomeActivity extends AppCompatActivity {
                         tvCatError.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
                 }
 
-                if (t1Loading != null)
-                    t1Loading.setVisibility(View.GONE);
-                if (t1Section != null)
-                    t1Section.setVisibility(View.GONE);
-                if (t1Error != null) {
-                    t1Error.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvT1Error = findViewById(R.id.tv_topic1_error);
-                    if (tvT1Error != null)
-                        tvT1Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
-                }
 
-                if (t2Loading != null)
-                    t2Loading.setVisibility(View.GONE);
-                if (t2Section != null)
-                    t2Section.setVisibility(View.GONE);
-                if (t2Error != null) {
-                    t2Error.setVisibility(View.VISIBLE);
-                    android.widget.TextView tvT2Error = findViewById(R.id.tv_topic2_error);
-                    if (tvT2Error != null)
-                        tvT2Error.setText(state.getMessage() != null ? state.getMessage() : "Chưa có dữ liệu");
-                }
+
 
                 View bannerLoading = findViewById(R.id.layout_banner_loading);
                 View bannerError = findViewById(R.id.layout_banner_error);
@@ -680,6 +629,7 @@ public class HomeActivity extends AppCompatActivity {
         int[] cardIds = { R.id.card_flashsale_1, R.id.card_flashsale_2, R.id.card_flashsale_3 };
         int[] ivIds = { R.id.iv_flashsale_1, R.id.iv_flashsale_2, R.id.iv_flashsale_3 };
         int[] nameIds = { R.id.tv_name_1, R.id.tv_name_2, R.id.tv_name_3 };
+        int[] storeNameIds = { R.id.tv_store_name_1, R.id.tv_store_name_2, R.id.tv_store_name_3 };
         int[] origPriceIds = { R.id.tv_orig_price_1, R.id.tv_orig_price_2, R.id.tv_orig_price_3 };
         int[] discPriceIds = { R.id.tv_disc_price_1, R.id.tv_disc_price_2, R.id.tv_disc_price_3 };
 
@@ -691,6 +641,7 @@ public class HomeActivity extends AppCompatActivity {
 
             android.widget.ImageView iv = card.findViewById(ivIds[i]);
             android.widget.TextView tvName = card.findViewById(nameIds[i]);
+            android.widget.TextView tvStoreName = card.findViewById(storeNameIds[i]);
             android.widget.TextView tvOrigPrice = card.findViewById(origPriceIds[i]);
             android.widget.TextView tvDiscPrice = card.findViewById(discPriceIds[i]);
 
@@ -738,6 +689,13 @@ public class HomeActivity extends AppCompatActivity {
                 iv.setImageDrawable(grayPlaceholder);
             }
             tvName.setText(item.getName());
+            
+            if (item.getRestaurantName() != null && !item.getRestaurantName().isEmpty()) {
+                tvStoreName.setText(item.getRestaurantName());
+                tvStoreName.setVisibility(android.view.View.VISIBLE);
+            } else {
+                tvStoreName.setVisibility(android.view.View.GONE);
+            }
 
             long discountedPrice = item.getPrice();
             long originalPrice = discountedPrice * 2;
