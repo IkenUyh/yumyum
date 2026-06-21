@@ -1,6 +1,7 @@
 package com.uit.fooddelivery_api.modules.restaurant.controllers;
 
 import com.uit.fooddelivery_api.common.responses.ApiResponse;
+import com.uit.fooddelivery_api.modules.food.entities.Food;
 import com.uit.fooddelivery_api.modules.restaurant.dtos.CreateRestaurantDTO;
 import com.uit.fooddelivery_api.modules.restaurant.dtos.RestaurantResponseDTO;
 import com.uit.fooddelivery_api.modules.restaurant.entities.Restaurant;
@@ -44,9 +45,12 @@ public class RestaurantController {
     // 3. Lấy thực đơn (Menu) của một nhà hàng (public - không cần đăng nhập)
     @GetMapping("/{id}/foods")
     public ApiResponse<java.util.List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO>> getRestaurantMenu(
-            @PathVariable("id") Long restaurantId) {
+            @PathVariable("id") Long restaurantId,
+            @RequestParam(value = "all", required = false, defaultValue = "false") boolean all) {
 
-        java.util.List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> menu = foodService.getFoodsByRestaurant(restaurantId)
+        java.util.List<Food> foods = all ? foodService.getAllFoodsByRestaurant(restaurantId) : foodService.getFoodsByRestaurant(restaurantId);
+
+        java.util.List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> menu = foods
                 .stream()
                 .map(com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO::fromEntity)
                 .toList();

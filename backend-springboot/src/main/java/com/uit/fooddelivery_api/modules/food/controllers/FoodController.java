@@ -125,4 +125,17 @@ public class FoodController {
 
         return ApiResponse.success("Đã ngưng bán món ăn thành công!");
     }
+
+    // Endpoint Bật/Tắt trạng thái bán của món ăn
+    @PutMapping("/{id}/status")
+    public ApiResponse<String> updateFoodStatus(
+            @PathVariable("id") Long foodId,
+            @RequestParam("isAvailable") Boolean isAvailable,
+            Authentication authentication) {
+
+        User merchant = (User) authentication.getPrincipal();
+        foodService.updateFoodStatus(foodId, isAvailable, merchant);
+
+        return ApiResponse.success(isAvailable ? "Đã bật bán món ăn thành công!" : "Đã tạm ngưng bán món ăn!");
+    }
 }

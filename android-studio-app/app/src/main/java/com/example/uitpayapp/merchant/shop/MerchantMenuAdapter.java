@@ -16,9 +16,13 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import java.util.List;
 
 public class MerchantMenuAdapter extends RecyclerView.Adapter<MerchantMenuAdapter.CategoryViewHolder> {
+    public interface OnFoodStatusChangeListener {
+        void onFoodStatusChanged(Long foodId, boolean isAvailable);
+    }
 
     private List<MerchantMenuCategory> categories;
     private boolean isToppingMode = false;
+    private OnFoodStatusChangeListener statusChangeListener;
 
     public MerchantMenuAdapter(List<MerchantMenuCategory> categories) {
         this.categories = categories;
@@ -27,6 +31,10 @@ public class MerchantMenuAdapter extends RecyclerView.Adapter<MerchantMenuAdapte
     public MerchantMenuAdapter(List<MerchantMenuCategory> categories, boolean isToppingMode) {
         this.categories = categories;
         this.isToppingMode = isToppingMode;
+    }
+
+    public void setOnFoodStatusChangeListener(OnFoodStatusChangeListener listener) {
+        this.statusChangeListener = listener;
     }
 
     public void updateList(List<MerchantMenuCategory> newList) {
@@ -111,8 +119,17 @@ public class MerchantMenuAdapter extends RecyclerView.Adapter<MerchantMenuAdapte
             } else {
                 swEnabled.setVisibility(View.VISIBLE);
                 tvEdit.setVisibility(View.GONE);
+                
+                // Cập nhật trạng thái hiện tại (bỏ listener cũ trước khi set để tránh loop khi tái sử dụng view)
+                swEnabled.setOnCheckedChangeListener(null);
                 swEnabled.setChecked(item.isEnabled());
-                swEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> item.setEnabled(isChecked));
+                
+                swEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    item.setEnabled(isChecked);
+                    if (statusChangeListener != null) {
+                        statusChangeListener.onFoodStatusChanged(item.getId(), isChecked);
+                    }
+                });
             }
             
             holder.container.addView(itemView);

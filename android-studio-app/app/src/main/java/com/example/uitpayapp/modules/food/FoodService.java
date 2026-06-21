@@ -36,6 +36,12 @@ public interface FoodService {
             @Path("id") Long foodId
     );
 
+    @PUT("api/v1/foods/{id}/status")
+    Call<ApiResponse<String>> updateFoodStatus(
+            @Path("id") Long foodId,
+            @Query("isAvailable") boolean isAvailable
+    );
+
     @POST("api/v1/foods/{foodId}/options")
     Call<ApiResponse<OptionGroupResponse>> addOptionGroup(
             @Path("foodId") Long foodId,
@@ -49,6 +55,11 @@ public interface FoodService {
 
     @GET("api/v1/restaurants/{id}/foods")
     Call<ApiResponse<List<FoodResponse>>> getRestaurantMenu(
+            @Path("id") Long restaurantId
+    );
+
+    @GET("api/v1/restaurants/{id}/foods?all=true")
+    Call<ApiResponse<List<FoodResponse>>> getRestaurantMenuForMerchant(
             @Path("id") Long restaurantId
     );
 

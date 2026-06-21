@@ -143,7 +143,7 @@ public class MerchantMenuViewModel extends ViewModel {
             @Override
             public void onSuccess(List<CategoryResponse> categories) {
                 // 2. Tải toàn bộ món ăn của quán
-                foodRepository.getRestaurantMenu(resId, new ApiCallback<List<FoodResponse>>() {
+                foodRepository.getRestaurantMenuForMerchant(resId, new ApiCallback<List<FoodResponse>>() {
                     @Override
                     public void onSuccess(List<FoodResponse> foods) {
                         processMenuData(categories, foods);
@@ -424,6 +424,28 @@ public class MerchantMenuViewModel extends ViewModel {
             @Override
             public void onError(String errorMessage) {
                 operationStatus.setValue(UiState.error("Ngưng bán món ăn thất bại: " + errorMessage, null));
+            }
+        });
+    }
+
+    /**
+     * Bật/Tắt trạng thái bán của món ăn
+     */
+    public void updateFoodStatus(Long foodId, boolean isAvailable) {
+        operationStatus.setValue(UiState.loading(null));
+        foodRepository.updateFoodStatus(foodId, isAvailable, new ApiCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                operationStatus.setValue(UiState.success(result));
+                // Có thể reload lại menu hoặc để adapter tự xử lý UI (vì switch đã bật/tắt ở UI rồi)
+                // loadMenu();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                operationStatus.setValue(UiState.error("Cập nhật trạng thái thất bại: " + errorMessage, null));
+                // Nếu lỗi, nên reload menu để switch quay lại trạng thái đúng
+                loadMenu();
             }
         });
     }
