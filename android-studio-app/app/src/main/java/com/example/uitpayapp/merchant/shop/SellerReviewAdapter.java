@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.merchant.shop.shop_model.ReviewModel;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.bumptech.glide.Glide;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,8 +26,13 @@ public class SellerReviewAdapter extends RecyclerView.Adapter<SellerReviewAdapte
         void onReply(ReviewModel review, int position, String replyContent, BottomSheetDialog dialog);
     }
 
+    public interface OnOrderClickListener {
+        void onOrderClick(String orderIdRaw);
+    }
+
     private List<ReviewModel> reviewList;
     private OnReplyListener onReplyListener;
+    private OnOrderClickListener onOrderClickListener;
 
     public SellerReviewAdapter(List<ReviewModel> reviewList) {
         this.reviewList = reviewList;
@@ -34,6 +40,10 @@ public class SellerReviewAdapter extends RecyclerView.Adapter<SellerReviewAdapte
 
     public void setOnReplyListener(OnReplyListener listener) {
         this.onReplyListener = listener;
+    }
+
+    public void setOnOrderClickListener(OnOrderClickListener listener) {
+        this.onOrderClickListener = listener;
     }
 
     public void updateData(List<ReviewModel> newList) {
@@ -57,6 +67,30 @@ public class SellerReviewAdapter extends RecyclerView.Adapter<SellerReviewAdapte
         holder.ratingBar.setRating(review.getRating());
         holder.tvRatingScore.setText(String.valueOf(review.getRating()));
         holder.tvOrderId.setText(review.getOrderId());
+        
+        // Remove underline from tvOrderId
+        holder.tvOrderId.setTextColor(android.graphics.Color.parseColor("#999999"));
+        holder.tvOrderId.setPaintFlags(holder.tvOrderId.getPaintFlags() & (~android.graphics.Paint.UNDERLINE_TEXT_FLAG));
+
+        // Load Avatar
+        if (review.getUserAvatar() != null && !review.getUserAvatar().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(review.getUserAvatar())
+                    .placeholder(R.drawable.bg_circle_gray)
+                    .error(R.drawable.bg_circle_gray)
+                    .into(holder.ivAvatar);
+        } else {
+            holder.ivAvatar.setImageResource(R.drawable.bg_circle_gray);
+        }
+
+        // Set click listener on the correct "Xem đơn hàng" button
+        if (holder.tvBtnViewOrder != null) {
+            holder.tvBtnViewOrder.setOnClickListener(v -> {
+                if (onOrderClickListener != null) {
+                    onOrderClickListener.onOrderClick(review.getOrderId());
+                }
+            });
+        }
 
         if (review.getReviewImage() != null && !review.getReviewImage().isEmpty()) {
             holder.cvReviewImage.setVisibility(View.VISIBLE);
@@ -66,7 +100,7 @@ public class SellerReviewAdapter extends RecyclerView.Adapter<SellerReviewAdapte
         if (review.hasReply()) {
             holder.cvReplyContainer.setVisibility(View.VISIBLE);
             holder.tvReplyName.setText(review.getReplyName());
-            holder.tvReplyDate.setText(review.getReplyDate());
+            holder.tvReplyDate.setVisibility(View.GONE); // Ẩn thời gian của reply
             holder.tvReplyContent.setText(review.getReplyContent());
             holder.tvBtnReply.setVisibility(View.GONE);
         } else {
@@ -107,7 +141,7 @@ public class SellerReviewAdapter extends RecyclerView.Adapter<SellerReviewAdapte
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvUserName, tvDate, tvContent, tvOrderId, tvRatingScore;
-        TextView tvReplyName, tvReplyDate, tvReplyContent, tvBtnReply;
+        TextView tvReplyName, tvReplyDate, tvReplyContent, tvBtnReply, tvBtnViewOrder;
         RatingBar ratingBar;
         ImageView ivAvatar, ivReviewImage;
         View cvReviewImage, cvReplyContainer;
@@ -129,6 +163,7 @@ public class SellerReviewAdapter extends RecyclerView.Adapter<SellerReviewAdapte
             tvReplyDate = itemView.findViewById(R.id.tv_reply_date);
             tvReplyContent = itemView.findViewById(R.id.tv_reply_content);
             tvBtnReply = itemView.findViewById(R.id.tv_btn_reply);
+            tvBtnViewOrder = itemView.findViewById(R.id.tv_btn_view_order);
         }
     }
 }

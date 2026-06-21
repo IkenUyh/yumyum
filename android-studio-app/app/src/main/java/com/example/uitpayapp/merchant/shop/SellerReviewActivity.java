@@ -3,6 +3,7 @@ package com.example.uitpayapp.merchant.shop;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,6 +57,7 @@ public class SellerReviewActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private RestaurantRepository restaurantRepository;
     private ReviewRepository reviewRepository;
+    private com.example.uitpayapp.modules.order.OrderRepository orderRepository;
     private Long merchantId;
     private Long restaurantId;
 
@@ -70,6 +72,7 @@ public class SellerReviewActivity extends AppCompatActivity {
         restaurantRepository = new RestaurantRepository();
         ReviewService reviewService = RetrofitClient.getReviewService();
         reviewRepository = new ReviewRepository(reviewService);
+        orderRepository = new com.example.uitpayapp.modules.order.OrderRepository();
         
         merchantId = sessionManager.getUserId();
 
@@ -138,6 +141,17 @@ public class SellerReviewActivity extends AppCompatActivity {
                 });
             }
         });
+
+        adapter.setOnOrderClickListener(orderIdRaw -> {
+            String idStr = orderIdRaw.replace("#", "");
+            try {
+                Long orderId = Long.parseLong(idStr);
+                fetchAndShowOrderDetails(orderId);
+            } catch (Exception e) {
+                Toast.makeText(this, "Mã đơn hàng không hợp lệ", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         if (rvReviews != null) {
             rvReviews.setAdapter(adapter);
         }
@@ -206,7 +220,7 @@ public class SellerReviewActivity extends AppCompatActivity {
                         ReviewModel model = new ReviewModel(
                                 res.getId() != null ? String.valueOf(res.getId()) : "",
                                 res.getCustomerName() != null ? res.getCustomerName() : "Ẩn danh",
-                                "",
+                                res.getCustomerAvatar() != null ? res.getCustomerAvatar() : "",
                                 res.getRating() != null ? res.getRating().floatValue() : 0.0f,
                                 ratingText,
                                 res.getOrderId() != null ? "#" + res.getOrderId() : "",
@@ -382,5 +396,88 @@ public class SellerReviewActivity extends AppCompatActivity {
             sum += r.getRating();
         }
         return sum / reviews.size();
+    }
+
+    private void fetchAndShowOrderDetails(Long orderId) {
+        orderRepository.getOrderById(orderId, new ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderResponse>() {
+            @Override
+            public void onSuccess(com.example.uitpayapp.modules.order.models.responses.OrderResponse data) {
+                showOrderDetailBottomSheet(data);
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(SellerReviewActivity.this, "Lỗi tải đơn hàng: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showOrderDetailBottomSheet(com.example.uitpayapp.modules.order.models.responses.OrderResponse o) {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_order_detail, null);
+        dialog.setContentView(view);
+
+        LinearLayout llItems = view.findViewById(R.id.ll_items_container);
+        llItems.removeAllViews();
+
+        if (o.getItems() != null) {
+            for (com.example.uitpayapp.modules.order.models.responses.OrderResponse.OrderItemResponse item : o.getItems()) {
+                View itemView = getLayoutInflater().inflate(R.layout.item_order_sub_item, llItems, false);
+                int qty = item.getQuantity() != null ? item.getQuantity() : 1;
+                long price = item.getPrice() != null ? item.getPrice().longValue() : 0L;
+                ((TextView) itemView.findViewById(R.id.tv_sub_item_name)).setText(qty + " x " + (item.getName() != null ? item.getName() : "Món"));
+                TextView tvPrice = itemView.findViewById(R.id.tv_sub_item_price);
+                tvPrice.setVisibility(View.VISIBLE);
+                tvPrice.setText(String.format("%,dđ", price));
+                llItems.addView(itemView);
+            }
+        }
+
+        long shippingFee = o.getShippingFee() != null ? o.getShippingFee().longValue() : 0L;
+        long discount = o.getDiscountAmount() != null ? o.getDiscountAmount().longValue() : 0L;
+        long totalAmount = o.getTotalAmount() != null ? o.getTotalAmount().longValue() : 0L;
+        
+        long subtotal = totalAmount - shippingFee + discount;
+
+        ((TextView) view.findViewById(R.id.tv_subtotal)).setText(String.format("%,dđ", subtotal));
+        TextView tvDeliveryFee = view.findViewById(R.id.tv_delivery_fee);
+        if (tvDeliveryFee != null) {
+            tvDeliveryFee.setText(String.format("%,dđ", shippingFee));
+        }
+
+        TextView tvDiscount = view.findViewById(R.id.tv_discount);
+        if (tvDiscount != null) {
+            tvDiscount.setText(String.format("-%,dđ", discount));
+        }
+
+        String totalStr = o.getTotalAmount() != null ? String.format("%,dđ", o.getTotalAmount().longValue()) : "0đ";
+        ((TextView) view.findViewById(R.id.tv_total_received)).setText(totalStr);
+        ((TextView) view.findViewById(R.id.tv_order_id)).setText("#" + o.getId());
+        
+        TextView tvOrderTime = view.findViewById(R.id.tv_order_time);
+        if (tvOrderTime != null) {
+            String createdAt = o.getCreatedAt() != null ? o.getCreatedAt() : "";
+            tvOrderTime.setText(formatIsoDate(createdAt));
+        }
+        
+        TextView tvPickupTime = view.findViewById(R.id.tv_pickup_time);
+        if (tvPickupTime != null) {
+            String pickupTime = o.getExpectedDeliveryTime() != null ? o.getExpectedDeliveryTime() : "";
+            tvPickupTime.setText(formatIsoDate(pickupTime));
+        }
+
+        view.findViewById(R.id.btn_close).setOnClickListener(v -> dialog.dismiss());
+
+        // Ẩn các nút thao tác vì đây chỉ là xem lại đơn hàng đã đánh giá
+        View btnModify = view.findViewById(R.id.btn_modify_order);
+        if (btnModify != null) btnModify.setVisibility(View.GONE);
+        
+        View btnCancel = view.findViewById(R.id.btn_order_cancel);
+        if (btnCancel != null) btnCancel.setVisibility(View.GONE);
+        
+        View btnComplete = view.findViewById(R.id.btn_complete_order);
+        if (btnComplete != null) btnComplete.setVisibility(View.GONE);
+
+        dialog.show();
     }
 }

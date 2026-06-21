@@ -15,6 +15,7 @@ public class ReviewResponseDTO {
     private Long orderId;
     private Long restaurantId;
     private String customerName; // Tên khách hàng để quán còn biết ai khen/chê
+    private String customerAvatar; // Avatar của khách hàng
     private Integer rating;
     private String comment;
     private String merchantReply;
@@ -26,6 +27,7 @@ public class ReviewResponseDTO {
                 .orderId(review.getOrder().getId())
                 .restaurantId(review.getRestaurant().getId())
                 .customerName(review.getOrder().getUser().getFullName())
+                .customerAvatar(review.getOrder().getUser().getAvatarUrl())
                 .rating(review.getRating())
                 .comment(review.getComment())
                 .merchantReply(review.getMerchantReply())
