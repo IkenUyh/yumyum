@@ -102,10 +102,30 @@ public class FoodService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy món ăn với id: " + foodId));
     }
 
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Radius of the earth in km
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; 
+    }
+
     // Lấy tất cả món ăn đang bán (public - không cần đăng nhập)
-    public List<Food> getAllAvailableFoods() {
+    public List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> getAllAvailableFoods(Double lat, Double lng) {
         return foodRepository.findAll().stream()
                 .filter(food -> Boolean.TRUE.equals(food.getIsAvailable()))
+                .map(food -> {
+                    com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO dto = com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO.fromEntity(food);
+                    if (lat != null && lng != null && food.getRestaurant() != null && food.getRestaurant().getLatitude() != null && food.getRestaurant().getLongitude() != null) {
+                        double distance = calculateDistance(lat, lng, food.getRestaurant().getLatitude().doubleValue(), food.getRestaurant().getLongitude().doubleValue());
+                        distance = Math.round(distance * 10.0) / 10.0;
+                        dto.setDistance(distance);
+                    }
+                    return dto;
+                })
                 .toList();
     }
 
@@ -171,7 +191,7 @@ public class FoodService {
         return FoodDetailResponseDTO.fromEntity(food, optionGroups);
     }
 
-    public List<Food> searchFoodsByKeyword(String keyword) {
+    public List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> searchFoodsByKeyword(String keyword, Double lat, Double lng) {
         String booleanKeyword = java.util.Arrays.stream(keyword.trim().split("\\s+"))
                 .filter(w -> !w.isEmpty())
                 .map(word -> "+" + word)
@@ -179,6 +199,14 @@ public class FoodService {
         if (booleanKeyword.isEmpty()) {
             return java.util.Collections.emptyList();
         }
-        return foodRepository.searchFoodsByKeyword(booleanKeyword);
+        return foodRepository.searchFoodsByKeyword(booleanKeyword).stream().map(food -> {
+            com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO dto = com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO.fromEntity(food);
+            if (lat != null && lng != null && food.getRestaurant() != null && food.getRestaurant().getLatitude() != null && food.getRestaurant().getLongitude() != null) {
+                double distance = calculateDistance(lat, lng, food.getRestaurant().getLatitude().doubleValue(), food.getRestaurant().getLongitude().doubleValue());
+                distance = Math.round(distance * 10.0) / 10.0;
+                dto.setDistance(distance);
+            }
+            return dto;
+        }).toList();
     }
 }
