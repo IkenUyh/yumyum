@@ -221,6 +221,9 @@ public class SellerOrderViewModel extends AndroidViewModel {
             }
         }
 
+        long shippingFee = o.getShippingFee() != null ? o.getShippingFee().longValue() : 0L;
+        long discountAmount = o.getDiscountAmount() != null ? o.getDiscountAmount().longValue() : 0L;
+
         return new SellerOrder(
                 o.getId(),
                 "#" + o.getId(),
@@ -233,6 +236,8 @@ public class SellerOrderViewModel extends AndroidViewModel {
                 "",
                 createdAtStr,
                 pickupTimeStr,
+                shippingFee,
+                discountAmount,
                 dishes
         );
     }

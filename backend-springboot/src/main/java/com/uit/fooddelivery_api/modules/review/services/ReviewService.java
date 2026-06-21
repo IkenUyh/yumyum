@@ -20,6 +20,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
     private final com.uit.fooddelivery_api.modules.loyalty.services.LoyaltyService loyaltyService;
+    private final com.uit.fooddelivery_api.modules.restaurant.repositories.RestaurantRepository restaurantRepository;
 
     /**
      * Hệ thống Regex Engine nâng cao - Cập nhật danh sách từ thô tục mới
@@ -109,6 +110,21 @@ public class ReviewService {
                 .build();
 
         Review savedReview = reviewRepository.save(review);
+
+        // 8. Cập nhật Rating cho Cửa hàng
+        com.uit.fooddelivery_api.modules.restaurant.entities.Restaurant restaurant = order.getRestaurant();
+        int currentCount = restaurant.getReviewCount() != null ? restaurant.getReviewCount() : 0;
+        java.math.BigDecimal currentRating = restaurant.getRatingAverage() != null ? restaurant.getRatingAverage() : java.math.BigDecimal.ZERO;
+
+        java.math.BigDecimal totalScore = currentRating.multiply(java.math.BigDecimal.valueOf(currentCount))
+                .add(java.math.BigDecimal.valueOf(dto.getRating()));
+
+        int newCount = currentCount + 1;
+        java.math.BigDecimal newRating = totalScore.divide(java.math.BigDecimal.valueOf(newCount), 1, java.math.RoundingMode.HALF_UP);
+
+        restaurant.setReviewCount(newCount);
+        restaurant.setRatingAverage(newRating);
+        restaurantRepository.save(restaurant);
 
         // Thưởng xu cho khách hàng sau khi đánh giá thành công
         loyaltyService.rewardPointsForReview(customer);
