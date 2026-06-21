@@ -1,5 +1,6 @@
 package com.example.uitpayapp.profile;
 
+// Feature: Wallet PIN entry and Topup Status check
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -44,6 +45,7 @@ public class ProfileActivity extends AppCompatActivity {
     View rlLoginProfile,llUserInfo;
     boolean isLogin = false;
     private long currentCoins = 0;
+    private java.math.BigDecimal previousBalance = java.math.BigDecimal.ZERO;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -506,29 +508,68 @@ public class ProfileActivity extends AppCompatActivity {
                 }
                 
                 com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
-                walletRepo.createVNPayTopUp(amount, new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
+                
+                // Lấy số dư hiện tại trước khi gọi API nạp
+                walletRepo.getBalance(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse>() {
                     @Override
-                    public void onSuccess(java.util.Map<String, Object> data) {
-                        runOnUiThread(() -> {
-                            if (data != null && data.containsKey("paymentUrl")) {
-                                String paymentUrl = (String) data.get("paymentUrl");
-                                
-                                // Mở trang thanh toán VNPay
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(paymentUrl));
-                                startActivity(browserIntent);
-                                
-                                // Hiện dialog để người dùng tự bấm cập nhật số dư sau khi thanh toán
-                                showRefreshBalanceDialog();
-                            } else {
-                                Toast.makeText(ProfileActivity.this, "Không lấy được link thanh toán VNPay", Toast.LENGTH_SHORT).show();
+                    public void onSuccess(com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse balanceData) {
+                        if (balanceData != null && balanceData.getBalance() != null) {
+                            previousBalance = balanceData.getBalance();
+                        }
+                        
+                        // Tiếp tục gọi API tạo giao dịch nạp tiền
+                        walletRepo.createVNPayTopUp(amount, new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
+                            @Override
+                            public void onSuccess(java.util.Map<String, Object> data) {
+                                runOnUiThread(() -> {
+                                    if (data != null && data.containsKey("paymentUrl")) {
+                                        String paymentUrl = (String) data.get("paymentUrl");
+                                        
+                                        // Mở trang thanh toán VNPay
+                                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(paymentUrl));
+                                        startActivity(browserIntent);
+                                        
+                                        // Hiện dialog để người dùng tự bấm cập nhật số dư sau khi thanh toán
+                                        showRefreshBalanceDialog();
+                                    } else {
+                                        Toast.makeText(ProfileActivity.this, "Không lấy được link thanh toán VNPay", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                runOnUiThread(() -> {
+                                    Toast.makeText(ProfileActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                });
                             }
                         });
                     }
 
                     @Override
                     public void onError(String errorMessage) {
-                        runOnUiThread(() -> {
-                            Toast.makeText(ProfileActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        // Nếu lấy số dư lỗi, vẫn cho phép tạo link nạp tiền
+                        walletRepo.createVNPayTopUp(amount, new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
+                            @Override
+                            public void onSuccess(java.util.Map<String, Object> data) {
+                                runOnUiThread(() -> {
+                                    if (data != null && data.containsKey("paymentUrl")) {
+                                        String paymentUrl = (String) data.get("paymentUrl");
+                                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(paymentUrl));
+                                        startActivity(browserIntent);
+                                        showRefreshBalanceDialog();
+                                    } else {
+                                        Toast.makeText(ProfileActivity.this, "Không lấy được link thanh toán VNPay", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(String err) {
+                                runOnUiThread(() -> {
+                                    Toast.makeText(ProfileActivity.this, "Lỗi: " + err, Toast.LENGTH_SHORT).show();
+                                });
+                            }
                         });
                     }
                 });
@@ -545,10 +586,36 @@ public class ProfileActivity extends AppCompatActivity {
         builder.setCancelable(false);
 
         builder.setPositiveButton("Cập nhật số dư", (dialog, which) -> {
-            recreate();
+            com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
+            walletRepo.getBalance(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse>() {
+                @Override
+                public void onSuccess(com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse balanceData) {
+                    runOnUiThread(() -> {
+                        if (balanceData != null && balanceData.getBalance() != null) {
+                            java.math.BigDecimal newBalance = balanceData.getBalance();
+                            if (newBalance.compareTo(previousBalance) > 0) {
+                                Toast.makeText(ProfileActivity.this, "Giao dịch thành công! Số dư đã được cập nhật.", Toast.LENGTH_LONG).show();
+                                recreate();
+                            } else {
+                                Toast.makeText(ProfileActivity.this, "Giao dịch thất bại hoặc chưa hoàn tất thanh toán!", Toast.LENGTH_LONG).show();
+                                showRefreshBalanceDialog();
+                            }
+                        } else {
+                            Toast.makeText(ProfileActivity.this, "Không lấy được số dư mới. Vui lòng thử lại sau.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(ProfileActivity.this, "Lỗi kiểm tra số dư: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
             dialog.dismiss();
-            Toast.makeText(this, "Đã cập nhật số dư", Toast.LENGTH_SHORT).show();
         });
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
         builder.show();
     }
 
