@@ -10,6 +10,9 @@ import java.util.List;
 public class CreateOrderDTO {
     private Long restaurantId;
     private Long addressId; //ID địa chỉ giao hàng
+    private String addressText;
+    private Double latitude;
+    private Double longitude;
     private String deliveryMode; //Khách truyền STANDARD, FAST, hoặc EXPRESS
     private List<String> voucherCodes;
 }
