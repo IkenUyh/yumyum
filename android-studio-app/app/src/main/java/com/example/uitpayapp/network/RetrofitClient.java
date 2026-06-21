@@ -35,7 +35,7 @@ import com.example.uitpayapp.BuildConfig;
 public class RetrofitClient {
     // Tự động lấy URL dựa trên Build Variant (Debug: local, Release: server)
     // Cấu hình ở trong file app/build.gradle
-    private static final String BASE_URL = "http://172.20.101.240:8083/";
+    private static final String BASE_URL = "https://kienhuy-dev.name.vn/";
     private static Retrofit retrofit = null;
     private static Context appContext = null; // Lưu trữ context toàn cục kích thước nhỏ gọn
 
