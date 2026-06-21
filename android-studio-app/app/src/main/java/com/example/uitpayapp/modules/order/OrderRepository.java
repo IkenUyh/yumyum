@@ -106,6 +106,10 @@ public class OrderRepository {
         enqueueCall(orderService.removeItemFromOrder(orderId, request), callback);
     }
 
+    public void merchantDeliverOrder(Long orderId, ApiCallback<OrderResponse> callback) {
+        enqueueCall(orderService.merchantDeliverOrder(orderId), callback);
+    }
+
     public void merchantCompleteOrder(Long orderId, ApiCallback<OrderResponse> callback) {
         enqueueCall(orderService.merchantCompleteOrder(orderId), callback);
     }

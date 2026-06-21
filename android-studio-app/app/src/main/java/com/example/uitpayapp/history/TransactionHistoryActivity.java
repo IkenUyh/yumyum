@@ -511,8 +511,11 @@ public class TransactionHistoryActivity extends AppCompatActivity {
                     
                     if ("PENDING".equalsIgnoreCase(status) || "PREPARING".equalsIgnoreCase(status) || "DELIVERING".equalsIgnoreCase(status)) {
                         category = "Đang đến";
-                        statusText = "Đang chuẩn bị";
-                        if ("DELIVERING".equalsIgnoreCase(status)) {
+                        if ("PENDING".equalsIgnoreCase(status)) {
+                            statusText = "Chờ xác nhận";
+                        } else if ("PREPARING".equalsIgnoreCase(status)) {
+                            statusText = "Đang chuẩn bị";
+                        } else {
                             statusText = "Đang giao";
                         }
                     } else if ("CANCELLED".equalsIgnoreCase(status)) {

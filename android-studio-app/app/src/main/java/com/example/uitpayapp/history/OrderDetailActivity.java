@@ -352,11 +352,20 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
             bottomSheetBehavior.setDraggable(false);
 
         } else {
-            tvOrderStatusTitle.setText("Đơn đang được giao...");
+            String statusStr = data.getStatus();
+            if ("PENDING".equalsIgnoreCase(statusStr)) {
+                tvOrderStatusTitle.setText("Chờ xác nhận...");
+                btnCancelOrder.setVisibility(View.VISIBLE);
+            } else if ("PREPARING".equalsIgnoreCase(statusStr)) {
+                tvOrderStatusTitle.setText("Đang chuẩn bị...");
+                btnCancelOrder.setVisibility(View.GONE);
+            } else {
+                tvOrderStatusTitle.setText("Đơn đang được giao...");
+                btnCancelOrder.setVisibility(View.GONE);
+            }
             tvOrderTimeHeader.setVisibility(View.VISIBLE);
             layoutDriverInfo.setVisibility(View.VISIBLE);
             mapContainer.setVisibility(View.VISIBLE);
-            btnCancelOrder.setVisibility(View.VISIBLE);
 
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             bottomSheetBehavior.setDraggable(true);
