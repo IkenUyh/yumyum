@@ -632,6 +632,7 @@ public class HomeActivity extends AppCompatActivity {
         int[] storeNameIds = { R.id.tv_store_name_1, R.id.tv_store_name_2, R.id.tv_store_name_3 };
         int[] origPriceIds = { R.id.tv_orig_price_1, R.id.tv_orig_price_2, R.id.tv_orig_price_3 };
         int[] discPriceIds = { R.id.tv_disc_price_1, R.id.tv_disc_price_2, R.id.tv_disc_price_3 };
+        int[] badgeIds = { R.id.tv_discount_badge_1, R.id.tv_discount_badge_2, R.id.tv_discount_badge_3 };
 
         for (int i = 0; i < 3; i++) {
             FoodMenuItem item = flashsaleFoods.get(i);
@@ -697,13 +698,21 @@ public class HomeActivity extends AppCompatActivity {
                 tvStoreName.setVisibility(android.view.View.GONE);
             }
 
+            // Sử dụng giá gốc và phần trăm giảm giá từ API
             long discountedPrice = item.getPrice();
-            long originalPrice = discountedPrice * 2;
+            long originalPrice = item.getOriginalPrice() > 0 ? item.getOriginalPrice() : discountedPrice * 2;
+            int discountPct = item.getDiscountPercent() > 0 ? item.getDiscountPercent() : 50;
 
             tvOrigPrice.setText(String.format("%,dđ", originalPrice).replace(',', '.'));
             tvOrigPrice.setPaintFlags(tvOrigPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
 
             tvDiscPrice.setText(String.format("%,dđ", discountedPrice).replace(',', '.'));
+
+            // Cập nhật badge giảm giá động
+            android.widget.TextView tvBadge = findViewById(badgeIds[i]);
+            if (tvBadge != null) {
+                tvBadge.setText("Giảm " + discountPct + "%");
+            }
 
             card.setOnClickListener(v -> {
                 FoodMenuItem discountedItem = new FoodMenuItem(
@@ -715,6 +724,8 @@ public class HomeActivity extends AppCompatActivity {
                         item.getImageUrl());
                 discountedItem.setRestaurantId(item.getRestaurantId());
                 discountedItem.setRestaurantName(item.getRestaurantName());
+                discountedItem.setOriginalPrice(originalPrice);
+                discountedItem.setDiscountPercent(discountPct);
                 showFoodItemDetailPopup(discountedItem, iv);
             });
         }
@@ -757,7 +768,15 @@ public class HomeActivity extends AppCompatActivity {
             }
 
             public void onFinish() {
-                startFlashSaleTimer();
+                // Đã hết giờ -> Tải lại Flashsale mới từ server (đợt mới mỗi giờ)
+                tvHours.setText("00");
+                tvMinutes.setText("00");
+                tvSeconds.setText("00");
+
+                if (viewModel != null) {
+                    android.util.Log.d("HomeActivity", "⚡ Flash sale hết hạn -> tải lại dữ liệu mới...");
+                    viewModel.refreshCoreData();
+                }
             }
         }.start();
     }

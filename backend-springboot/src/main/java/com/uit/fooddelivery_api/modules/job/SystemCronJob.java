@@ -1,11 +1,13 @@
 package com.uit.fooddelivery_api.modules.job;
 
+import com.uit.fooddelivery_api.modules.flashsale.services.FlashSaleRotationService;
 import com.uit.fooddelivery_api.modules.order.entities.Order;
 import com.uit.fooddelivery_api.modules.order.repositories.OrderRepository;
 import com.uit.fooddelivery_api.modules.voucher.entities.Voucher;
 import com.uit.fooddelivery_api.modules.voucher.repositories.VoucherRepository;
 import com.uit.fooddelivery_api.modules.wallet.entities.Wallet;
 import com.uit.fooddelivery_api.modules.wallet.repositories.WalletRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,6 +23,18 @@ public class SystemCronJob {
     private final OrderRepository orderRepository;
     private final VoucherRepository voucherRepository;
     private final WalletRepository walletRepository;
+    private final FlashSaleRotationService flashSaleRotationService;
+
+    // 0. KHỞI TẠO: Đảm bảo luôn có Flashsale hoạt động khi server khởi động
+    @PostConstruct
+    public void initFlashSaleOnStartup() {
+        try {
+            System.out.println("🚀 SystemCronJob: Kiểm tra & tạo Flashsale khi khởi động...");
+            flashSaleRotationService.rotateFlashSale();
+        } catch (Exception e) {
+            System.out.println("⚠️ SystemCronJob: Lỗi khi tạo Flashsale lúc khởi động: " + e.getMessage());
+        }
+    }
 
     // 1. JOB HỦY ĐƠN VÀ HOÀN TIỀN: Chạy lặp lại mỗi 1 phút (60000 mili-giây)
     @Scheduled(fixedRate = 60000)
@@ -66,6 +80,19 @@ public class SystemCronJob {
             }
             voucherRepository.saveAll(expiredVouchers);
             System.out.println("✅ CronJob: Đã khóa voucher thành công!");
+        }
+    }
+
+    // 3. JOB XOAY VÒNG FLASHSALE: Chạy mỗi giờ, đúng phút 0 (VD: 10:00, 11:00, 12:00, ...)
+    @Scheduled(cron = "0 0 * * * *")
+    @Transactional
+    public void rotateHourlyFlashSale() {
+        try {
+            System.out.println("⚡ CronJob: Bắt đầu xoay vòng Flashsale hàng giờ...");
+            flashSaleRotationService.rotateFlashSale();
+        } catch (Exception e) {
+            System.out.println("❌ CronJob: Lỗi khi xoay vòng Flashsale: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

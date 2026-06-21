@@ -150,6 +150,7 @@
                     android:background="@drawable/bg_gradient_bottom" />
                     
                 <TextView
+                    android:id="@+id/tv_discount_badge_1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top|start"
@@ -237,6 +238,7 @@
                         android:background="@drawable/bg_gradient_bottom" />
                         
                     <TextView
+                        android:id="@+id/tv_discount_badge_2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="top|start"
@@ -321,6 +323,7 @@
                         android:background="@drawable/bg_gradient_bottom" />
                         
                     <TextView
+                        android:id="@+id/tv_discount_badge_3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="top|start"
