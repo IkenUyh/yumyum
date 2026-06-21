@@ -101,9 +101,6 @@ public class Order {
     @Column(name = "used_coins")
     private Integer usedCoins;
 
-    @Column(name = "payment_method", length = 20)
-    private String paymentMethod;
-
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private com.uit.fooddelivery_api.modules.review.entities.Review review;
 }

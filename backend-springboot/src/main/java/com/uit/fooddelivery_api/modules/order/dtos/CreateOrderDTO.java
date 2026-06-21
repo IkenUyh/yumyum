@@ -19,5 +19,4 @@ public class CreateOrderDTO {
     private Boolean isCutleryRequested;
     private Boolean useCoins;
     private String paymentMethod;
-    private String paymentMethod;
 }
