@@ -44,6 +44,10 @@ public class Voucher {
     @Column(name = "end_date", nullable = false)
     private LocalDateTime endDate;
 
+    @Column(name = "required_points", nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Builder.Default
+    private Integer requiredPoints = 0;
+
     @Column(name = "is_active")
     private Boolean isActive;
 }
