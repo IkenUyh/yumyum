@@ -12,11 +12,13 @@ public class SellerOrder {
     private String totalPrice;
     private String status;     // PENDING, PREPARING, ...
     private String guestNote;
+    private String orderTime;
+    private String pickupTime;
     private List<OrderItem> dishes;
 
     public SellerOrder(Long orderId, String id, String customerName, String customerPhone,
                        String avatarUrl, int numberOfDishes, String totalPrice,
-                       String status, String guestNote, List<OrderItem> dishes) {
+                       String status, String guestNote, String orderTime, String pickupTime, List<OrderItem> dishes) {
         this.orderId = orderId;
         this.id = id;
         this.customerName = customerName;
@@ -26,6 +28,8 @@ public class SellerOrder {
         this.totalPrice = totalPrice;
         this.status = status;
         this.guestNote = guestNote;
+        this.orderTime = orderTime;
+        this.pickupTime = pickupTime;
         this.dishes = dishes;
     }
 
@@ -43,5 +47,9 @@ public class SellerOrder {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public String getGuestNote() { return guestNote; }
+    public String getOrderTime() { return orderTime; }
+    public void setOrderTime(String orderTime) { this.orderTime = orderTime; }
+    public String getPickupTime() { return pickupTime; }
+    public void setPickupTime(String pickupTime) { this.pickupTime = pickupTime; }
     public List<OrderItem> getDishes() { return dishes; }
 }

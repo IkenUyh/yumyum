@@ -178,6 +178,34 @@ public class SellerOrderViewModel extends AndroidViewModel {
         String customerName = o.getCustomerName() != null ? o.getCustomerName() : "Khách hàng";
         String customerPhone = o.getCustomerPhone() != null ? o.getCustomerPhone() : "";
 
+        String createdAtStr = "Không rõ";
+        if (o.getCreatedAt() != null && !o.getCreatedAt().isEmpty()) {
+            try {
+                SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+                Date parsed = iso.parse(o.getCreatedAt());
+                if (parsed != null) {
+                    SimpleDateFormat displayFmt = new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault());
+                    createdAtStr = displayFmt.format(parsed);
+                }
+            } catch (Exception ignored) {
+                createdAtStr = o.getCreatedAt();
+            }
+        }
+
+        String pickupTimeStr = "Không rõ";
+        if (o.getExpectedDeliveryTime() != null && !o.getExpectedDeliveryTime().isEmpty()) {
+            try {
+                SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+                Date parsed = iso.parse(o.getExpectedDeliveryTime());
+                if (parsed != null) {
+                    SimpleDateFormat displayFmt = new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault());
+                    pickupTimeStr = displayFmt.format(parsed);
+                }
+            } catch (Exception ignored) {
+                pickupTimeStr = o.getExpectedDeliveryTime();
+            }
+        }
+
         return new SellerOrder(
                 o.getId(),
                 "#" + o.getId(),
@@ -188,6 +216,8 @@ public class SellerOrderViewModel extends AndroidViewModel {
                 totalStr,
                 o.getStatus(),
                 "",
+                createdAtStr,
+                pickupTimeStr,
                 dishes
         );
     }
