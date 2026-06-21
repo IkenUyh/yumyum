@@ -20,6 +20,7 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.merchant.home.home_model.OrderItem;
@@ -95,6 +96,11 @@ public class SellerHomeActivity extends AppCompatActivity {
             intent.putExtra("URL_KEY", "https://merchant.shopeefood.vn/edu/collection/co-ban");
             startActivity(intent);
         });
+        SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipe_refresh_seller_home);swipeRefreshLayout.setOnRefreshListener(() -> {
+            loadShopStatus();
+            viewModel.loadData();
+        });
+        viewModel.getIsLoading().observe(this, isLoading -> swipeRefreshLayout.setRefreshing(isLoading));
     }
 
     private void loadShopStatus() {
@@ -242,6 +248,12 @@ public class SellerHomeActivity extends AppCompatActivity {
         ((TextView) view.findViewById(R.id.tv_subtotal)).setText(String.format("%,dđ", subtotal));
         ((TextView) view.findViewById(R.id.tv_total_received)).setText(order.getTotalPrice());
         ((TextView) view.findViewById(R.id.tv_order_id)).setText(order.getId());
+        
+        TextView tvOrderTime = view.findViewById(R.id.tv_order_time);
+        if (tvOrderTime != null) tvOrderTime.setText(order.getOrderTime());
+        
+        TextView tvPickupTime = view.findViewById(R.id.tv_pickup_time);
+        if (tvPickupTime != null) tvPickupTime.setText(order.getPickupTime());
 
         view.findViewById(R.id.btn_close).setOnClickListener(v -> dialog.dismiss());
 
