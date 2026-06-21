@@ -23,6 +23,7 @@ public class SellerWalletActivity extends AppCompatActivity {
     private TransactionAdapter adapter;
     private List<TransactionModel> transactionList;
     private java.math.BigDecimal currentBalance = java.math.BigDecimal.ZERO;
+    private Long currentStoreId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,12 +33,19 @@ public class SellerWalletActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
         
+        android.content.SharedPreferences prefs = getSharedPreferences("SellerPrefs", MODE_PRIVATE);
+        long storeId = prefs.getLong("current_store_id", -1L);
+        if (storeId != -1L) {
+            currentStoreId = storeId;
+        }
+        
         findViewById(R.id.btn_withdraw).setOnClickListener(v -> {
             if (currentBalance == null || currentBalance.compareTo(java.math.BigDecimal.ZERO) <= 0) {
                 Toast.makeText(this, "Số dư không đủ để rút", Toast.LENGTH_SHORT).show();
                 return;
             }
-            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(SellerWalletActivity.this);
+            com.google.android.material.dialog.MaterialAlertDialogBuilder builder = new com.google.android.material.dialog.MaterialAlertDialogBuilder(SellerWalletActivity.this);
+            builder.setBackground(androidx.core.content.ContextCompat.getDrawable(SellerWalletActivity.this, R.drawable.bg_white_rounded_corner));
             builder.setTitle("Chọn phương thức rút tiền");
             String[] options = {"Điều chuyển về Ví Cá Nhân", "Rút về Tài khoản Ngân hàng"};
             builder.setItems(options, (dialog, which) -> {
@@ -69,7 +77,7 @@ public class SellerWalletActivity extends AppCompatActivity {
 
     private void fetchBalance() {
         com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
-        walletRepo.getMerchantBalance(new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse>() {
+        walletRepo.getMerchantBalance(currentStoreId, new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse>() {
             @Override
             public void onSuccess(com.example.uitpayapp.modules.wallet.models.responses.BalanceResponse data) {
                 new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
@@ -94,7 +102,7 @@ public class SellerWalletActivity extends AppCompatActivity {
 
     private void fetchTransactions() {
         com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
-        walletRepo.getMerchantTransactionHistory(new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.wallet.models.responses.TransactionResponse>>() {
+        walletRepo.getMerchantTransactionHistory(currentStoreId, new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.wallet.models.responses.TransactionResponse>>() {
             @Override
             public void onSuccess(List<com.example.uitpayapp.modules.wallet.models.responses.TransactionResponse> data) {
                 new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
@@ -128,52 +136,98 @@ public class SellerWalletActivity extends AppCompatActivity {
     }
 
     private void handleTransferToPersonal() {
-        com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
-        com.example.uitpayapp.modules.wallet.models.requests.MerchantWalletTransferRequest request = 
-            new com.example.uitpayapp.modules.wallet.models.requests.MerchantWalletTransferRequest();
-        request.setAmount(currentBalance);
-        
-        walletRepo.transferMerchantToPersonal(request, new com.example.uitpayapp.network.ApiCallback<String>() {
-            @Override
-            public void onSuccess(String data) {
-                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                    Toast.makeText(SellerWalletActivity.this, "Đã điều chuyển doanh thu về Ví Cá Nhân!", Toast.LENGTH_LONG).show();
-                    fetchBalance();
-                    fetchTransactions();
-                });
-            }
+        promptForAmount("Điều chuyển về Ví Cá Nhân", amount -> {
+            com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
+            com.example.uitpayapp.modules.wallet.models.requests.MerchantWalletTransferRequest request = 
+                new com.example.uitpayapp.modules.wallet.models.requests.MerchantWalletTransferRequest();
+            request.setAmount(amount);
+            request.setRestaurantId(currentStoreId);
+            
+            walletRepo.transferMerchantToPersonal(request, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String data) {
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        Toast.makeText(SellerWalletActivity.this, "Đã điều chuyển doanh thu về Ví Cá Nhân!", Toast.LENGTH_LONG).show();
+                        fetchBalance();
+                        fetchTransactions();
+                    });
+                }
 
-            @Override
-            public void onError(String errorMessage) {
-                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                    Toast.makeText(SellerWalletActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
-                });
-            }
+                @Override
+                public void onError(String errorMessage) {
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        Toast.makeText(SellerWalletActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
         });
     }
 
     private void handleWithdrawToBank() {
-        com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
-        com.example.uitpayapp.modules.wallet.models.requests.MerchantWalletWithdrawRequest request = 
-            new com.example.uitpayapp.modules.wallet.models.requests.MerchantWalletWithdrawRequest();
-        request.setAmount(currentBalance);
-        
-        walletRepo.withdrawMerchantBalance(request, new com.example.uitpayapp.network.ApiCallback<String>() {
-            @Override
-            public void onSuccess(String data) {
-                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                    Toast.makeText(SellerWalletActivity.this, "Đã gửi yêu cầu rút tiền về Ngân hàng!", Toast.LENGTH_LONG).show();
-                    fetchBalance();
-                    fetchTransactions();
-                });
-            }
+        promptForAmount("Rút về Tài khoản Ngân hàng", amount -> {
+            com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
+            com.example.uitpayapp.modules.wallet.models.requests.MerchantWalletWithdrawRequest request = 
+                new com.example.uitpayapp.modules.wallet.models.requests.MerchantWalletWithdrawRequest();
+            request.setAmount(amount);
+            request.setRestaurantId(currentStoreId);
+            
+            walletRepo.withdrawMerchantBalance(request, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String data) {
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        Toast.makeText(SellerWalletActivity.this, "Đã gửi yêu cầu rút tiền về Ngân hàng!", Toast.LENGTH_LONG).show();
+                        fetchBalance();
+                        fetchTransactions();
+                    });
+                }
 
-            @Override
-            public void onError(String errorMessage) {
-                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                    Toast.makeText(SellerWalletActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
-                });
+                @Override
+                public void onError(String errorMessage) {
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        Toast.makeText(SellerWalletActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
+        });
+    }
+
+    private void promptForAmount(String title, java.util.function.Consumer<java.math.BigDecimal> onConfirm) {
+        android.widget.EditText input = new android.widget.EditText(this);
+        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        input.setHint("Nhập số tiền (VNĐ)...");
+        
+        android.widget.FrameLayout container = new android.widget.FrameLayout(this);
+        android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT, 
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        int margin = (int) (20 * getResources().getDisplayMetrics().density);
+        params.setMargins(margin, margin/2, margin, margin/2);
+        input.setLayoutParams(params);
+        container.addView(input);
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
+        builder.setBackground(androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_white_rounded_corner));
+        builder.setTitle(title);
+        builder.setView(container);
+        builder.setPositiveButton("Xác nhận", (dialog, which) -> {
+            String val = input.getText().toString();
+            try {
+                java.math.BigDecimal amount = new java.math.BigDecimal(val);
+                if (amount.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+                    Toast.makeText(this, "Số tiền phải lớn hơn 0", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (amount.compareTo(currentBalance) > 0) {
+                    Toast.makeText(this, "Số dư không đủ", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                onConfirm.accept(amount);
+            } catch (Exception e) {
+                Toast.makeText(this, "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
             }
         });
+        builder.setNegativeButton("Hủy", null);
+        builder.show();
     }
 }

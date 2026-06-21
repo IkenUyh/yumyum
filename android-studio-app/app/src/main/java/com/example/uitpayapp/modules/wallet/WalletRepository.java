@@ -135,8 +135,8 @@ public class WalletRepository {
     }
 
     // Hàm gọi lấy số dư ví cửa hàng
-    public void getMerchantBalance(final ApiCallback<BalanceResponse> callback) {
-        walletService.getMerchantBalance().enqueue(new Callback<ApiResponse<BalanceResponse>>() {
+    public void getMerchantBalance(Long restaurantId, final ApiCallback<BalanceResponse> callback) {
+        walletService.getMerchantBalance(restaurantId).enqueue(new Callback<ApiResponse<BalanceResponse>>() {
             @Override
             public void onResponse(Call<ApiResponse<BalanceResponse>> call, Response<ApiResponse<BalanceResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -154,8 +154,8 @@ public class WalletRepository {
     }
 
     // Hàm gọi lấy lịch sử giao dịch ví cửa hàng
-    public void getMerchantTransactionHistory(final ApiCallback<List<TransactionResponse>> callback) {
-        walletService.getMerchantTransactions().enqueue(new Callback<ApiResponse<List<TransactionResponse>>>() {
+    public void getMerchantTransactionHistory(Long restaurantId, final ApiCallback<List<TransactionResponse>> callback) {
+        walletService.getMerchantTransactions(restaurantId).enqueue(new Callback<ApiResponse<List<TransactionResponse>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<TransactionResponse>>> call, Response<ApiResponse<List<TransactionResponse>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -180,7 +180,14 @@ public class WalletRepository {
                 if (response.isSuccessful() && response.body() != null) {
                     callback.onSuccess(response.body().getMessage());
                 } else {
-                    callback.onError("Không thể chuyển tiền: " + response.code());
+                    String msg = "Lỗi " + response.code();
+                    try {
+                        if (response.errorBody() != null) {
+                            com.google.gson.JsonObject errObj = new com.google.gson.JsonParser().parse(response.errorBody().string()).getAsJsonObject();
+                            if (errObj.has("message")) msg = errObj.get("message").getAsString();
+                        }
+                    } catch(Exception e) {}
+                    callback.onError(msg);
                 }
             }
 
@@ -199,7 +206,14 @@ public class WalletRepository {
                 if (response.isSuccessful() && response.body() != null) {
                     callback.onSuccess(response.body().getMessage());
                 } else {
-                    callback.onError("Không thể rút tiền: " + response.code());
+                    String msg = "Lỗi " + response.code();
+                    try {
+                        if (response.errorBody() != null) {
+                            com.google.gson.JsonObject errObj = new com.google.gson.JsonParser().parse(response.errorBody().string()).getAsJsonObject();
+                            if (errObj.has("message")) msg = errObj.get("message").getAsString();
+                        }
+                    } catch(Exception e) {}
+                    callback.onError(msg);
                 }
             }
 
