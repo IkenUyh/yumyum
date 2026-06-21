@@ -17,6 +17,7 @@ import com.uit.fooddelivery_api.modules.wallet.repositories.WalletRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -38,6 +39,7 @@ public class OrderService {
     private final com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository;
     private final com.uit.fooddelivery_api.modules.wallet.services.WalletService walletService;
     private final com.uit.fooddelivery_api.modules.restaurant.repositories.RestaurantTransactionRepository restaurantTransactionRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // Phí ship cơ bản: 5.000 VNĐ / 1 Km
     private static final BigDecimal FEE_PER_KM = BigDecimal.valueOf(5000);
@@ -500,6 +502,7 @@ public class OrderService {
                 "Bạn có đơn hàng mới từ " + customer.getFullName() + ". Mã đơn: #" + savedOrder.getId(),
                 "ORDER_UPDATE");
 
+        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
         return savedOrder;
     }
 
@@ -580,7 +583,9 @@ public class OrderService {
             // Có thể thêm logic gọi DriverDispatchService để set tài xế về ONLINE ở đây.
         }
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
+        return savedOrder;
     }
 
     // 1. Lấy danh sách đơn đang chờ tài xế
@@ -600,7 +605,9 @@ public class OrderService {
 
         order.setDriver(driver);
         order.setStatus("DELIVERING");
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
+        return savedOrder;
     }
 
     // 3. Tài xế giao xong -> Chuyển tiền cho chủ quán
@@ -641,7 +648,9 @@ public class OrderService {
                 "Đơn hàng #" + order.getId() + " đã được giao đến bạn. Chúc bạn ngon miệng!",
                 "ORDER_UPDATE");
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
+        return savedOrder;
     }
 
     // 1. QUÁN ĂN: Bấm xác nhận nấu xong món ăn -> Sinh mã Pickup Code
@@ -673,6 +682,7 @@ public class OrderService {
                         + generatedPickupCode,
                 "ORDER_UPDATE");
 
+        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
         return savedOrder;
     }
 
@@ -707,6 +717,7 @@ public class OrderService {
                         + generatedDeliveryPin,
                 "ORDER_UPDATE");
 
+        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
         return savedOrder;
     }
 
@@ -761,7 +772,9 @@ public class OrderService {
                 "Cảm ơn bạn đã đặt hàng tại FoodDelivery! Đơn hàng #" + order.getId() + " đã giao thành công.",
                 "ORDER_UPDATE");
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
+        return savedOrder;
     }
 
     // Lấy lịch sử đơn hàng cho Khách hàng
@@ -815,7 +828,9 @@ public class OrderService {
         BigDecimal discount = order.getDiscountAmount() != null ? order.getDiscountAmount() : BigDecimal.ZERO;
         order.setTotalAmount(newFoodTotal.add(shipping).subtract(discount));
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
+        return savedOrder;
     }
 
     // 5. CHỦ QUÁN: Hoàn thành trực tiếp đơn hàng (không qua tài xế)
@@ -859,11 +874,19 @@ public class OrderService {
                 "Đơn hàng #" + order.getId() + " từ " + order.getRestaurant().getName() + " đã hoàn tất!",
                 "ORDER_UPDATE");
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        broadcastOrderUpdate(savedOrder.getRestaurant().getId());
+        return savedOrder;
     }
 
     public Order getOrderById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+    }
+
+    private void broadcastOrderUpdate(Long restaurantId) {
+        if (messagingTemplate != null && restaurantId != null) {
+            messagingTemplate.convertAndSend("/topic/restaurant/" + restaurantId + "/orders", "UPDATE");
+        }
     }
 }

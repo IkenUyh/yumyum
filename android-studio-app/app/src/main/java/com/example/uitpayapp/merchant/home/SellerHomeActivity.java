@@ -77,6 +77,14 @@ public class SellerHomeActivity extends AppCompatActivity {
         loadShopStatus();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (viewModel != null) {
+            viewModel.disconnectWebSocket();
+        }
+    }
+
     private void initViews() {
         tabLayout = findViewById(R.id.tab_layout);
         tvShopStatus = findViewById(R.id.tv_shop_status);
