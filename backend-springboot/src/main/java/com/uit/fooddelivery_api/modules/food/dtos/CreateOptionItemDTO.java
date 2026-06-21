@@ -9,4 +9,5 @@ import java.math.BigDecimal;
 public class CreateOptionItemDTO {
     private String name;
     private BigDecimal additionalPrice;
+    private String imageUrl;
 }

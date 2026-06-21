@@ -49,6 +49,7 @@ public class FoodOptionService {
                         .group(group)
                         .name(itemDto.getName())
                         .additionalPrice(itemDto.getAdditionalPrice())
+                        .imageUrl(itemDto.getImageUrl())
                         .isAvailable(true)
                         .build();
                 items.add(item);
@@ -99,6 +100,7 @@ public class FoodOptionService {
                 .group(group)
                 .name(dto.getName())
                 .additionalPrice(dto.getAdditionalPrice())
+                .imageUrl(dto.getImageUrl())
                 .isAvailable(true)
                 .build();
 
@@ -118,6 +120,7 @@ public class FoodOptionService {
 
         if (dto.getName() != null) item.setName(dto.getName());
         if (dto.getAdditionalPrice() != null) item.setAdditionalPrice(dto.getAdditionalPrice());
+        if (dto.getImageUrl() != null) item.setImageUrl(dto.getImageUrl());
 
         return itemRepository.save(item);
     }
