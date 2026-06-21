@@ -129,7 +129,15 @@ public class SearchStoreFragment extends Fragment {
             layoutEmptyState.setVisibility(View.GONE);
             rvSearchResults.setVisibility(View.VISIBLE);
 
-            new com.example.uitpayapp.modules.restaurant.RestaurantRepository().searchByKeyword(query, new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.restaurant.models.RestaurantDistanceViewDTO>>() {
+            Double lat = null;
+            Double lng = null;
+            com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(getContext());
+            if (session.getDeliveryLatitude() != 0.0 && session.getDeliveryLongitude() != 0.0) {
+                lat = session.getDeliveryLatitude();
+                lng = session.getDeliveryLongitude();
+            }
+
+            new com.example.uitpayapp.modules.restaurant.RestaurantRepository().searchByKeyword(query, lat, lng, 20.0, new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.restaurant.models.RestaurantDistanceViewDTO>>() {
                 @Override
                 public void onSuccess(List<com.example.uitpayapp.modules.restaurant.models.RestaurantDistanceViewDTO> result) {
                     if (!query.equals(currentQuery)) {
@@ -220,6 +228,14 @@ public class SearchStoreFragment extends Fragment {
             } else {
                 holder.tvDistance.setVisibility(View.GONE);
             }
+            
+            // Bind address
+            if (item.getAddress() != null && !item.getAddress().isEmpty()) {
+                holder.tvAddress.setText(item.getAddress());
+                holder.tvAddress.setVisibility(View.VISIBLE);
+            } else {
+                holder.tvAddress.setVisibility(View.GONE);
+            }
 
             // Load remote image with placeholder animation
             com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(holder.ivStoreImage, item.getImageUrl());
@@ -239,6 +255,7 @@ public class SearchStoreFragment extends Fragment {
             TextView tvRating;
             TextView tvReviewCount;
             TextView tvDistance;
+            TextView tvAddress;
 
             public ViewHolder(View itemView) {
                 super(itemView);
@@ -248,6 +265,7 @@ public class SearchStoreFragment extends Fragment {
                 tvRating = itemView.findViewById(R.id.tv_store_rating);
                 tvReviewCount = itemView.findViewById(R.id.tv_review_count);
                 tvDistance = itemView.findViewById(R.id.tv_store_distance);
+                tvAddress = itemView.findViewById(R.id.tv_store_address);
             }
         }
     }

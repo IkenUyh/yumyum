@@ -85,7 +85,7 @@ public class HomeDealAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private void bindDeal(DealViewHolder holder, RecommendedDealModel deal) {
         holder.tvStoreName.setText(deal.getStoreName());
-        holder.tvDistance.setText(deal.getDistance() + "km");
+        holder.tvDistance.setText(String.format(java.util.Locale.US, "%.1f km", deal.getDistance()));
         holder.tvDeliveryTime.setText(deal.getDeliveryTime() + " phút");
         if (holder.tvRating != null) {
             holder.tvRating.setText(String.valueOf(deal.getRating()));

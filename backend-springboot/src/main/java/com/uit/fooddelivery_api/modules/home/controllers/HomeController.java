@@ -28,7 +28,9 @@ public class HomeController {
             @RequestParam(value = "addressId", required = false) String addressId,
             @RequestParam(value = "tabId", defaultValue = "0") int tabId,
             @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
-        return ApiResponse.success(homeService.getRecommendedDeals(addressId, tabId, page, size));
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "lat", required = false) Double lat,
+            @RequestParam(value = "lng", required = false) Double lng) {
+        return ApiResponse.success(homeService.getRecommendedDeals(addressId, tabId, page, size, lat, lng));
     }
 }

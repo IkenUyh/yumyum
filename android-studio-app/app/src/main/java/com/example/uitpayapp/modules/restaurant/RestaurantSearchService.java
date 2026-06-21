@@ -20,6 +20,9 @@ public interface RestaurantSearchService {
 
     @GET("api/v1/search/keyword")
     Call<ApiResponse<List<RestaurantDistanceViewDTO>>> searchByKeyword(
-            @Query("q") String keyword
+            @Query("q") String keyword,
+            @Query("lat") Double latitude,
+            @Query("lng") Double longitude,
+            @Query("radius") Double radiusKm
     );
 }

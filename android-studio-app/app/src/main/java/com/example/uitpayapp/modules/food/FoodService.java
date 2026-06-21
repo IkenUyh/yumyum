@@ -93,6 +93,8 @@ public interface FoodService {
 
     @GET("api/v1/foods/keyword")
     Call<ApiResponse<List<FoodResponse>>> searchFoodsByKeyword(
-            @Query("q") String keyword
+            @Query("q") String keyword,
+            @Query("lat") Double lat,
+            @Query("lng") Double lng
     );
 }

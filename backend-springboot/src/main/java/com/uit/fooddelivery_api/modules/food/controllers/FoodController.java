@@ -24,11 +24,10 @@ public class FoodController {
 
     // Lấy tất cả món ăn đang bán (hiển thị trang Home cho khách chưa đăng nhập)
     @GetMapping
-    public ApiResponse<java.util.List<FoodResponseDTO>> getAllAvailableFoods() {
-        java.util.List<FoodResponseDTO> list = foodService.getAllAvailableFoods()
-                .stream()
-                .map(FoodResponseDTO::fromEntity)
-                .toList();
+    public ApiResponse<java.util.List<FoodResponseDTO>> getAllAvailableFoods(
+            @RequestParam(value = "lat", required = false) Double lat,
+            @RequestParam(value = "lng", required = false) Double lng) {
+        java.util.List<FoodResponseDTO> list = foodService.getAllAvailableFoods(lat, lng);
         return ApiResponse.success(list);
     }
 
@@ -46,15 +45,15 @@ public class FoodController {
 
     // Tìm kiếm món ăn theo từ khóa (Fuzzy Search)
     @GetMapping("/keyword")
-    public ApiResponse<java.util.List<FoodResponseDTO>> searchFoodsByKeyword(@RequestParam("q") String keyword) {
+    public ApiResponse<java.util.List<FoodResponseDTO>> searchFoodsByKeyword(
+            @RequestParam("q") String keyword,
+            @RequestParam(value = "lat", required = false) Double lat,
+            @RequestParam(value = "lng", required = false) Double lng) {
         String cleanKeyword = keyword.trim();
         if (cleanKeyword.isEmpty()) {
             return ApiResponse.success(java.util.Collections.emptyList());
         }
-        java.util.List<FoodResponseDTO> list = foodService.searchFoodsByKeyword(cleanKeyword)
-                .stream()
-                .map(FoodResponseDTO::fromEntity)
-                .toList();
+        java.util.List<FoodResponseDTO> list = foodService.searchFoodsByKeyword(cleanKeyword, lat, lng);
         return ApiResponse.success(list);
     }
 

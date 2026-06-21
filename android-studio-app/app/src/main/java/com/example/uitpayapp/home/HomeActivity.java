@@ -382,7 +382,14 @@ public class HomeActivity extends AppCompatActivity {
                 addressBarDummy.setClickable(true);
         }
 
-        viewModel.setAddressAndRefresh(address);
+        com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        Double lat = null;
+        Double lng = null;
+        if (sessionManager.getDeliveryLatitude() != 0.0 || sessionManager.getDeliveryLongitude() != 0.0) {
+            lat = sessionManager.getDeliveryLatitude();
+            lng = sessionManager.getDeliveryLongitude();
+        }
+        viewModel.setAddressAndRefresh(address, lat, lng);
     }
 
     private void setupObservers() {

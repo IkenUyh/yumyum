@@ -40,6 +40,9 @@ public class HomeViewModel extends ViewModel {
     private boolean isDealsLoading = false;
     private boolean hasMoreDeals = true;
     private List<RecommendedDealModel> accumulatedDeals = new ArrayList<>();
+    
+    private Double currentLat = null;
+    private Double currentLng = null;
 
     public HomeViewModel() {
         this.apiService = RetrofitClient.getHomeApiService();
@@ -51,8 +54,10 @@ public class HomeViewModel extends ViewModel {
     public LiveData<UiState<List<RecommendedDealModel>>> getDealsData() { return dealsData; }
     public LiveData<UiState<List<TopicResponse>>> getRandomTopicsData() { return randomTopicsData; }
 
-    public void setAddressAndRefresh(String addressId) {
+    public void setAddressAndRefresh(String addressId, Double lat, Double lng) {
         this.currentAddressId = addressId;
+        this.currentLat = lat;
+        this.currentLng = lng;
         refreshAll();
     }
 
@@ -152,7 +157,7 @@ public class HomeViewModel extends ViewModel {
 
     private void fetchDealsPage() {
         isDealsLoading = true;
-        apiService.getRecommendedDeals(currentAddressId, currentTabId, currentDealsPage, 10)
+        apiService.getRecommendedDeals(currentAddressId, currentTabId, currentDealsPage, 10, currentLat, currentLng)
                 .enqueue(new Callback<ApiResponse<DealResponse>>() {
             @Override
             public void onResponse(Call<ApiResponse<DealResponse>> call, Response<ApiResponse<DealResponse>> response) {

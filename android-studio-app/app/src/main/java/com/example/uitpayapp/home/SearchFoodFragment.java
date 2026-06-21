@@ -119,7 +119,15 @@ public class SearchFoodFragment extends Fragment {
             layoutEmptyState.setVisibility(View.GONE);
             rvSearchResults.setVisibility(View.VISIBLE);
 
-            new com.example.uitpayapp.modules.food.FoodRepository().searchFoodsByKeyword(query, new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.food.models.responses.FoodResponse>>() {
+            com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(getContext());
+            Double lat = null;
+            Double lng = null;
+            if (sessionManager.getDeliveryLatitude() != 0.0 || sessionManager.getDeliveryLongitude() != 0.0) {
+                lat = sessionManager.getDeliveryLatitude();
+                lng = sessionManager.getDeliveryLongitude();
+            }
+
+            new com.example.uitpayapp.modules.food.FoodRepository().searchFoodsByKeyword(query, lat, lng, new com.example.uitpayapp.network.ApiCallback<List<com.example.uitpayapp.modules.food.models.responses.FoodResponse>>() {
                 @Override
                 public void onSuccess(List<com.example.uitpayapp.modules.food.models.responses.FoodResponse> result) {
                     if (!query.equals(currentQuery)) {
@@ -140,6 +148,7 @@ public class SearchFoodFragment extends Fragment {
                                 );
                                 item.setRestaurantId(res.getRestaurantId());
                                 item.setRestaurantName(res.getRestaurantName());
+                                item.setDistance(res.getDistance());
                                 filteredFoods.add(item);
                             }
                         }
@@ -232,6 +241,15 @@ public class SearchFoodFragment extends Fragment {
                     holder.tvStoreName.setText("Cửa hàng");
                 }
             }
+
+            if(holder.tvDistance != null) {
+                if(item.getDistance() != null) {
+                    holder.tvDistance.setVisibility(View.VISIBLE);
+                    holder.tvDistance.setText(String.format(java.util.Locale.US, "%.1f km", item.getDistance()));
+                } else {
+                    holder.tvDistance.setVisibility(View.GONE);
+                }
+            }
             
             holder.itemView.setOnClickListener(v -> listener.onItemClick(item, holder.ivImage));
         }
@@ -242,7 +260,7 @@ public class SearchFoodFragment extends Fragment {
         }
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
-            TextView tvName, tvPrice, tvStoreName;
+            TextView tvName, tvPrice, tvStoreName, tvDistance;
             ImageView ivImage;
             public ViewHolder(View itemView) {
                 super(itemView);
@@ -250,6 +268,7 @@ public class SearchFoodFragment extends Fragment {
                 tvPrice = itemView.findViewById(R.id.tv_discount_price);
                 ivImage = itemView.findViewById(R.id.iv_food_image);
                 tvStoreName = itemView.findViewById(R.id.tv_store_name);
+                tvDistance = itemView.findViewById(R.id.tv_distance);
                 
                 // Hide unnecessary elements for search view
                 View discountTag = itemView.findViewById(R.id.tv_discount_tag);
