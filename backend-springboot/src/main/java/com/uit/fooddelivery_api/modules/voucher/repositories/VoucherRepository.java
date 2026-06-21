@@ -22,4 +22,16 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
             "FROM Voucher v " +
             "WHERE v.isActive = true AND v.startDate <= :now AND v.endDate >= :now AND v.stockQuantity > 0")
     java.util.List<Voucher> findActiveVouchers(@org.springframework.data.repository.query.Param("now") java.time.LocalDateTime now);
+
+    // Lấy các Voucher đang còn hiệu lực, còn tồn kho, và (là global hoặc thuộc về userId)
+    @org.springframework.data.jpa.repository.Query("SELECT v " +
+            "FROM Voucher v " +
+            "WHERE v.isActive = true " +
+            "AND v.startDate <= :now " +
+            "AND v.endDate >= :now " +
+            "AND v.stockQuantity > 0 " +
+            "AND (v.user IS NULL OR (:userId IS NOT NULL AND v.user.id = :userId))")
+    java.util.List<Voucher> findActiveVouchersForUser(
+            @org.springframework.data.repository.query.Param("now") java.time.LocalDateTime now,
+            @org.springframework.data.repository.query.Param("userId") Long userId);
 }

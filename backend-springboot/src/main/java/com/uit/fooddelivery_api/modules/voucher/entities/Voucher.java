@@ -50,4 +50,8 @@ public class Voucher {
 
     @Column(name = "is_active")
     private Boolean isActive;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private com.uit.fooddelivery_api.modules.user.entities.User user;
 }

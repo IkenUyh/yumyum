@@ -134,13 +134,13 @@ public class GiftExchangeActivity extends AppCompatActivity {
         for (int i = 0; i < Math.min(4, allVoucherList.size()); i++) {
             demoList.add(allVoucherList.get(i));
         }
-        ExchangeVoucherAdapter demoAdapter = new ExchangeVoucherAdapter(demoList);
+        ExchangeVoucherAdapter demoAdapter = new ExchangeVoucherAdapter(demoList, this::HandleExchangeClick);
         rvExchangeVoucherDemo.setLayoutManager(new GridLayoutManager(this, 2));
         rvExchangeVoucherDemo.setAdapter(demoAdapter);
         rvExchangeVoucherDemo.setNestedScrollingEnabled(false);
 
         displayVoucherList = new ArrayList<>(allVoucherList);
-        exchangeVoucherAdapter = new ExchangeVoucherAdapter(displayVoucherList);
+        exchangeVoucherAdapter = new ExchangeVoucherAdapter(displayVoucherList, this::HandleExchangeClick);
         rvExchangeVoucher.setLayoutManager(new GridLayoutManager(this, 2));
         rvExchangeVoucher.setAdapter(exchangeVoucherAdapter);
         rvExchangeVoucher.setNestedScrollingEnabled(false);
@@ -160,6 +160,51 @@ public class GiftExchangeActivity extends AppCompatActivity {
             }
         }
         exchangeVoucherAdapter.notifyDataSetChanged();
+    }
+
+    private void HandleExchangeClick(ExchangeVoucherModel voucher) {
+        if (voucher == null) return;
+
+        int coinCostVal = 0;
+        try {
+            coinCostVal = Integer.parseInt(voucher.getCoinCost());
+        } catch (NumberFormatException e) {
+            // ignore
+        }
+
+        final int finalCoinCost = coinCostVal;
+
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("Đổi Voucher");
+        builder.setMessage("Bạn có chắc chắn muốn dùng " + finalCoinCost + " xu để đổi lấy voucher \"" + voucher.getTitle() + "\" không?");
+
+        builder.setPositiveButton("Đổi", (dialog, which) -> {
+            com.example.uitpayapp.voucher.VoucherExchangeRequest request = new com.example.uitpayapp.voucher.VoucherExchangeRequest(
+                    voucher.getTitle(),
+                    voucher.getVoucherType().name(),
+                    finalCoinCost
+            );
+
+            new com.example.uitpayapp.voucher.VoucherRepository().exchangeVoucher(request, new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.voucher.VoucherResponseDTO>() {
+                @Override
+                public void onSuccess(com.example.uitpayapp.voucher.VoucherResponseDTO data) {
+                    runOnUiThread(() -> {
+                        android.widget.Toast.makeText(GiftExchangeActivity.this, "Đổi voucher thành công! Đã thêm vào ví.", android.widget.Toast.LENGTH_LONG).show();
+                        loadLoyaltyData(); // Tải lại số xu mới
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    runOnUiThread(() -> {
+                        android.widget.Toast.makeText(GiftExchangeActivity.this, "Đổi voucher thất bại: " + errorMessage, android.widget.Toast.LENGTH_LONG).show();
+                    });
+                }
+            });
+        });
+
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+        builder.show();
     }
 
     private void setBannerData() {

@@ -425,11 +425,13 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                                 title,
                                 description,
                                 dto.getMaxDiscount() != null ? dto.getMaxDiscount().longValue() : 0,
-                                dto.getMinOrderValue() != null ? dto.getMinOrderValue().longValue() : 0
+                                dto.getMinOrderValue() != null ? dto.getMinOrderValue().longValue() : 0,
+                                dto.getType()
                         ));
                     }
 
-                    VoucherAdapter adapter = new VoucherAdapter(activeVouchers, voucher -> {
+                    final VoucherAdapter[] adapterHolder = new VoucherAdapter[1];
+                    VoucherAdapter adapter = new VoucherAdapter(activeVouchers, selectedVouchers, voucher -> {
                         if (subtotalAmount >= voucher.getMinOrderAmount()) {
                             boolean isSelected = false;
                             for (VoucherModel v : selectedVouchers) {
@@ -442,8 +444,20 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                             if (isSelected) {
                                 Toast.makeText(FoodCheckoutActivity.this, "Đã bỏ chọn mã: " + voucher.getTitle(), Toast.LENGTH_SHORT).show();
                             } else {
+                                // Auto-replace vouchers of the same type (only 1 shipping discount and 1 order discount allowed)
+                                List<VoucherModel> toRemove = new ArrayList<>();
+                                for (VoucherModel v : selectedVouchers) {
+                                    if (v.getType() != null && v.getType().equals(voucher.getType())) {
+                                        toRemove.add(v);
+                                    }
+                                }
+                                selectedVouchers.removeAll(toRemove);
+
                                 selectedVouchers.add(voucher);
                                 Toast.makeText(FoodCheckoutActivity.this, "Đã áp dụng mã: " + voucher.getTitle(), Toast.LENGTH_SHORT).show();
+                            }
+                            if (adapterHolder[0] != null) {
+                                adapterHolder[0].notifyDataSetChanged();
                             }
                             fetchPreviewData();
                         } else {
@@ -451,6 +465,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                         }
                     });
 
+                    adapterHolder[0] = adapter;
                     rvVouchers.setAdapter(adapter);
                     bottomSheetDialog.show();
                 });
