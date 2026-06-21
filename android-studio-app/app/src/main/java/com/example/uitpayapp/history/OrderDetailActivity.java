@@ -28,6 +28,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import android.animation.ValueAnimator;
+import android.view.animation.LinearInterpolator;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +55,10 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
     private double customerLat = 10.8750;
     private double customerLng = 106.7900;
     private boolean isMapDataLoaded = false;
+    private String orderStatus;
+    private Marker shipperMarker;
+    private ValueAnimator shipperAnimator;
+    private static final Map<String, Long> deliveryStartTimes = new HashMap<>();
 
     // 2. Hệ thống nút bấm tương tác
     private ImageButton btnMapBack;
@@ -147,7 +158,8 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                     fallback.setCustomerPhone("+84987301126");
                     fallback.setMerchantName("UIT FOOD");
                     fallback.setDestAddress("Ký túc xá khu A, ĐHQG TP.HCM");
-                    fallback.setStatus("COMPLETED");
+                    orderStatus = "COMPLETED";
+                    fallback.setStatus(orderStatus);
 
                     List<OrderDetail.CartItem> items = new ArrayList<>();
                     OrderDetail.CartItem item1 = new OrderDetail.CartItem();
@@ -182,7 +194,8 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                     data.setMerchantName(order.getRestaurantName() != null ? order.getRestaurantName() : "UIT FOOD");
                     data.setDestAddress(order.getDestAddress() != null ? order.getDestAddress() : "Ký túc xá khu A, ĐHQG TP.HCM");
                     data.setCustomerPhone(order.getCustomerPhone() != null ? order.getCustomerPhone() : "+84987301126");
-                    data.setStatus(order.getStatus());
+                    orderStatus = order.getStatus();
+                    data.setStatus(orderStatus);
 
                     // Đọc tọa độ thực tế từ backend
                     merchantLat = order.getRestaurantLatitude() != null ? order.getRestaurantLatitude().doubleValue() : 10.8800;
@@ -229,7 +242,8 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                     fallback.setCustomerPhone("+84987301126");
                     fallback.setMerchantName("UIT FOOD");
                     fallback.setDestAddress("Ký túc xá khu A, ĐHQG TP.HCM");
-                    fallback.setStatus("COMPLETED");
+                    orderStatus = "COMPLETED";
+                    fallback.setStatus(orderStatus);
 
                     List<OrderDetail.CartItem> items = new ArrayList<>();
                     OrderDetail.CartItem item1 = new OrderDetail.CartItem();
@@ -249,6 +263,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
     }
 
     private void bindOrderData(OrderDetail data) {
+        orderStatus = data.getStatus();
         tvMerchantName.setText("Từ: " + data.getMerchantName());
         tvDestAddress.setText("Đến: " + data.getDestAddress());
         tvTotalPaid.setText(String.format("%,.0fđ", data.getTotalPaid()));
@@ -337,6 +352,12 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
         });
 
         if ("COMPLETED".equalsIgnoreCase(data.getStatus()) || "CANCELLED".equalsIgnoreCase(data.getStatus())) {
+            if (shipperAnimator != null) {
+                shipperAnimator.cancel();
+            }
+            if (shipperMarker != null) {
+                shipperMarker.remove();
+            }
             if ("CANCELLED".equalsIgnoreCase(data.getStatus())) {
                 tvOrderStatusTitle.setText("Đã hủy");
             } else {
@@ -424,6 +445,10 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                 .width(8)
                 .color(android.graphics.Color.parseColor("#E84A26"));
         mMap.addPolyline(polylineOptions);
+
+        if ("DELIVERING".equalsIgnoreCase(orderStatus)) {
+            startShipperSimulation(merchantLocation, customerLocation);
+        }
     }
 
     @Override
@@ -434,6 +459,96 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
         } else {
             drawMarkers(10.8800, 106.8000, 10.8750, 106.7900);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (shipperAnimator != null) {
+            shipperAnimator.cancel();
+        }
+        super.onDestroy();
+    }
+
+    private BitmapDescriptor getMarkerIconFromDrawable(int resId, int width, int height) {
+        android.graphics.drawable.Drawable drawable = androidx.core.content.ContextCompat.getDrawable(this, resId);
+        if (drawable == null) {
+            return BitmapDescriptorFactory.defaultMarker();
+        }
+        android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
+        drawable.setBounds(0, 0, width, height);
+        drawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    private float getBearing(LatLng begin, LatLng end) {
+        double lat1 = Math.toRadians(begin.latitude);
+        double lng1 = Math.toRadians(begin.longitude);
+        double lat2 = Math.toRadians(end.latitude);
+        double lng2 = Math.toRadians(end.longitude);
+
+        double dLng = lng2 - lng1;
+
+        double y = Math.sin(dLng) * Math.cos(lat2);
+        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+
+        double bearing = Math.toDegrees(Math.atan2(y, x));
+        return (float) (bearing + 360) % 360;
+    }
+
+    private void startShipperSimulation(LatLng merchantLocation, LatLng customerLocation) {
+        if (shipperAnimator != null) {
+            shipperAnimator.cancel();
+        }
+        if (shipperMarker != null) {
+            shipperMarker.remove();
+        }
+
+        shipperMarker = mMap.addMarker(new MarkerOptions()
+                .position(merchantLocation)
+                .title("Shipper đang giao hàng")
+                .anchor(0.5f, 0.5f)
+                .icon(getMarkerIconFromDrawable(R.drawable.ic_shipper, 100, 100)));
+
+        long totalDurationMs = 5 * 60 * 1000; // 5 phút giả lập
+        long now = System.currentTimeMillis();
+        String orderId = tvDetailOrderId.getText().toString();
+
+        Long startTime = deliveryStartTimes.get(orderId);
+        if (startTime == null) {
+            startTime = now;
+            deliveryStartTimes.put(orderId, startTime);
+        }
+
+        long elapsed = now - startTime;
+        if (elapsed >= totalDurationMs) {
+            shipperMarker.setPosition(customerLocation);
+            float bearing = getBearing(merchantLocation, customerLocation);
+            shipperMarker.setRotation(bearing);
+            return;
+        }
+
+        float startFraction = (float) elapsed / totalDurationMs;
+        long remainingDuration = totalDurationMs - elapsed;
+
+        shipperAnimator = ValueAnimator.ofFloat(startFraction, 1.0f);
+        shipperAnimator.setDuration(remainingDuration);
+        shipperAnimator.setInterpolator(new LinearInterpolator());
+        shipperAnimator.addUpdateListener(animation -> {
+            if (mMap == null || shipperMarker == null) return;
+            float fraction = (float) animation.getAnimatedValue();
+
+            double lat = merchantLocation.latitude + (customerLocation.latitude - merchantLocation.latitude) * fraction;
+            double lng = merchantLocation.longitude + (customerLocation.longitude - merchantLocation.longitude) * fraction;
+            LatLng currentPos = new LatLng(lat, lng);
+
+            shipperMarker.setPosition(currentPos);
+
+            float bearing = getBearing(merchantLocation, customerLocation);
+            shipperMarker.setRotation(bearing);
+        });
+
+        shipperAnimator.start();
     }
 
     // Lớp Adapter nội bộ cập nhật theo class OrderDetail mới

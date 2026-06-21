@@ -24,6 +24,10 @@ public class SessionManager {
     // Address storage
     private static final String KEY_DELIVERY_ADDRESS_ID = "delivery_address_id";
     private static final String KEY_DELIVERY_ADDRESS_TEXT = "delivery_address_text";
+
+    // FCM Storage
+    private static final String KEY_FCM_TOKEN = "fcm_token";
+    private static final String KEY_FCM_TOKEN_SYNCED = "fcm_token_synced";
     
     private static SessionManager instance;
     private final SharedPreferences sharedPreferences;
@@ -117,6 +121,7 @@ public class SessionManager {
         editor.remove(KEY_USER_ID);
         editor.remove(KEY_USER_ROLE);
         editor.putBoolean(KEY_IS_LOGGED_IN, false);
+        editor.putBoolean(KEY_FCM_TOKEN_SYNCED, false);
         editor.apply();
     }
 
@@ -177,5 +182,23 @@ public class SessionManager {
     public Long getDeliveryAddressId() {
         long id = sharedPreferences.getLong(KEY_DELIVERY_ADDRESS_ID, -1L);
         return id == -1L ? null : id;
+    }
+
+    public void saveFcmToken(String fcmToken) {
+        editor.putString(KEY_FCM_TOKEN, fcmToken);
+        editor.apply();
+    }
+
+    public String getFcmToken() {
+        return sharedPreferences.getString(KEY_FCM_TOKEN, null);
+    }
+
+    public void setFcmTokenSynced(boolean synced) {
+        editor.putBoolean(KEY_FCM_TOKEN_SYNCED, synced);
+        editor.apply();
+    }
+
+    public boolean isFcmTokenSynced() {
+        return sharedPreferences.getBoolean(KEY_FCM_TOKEN_SYNCED, false);
     }
 }

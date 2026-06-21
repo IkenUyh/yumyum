@@ -178,23 +178,43 @@ public class ProfileActivity extends AppCompatActivity {
             startActivity(intentAccount);
         });
         findViewById(R.id.btn_logout).setOnClickListener(v->{
-            SessionManager.getInstance(this).clearSession();
-            SharedPreferences.Editor editor = getSharedPreferences("UserPrefs", MODE_PRIVATE).edit();
-            editor.clear();
-            editor.apply();
-            checkLoginStatus();
-            Toast.makeText(this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
+            SessionManager sessionManager = SessionManager.getInstance(this);
+            String fcmToken = sessionManager.getFcmToken();
+            if (fcmToken != null) {
+                new com.example.uitpayapp.modules.notification.NotificationRepository().deregisterFcmToken(fcmToken, new com.example.uitpayapp.network.ApiCallback<String>() {
+                    @Override
+                    public void onSuccess(String data) {
+                        performLogout();
+                    }
 
-            Intent intent = new Intent(this, com.example.uitpayapp.home.HomeActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+                    @Override
+                    public void onError(String errorMessage) {
+                        performLogout();
+                    }
+                });
+            } else {
+                performLogout();
+            }
         });
         findViewById(R.id.btn_login_profile).setOnClickListener(v->
         {
             Intent intentLogin=new Intent(this, SignInActivity.class);
             startActivity(intentLogin);
         });
+    }
+
+    private void performLogout() {
+        SessionManager.getInstance(this).clearSession();
+        SharedPreferences.Editor editor = getSharedPreferences("UserPrefs", MODE_PRIVATE).edit();
+        editor.clear();
+        editor.apply();
+        checkLoginStatus();
+        Toast.makeText(this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(this, com.example.uitpayapp.home.HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     void SetDataMainMenu(RecyclerView mainMenu) {
