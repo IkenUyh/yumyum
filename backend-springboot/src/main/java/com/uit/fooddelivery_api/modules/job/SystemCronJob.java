@@ -24,6 +24,8 @@ public class SystemCronJob {
     private final VoucherRepository voucherRepository;
     private final WalletRepository walletRepository;
     private final FlashSaleRotationService flashSaleRotationService;
+    private final com.uit.fooddelivery_api.modules.order.services.OrderService orderService;
+    private final com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository;
 
     // 0. KHỞI TẠO: Đảm bảo luôn có Flashsale hoạt động khi server khởi động
     @PostConstruct
@@ -48,20 +50,57 @@ public class SystemCronJob {
             System.out.println("🔄 CronJob: Đang tự động hủy " + staleOrders.size() + " đơn hàng quá hạn (không có tài xế nhận)...");
 
             for (Order order : staleOrders) {
-                // Đổi trạng thái thành Đã Hủy
-                order.setStatus("CANCELLED");
-
-                // Tìm ví của người mua để Hoàn tiền
-                Wallet customerWallet = walletRepository.findByUserId(order.getUser().getId())
-                        .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy ví khách hàng để hoàn tiền!"));
-
-                customerWallet.setBalance(customerWallet.getBalance().add(order.getTotalAmount()));
-                walletRepository.save(customerWallet);
+                try {
+                    orderService.cancelOrder(order.getId(), order.getUser(), "Hệ thống tự động hủy do quá hạn không có tài xế nhận");
+                } catch (Exception e) {
+                    System.out.println("⚠️ CronJob Error: Không thể tự động hủy đơn #" + order.getId() + ": " + e.getMessage());
+                }
             }
+        }
+    }
 
-            // Lưu cập nhật tất cả đơn hàng
-            orderRepository.saveAll(staleOrders);
-            System.out.println("✅ CronJob: Đã hủy và hoàn trả tiền vào ví khách hàng thành công!");
+    // 4. JOB HỦY ĐƠN CHƯA THANH TOÁN: Chạy lặp lại mỗi 1 phút (60000 mili-giây)
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    public void autoCancelUnpaidOrders() {
+        LocalDateTime cutoffTime = LocalDateTime.now().minusMinutes(15);
+        List<Order> unpaidOrders = orderRepository.findStaleUnpaidOrders(cutoffTime);
+
+        if (!unpaidOrders.isEmpty()) {
+            System.out.println("🔄 CronJob: Đang tự động hủy " + unpaidOrders.size() + " đơn hàng chưa thanh toán quá hạn...");
+
+            for (Order order : unpaidOrders) {
+                try {
+                    order.setStatus("CANCELLED");
+                    order.setPaymentStatus("EXPIRED");
+                    order.setCancelReason("Hết hạn chờ thanh toán");
+
+                    // Trả lại Voucher
+                    if (order.getVouchers() != null) {
+                        for (com.uit.fooddelivery_api.modules.voucher.entities.Voucher v : order.getVouchers()) {
+                            v.setStockQuantity(v.getStockQuantity() + 1);
+                            voucherRepository.save(v);
+                        }
+                    }
+
+                    // Trả lại Flash Sale stock
+                    if (order.getOrderItems() != null) {
+                        for (com.uit.fooddelivery_api.modules.order.entities.OrderItem item : order.getOrderItems()) {
+                            java.util.Optional<com.uit.fooddelivery_api.modules.flashsale.entities.FlashSaleItem> flashSaleOpt = flashSaleItemRepository
+                                    .findActiveFlashSaleItemByFoodId(item.getFood().getId(), LocalDateTime.now());
+                            if (flashSaleOpt.isPresent()) {
+                                com.uit.fooddelivery_api.modules.flashsale.entities.FlashSaleItem fsItem = flashSaleOpt.get();
+                                fsItem.setSoldQuantity(Math.max(0, fsItem.getSoldQuantity() - item.getQuantity()));
+                                flashSaleItemRepository.save(fsItem);
+                            }
+                        }
+                    }
+
+                    orderRepository.save(order);
+                } catch (Exception e) {
+                    System.out.println("⚠️ CronJob Error: Không thể tự động hủy đơn unpaid #" + order.getId() + ": " + e.getMessage());
+                }
+            }
         }
     }
 

@@ -38,6 +38,9 @@ public class OrderResponseDTO {
     private java.math.BigDecimal restaurantLongitude;
     private java.math.BigDecimal destLatitude;
     private java.math.BigDecimal destLongitude;
+    private String paymentMethod;
+    private String paymentStatus;
+    private String paymentUrl;
 
     @Getter
     @Setter
@@ -89,6 +92,9 @@ public class OrderResponseDTO {
                 .restaurantLongitude(order.getRestaurant().getLongitude())
                 .destLatitude(order.getAddress() != null ? order.getAddress().getLatitude() : null)
                 .destLongitude(order.getAddress() != null ? order.getAddress().getLongitude() : null)
+                .paymentMethod(order.getPaymentMethod())
+                .paymentStatus(order.getPaymentStatus())
+                .paymentUrl(order.getPaymentUrl())
                 .build();
     }
 }

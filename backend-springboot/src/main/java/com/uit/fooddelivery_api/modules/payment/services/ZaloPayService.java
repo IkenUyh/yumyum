@@ -82,6 +82,44 @@ public class ZaloPayService {
         return response; // Trong này sẽ chứa 'order_url' để Frontend mở lên
     }
 
+    // Hàm tạo yêu cầu thanh toán cho đơn hàng
+    public Map<String, Object> createOrderPayment(com.uit.fooddelivery_api.modules.order.entities.Order order) {
+        String appTransId = getCurrentTimeString("yyMMdd") + "_" + order.getId() + "_" + System.currentTimeMillis();
+        String appTime = String.valueOf(System.currentTimeMillis());
+        String item = "[]"; 
+        String embedData = "{\"order_id\": " + order.getId() + ", \"user_id\": " + order.getUser().getId() + "}";
+        String description = "Thanh toán đơn hàng FoodDelivery #" + order.getId();
+
+        // app_id|app_trans_id|app_user|amount|app_time|embed_data|item
+        String dataToMac = appId + "|" + appTransId + "|" + order.getUser().getPhoneNumber() + "|" + order.getTotalAmount().longValue() + "|" + appTime + "|" + embedData + "|" + item;
+        String mac = HMACUtil.HMacHexString(dataToMac, key1);
+
+        MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+        requestBody.add("app_id", appId);
+        requestBody.add("app_trans_id", appTransId);
+        requestBody.add("app_user", order.getUser().getPhoneNumber());
+        requestBody.add("app_time", appTime);
+        requestBody.add("item", item);
+        requestBody.add("embed_data", embedData);
+        requestBody.add("amount", String.valueOf(order.getTotalAmount().longValue()));
+        requestBody.add("description", description);
+        requestBody.add("bank_code", "");
+        requestBody.add("mac", mac);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(requestBody, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        Map<String, Object> response = restTemplate.postForObject(endpointCreate, request, Map.class);
+
+        if (response != null) {
+            response.put("app_trans_id", appTransId);
+        }
+
+        return response;
+    }
+
     // Hàm truy vấn trạng thái đơn hàng
     public Map<String, Object> queryOrder(String appTransId) {
         String dataToMac = appId + "|" + appTransId + "|" + key1;

@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.uit.fooddelivery_api.modules.payment.services.VNPayService;
+import com.uit.fooddelivery_api.modules.order.entities.Order;
+import com.uit.fooddelivery_api.modules.order.repositories.OrderRepository;
+import com.uit.fooddelivery_api.modules.notification.services.NotificationService;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -26,6 +29,8 @@ public class PaymentController {
     private final ZaloPayService zaloPayService;
     private final VNPayService vnPayService;
     private final WalletRepository walletRepository;
+    private final OrderRepository orderRepository;
+    private final NotificationService notificationService;
 
     @Value("${zalopay.key2}")
     private String key2; // ZaloPay dùng Key 2 để ký chữ ký Callback trả về
@@ -64,18 +69,44 @@ public class PaymentController {
                 result.put("return_code", -1);
                 result.put("return_message", "mac not equal");
             } else {
-                // Thanh toán thành công -> Lấy userId từ embed_data ra và cộng tiền
                 Map<String, Object> data = mapper.readValue(dataStr, Map.class);
                 Map<String, Object> embedData = mapper.readValue((String) data.get("embed_data"), Map.class);
+                String zpTransId = (String) data.get("zp_trans_id");
 
-                Long userId = ((Number) embedData.get("user_id")).longValue();
-                Long amount = ((Number) data.get("amount")).longValue();
+                if (embedData.containsKey("order_id")) {
+                    Long orderId = ((Number) embedData.get("order_id")).longValue();
+                    Order order = orderRepository.findById(orderId)
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng #" + orderId));
 
-                Wallet wallet = walletRepository.findByUserId(userId)
-                        .orElseThrow(() -> new RuntimeException("Không tìm thấy ví"));
+                    order.setPaymentStatus("PAID");
+                    order.setStatus("PENDING");
+                    order.setZaloPayZpTransId(zpTransId);
+                    orderRepository.save(order);
 
-                wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(amount)));
-                walletRepository.save(wallet);
+                    // Bắn thông báo cho Merchant
+                    notificationService.pushNotification(
+                            order.getRestaurant().getMerchant().getId(),
+                            "Đơn hàng mới",
+                            "Bạn có đơn hàng mới từ " + order.getUser().getFullName() + " (Đã thanh toán ZaloPay). Mã đơn: #" + order.getId(),
+                            "ORDER_UPDATE");
+
+                    // Bắn thông báo cho Customer
+                    notificationService.pushNotification(
+                            order.getUser().getId(),
+                            "Thanh toán thành công",
+                            "Đơn hàng #" + order.getId() + " đã được thanh toán thành công qua ZaloPay!",
+                            "ORDER_UPDATE");
+                } else {
+                    // TopUp flow
+                    Long userId = ((Number) embedData.get("user_id")).longValue();
+                    Long amount = ((Number) data.get("amount")).longValue();
+
+                    Wallet wallet = walletRepository.findByUserId(userId)
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy ví"));
+
+                    wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(amount)));
+                    walletRepository.save(wallet);
+                }
 
                 // Trả về tín hiệu cho ZaloPay biết Server mình đã ghi nhận
                 result.put("return_code", 1);

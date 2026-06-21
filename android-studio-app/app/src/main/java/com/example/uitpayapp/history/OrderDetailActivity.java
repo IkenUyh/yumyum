@@ -194,6 +194,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                     data.setMerchantName(order.getRestaurantName() != null ? order.getRestaurantName() : "UIT FOOD");
                     data.setDestAddress(order.getDestAddress() != null ? order.getDestAddress() : "Ký túc xá khu A, ĐHQG TP.HCM");
                     data.setCustomerPhone(order.getCustomerPhone() != null ? order.getCustomerPhone() : "+84987301126");
+                    data.setPaymentMethod(order.getPaymentMethod());
                     orderStatus = order.getStatus();
                     data.setStatus(orderStatus);
 
@@ -268,6 +269,12 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
         tvDestAddress.setText("Đến: " + data.getDestAddress());
         tvTotalPaid.setText(String.format("%,.0fđ", data.getTotalPaid()));
         tvDetailOrderId.setText(data.getOrderId());
+
+        if ("ZALOPAY".equalsIgnoreCase(data.getPaymentMethod())) {
+            tvPaymentMethod.setText("ZaloPay");
+        } else {
+            tvPaymentMethod.setText("Ví nội bộ (YumYumPay)");
+        }
 
         tvShipFee.setText(String.format("%,.0fđ", data.getShippingFee()));
         if (data.getDiscount() > 0) {
@@ -359,7 +366,10 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                 shipperMarker.remove();
             }
             if ("CANCELLED".equalsIgnoreCase(data.getStatus())) {
-                tvOrderStatusTitle.setText("Đã hủy");
+                String refundInfo = "ZALOPAY".equalsIgnoreCase(data.getPaymentMethod()) 
+                    ? "Đã hủy (Đã hoàn tiền ZaloPay)" 
+                    : "Đã hủy (Đã hoàn lại Ví YumYumPay)";
+                tvOrderStatusTitle.setText(refundInfo);
             } else {
                 tvOrderStatusTitle.setText("Hoàn thành");
             }

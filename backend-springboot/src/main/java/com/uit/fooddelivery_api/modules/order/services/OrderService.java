@@ -47,6 +47,7 @@ public class OrderService {
     private final com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository;
     private final com.uit.fooddelivery_api.modules.wallet.services.WalletService walletService;
     private final com.uit.fooddelivery_api.modules.restaurant.repositories.RestaurantTransactionRepository restaurantTransactionRepository;
+    private final com.uit.fooddelivery_api.modules.payment.services.ZaloPayService zaloPayService;
 
     // Phí ship cơ bản: 5.000 VNĐ / 1 Km
     private static final BigDecimal FEE_PER_KM = BigDecimal.valueOf(5000);
@@ -527,27 +528,58 @@ public class OrderService {
         order.setVouchers(appliedVouchers); // Lưu danh sách các mã đã dùng vào bảng trung gian
         order.setOrderItems(orderItems);
 
-        Wallet wallet = walletRepository.findByUserId(customer.getId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin ví điện tử cá nhân!"));
+        String paymentMethod = (dto.getPaymentMethod() != null) ? dto.getPaymentMethod().toUpperCase() : "WALLET";
+        order.setPaymentMethod(paymentMethod);
 
-        if (wallet.getBalance().compareTo(finalTotal) < 0) {
-            throw new RuntimeException(
-                    "Số dư tài khoản ví không đủ để thực hiện thanh toán! Tổng tiền: " + finalTotal + "đ.");
+        if ("ZALOPAY".equals(paymentMethod)) {
+            order.setPaymentStatus("UNPAID");
+            order.setStatus("UNPAID");
+
+            Order savedOrder = orderRepository.save(order);
+            cartItemRepository.deleteByUserId(customer.getId());
+
+            try {
+                java.util.Map<String, Object> zaloPayResponse = zaloPayService.createOrderPayment(savedOrder);
+                if (zaloPayResponse != null && zaloPayResponse.containsKey("order_url")) {
+                    String orderUrl = (String) zaloPayResponse.get("order_url");
+                    String appTransId = (String) zaloPayResponse.get("app_trans_id");
+                    savedOrder.setZaloPayAppTransId(appTransId);
+                    savedOrder.setPaymentUrl(orderUrl);
+                    orderRepository.save(savedOrder);
+                } else {
+                    throw new RuntimeException("Lỗi tạo giao dịch thanh toán với ZaloPay!");
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Không thể kết nối với cổng thanh toán ZaloPay: " + e.getMessage());
+            }
+
+            return savedOrder;
+        } else {
+            order.setPaymentStatus("PAID");
+            order.setStatus("PENDING");
+
+            Wallet wallet = walletRepository.findByUserId(customer.getId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin ví điện tử cá nhân!"));
+
+            if (wallet.getBalance().compareTo(finalTotal) < 0) {
+                throw new RuntimeException(
+                        "Số dư tài khoản ví không đủ để thực hiện thanh toán! Tổng tiền: " + finalTotal + "đ.");
+            }
+
+            walletService.processTransaction(customer.getId(), finalTotal.negate(), "PAYMENT", "ORDER_" + order.getId(),
+                    "Thanh toán đơn hàng đồ ăn");
+
+            Order savedOrder = orderRepository.save(order);
+            cartItemRepository.deleteByUserId(customer.getId());
+
+            notificationService.pushNotification(
+                    restaurant.getMerchant().getId(),
+                    "Đơn hàng mới",
+                    "Bạn có đơn hàng mới từ " + customer.getFullName() + ". Mã đơn: #" + savedOrder.getId(),
+                    "ORDER_UPDATE");
+
+            return savedOrder;
         }
-
-        walletService.processTransaction(customer.getId(), finalTotal.negate(), "PAYMENT", "ORDER_" + order.getId(),
-                "Thanh toán đơn hàng đồ ăn");
-
-        Order savedOrder = orderRepository.save(order);
-        cartItemRepository.deleteByUserId(customer.getId());
-
-        notificationService.pushNotification(
-                restaurant.getMerchant().getId(),
-                "Đơn hàng mới",
-                "Bạn có đơn hàng mới từ " + customer.getFullName() + ". Mã đơn: #" + savedOrder.getId(),
-                "ORDER_UPDATE");
-
-        return savedOrder;
     }
 
     @Transactional
@@ -580,20 +612,63 @@ public class OrderService {
         // 3. LOGIC HOÀN TIỀN VÀ TRẢ LẠI VOUCHER
         // ==========================================
 
-        // A. Hoàn tiền tự động vào Ví (Issue #27)
-        // Số tiền đưa vào là số DƯƠNG vì ta muốn CỘNG tiền lại cho Khách
-        walletService.processTransaction(
-                order.getUser().getId(),
-                order.getTotalAmount(),
-                "REFUND",
-                "ORDER_" + order.getId(),
-                "Hoàn tiền do hủy đơn hàng: " + reason);
+        String refundMsg = "";
+        if ("ZALOPAY".equalsIgnoreCase(order.getPaymentMethod())) {
+            if ("PAID".equalsIgnoreCase(order.getPaymentStatus())) {
+                try {
+                    java.util.Map<String, Object> refundResponse = zaloPayService.refund(
+                            order.getZaloPayZpTransId(),
+                            order.getTotalAmount().longValue(),
+                            "Hoàn tiền hủy đơn #" + order.getId()
+                    );
+                    if (refundResponse != null && (
+                            "1".equals(String.valueOf(refundResponse.get("return_code"))) ||
+                            "2".equals(String.valueOf(refundResponse.get("return_code")))
+                       )) {
+                        order.setPaymentStatus("REFUNDED");
+                        refundMsg = "Tiền đã được hoàn về tài khoản ZaloPay.";
+                    } else {
+                        order.setPaymentStatus("REFUND_FAILED");
+                        refundMsg = "Gặp lỗi khi tự động hoàn tiền ZaloPay. Vui lòng liên hệ hỗ trợ.";
+                    }
+                } catch (Exception e) {
+                    order.setPaymentStatus("REFUND_FAILED");
+                    refundMsg = "Gặp lỗi khi kết nối ZaloPay để hoàn tiền: " + e.getMessage();
+                }
+            } else {
+                order.setPaymentStatus("CANCELLED");
+                refundMsg = "Đơn hàng chưa thanh toán, không cần hoàn tiền.";
+            }
+        } else {
+            // WALLET (mặc định)
+            walletService.processTransaction(
+                    order.getUser().getId(),
+                    order.getTotalAmount(),
+                    "REFUND",
+                    "ORDER_" + order.getId(),
+                    "Hoàn tiền do hủy đơn hàng: " + reason);
+            order.setPaymentStatus("REFUNDED");
+            refundMsg = "Tiền đã được hoàn lại vào Ví YumYumPay.";
+        }
 
         // B. Trả lại lượt sử dụng Voucher vào kho (Issue #16)
         if (order.getVouchers() != null && !order.getVouchers().isEmpty()) {
             for (com.uit.fooddelivery_api.modules.voucher.entities.Voucher v : order.getVouchers()) {
                 v.setStockQuantity(v.getStockQuantity() + 1); // Trả lại 1 lượt
                 voucherRepository.save(v);
+            }
+        }
+
+        // Trả lại flashsale stock (nếu có)
+        if (order.getOrderItems() != null) {
+            for (com.uit.fooddelivery_api.modules.order.entities.OrderItem item : order.getOrderItems()) {
+                java.util.Optional<com.uit.fooddelivery_api.modules.flashsale.entities.FlashSaleItem> flashSaleOpt = flashSaleItemRepository
+                        .findActiveFlashSaleItemByFoodId(item.getFood().getId(), java.time.LocalDateTime.now());
+                if (flashSaleOpt.isPresent()) {
+                    com.uit.fooddelivery_api.modules.flashsale.entities.FlashSaleItem fsItem = flashSaleOpt.get();
+                    fsItem.setSoldQuantity(Math.max(0, fsItem.getSoldQuantity() - item.getQuantity()));
+                    flashSaleItemRepository.save(fsItem);
+                }
             }
         }
 

@@ -15,4 +15,5 @@ public class CreateOrderDTO {
     private Double longitude;
     private String deliveryMode; //Khách truyền STANDARD, FAST, hoặc EXPRESS
     private List<String> voucherCodes;
+    private String paymentMethod;
 }
