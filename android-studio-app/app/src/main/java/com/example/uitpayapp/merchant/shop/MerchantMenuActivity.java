@@ -123,6 +123,19 @@ public class MerchantMenuActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // Observe Operation Status for Toast
+        viewModel.getOperationStatus().observe(this, state -> {
+            if (state != null) {
+                if (state.isLoading()) {
+                    // Could show a small loader, but we don't want to block the UI for a switch toggle
+                } else if (state.isSuccess()) {
+                    android.widget.Toast.makeText(this, state.getData(), android.widget.Toast.LENGTH_SHORT).show();
+                } else if (state.isError()) {
+                    android.widget.Toast.makeText(this, state.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 
     private void initViews() {
@@ -292,6 +305,11 @@ public class MerchantMenuActivity extends AppCompatActivity {
 
     private void setupData() {
         dishAdapter = new MerchantMenuAdapter(dishCategories);
+        dishAdapter.setOnFoodStatusChangeListener((foodId, isAvailable) -> {
+            if (viewModel != null) {
+                viewModel.updateFoodStatus(foodId, isAvailable);
+            }
+        });
         toppingAdapter = new MerchantToppingAdapter(toppingGroups);
     }
 

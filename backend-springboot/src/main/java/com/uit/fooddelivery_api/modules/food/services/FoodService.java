@@ -77,8 +77,15 @@ public class FoodService {
         return foodRepository.save(food);
     }
 
-    // Lấy danh sách món ăn theo nhà hàng (public - không cần đăng nhập)
+    // Lấy danh sách món ăn theo nhà hàng (public - không cần đăng nhập - chỉ lấy món đang bán)
     public List<Food> getFoodsByRestaurant(Long restaurantId) {
+        return foodRepository.findByRestaurantId(restaurantId).stream()
+                .filter(food -> Boolean.TRUE.equals(food.getIsAvailable()))
+                .toList();
+    }
+
+    // Lấy tất cả món ăn của nhà hàng (bao gồm cả món đang ngưng bán - dành cho chủ quán)
+    public List<Food> getAllFoodsByRestaurant(Long restaurantId) {
         return foodRepository.findByRestaurantId(restaurantId);
     }
 
@@ -139,6 +146,21 @@ public class FoodService {
 
         // Chuyển trạng thái thành ngưng bán thay vì xóa data để giữ lịch sử hóa đơn
         food.setIsAvailable(false);
+        foodRepository.save(food);
+    }
+
+    // API Cập nhật trạng thái món ăn (Bật/Tắt)
+    @jakarta.transaction.Transactional
+    public void updateFoodStatus(Long foodId, Boolean isAvailable, User merchant) {
+        Food food = foodRepository.findById(foodId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy món ăn!"));
+
+        // Check quyền chủ quán
+        if (!food.getRestaurant().getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("Anh không có quyền sửa món ăn của nhà hàng khác!");
+        }
+
+        food.setIsAvailable(isAvailable);
         foodRepository.save(food);
     }
 

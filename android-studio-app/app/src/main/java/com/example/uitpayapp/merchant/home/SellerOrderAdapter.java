@@ -68,7 +68,7 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
         
         String status = order.getStatus() != null ? order.getStatus().toUpperCase() : "";
         if ("PREPARING".equals(status) || "CONFIRMED".equals(status)) {
-            holder.btnAccept.setText("Bàn giao cho Shipper");
+            holder.btnAccept.setText("Bàn giao");
             holder.btnAccept.setVisibility(View.VISIBLE);
         } else if ("DELIVERING".equals(status)) {
             holder.btnAccept.setText("Hoàn thành");

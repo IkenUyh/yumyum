@@ -65,6 +65,10 @@ public class FoodRepository {
         handleCall(foodService.deleteFood(foodId), callback);
     }
 
+    public void updateFoodStatus(Long foodId, boolean isAvailable, ApiCallback<String> callback) {
+        handleCall(foodService.updateFoodStatus(foodId, isAvailable), callback);
+    }
+
     public void addOptionGroup(Long foodId, CreateOptionGroupRequest request, ApiCallback<OptionGroupResponse> callback) {
         handleCall(foodService.addOptionGroup(foodId, request), callback);
     }
@@ -75,6 +79,10 @@ public class FoodRepository {
 
     public void getRestaurantMenu(Long restaurantId, ApiCallback<List<FoodResponse>> callback) {
         handleCall(foodService.getRestaurantMenu(restaurantId), callback);
+    }
+
+    public void getRestaurantMenuForMerchant(Long restaurantId, ApiCallback<List<FoodResponse>> callback) {
+        handleCall(foodService.getRestaurantMenuForMerchant(restaurantId), callback);
     }
 
     public void updateOptionGroup(Long groupId, CreateOptionGroupRequest request, ApiCallback<OptionGroupResponse> callback) {
