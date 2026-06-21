@@ -64,8 +64,20 @@ public class OrderService {
         Restaurant restaurant = restaurantRepository.findById(dto.getRestaurantId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà hàng!"));
 
-        UserAddress address = addressRepository.findByIdAndUserId(dto.getAddressId(), customer.getId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ giao hàng!"));
+        UserAddress address;
+        if (dto.getAddressId() != null && dto.getAddressId() != -1L) {
+            address = addressRepository.findByIdAndUserId(dto.getAddressId(), customer.getId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ giao hàng!"));
+        } else {
+            if (dto.getLatitude() == null || dto.getLongitude() == null) {
+                throw new RuntimeException("Hệ thống chưa cập nhật đủ tọa độ để tính phí ship!");
+            }
+            address = new UserAddress();
+            address.setUser(customer);
+            address.setDetailedAddress(dto.getAddressText() != null ? dto.getAddressText() : "Vị trí hiện tại");
+            address.setLatitude(BigDecimal.valueOf(dto.getLatitude()));
+            address.setLongitude(BigDecimal.valueOf(dto.getLongitude()));
+        }
 
         // KIỂM TRA GIỜ HOẠT ĐỘNG
         if (restaurant.getIsAcceptingOrders() != null && !restaurant.getIsAcceptingOrders()) {
@@ -247,9 +259,35 @@ public class OrderService {
         Restaurant restaurant = restaurantRepository.findById(dto.getRestaurantId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà hàng!"));
 
-        // 3. Tìm Địa chỉ
-        UserAddress address = addressRepository.findByIdAndUserId(dto.getAddressId(), customer.getId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ giao hàng!"));
+        // 3. Tìm Địa chỉ hoặc tạo mới từ session
+        UserAddress address;
+        if (dto.getAddressId() != null && dto.getAddressId() != -1L) {
+            address = addressRepository.findByIdAndUserId(dto.getAddressId(), customer.getId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ giao hàng!"));
+        } else {
+            if (dto.getLatitude() == null || dto.getLongitude() == null) {
+                throw new RuntimeException("Hệ thống chưa cập nhật đủ tọa độ để tính phí ship!");
+            }
+            
+            // Hủy default cũ
+            List<UserAddress> oldAddresses = addressRepository.findByUserId(customer.getId());
+            for (UserAddress old : oldAddresses) {
+                if (Boolean.TRUE.equals(old.getIsDefault())) {
+                    old.setIsDefault(false);
+                    addressRepository.save(old);
+                }
+            }
+
+            address = new UserAddress();
+            address.setUser(customer);
+            address.setRecipientName(customer.getFullName());
+            address.setPhoneNumber(customer.getPhoneNumber());
+            address.setDetailedAddress(dto.getAddressText() != null ? dto.getAddressText() : "Vị trí hiện tại");
+            address.setLatitude(BigDecimal.valueOf(dto.getLatitude()));
+            address.setLongitude(BigDecimal.valueOf(dto.getLongitude()));
+            address.setIsDefault(true);
+            address = addressRepository.save(address);
+        }
 
         // ==========================================
         // 4. KIỂM TRA GIỜ HOẠT ĐỘNG VÀ QUÁ TẢI BẾP (ISSUE #28)

@@ -37,4 +37,14 @@ public class AddressResponseDTO {
     public BigDecimal getLatitude() { return latitude; }
     public BigDecimal getLongitude() { return longitude; }
     public Boolean getIsDefault() { return isDefault; }
+
+    // Setters
+    public void setId(Long id) { this.id = id; }
+    public void setAddressName(String addressName) { this.addressName = addressName; }
+    public void setRecipientName(String recipientName) { this.recipientName = recipientName; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public void setDetailedAddress(String detailedAddress) { this.detailedAddress = detailedAddress; }
+    public void setLatitude(BigDecimal latitude) { this.latitude = latitude; }
+    public void setLongitude(BigDecimal longitude) { this.longitude = longitude; }
+    public void setIsDefault(Boolean isDefault) { this.isDefault = isDefault; }
 }
