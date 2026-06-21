@@ -37,6 +37,7 @@ public class OrderService {
     private final com.uit.fooddelivery_api.modules.voucher.repositories.VoucherRepository voucherRepository;
     private final com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository;
     private final com.uit.fooddelivery_api.modules.wallet.services.WalletService walletService;
+    private final com.uit.fooddelivery_api.modules.restaurant.repositories.RestaurantTransactionRepository restaurantTransactionRepository;
 
     // Phí ship cơ bản: 5.000 VNĐ / 1 Km
     private static final BigDecimal FEE_PER_KM = BigDecimal.valueOf(5000);
@@ -580,12 +581,23 @@ public class OrderService {
         // Đổi trạng thái đơn
         order.setStatus("COMPLETED");
 
-        // Bắn tiền cho chủ quán (Merchant)
-        Wallet merchantWallet = walletRepository.findByUserId(order.getRestaurant().getMerchant().getId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy ví của chủ quán!"));
+        // Cộng tiền vào số dư của nhà hàng
+        BigDecimal revenue = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
+        BigDecimal shipping = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
+        BigDecimal amountToAdd = revenue.subtract(shipping);
+        
+        Restaurant restaurant = order.getRestaurant();
+        restaurant.setBalance(restaurant.getBalance().add(amountToAdd));
+        restaurantRepository.save(restaurant);
 
-        merchantWallet.setBalance(merchantWallet.getBalance().add(order.getTotalAmount()));
-        walletRepository.save(merchantWallet);
+        restaurantTransactionRepository.save(com.uit.fooddelivery_api.modules.restaurant.entities.RestaurantTransaction.builder()
+                .restaurant(restaurant)
+                .amount(amountToAdd)
+                .balanceAfter(restaurant.getBalance())
+                .type("REVENUE")
+                .referenceId("ORDER_" + order.getId())
+                .description("Doanh thu bán hàng đơn #" + order.getId())
+                .build());
 
         notificationService.pushNotification(
                 order.getUser().getId(),
@@ -679,14 +691,23 @@ public class OrderService {
 
         order.setStatus("COMPLETED");
 
-        // Bắn tiền thu nhập về ví của chủ quán (Merchant) qua Sổ cái kế toán
-        walletService.processTransaction(
-                order.getRestaurant().getMerchant().getId(),
-                order.getTotalAmount().subtract(order.getShippingFee()), // Tiền đồ ăn về quán
-                "REVENUE",
-                "ORDER_" + order.getId(),
-                "Doanh thu bán hàng đơn #" + order.getId()
-        );
+        // Bắn tiền thu nhập vào số dư nhà hàng (Merchant Balance) thay vì ví cá nhân
+        BigDecimal revenue = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
+        BigDecimal shipping = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
+        BigDecimal amountToAdd = revenue.subtract(shipping);
+
+        Restaurant restaurant = order.getRestaurant();
+        restaurant.setBalance(restaurant.getBalance().add(amountToAdd));
+        restaurantRepository.save(restaurant);
+
+        restaurantTransactionRepository.save(com.uit.fooddelivery_api.modules.restaurant.entities.RestaurantTransaction.builder()
+                .restaurant(restaurant)
+                .amount(amountToAdd)
+                .balanceAfter(restaurant.getBalance())
+                .type("REVENUE")
+                .referenceId("ORDER_" + order.getId())
+                .description("Doanh thu bán hàng đơn #" + order.getId())
+                .build());
 
         // Bắn tiền ship về cho Ví của Tài xế (Driver)
         walletService.processTransaction(
@@ -778,16 +799,23 @@ public class OrderService {
 
         order.setStatus("COMPLETED");
 
-        // Bắn tiền doanh thu về ví chủ quán
+        // Bắn tiền doanh thu vào số dư nhà hàng
         BigDecimal revenue = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
         BigDecimal shipping = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
-        walletService.processTransaction(
-                order.getRestaurant().getMerchant().getId(),
-                revenue.subtract(shipping),
-                "REVENUE",
-                "ORDER_" + order.getId(),
-                "Doanh thu bán hàng đơn #" + order.getId()
-        );
+        BigDecimal amountToAdd = revenue.subtract(shipping);
+        
+        Restaurant restaurant = order.getRestaurant();
+        restaurant.setBalance(restaurant.getBalance().add(amountToAdd));
+        restaurantRepository.save(restaurant);
+
+        restaurantTransactionRepository.save(com.uit.fooddelivery_api.modules.restaurant.entities.RestaurantTransaction.builder()
+                .restaurant(restaurant)
+                .amount(amountToAdd)
+                .balanceAfter(restaurant.getBalance())
+                .type("REVENUE")
+                .referenceId("ORDER_" + order.getId())
+                .description("Doanh thu bán hàng đơn #" + order.getId())
+                .build());
 
         notificationService.pushNotification(
                 order.getUser().getId(),
