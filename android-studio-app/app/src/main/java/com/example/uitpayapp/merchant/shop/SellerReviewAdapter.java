@@ -21,10 +21,19 @@ import java.util.Locale;
 
 public class SellerReviewAdapter extends RecyclerView.Adapter<SellerReviewAdapter.ViewHolder> {
 
+    public interface OnReplyListener {
+        void onReply(ReviewModel review, int position, String replyContent, BottomSheetDialog dialog);
+    }
+
     private List<ReviewModel> reviewList;
+    private OnReplyListener onReplyListener;
 
     public SellerReviewAdapter(List<ReviewModel> reviewList) {
         this.reviewList = reviewList;
+    }
+
+    public void setOnReplyListener(OnReplyListener listener) {
+        this.onReplyListener = listener;
     }
 
     public void updateData(List<ReviewModel> newList) {
@@ -81,13 +90,9 @@ public class SellerReviewAdapter extends RecyclerView.Adapter<SellerReviewAdapte
         
         btnSend.setOnClickListener(v -> {
             String content = etReply.getText().toString().trim();
-            if (!content.isEmpty()) {
+            if (!content.isEmpty() && onReplyListener != null) {
                 ReviewModel review = reviewList.get(position);
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-                Date date = new Date();
-                review.setReply("Tôi",dateFormat.format(date),content);
-                notifyItemChanged(position);
-                bottomSheetDialog.dismiss();
+                onReplyListener.onReply(review, position, content, bottomSheetDialog);
             }
         });
 

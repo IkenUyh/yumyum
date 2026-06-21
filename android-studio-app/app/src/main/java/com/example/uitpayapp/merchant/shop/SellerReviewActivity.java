@@ -114,6 +114,30 @@ public class SellerReviewActivity extends AppCompatActivity {
 
     private void setupData() {
         adapter = new SellerReviewAdapter(displayReviews);
+        adapter.setOnReplyListener(new SellerReviewAdapter.OnReplyListener() {
+            @Override
+            public void onReply(ReviewModel review, int position, String replyContent, com.google.android.material.bottomsheet.BottomSheetDialog dialog) {
+                if (review.getId() == null || review.getId().isEmpty()) {
+                    Toast.makeText(SellerReviewActivity.this, "Lỗi: Đánh giá không hợp lệ", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Long reviewId = Long.parseLong(review.getId());
+                reviewRepository.replyReview(reviewId, replyContent, new ApiCallback<com.example.uitpayapp.modules.review.models.responses.ReviewResponse>() {
+                    @Override
+                    public void onSuccess(com.example.uitpayapp.modules.review.models.responses.ReviewResponse data) {
+                        review.setReply("Quán của bạn", formatIsoDate(data.getCreatedAt()), data.getMerchantReply());
+                        adapter.notifyItemChanged(position);
+                        dialog.dismiss();
+                        Toast.makeText(SellerReviewActivity.this, "Đã phản hồi đánh giá!", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Toast.makeText(SellerReviewActivity.this, "Lỗi trả lời: " + error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
         if (rvReviews != null) {
             rvReviews.setAdapter(adapter);
         }
@@ -180,6 +204,7 @@ public class SellerReviewActivity extends AppCompatActivity {
                         }
 
                         ReviewModel model = new ReviewModel(
+                                res.getId() != null ? String.valueOf(res.getId()) : "",
                                 res.getCustomerName() != null ? res.getCustomerName() : "Ẩn danh",
                                 "",
                                 res.getRating() != null ? res.getRating().floatValue() : 0.0f,
@@ -189,6 +214,9 @@ public class SellerReviewActivity extends AppCompatActivity {
                                 res.getComment() != null ? res.getComment() : "",
                                 ""
                         );
+                        if (res.getMerchantReply() != null && !res.getMerchantReply().isEmpty()) {
+                            model.setReply("Quán của bạn", formatIsoDate(res.getCreatedAt()), res.getMerchantReply());
+                        }
                         allReviews.add(model);
                     }
                 }

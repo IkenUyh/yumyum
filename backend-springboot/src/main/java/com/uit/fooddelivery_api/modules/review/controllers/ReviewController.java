@@ -40,4 +40,15 @@ public class ReviewController {
                 .toList();
         return ApiResponse.success(list);
     }
+
+    // API: Chủ quán trả lời đánh giá
+    @PostMapping("/{id}/reply")
+    public ApiResponse<ReviewResponseDTO> replyReview(
+            @PathVariable("id") Long reviewId,
+            @RequestBody com.uit.fooddelivery_api.modules.review.dtos.ReplyReviewDTO dto,
+            Authentication authentication) {
+        User merchant = (User) authentication.getPrincipal();
+        Review updatedReview = reviewService.replyReview(reviewId, dto.getMerchantReply(), merchant);
+        return ApiResponse.success(ReviewResponseDTO.fromEntity(updatedReview));
+    }
 }
