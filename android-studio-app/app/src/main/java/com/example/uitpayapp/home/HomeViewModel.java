@@ -100,18 +100,21 @@ public class HomeViewModel extends ViewModel {
                     if (dtos.isEmpty()) {
                         brandsData.setValue(UiState.empty());
                     } else {
-                        // Map RestaurantResponseDTO -> Restaurant (giới hạn tối đa 10)
+                        // Map RestaurantResponseDTO -> Restaurant (giới hạn tối đa 10, random)
+                        java.util.Collections.shuffle(dtos);
                         List<com.example.uitpayapp.home.home_models.Restaurant> mappedRestaurants = new ArrayList<>();
                         int limit = Math.min(dtos.size(), 10);
                         for (int i = 0; i < limit; i++) {
                             RestaurantResponseDTO dto = dtos.get(i);
                             String shortName = dto.getName() != null && dto.getName().length() > 0
                                     ? dto.getName().substring(0, 1) : "A";
+                            double rating = dto.getRatingAverage() != null ? dto.getRatingAverage() : 0.0;
+                            int reviewCount = dto.getReviewCount() != null ? dto.getReviewCount() : 0;
                             mappedRestaurants.add(new com.example.uitpayapp.home.home_models.Restaurant(
                                     dto.getId(), dto.getName(), shortName,
                                     android.graphics.Color.parseColor("#E4002B"), "Danh mục",
                                     new ArrayList<>(), 0,
-                                    4.5, 100, 30, dto.getAddress(), dto.getImageUrl()));
+                                    rating, reviewCount, 30, dto.getAddress(), dto.getImageUrl()));
                         }
                         BrandResponse brandResponse = new BrandResponse();
                         brandResponse.setBrands(mappedRestaurants);
