@@ -161,6 +161,9 @@ public class OrderResponse {
     public BigDecimal getRestaurantLongitude() { return restaurantLongitude; }
     public void setRestaurantLongitude(BigDecimal restaurantLongitude) { this.restaurantLongitude = restaurantLongitude; }
 
+    public BigDecimal getDestLatitude() { return destLatitude; }
+    public void setDestLatitude(BigDecimal destLatitude) { this.destLatitude = destLatitude; }
+
     public BigDecimal getDestLongitude() { return destLongitude; }
     public void setDestLongitude(BigDecimal destLongitude) { this.destLongitude = destLongitude; }
 
