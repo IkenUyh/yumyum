@@ -41,8 +41,12 @@ public class ConfirmedOrdersFragment extends Fragment {
         adapter = new SellerOrderAdapter(getContext(), new ArrayList<>(), new SellerOrderAdapter.OnOrderActionListener() {
             @Override
             public void onAccept(SellerOrder order) {
-                // Gọi API để hoàn thành đơn hàng, server cập nhật trạng thái → COMPLETED
-                viewModel.completeOrder(order);
+                String status = order.getStatus() != null ? order.getStatus().toUpperCase() : "";
+                if ("PREPARING".equals(status) || "CONFIRMED".equalsIgnoreCase(status)) {
+                    viewModel.deliverOrder(order);
+                } else if ("DELIVERING".equals(status)) {
+                    viewModel.completeOrder(order);
+                }
             }
 
 
