@@ -12,4 +12,5 @@ public class CreateOrderDTO {
     private Long addressId; //ID địa chỉ giao hàng
     private String deliveryMode; //Khách truyền STANDARD, FAST, hoặc EXPRESS
     private List<String> voucherCodes;
+    private String paymentMethod;
 }

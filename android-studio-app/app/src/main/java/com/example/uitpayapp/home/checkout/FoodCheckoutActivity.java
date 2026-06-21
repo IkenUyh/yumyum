@@ -302,48 +302,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         }
 
         if (isZaloPaySelected) {
-            // Thanh toán qua ZaloPay
-            android.app.ProgressDialog progress = new android.app.ProgressDialog(this);
-            progress.setMessage("Đang tạo giao dịch ZaloPay...");
-            progress.setCancelable(false);
-            progress.show();
-
-            com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
-            walletRepo.createZaloPayTopUp(totalAmount,
-                    new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
-                        @Override
-                        public void onSuccess(java.util.Map<String, Object> data) {
-                            runOnUiThread(() -> {
-                                progress.dismiss();
-                                if (data != null && data.containsKey("order_url") && data.containsKey("app_trans_id")) {
-                                    String orderUrl = (String) data.get("order_url");
-                                    String appTransId = (String) data.get("app_trans_id");
-
-                                    // Lưu app_trans_id vào SharedPreferences để kiểm tra khi quay lại app
-                                    getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
-                                            .putString("PENDING_CHECKOUT_ZALOPAY_TRANS_ID", appTransId)
-                                            .apply();
-
-                                    // Mở ZaloPay hoặc trình duyệt thanh toán
-                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                            android.net.Uri.parse(orderUrl));
-                                    startActivity(browserIntent);
-                                } else {
-                                    Toast.makeText(FoodCheckoutActivity.this,
-                                            "Không lấy được thông tin thanh toán ZaloPay", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onError(String errorMessage) {
-                            runOnUiThread(() -> {
-                                progress.dismiss();
-                                Toast.makeText(FoodCheckoutActivity.this, "Lỗi tạo đơn ZaloPay: " + errorMessage,
-                                        Toast.LENGTH_LONG).show();
-                            });
-                        }
-                    });
+            executeConfirmCheckout("ZALOPAY");
         } else {
             // Thanh toán qua Ví nội bộ
             if (currentWalletBalance < totalAmount) {
@@ -351,11 +310,11 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                         .show();
                 return;
             }
-            executeConfirmCheckout();
+            executeConfirmCheckout("WALLET");
         }
     }
 
-    private void executeConfirmCheckout() {
+    private void executeConfirmCheckout(String paymentMethod) {
         if (addressId == null) {
             Toast.makeText(this, "Vui lòng chọn địa chỉ giao hàng trước!", Toast.LENGTH_SHORT).show();
             return;
@@ -366,7 +325,8 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                 restaurantId != null ? restaurantId : 1L,
                 addressId,
                 "STANDARD",
-                new ArrayList<>());
+                new ArrayList<>(),
+                paymentMethod);
 
         com.example.uitpayapp.modules.order.OrderRepository orderRepo = new com.example.uitpayapp.modules.order.OrderRepository();
         orderRepo.createOrder(request,
@@ -374,28 +334,59 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(com.example.uitpayapp.modules.order.models.responses.OrderResponse data) {
                         runOnUiThread(() -> {
-                            Intent intent = new Intent(FoodCheckoutActivity.this, TransferSuccessActivity.class);
-                            intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
-                            intent.putExtra("KEY_IS_FOOD_ORDER", true);
-                            intent.putExtra("KEY_FOOD_PRODUCTS", productNames);
-                            intent.putExtra("KEY_DELIVERY_FEE", deliveryFee);
+                            if ("ZALOPAY".equalsIgnoreCase(paymentMethod)) {
+                                if (data != null && data.getPaymentUrl() != null) {
+                                    // Lưu order ID vào SharedPreferences để kiểm tra khi quay lại app
+                                    getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
+                                            .putLong("PENDING_CHECKOUT_ZALOPAY_ORDER_ID", data.getId())
+                                            .apply();
 
-                            long discountAmount = selectedVoucher != null ? selectedVoucher.getDiscountAmount() : 0;
-                            intent.putExtra("KEY_DISCOUNT", discountAmount);
+                                    // Mở ZaloPay hoặc trình duyệt thanh toán
+                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                                            android.net.Uri.parse(data.getPaymentUrl()));
+                                    startActivity(browserIntent);
 
-                            startActivity(intent);
+                                    // Xóa giỏ hàng
+                                    cartManager.clearCartSync(new com.example.uitpayapp.network.ApiCallback<String>() {
+                                        @Override
+                                        public void onSuccess(String d) {
+                                            runOnUiThread(() -> finish());
+                                        }
 
-                            cartManager.clearCartSync(new com.example.uitpayapp.network.ApiCallback<String>() {
-                                @Override
-                                public void onSuccess(String data) {
-                                    runOnUiThread(() -> finish());
+                                        @Override
+                                        public void onError(String errorMessage) {
+                                            runOnUiThread(() -> finish());
+                                        }
+                                    });
+                                } else {
+                                    Toast.makeText(FoodCheckoutActivity.this,
+                                            "Không lấy được thông tin thanh toán ZaloPay", Toast.LENGTH_SHORT).show();
                                 }
+                            } else {
+                                Intent intent = new Intent(FoodCheckoutActivity.this, TransferSuccessActivity.class);
+                                intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
+                                intent.putExtra("KEY_IS_FOOD_ORDER", true);
+                                intent.putExtra("KEY_FOOD_PRODUCTS", productNames);
+                                intent.putExtra("KEY_DELIVERY_FEE", deliveryFee);
+                                intent.putExtra("KEY_ORDER_ID", String.valueOf(data.getId()));
 
-                                @Override
-                                public void onError(String errorMessage) {
-                                    runOnUiThread(() -> finish());
-                                }
-                            });
+                                long discountAmount = selectedVoucher != null ? selectedVoucher.getDiscountAmount() : 0;
+                                intent.putExtra("KEY_DISCOUNT", discountAmount);
+
+                                startActivity(intent);
+
+                                cartManager.clearCartSync(new com.example.uitpayapp.network.ApiCallback<String>() {
+                                    @Override
+                                    public void onSuccess(String data) {
+                                        runOnUiThread(() -> finish());
+                                    }
+
+                                    @Override
+                                    public void onError(String errorMessage) {
+                                        runOnUiThread(() -> finish());
+                                    }
+                                });
+                            }
                         });
                     }
 
@@ -417,13 +408,13 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         loadCartData();
 
         android.content.SharedPreferences paymentPrefs = getSharedPreferences("PaymentPrefs", MODE_PRIVATE);
-        String pendingTransId = paymentPrefs.getString("PENDING_CHECKOUT_ZALOPAY_TRANS_ID", null);
-        if (pendingTransId != null) {
-            showZaloPayCheckStatusDialog(pendingTransId);
+        long pendingOrderId = paymentPrefs.getLong("PENDING_CHECKOUT_ZALOPAY_ORDER_ID", -1L);
+        if (pendingOrderId != -1L) {
+            showZaloPayCheckStatusDialog(pendingOrderId);
         }
     }
 
-    private void showZaloPayCheckStatusDialog(String appTransId) {
+    private void showZaloPayCheckStatusDialog(long orderId) {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
         builder.setTitle("Đang chờ thanh toán");
         builder.setMessage(
@@ -433,7 +424,7 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         builder.setPositiveButton("Xác nhận đã thanh toán", null);
         builder.setNegativeButton("Hủy bỏ", (dialog, which) -> {
             getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
-                    .remove("PENDING_CHECKOUT_ZALOPAY_TRANS_ID")
+                    .remove("PENDING_CHECKOUT_ZALOPAY_ORDER_ID")
                     .apply();
             dialog.dismiss();
             Toast.makeText(this, "Đã hủy giao dịch thanh toán ZaloPay", Toast.LENGTH_SHORT).show();
@@ -448,28 +439,35 @@ public class FoodCheckoutActivity extends AppCompatActivity {
             progress.setCancelable(false);
             progress.show();
 
-            com.example.uitpayapp.modules.wallet.WalletRepository walletRepo = new com.example.uitpayapp.modules.wallet.WalletRepository();
-            walletRepo.queryZaloPayOrderStatus(appTransId,
-                    new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Object>>() {
+            com.example.uitpayapp.modules.order.OrderRepository orderRepo = new com.example.uitpayapp.modules.order.OrderRepository();
+            orderRepo.getOrderById(orderId,
+                    new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderResponse>() {
                         @Override
-                        public void onSuccess(java.util.Map<String, Object> data) {
+                        public void onSuccess(com.example.uitpayapp.modules.order.models.responses.OrderResponse data) {
                             runOnUiThread(() -> {
                                 progress.dismiss();
-                                if (data != null && data.containsKey("return_code")) {
-                                    int returnCode = ((Number) data.get("return_code")).intValue();
-                                    if (returnCode == 1) {
+                                if (data != null && data.getStatus() != null) {
+                                    if (!"UNPAID".equalsIgnoreCase(data.getStatus())) {
                                         getSharedPreferences("PaymentPrefs", MODE_PRIVATE).edit()
-                                                .remove("PENDING_CHECKOUT_ZALOPAY_TRANS_ID")
+                                                .remove("PENDING_CHECKOUT_ZALOPAY_ORDER_ID")
                                                 .apply();
                                         dialog.dismiss();
-                                        Toast.makeText(FoodCheckoutActivity.this, "Thanh toán ZaloPay thành công!",
+                                        Toast.makeText(FoodCheckoutActivity.this, "Đơn hàng đã được ghi nhận thanh toán thành công!",
                                                 Toast.LENGTH_SHORT).show();
-                                        executeConfirmCheckout();
+
+                                        String productNames = cartManager.getProductSummary();
+                                        Intent intent = new Intent(FoodCheckoutActivity.this, TransferSuccessActivity.class);
+                                        intent.putExtra("KEY_AMOUNT", String.valueOf(totalAmount));
+                                        intent.putExtra("KEY_IS_FOOD_ORDER", true);
+                                        intent.putExtra("KEY_FOOD_PRODUCTS", productNames);
+                                        intent.putExtra("KEY_DELIVERY_FEE", deliveryFee);
+                                        intent.putExtra("KEY_ORDER_ID", String.valueOf(data.getId()));
+                                        long discountAmount = selectedVoucher != null ? selectedVoucher.getDiscountAmount() : 0;
+                                        intent.putExtra("KEY_DISCOUNT", discountAmount);
+                                        startActivity(intent);
+                                        finish();
                                     } else {
-                                        String msg = data.containsKey("return_message")
-                                                ? (String) data.get("return_message")
-                                                : "Chưa hoàn tất thanh toán";
-                                        Toast.makeText(FoodCheckoutActivity.this, "Giao dịch chưa hoàn tất: " + msg,
+                                        Toast.makeText(FoodCheckoutActivity.this, "Giao dịch chưa hoàn tất. Vui lòng hoàn tất thanh toán trên ZaloPay trước!",
                                                 Toast.LENGTH_LONG).show();
                                     }
                                 } else {

@@ -56,6 +56,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "WHERE o.status = 'PENDING' AND o.createdAt <= :cutoffTime")
     java.util.List<Order> findStalePendingOrders(@org.springframework.data.repository.query.Param("cutoffTime") java.time.LocalDateTime cutoffTime);
 
+    // Lấy các đơn hàng UNPAID mà thời gian tạo đã vượt qua mốc thời gian quy định
+    @org.springframework.data.jpa.repository.Query("SELECT o " +
+            "FROM Order o JOIN FETCH o.user JOIN FETCH o.restaurant " +
+            "WHERE o.status = 'UNPAID' AND o.createdAt <= :cutoffTime")
+    java.util.List<Order> findStaleUnpaidOrders(@org.springframework.data.repository.query.Param("cutoffTime") java.time.LocalDateTime cutoffTime);
+
     // Lấy doanh thu theo từng ngày trong tháng cho một cửa hàng
     @org.springframework.data.jpa.repository.Query(
             "SELECT DAY(o.createdAt), COALESCE(SUM(o.totalAmount), 0), COUNT(o) " +

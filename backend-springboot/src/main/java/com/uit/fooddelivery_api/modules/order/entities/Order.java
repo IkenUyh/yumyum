@@ -77,6 +77,21 @@ public class Order {
     @Column(name = "delivery_pin", length = 10)
     private String deliveryPin;
 
+    @Column(name = "payment_method", length = 50)
+    private String paymentMethod;
+
+    @Column(name = "payment_status", length = 30)
+    private String paymentStatus;
+
+    @Column(name = "zalopay_app_trans_id", length = 100)
+    private String zaloPayAppTransId;
+
+    @Column(name = "zalopay_zp_trans_id", length = 100)
+    private String zaloPayZpTransId;
+
+    @Transient
+    private String paymentUrl;
+
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private com.uit.fooddelivery_api.modules.review.entities.Review review;
 }

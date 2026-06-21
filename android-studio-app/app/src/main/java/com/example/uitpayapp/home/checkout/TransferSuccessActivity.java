@@ -37,10 +37,7 @@ public class TransferSuccessActivity extends AppCompatActivity {
             boolean isFoodOrderLocal = getIntent().getBooleanExtra("KEY_IS_FOOD_ORDER", false);
             if (isFoodOrderLocal) {
                 Intent detailsIntent = new Intent(this, com.example.uitpayapp.history.OrderDetailActivity.class);
-                detailsIntent.putExtra("ORDER_STATUS", "DELIVERING");
-                detailsIntent.putExtra("KEY_AMOUNT", getIntent().getStringExtra("KEY_AMOUNT"));
-                detailsIntent.putExtra("KEY_DELIVERY_FEE", getIntent().getLongExtra("KEY_DELIVERY_FEE", 15000));
-                detailsIntent.putExtra("KEY_DISCOUNT", getIntent().getLongExtra("KEY_DISCOUNT", 0));
+                detailsIntent.putExtra("ORDER_ID", getIntent().getStringExtra("KEY_ORDER_ID"));
                 startActivity(detailsIntent);
             } else {
                 Toast.makeText(this, "Tính năng xem chi tiết đang phát triển", Toast.LENGTH_SHORT).show();

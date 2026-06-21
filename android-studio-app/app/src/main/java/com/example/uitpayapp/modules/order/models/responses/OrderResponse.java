@@ -161,9 +161,24 @@ public class OrderResponse {
     public BigDecimal getRestaurantLongitude() { return restaurantLongitude; }
     public void setRestaurantLongitude(BigDecimal restaurantLongitude) { this.restaurantLongitude = restaurantLongitude; }
 
-    public BigDecimal getDestLatitude() { return destLatitude; }
-    public void setDestLatitude(BigDecimal destLatitude) { this.destLatitude = destLatitude; }
-
     public BigDecimal getDestLongitude() { return destLongitude; }
     public void setDestLongitude(BigDecimal destLongitude) { this.destLongitude = destLongitude; }
+
+    @SerializedName("paymentMethod")
+    private String paymentMethod;
+
+    @SerializedName("paymentStatus")
+    private String paymentStatus;
+
+    @SerializedName("paymentUrl")
+    private String paymentUrl;
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public String getPaymentUrl() { return paymentUrl; }
+    public void setPaymentUrl(String paymentUrl) { this.paymentUrl = paymentUrl; }
 }
