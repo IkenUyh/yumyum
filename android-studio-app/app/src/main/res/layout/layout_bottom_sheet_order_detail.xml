@@ -59,7 +59,14 @@
                 android:layout_height="wrap_content"
                 android:paddingVertical="4dp">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tạm tính" android:textColor="#666" />
-                <TextView android:id="@+id/tv_subtotal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="70.000đ" android:textColor="#333" />
+
+                <TextView
+                    android:id="@+id/tv_subtotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="70.000đ"
+                    android:textColor="#333" />
             </RelativeLayout>
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -72,7 +79,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingVertical="4dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chiết khấu (20%)" android:textColor="#666" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chiết khấu" android:textColor="#666" />
                 <TextView android:id="@+id/tv_discount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="-1.600đ" android:textColor="#E53935" />
             </RelativeLayout>
             <View
@@ -84,7 +91,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingVertical="8dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tổng tiền quán nhận" android:textColor="#000" android:textSize="16sp" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tổng tiền" android:textColor="#000" android:textSize="16sp" android:textStyle="bold" />
                 <TextView android:id="@+id/tv_total_received" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="78.000đ" android:textColor="#E53935" android:textSize="16sp" android:textStyle="bold" />
             </RelativeLayout>
             <View

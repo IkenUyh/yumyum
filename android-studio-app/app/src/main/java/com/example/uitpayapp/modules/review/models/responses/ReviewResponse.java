@@ -15,6 +15,9 @@ public class ReviewResponse {
     @SerializedName("customerName")
     private String customerName;
 
+    @SerializedName("customerAvatar")
+    private String customerAvatar;
+
     @SerializedName("rating")
     private Integer rating;
 
@@ -39,6 +42,9 @@ public class ReviewResponse {
 
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
+
+    public String getCustomerAvatar() { return customerAvatar; }
+    public void setCustomerAvatar(String customerAvatar) { this.customerAvatar = customerAvatar; }
 
     public Integer getRating() { return rating; }
     public void setRating(Integer rating) { this.rating = rating; }
