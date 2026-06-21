@@ -12,10 +12,20 @@ import java.util.List;
 
 public class ExchangeVoucherAdapter extends RecyclerView.Adapter<ExchangeVoucherAdapter.VoucherViewHolder> {
 
+    public interface OnExchangeClickListener {
+        void onExchangeClick(ExchangeVoucherModel voucher);
+    }
+
     private List<ExchangeVoucherModel> voucherList;
+    private OnExchangeClickListener listener;
 
     public ExchangeVoucherAdapter(List<ExchangeVoucherModel> voucherList) {
+        this(voucherList, null);
+    }
+
+    public ExchangeVoucherAdapter(List<ExchangeVoucherModel> voucherList, OnExchangeClickListener listener) {
         this.voucherList = voucherList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -42,6 +52,12 @@ public class ExchangeVoucherAdapter extends RecyclerView.Adapter<ExchangeVoucher
             holder.tvCondition.setVisibility(View.GONE);
         }
         holder.tvCoinCost.setText(voucher.getCoinCost());
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onExchangeClick(voucher);
+            }
+        });
     }
 
     @Override

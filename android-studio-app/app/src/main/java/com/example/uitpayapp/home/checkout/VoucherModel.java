@@ -6,13 +6,19 @@ public class VoucherModel {
     private String description;
     private long discountAmount;
     private long minOrderAmount;
+    private String type; // SHIPPING_DISCOUNT, ORDER_DISCOUNT
 
     public VoucherModel(String id, String title, String description, long discountAmount, long minOrderAmount) {
+        this(id, title, description, discountAmount, minOrderAmount, null);
+    }
+
+    public VoucherModel(String id, String title, String description, long discountAmount, long minOrderAmount, String type) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.discountAmount = discountAmount;
         this.minOrderAmount = minOrderAmount;
+        this.type = type;
     }
 
     public String getId() {
@@ -33,5 +39,9 @@ public class VoucherModel {
 
     public long getMinOrderAmount() {
         return minOrderAmount;
+    }
+
+    public String getType() {
+        return type;
     }
 }

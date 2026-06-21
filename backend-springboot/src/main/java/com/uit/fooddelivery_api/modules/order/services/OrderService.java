@@ -199,6 +199,11 @@ public class OrderService {
                         .orElseThrow(() -> new RuntimeException(
                                 "Mã giảm giá [" + code + "] không tồn tại hoặc đã hết lượt kích hoạt!"));
 
+                // Kiểm tra xem voucher này có thuộc về user khác không
+                if (voucher.getUser() != null && !voucher.getUser().getId().equals(customer.getId())) {
+                    throw new RuntimeException("Mã giảm giá [" + code + "] không thuộc quyền sở hữu của bạn!");
+                }
+
                 LocalDateTime now = LocalDateTime.now();
                 if (now.isBefore(voucher.getStartDate()) || now.isAfter(voucher.getEndDate())) {
                     throw new RuntimeException(
@@ -472,6 +477,11 @@ public class OrderService {
                         .findByCodeAndIsActiveTrue(code)
                         .orElseThrow(() -> new RuntimeException(
                                 "Mã giảm giá [" + code + "] không tồn tại hoặc đã hết lượt kích hoạt!"));
+
+                // Kiểm tra xem voucher này có thuộc về user khác không
+                if (voucher.getUser() != null && !voucher.getUser().getId().equals(customer.getId())) {
+                    throw new RuntimeException("Mã giảm giá [" + code + "] không thuộc quyền sở hữu của bạn!");
+                }
 
                 // Kiểm tra thời hạn hiệu lực của mã
                 LocalDateTime now = LocalDateTime.now();

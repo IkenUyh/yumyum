@@ -15,6 +15,7 @@ import java.util.List;
 public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHolder> {
 
     private List<VoucherModel> vouchers;
+    private List<VoucherModel> selectedVouchers;
     private OnVoucherSelectedListener listener;
 
     public interface OnVoucherSelectedListener {
@@ -22,7 +23,12 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHold
     }
 
     public VoucherAdapter(List<VoucherModel> vouchers, OnVoucherSelectedListener listener) {
+        this(vouchers, null, listener);
+    }
+
+    public VoucherAdapter(List<VoucherModel> vouchers, List<VoucherModel> selectedVouchers, OnVoucherSelectedListener listener) {
         this.vouchers = vouchers;
+        this.selectedVouchers = selectedVouchers;
         this.listener = listener;
     }
 
@@ -41,6 +47,24 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHold
         holder.tvDescription.setText(voucher.getDescription());
         holder.tvMinOrder.setText(String.format("Đơn tối thiểu: %,dđ", voucher.getMinOrderAmount()).replace(',', '.'));
         
+        boolean isSelected = false;
+        if (selectedVouchers != null) {
+            for (VoucherModel v : selectedVouchers) {
+                if (v.getId().equals(voucher.getId())) {
+                    isSelected = true;
+                    break;
+                }
+            }
+        }
+
+        if (isSelected) {
+            holder.btnUse.setText("Bỏ chọn");
+            holder.btnUse.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#757575")));
+        } else {
+            holder.btnUse.setText("Dùng");
+            holder.btnUse.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#0A46A6")));
+        }
+
         holder.btnUse.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onVoucherSelected(voucher);
