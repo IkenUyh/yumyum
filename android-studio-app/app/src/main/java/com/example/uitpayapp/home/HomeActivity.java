@@ -65,10 +65,21 @@ import com.example.uitpayapp.home.network.HomeCoreResponse;
 import com.example.uitpayapp.home.network.BrandResponse;
 import com.example.uitpayapp.home.network.TopicResponse;
 import android.util.Log;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import android.location.Geocoder;
+import android.location.Address;
+import java.io.IOException;
 
 public class HomeActivity extends AppCompatActivity {
 
     private HomeViewModel viewModel;
+    private FusedLocationProviderClient fusedLocationClient;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
     private List<Restaurant> restaurants;
     private List<Restaurant> filteredRestaurants;
@@ -155,7 +166,9 @@ public class HomeActivity extends AppCompatActivity {
         setupBottomNavigation();
         setupObservers();
 
-        loadInitialAddress();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        loadInitialAddressWithOverlay();
 
         androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout = findViewById(
                 R.id.swipe_refresh_home);
@@ -167,38 +180,149 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    private void loadInitialAddressWithOverlay() {
+        View overlay = findViewById(R.id.layout_location_finding_overlay);
+        if (overlay != null) {
+            overlay.setVisibility(View.VISIBLE);
+            
+            // Pulsing animation for map circle
+            View mapCircle = overlay.findViewById(R.id.iv_location_pin);
+            if (mapCircle != null) {
+                android.view.animation.Animation pulse = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
+                pulse.setDuration(800);
+                pulse.setRepeatMode(android.view.animation.Animation.REVERSE);
+                pulse.setRepeatCount(android.view.animation.Animation.INFINITE);
+                mapCircle.startAnimation(pulse);
+            }
+        }
+
+        // Add an artificial delay to show the "finding location" UI
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            loadInitialAddress();
+        }, 1500);
+    }
+
+    private void hideLocationOverlay(String address) {
+        View overlay = findViewById(R.id.layout_location_finding_overlay);
+        if (overlay == null || overlay.getVisibility() != View.VISIBLE) return;
+
+        TextView tvStatus = overlay.findViewById(R.id.tv_finding_location_status);
+        ImageView ivPin = overlay.findViewById(R.id.iv_location_pin);
+        TextView tvAddress = overlay.findViewById(R.id.tv_found_address_center);
+
+        if (tvStatus != null) {
+            tvStatus.setText("Đã xác định vị trí");
+        }
+        if (ivPin != null) {
+            ivPin.clearAnimation();
+        }
+        if (tvAddress != null) {
+            tvAddress.setText(address);
+            tvAddress.setVisibility(View.VISIBLE);
+        }
+
+        // Wait a bit to let the user read the address, then fade out
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            overlay.animate()
+                .alpha(0f)
+                .setDuration(500)
+                .withEndAction(() -> {
+                    overlay.setVisibility(View.GONE);
+                    overlay.setAlpha(1f);
+                })
+                .start();
+        }, 1500);
+    }
+
     private void loadInitialAddress() {
         com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager
                 .getInstance(this);
-        if (sessionManager.getAuthToken() != null && !sessionManager.getAuthToken().isEmpty()) {
-            String savedAddress = sessionManager.getDeliveryAddressText();
-            if (savedAddress != null && !savedAddress.isEmpty()) {
-                updateAddressUI(savedAddress);
-            } else {
-                new com.example.uitpayapp.modules.user.AddressRepository().getDefaultAddress(
-                        new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>() {
-                            @Override
-                            public void onSuccess(
-                                    com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO result) {
-                                if (result != null) {
-                                    String addr = result.getDetailedAddress();
-                                    if (addr == null || addr.isEmpty())
-                                        addr = "Hiện chưa có địa chỉ";
-                                    sessionManager.saveDeliveryAddress(result.getId(), addr);
-                                    updateAddressUI(addr);
-                                } else {
-                                    updateAddressUI("Hiện chưa có địa chỉ");
-                                }
-                            }
+        // Always try to get GPS location first on startup to check for fresh coordinates
+        fetchGPSLocation(sessionManager);
+    }
 
-                            @Override
-                            public void onError(String errorMessage) {
-                                updateAddressUI("Hiện chưa có địa chỉ");
+    private void fetchGPSLocation(com.example.uitpayapp.network.SessionManager sessionManager) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+            return;
+        }
+
+        fusedLocationClient.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener(this, location -> {
+                    if (location != null) {
+                        try {
+                            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                            List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                            if (addresses != null && !addresses.isEmpty()) {
+                                Address address = addresses.get(0);
+                                String addressText = address.getAddressLine(0);
+                                sessionManager.saveDeliveryAddress(-1L, addressText);
+                                hideLocationOverlay(addressText);
+                                updateAddressUI(addressText);
+                                return;
                             }
-                        });
+                        } catch (IOException e) {
+                            Log.e("HomeActivity", "Geocoder failed", e);
+                        }
+                    }
+                    // Fallback to API if GPS fails or no address found
+                    fallbackToApiAddress(sessionManager);
+                }).addOnFailureListener(e -> {
+                    fallbackToApiAddress(sessionManager);
+                });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @androidx.annotation.NonNull String[] permissions, @androidx.annotation.NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
+                fetchGPSLocation(sessionManager);
+            } else {
+                com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
+                fallbackToApiAddress(sessionManager);
             }
+        }
+    }
+
+    private void fallbackToApiAddress(com.example.uitpayapp.network.SessionManager sessionManager) {
+        // Fallback to cached address first if available
+        String cachedAddress = sessionManager.getDeliveryAddressText();
+        if (cachedAddress != null && !cachedAddress.isEmpty()) {
+            hideLocationOverlay(cachedAddress);
+            updateAddressUI(cachedAddress);
+            return;
+        }
+
+        if (sessionManager.getAuthToken() != null && !sessionManager.getAuthToken().isEmpty()) {
+            new com.example.uitpayapp.modules.user.AddressRepository().getDefaultAddress(
+                    new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO>() {
+                        @Override
+                        public void onSuccess(
+                                com.example.uitpayapp.modules.user.models.responses.AddressResponseDTO result) {
+                            if (result != null) {
+                                String addr = result.getDetailedAddress();
+                                if (addr == null || addr.isEmpty())
+                                    addr = "Vui lòng chọn địa chỉ";
+                                sessionManager.saveDeliveryAddress(result.getId(), addr);
+                                hideLocationOverlay(addr);
+                                updateAddressUI(addr);
+                            } else {
+                                hideLocationOverlay("Vui lòng chọn địa chỉ");
+                                updateAddressUI("Vui lòng chọn địa chỉ");
+                            }
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            hideLocationOverlay("Vui lòng chọn địa chỉ");
+                            updateAddressUI("Vui lòng chọn địa chỉ");
+                        }
+                    });
         } else {
-            updateAddressUI("Vui lòng đăng nhập");
+            hideLocationOverlay("Vui lòng chọn địa chỉ");
+            updateAddressUI("Vui lòng chọn địa chỉ");
         }
     }
 
