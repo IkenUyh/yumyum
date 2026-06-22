@@ -62,6 +62,10 @@ public class PriceCalculationService {
         return calculateFinalPrice(food, null);
     }
 
+    public Map<Long, PriceResult> calculateFinalPrices(List<Food> foods) {
+        return calculateFinalPrices(foods, null);
+    }
+
     public Map<Long, PriceResult> calculateFinalPrices(List<Food> foods, String requestedPromotion) {
         List<FlashSaleItem> activeFS = flashSaleItemRepository.findActiveFlashSaleItems(LocalDateTime.now());
         Map<Long, FlashSaleItem> fsMap = activeFS.stream()
