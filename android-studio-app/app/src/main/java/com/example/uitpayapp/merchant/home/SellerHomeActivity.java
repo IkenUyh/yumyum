@@ -41,6 +41,8 @@ import java.util.List;
 
 public class SellerHomeActivity extends AppCompatActivity {
 
+    public static boolean isResumed = false;
+
     private TabLayout tabLayout;
     private SellerOrderViewModel viewModel;
     private TextView tvShopStatus;
@@ -69,24 +71,136 @@ public class SellerHomeActivity extends AppCompatActivity {
             replaceFragment(new NewOrdersFragment());
         }
 
-        // Tải dữ liệu thực từ API
+        // Tải dữ liệu thực từ API và bắt đầu polling realtime 5s
         viewModel.loadData();
+        viewModel.startPolling();
+
+        // Đăng ký FCM token để backend có thể gửi push notification khi có đơn mới
+        registerFcmTokenIfNeeded();
+        requestNotificationPermission();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        isResumed = true;
         // Refresh khi quay lại màn hình
         viewModel.loadData();
         loadShopStatus();
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        isResumed = false;
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (viewModel != null) {
+            viewModel.stopPolling();
             viewModel.disconnectWebSocket();
         }
+    }
+
+    /**
+     * Đăng ký FCM token với backend để nhận push notification khi có đơn mới.
+     * Giống cơ chế trong HomeActivity cho customer side.
+     */
+    private void registerFcmTokenIfNeeded() {
+        com.example.uitpayapp.network.SessionManager sessionManager =
+                com.example.uitpayapp.network.SessionManager.getInstance(this);
+        if (!sessionManager.isLoggedIn()) return;
+
+        com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        android.util.Log.w("SellerHome", "FCM token fetch failed", task.getException());
+                        return;
+                    }
+                    String token = task.getResult();
+                    if (token == null || token.isEmpty()) return;
+
+                    // Lưu token vào local storage
+                    sessionManager.saveFcmToken(token);
+
+                    // Đồng bộ lên server nếu chưa đồng bộ
+                    if (!sessionManager.isFcmTokenSynced()) {
+                        com.example.uitpayapp.modules.notification.NotificationRepository repo =
+                                new com.example.uitpayapp.modules.notification.NotificationRepository();
+                        repo.registerFcmToken(token, new com.example.uitpayapp.network.ApiCallback<String>() {
+                            @Override
+                            public void onSuccess(String data) {
+                                sessionManager.setFcmTokenSynced(true);
+                                android.util.Log.d("SellerHome", "FCM token registered with backend");
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                android.util.Log.e("SellerHome", "Failed to register FCM token: " + errorMessage);
+                            }
+                        });
+                    }
+                });
+    }
+
+    private void requestNotificationPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(this, "android.permission.POST_NOTIFICATIONS")
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                androidx.core.app.ActivityCompat.requestPermissions(this,
+                        new String[]{"android.permission.POST_NOTIFICATIONS"}, 101);
+            }
+        }
+    }
+
+    private void showNewOrderPopup() {
+        // Phát âm thanh chuông thông báo mặc định
+        try {
+            android.net.Uri notificationUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION);
+            android.media.Ringtone ringtone = android.media.RingtoneManager.getRingtone(getApplicationContext(), notificationUri);
+            if (ringtone != null) {
+                ringtone.play();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Tạo custom dialog sử dụng layout xml người dùng chỉnh sửa
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_new_order_alert, null);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        // Setup các button và text
+        TextView tvMessage = dialogView.findViewById(R.id.tvNewOrderPopupMessage);
+        if (tvMessage != null) {
+            tvMessage.setText("Xem tab Đơn mới để xác nhận đơn hàng");
+        }
+
+        View btnDismiss = dialogView.findViewById(R.id.btnNewOrderPopupDismiss);
+        if (btnDismiss != null) {
+            btnDismiss.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        View btnView = dialogView.findViewById(R.id.btnNewOrderPopupView);
+        if (btnView != null) {
+            btnView.setOnClickListener(v -> {
+                dialog.dismiss();
+                // Chuyển sang tab Mới (tab 0)
+                TabLayout.Tab tab = tabLayout.getTabAt(0);
+                if (tab != null) {
+                    tab.select();
+                }
+            });
+        }
+
+        dialog.show();
     }
 
     private void initViews() {
@@ -198,22 +312,11 @@ public class SellerHomeActivity extends AppCompatActivity {
             }
         });
 
-        // Lắng nghe sự kiện có đơn hàng mới từ WebSocket
+        // Lắng nghe sự kiện có đơn hàng mới từ WebSocket hoặc Polling
         viewModel.getNewOrderEvent().observe(this, payload -> {
             if (payload != null && !payload.isEmpty()) {
-                // Chuyển sang tab Mới (tab 0)
-                TabLayout.Tab tab = tabLayout.getTabAt(0);
-                if (tab != null) {
-                    tab.select();
-                }
-                
-                // Hiện popup
-                new AlertDialog.Builder(this)
-                        .setTitle("🔔 Đơn hàng mới!")
-                        .setMessage("Bạn vừa nhận được một đơn hàng mới. Hãy kiểm tra ngay!")
-                        .setPositiveButton("Xem ngay", (dialog, which) -> dialog.dismiss())
-                        .show();
-
+                // Hiện custom popup thông báo đơn hàng mới
+                showNewOrderPopup();
                 viewModel.clearNewOrderEvent();
             }
         });
