@@ -19,6 +19,7 @@ public class FcmService {
     private final FirebaseConfig firebaseConfig;
     private final UserFcmTokenRepository userFcmTokenRepository;
 
+    @org.springframework.scheduling.annotation.Async
     @Transactional
     public void sendPushNotification(Long userId, String title, String message, String type) {
         if (!firebaseConfig.isFirebaseEnabled()) {
