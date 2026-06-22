@@ -16,12 +16,13 @@ public class SellerOrder {
     private String pickupTime;
     private long shippingFee;
     private long discountAmount;
+    private Double distance;
     private List<OrderItem> dishes;
 
     public SellerOrder(Long orderId, String id, String customerName, String customerPhone,
                        String avatarUrl, int numberOfDishes, String totalPrice,
                        String status, String guestNote, String orderTime, String pickupTime, 
-                       long shippingFee, long discountAmount, List<OrderItem> dishes) {
+                       long shippingFee, long discountAmount, Double distance, List<OrderItem> dishes) {
         this.orderId = orderId;
         this.id = id;
         this.customerName = customerName;
@@ -35,11 +36,13 @@ public class SellerOrder {
         this.pickupTime = pickupTime;
         this.shippingFee = shippingFee;
         this.discountAmount = discountAmount;
+        this.distance = distance;
         this.dishes = dishes;
     }
 
     public long getShippingFee() { return shippingFee; }
     public long getDiscountAmount() { return discountAmount; }
+    public Double getDistance() { return distance; }
     
     public Long getOrderId() { return orderId; }
     public void setOrderId(Long orderId) { this.orderId = orderId; }

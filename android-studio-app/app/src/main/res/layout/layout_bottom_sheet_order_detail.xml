@@ -54,6 +54,27 @@
                 android:layout_height="1dp"
                 android:layout_marginVertical="8dp"
                 android:background="#EEE" />
+            <LinearLayout
+                android:id="@+id/ll_guest_note_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingVertical="4dp"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ghi chú từ khách hàng"
+                    android:textColor="#666" />
+                <TextView
+                    android:id="@+id/tv_detail_guest_note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text=""
+                    android:textColor="#333"
+                    android:textStyle="italic" />
+            </LinearLayout>
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

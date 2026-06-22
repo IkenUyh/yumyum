@@ -62,6 +62,10 @@ public class SellerHomeActivity extends AppCompatActivity {
         setupObservers();
 
         if (savedInstanceState == null) {
+            TabLayout.Tab tab = tabLayout.getTabAt(0);
+            if (tab != null) {
+                tab.select();
+            }
             replaceFragment(new NewOrdersFragment());
         }
 
@@ -193,6 +197,26 @@ public class SellerHomeActivity extends AppCompatActivity {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
             }
         });
+
+        // Lắng nghe sự kiện có đơn hàng mới từ WebSocket
+        viewModel.getNewOrderEvent().observe(this, payload -> {
+            if (payload != null && !payload.isEmpty()) {
+                // Chuyển sang tab Mới (tab 0)
+                TabLayout.Tab tab = tabLayout.getTabAt(0);
+                if (tab != null) {
+                    tab.select();
+                }
+                
+                // Hiện popup
+                new AlertDialog.Builder(this)
+                        .setTitle("🔔 Đơn hàng mới!")
+                        .setMessage("Bạn vừa nhận được một đơn hàng mới. Hãy kiểm tra ngay!")
+                        .setPositiveButton("Xem ngay", (dialog, which) -> dialog.dismiss())
+                        .show();
+
+                viewModel.clearNewOrderEvent();
+            }
+        });
     }
 
     private void setupTabLayout() {
@@ -244,11 +268,45 @@ public class SellerHomeActivity extends AppCompatActivity {
 
         for (OrderItem item : order.getDishes()) {
             View itemView = getLayoutInflater().inflate(R.layout.item_order_sub_item, llItems, false);
-            ((TextView) itemView.findViewById(R.id.tv_sub_item_name)).setText(item.getQuantity() + " x " + item.getDishName());
+            String displayName = item.getQuantity() + " x " + item.getDishName();
+            if (item.getSelectedOptions() != null && !item.getSelectedOptions().isEmpty()) {
+                StringBuilder options = new StringBuilder();
+                for (java.util.Map<String, Object> opt : item.getSelectedOptions()) {
+                    String optName = "";
+                    if (opt.containsKey("optionName") && opt.get("optionName") != null) optName = opt.get("optionName").toString();
+                    else if (opt.containsKey("name") && opt.get("name") != null) optName = opt.get("name").toString();
+
+                    long optPrice = 0;
+                    if (opt.containsKey("price") && opt.get("price") != null) {
+                        try { optPrice = ((Number) opt.get("price")).longValue(); } catch (Exception e) {}
+                    } else if (opt.containsKey("additionalPrice") && opt.get("additionalPrice") != null) {
+                        try { optPrice = ((Number) opt.get("additionalPrice")).longValue(); } catch (Exception e) {}
+                    }
+
+                    if (!optName.isEmpty()) {
+                        options.append("\n  + ").append(optName);
+                        if (optPrice > 0) {
+                            options.append(String.format(" (+%,dđ)", optPrice));
+                        }
+                    }
+                }
+                displayName += options.toString();
+            }
+            ((TextView) itemView.findViewById(R.id.tv_sub_item_name)).setText(displayName);
             TextView tvPrice = itemView.findViewById(R.id.tv_sub_item_price);
             tvPrice.setVisibility(View.VISIBLE);
             tvPrice.setText(String.format("%,dđ", item.getPrice()));
             llItems.addView(itemView);
+        }
+
+        String guestNote = order.getGuestNote();
+        LinearLayout llGuestNote = view.findViewById(R.id.ll_guest_note_container);
+        TextView tvDetailGuestNote = view.findViewById(R.id.tv_detail_guest_note);
+        if (guestNote != null && !guestNote.trim().isEmpty() && llGuestNote != null && tvDetailGuestNote != null) {
+            tvDetailGuestNote.setText("💬 " + guestNote);
+            llGuestNote.setVisibility(View.VISIBLE);
+        } else if (llGuestNote != null) {
+            llGuestNote.setVisibility(View.GONE);
         }
 
         long totalAmount = 0;
@@ -318,7 +376,12 @@ public class SellerHomeActivity extends AppCompatActivity {
         View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_edit_order, null);
         dialog.setContentView(view);
 
-        ((TextView) view.findViewById(R.id.tv_customer_name)).setText(order.getCustomerName());
+        if (order.getDistance() != null) {
+            ((TextView) view.findViewById(R.id.tv_customer_name)).setText(
+                String.format(java.util.Locale.getDefault(), "%s (%.1f km)", order.getCustomerName(), order.getDistance()));
+        } else {
+            ((TextView) view.findViewById(R.id.tv_customer_name)).setText(order.getCustomerName());
+        }
 
         CheckBox cbWrongPrice = view.findViewById(R.id.cb_wrong_price);
         CheckBox cbOutOfStock = view.findViewById(R.id.cb_out_of_stock);
@@ -394,7 +457,12 @@ public class SellerHomeActivity extends AppCompatActivity {
         View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_remove_items, null);
         dialog.setContentView(view);
 
-        ((TextView) view.findViewById(R.id.tv_customer_name)).setText(order.getCustomerName());
+        if (order.getDistance() != null) {
+            ((TextView) view.findViewById(R.id.tv_customer_name)).setText(
+                String.format(java.util.Locale.getDefault(), "%s (%.1f km)", order.getCustomerName(), order.getDistance()));
+        } else {
+            ((TextView) view.findViewById(R.id.tv_customer_name)).setText(order.getCustomerName());
+        }
         ((TextView) view.findViewById(R.id.tv_order_id)).setText(order.getId());
 
         LinearLayout llItems = view.findViewById(R.id.ll_items_remove_container);
@@ -421,7 +489,31 @@ public class SellerHomeActivity extends AppCompatActivity {
         for (int i = 0; i < dishes.size(); i++) {
             OrderItem item = dishes.get(i);
             View itemView = getLayoutInflater().inflate(R.layout.item_edit_order_remove, container, false);
-            ((TextView) itemView.findViewById(R.id.tv_item_name)).setText(item.getQuantity() + " x " + item.getDishName());
+            String displayName = item.getQuantity() + " x " + item.getDishName();
+            if (item.getSelectedOptions() != null && !item.getSelectedOptions().isEmpty()) {
+                StringBuilder options = new StringBuilder();
+                for (java.util.Map<String, Object> opt : item.getSelectedOptions()) {
+                    String optName = "";
+                    if (opt.containsKey("optionName") && opt.get("optionName") != null) optName = opt.get("optionName").toString();
+                    else if (opt.containsKey("name") && opt.get("name") != null) optName = opt.get("name").toString();
+
+                    long optPrice = 0;
+                    if (opt.containsKey("price") && opt.get("price") != null) {
+                        try { optPrice = ((Number) opt.get("price")).longValue(); } catch (Exception e) {}
+                    } else if (opt.containsKey("additionalPrice") && opt.get("additionalPrice") != null) {
+                        try { optPrice = ((Number) opt.get("additionalPrice")).longValue(); } catch (Exception e) {}
+                    }
+
+                    if (!optName.isEmpty()) {
+                        options.append("\n  + ").append(optName);
+                        if (optPrice > 0) {
+                            options.append(String.format(" (+%,dđ)", optPrice));
+                        }
+                    }
+                }
+                displayName += options.toString();
+            }
+            ((TextView) itemView.findViewById(R.id.tv_item_name)).setText(displayName);
             ((TextView) itemView.findViewById(R.id.tv_item_price)).setText(String.format("%,dđ", item.getPrice()));
 
             int finalI = i;

@@ -49,10 +49,20 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
         SellerOrder order = orderList.get(position);
         
         holder.tvOrderShortId.setText(order.getId());
-        holder.tvCustomerName.setText(order.getCustomerName());
+        if (order.getDistance() != null) {
+            holder.tvCustomerName.setText(String.format(java.util.Locale.getDefault(), "%s (%.1f km)", order.getCustomerName(), order.getDistance()));
+        } else {
+            holder.tvCustomerName.setText(order.getCustomerName());
+        }
         holder.tvNumberOfDishes.setText(order.getNumberOfDishes() + " Món");
         holder.tvTotalPrice.setText(order.getTotalPrice());
-        holder.tvGuestNote.setText("💬 " + order.getGuestNote());
+        String guestNote = order.getGuestNote();
+        if (guestNote != null && !guestNote.trim().isEmpty()) {
+            holder.tvGuestNote.setText("💬 " + guestNote);
+            holder.tvGuestNote.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvGuestNote.setVisibility(View.GONE);
+        }
         
         holder.llDishesContainer.removeAllViews();
         for (OrderItem item : order.getDishes()) {
@@ -60,7 +70,31 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
             TextView tvDish = dishView.findViewById(R.id.tv_sub_item_name);
             TextView tvPrice = dishView.findViewById(R.id.tv_sub_item_price);
             
-            tvDish.setText(item.getQuantity() + " x " + item.getDishName());
+            String displayName = item.getQuantity() + " x " + item.getDishName();
+            if (item.getSelectedOptions() != null && !item.getSelectedOptions().isEmpty()) {
+                StringBuilder options = new StringBuilder();
+                for (java.util.Map<String, Object> opt : item.getSelectedOptions()) {
+                    String optName = "";
+                    if (opt.containsKey("optionName") && opt.get("optionName") != null) optName = opt.get("optionName").toString();
+                    else if (opt.containsKey("name") && opt.get("name") != null) optName = opt.get("name").toString();
+
+                    long optPrice = 0;
+                    if (opt.containsKey("price") && opt.get("price") != null) {
+                        try { optPrice = ((Number) opt.get("price")).longValue(); } catch (Exception e) {}
+                    } else if (opt.containsKey("additionalPrice") && opt.get("additionalPrice") != null) {
+                        try { optPrice = ((Number) opt.get("additionalPrice")).longValue(); } catch (Exception e) {}
+                    }
+
+                    if (!optName.isEmpty()) {
+                        options.append("\n  + ").append(optName);
+                        if (optPrice > 0) {
+                            options.append(String.format(" (+%,dđ)", optPrice));
+                        }
+                    }
+                }
+                displayName += options.toString();
+            }
+            tvDish.setText(displayName);
             tvPrice.setVisibility(View.GONE);
 
             holder.llDishesContainer.addView(dishView);

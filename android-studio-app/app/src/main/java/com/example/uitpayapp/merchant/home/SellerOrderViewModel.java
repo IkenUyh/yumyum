@@ -43,6 +43,7 @@ public class SellerOrderViewModel extends AndroidViewModel {
 
     private StompClient mStompClient;
     private long connectedStoreId = -1L;
+    private final MutableLiveData<String> newOrderEvent = new MutableLiveData<>();
 
     // UI feedback
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
@@ -60,6 +61,11 @@ public class SellerOrderViewModel extends AndroidViewModel {
     public LiveData<Boolean> getIsLoading() { return isLoading; }
     public LiveData<String> getErrorMessage() { return errorMessage; }
     public LiveData<String> getSuccessMessage() { return successMessage; }
+    public LiveData<String> getNewOrderEvent() { return newOrderEvent; }
+
+    public void clearNewOrderEvent() {
+        newOrderEvent.setValue(null);
+    }
 
     /**
      * Tải toàn bộ đơn hàng của quán từ API, phân loại theo trạng thái.
@@ -149,6 +155,8 @@ public class SellerOrderViewModel extends AndroidViewModel {
                     int itemCount = o.getItemCount() != null ? o.getItemCount() : 0;
                     String customerName = o.getCustomerName() != null ? o.getCustomerName() : "Khách hàng";
 
+                    Double dist = o.getDistance();
+
                     history.add(new SellerHistoryOrder(
                             o.getId(),
                             "#" + o.getId(),
@@ -156,7 +164,7 @@ public class SellerOrderViewModel extends AndroidViewModel {
                             displayStatus,
                             timeStr,
                             itemCount,
-                            "—",
+                            dist != null ? String.format(Locale.getDefault(), "%.1f km", dist) : "—",
                             dateStr,
                             timeStr,
                             totalStr
@@ -181,7 +189,7 @@ public class SellerOrderViewModel extends AndroidViewModel {
                 int qty = item.getQuantity() != null ? item.getQuantity() : 1;
                 // foodId được lưu qua name vì API hiện tại không trả trực tiếp foodId trong item
                 // Dùng null để fallback sang UI-only remove (local)
-                dishes.add(new OrderItem(qty, item.getName() != null ? item.getName() : "", priceVal));
+                dishes.add(new OrderItem(null, qty, item.getName() != null ? item.getName() : "", priceVal, item.getSelectedOptions()));
             }
         }
 
@@ -224,6 +232,8 @@ public class SellerOrderViewModel extends AndroidViewModel {
         long shippingFee = o.getShippingFee() != null ? o.getShippingFee().longValue() : 0L;
         long discountAmount = o.getDiscountAmount() != null ? o.getDiscountAmount().longValue() : 0L;
 
+        Double distance = o.getDistance();
+
         return new SellerOrder(
                 o.getId(),
                 "#" + o.getId(),
@@ -238,6 +248,7 @@ public class SellerOrderViewModel extends AndroidViewModel {
                 pickupTimeStr,
                 shippingFee,
                 discountAmount,
+                distance,
                 dishes
         );
     }
@@ -486,7 +497,7 @@ public class SellerOrderViewModel extends AndroidViewModel {
             for (OrderResponse.OrderItemResponse item : response.getItems()) {
                 long priceVal = item.getPrice() != null ? item.getPrice().longValue() : 0L;
                 int qty = item.getQuantity() != null ? item.getQuantity() : 1;
-                updatedDishes.add(new OrderItem(qty, item.getName() != null ? item.getName() : "", priceVal));
+                updatedDishes.add(new OrderItem(null, qty, item.getName() != null ? item.getName() : "", priceVal, item.getSelectedOptions()));
             }
             order.getDishes().clear();
             order.getDishes().addAll(updatedDishes);
@@ -525,6 +536,9 @@ public class SellerOrderViewModel extends AndroidViewModel {
                 .subscribe(topicMessage -> {
                     Log.d("WebSocket", "Received message: " + topicMessage.getPayload());
                     loadData();
+                    if (topicMessage.getPayload() != null && topicMessage.getPayload().startsWith("NEW_ORDER_")) {
+                        newOrderEvent.postValue(topicMessage.getPayload());
+                    }
                 }, throwable -> {
                     Log.e("WebSocket", "Error on subscribe topic", throwable);
                 });

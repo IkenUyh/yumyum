@@ -51,6 +51,7 @@ public class OrderService {
     private final com.uit.fooddelivery_api.modules.loyalty.services.LoyaltyService loyaltyService;
     private final com.uit.fooddelivery_api.modules.loyalty.repositories.LoyaltyPointRepository loyaltyPointRepository;
     private final com.uit.fooddelivery_api.modules.payment.services.ZaloPayService zaloPayService;
+    private final org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
 
     // Phí ship cơ bản: 5.000 VNĐ / 1 Km
     private static final BigDecimal FEE_PER_KM = BigDecimal.valueOf(5000);
@@ -650,6 +651,12 @@ public class OrderService {
                 "Đơn hàng mới",
                 "Bạn có đơn hàng mới từ " + customer.getFullName() + ". Mã đơn: #" + savedOrder.getId(),
                 "ORDER_UPDATE");
+
+        try {
+            messagingTemplate.convertAndSend("/topic/restaurant/" + restaurant.getId() + "/orders", "NEW_ORDER_" + savedOrder.getId());
+        } catch (Exception e) {
+            System.err.println("Failed to send WebSocket message: " + e.getMessage());
+        }
 
         return savedOrder;
     }
