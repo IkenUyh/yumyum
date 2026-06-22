@@ -20,6 +20,7 @@ import com.uit.fooddelivery_api.modules.payment.services.VNPayService;
 import com.uit.fooddelivery_api.modules.order.entities.Order;
 import com.uit.fooddelivery_api.modules.order.repositories.OrderRepository;
 import com.uit.fooddelivery_api.modules.notification.services.NotificationService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -31,6 +32,7 @@ public class PaymentController {
     private final WalletRepository walletRepository;
     private final OrderRepository orderRepository;
     private final NotificationService notificationService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Value("${zalopay.key2}")
     private String key2; // ZaloPay dùng Key 2 để ký chữ ký Callback trả về
@@ -96,6 +98,13 @@ public class PaymentController {
                             "Thanh toán thành công",
                             "Đơn hàng #" + order.getId() + " đã được thanh toán thành công qua ZaloPay!",
                             "ORDER_UPDATE");
+
+                    // Gửi thông báo WebSocket realtime cho Merchant
+                    try {
+                        messagingTemplate.convertAndSend("/topic/restaurant/" + order.getRestaurant().getId() + "/orders", "NEW_ORDER_" + order.getId());
+                    } catch (Exception e) {
+                        System.err.println("Failed to send WebSocket message on ZaloPay success: " + e.getMessage());
+                    }
                 } else {
                     // TopUp flow
                     Long userId = ((Number) embedData.get("user_id")).longValue();

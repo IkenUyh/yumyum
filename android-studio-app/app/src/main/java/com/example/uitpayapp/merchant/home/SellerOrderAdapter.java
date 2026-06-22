@@ -47,13 +47,13 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         SellerOrder order = orderList.get(position);
-        
         holder.tvOrderShortId.setText(order.getId());
         if (order.getDistance() != null) {
-            holder.tvCustomerName.setText(String.format(java.util.Locale.getDefault(), "%s (%.1f km)", order.getCustomerName(), order.getDistance()));
+            holder.tvDistance.setText(order.getDistance() + " km");
         } else {
-            holder.tvCustomerName.setText(order.getCustomerName());
+            holder.tvDistance.setVisibility(View.GONE);
         }
+        holder.tvCustomerName.setText(order.getCustomerName());
         holder.tvNumberOfDishes.setText(order.getNumberOfDishes() + " Món");
         holder.tvTotalPrice.setText(order.getTotalPrice());
         String guestNote = order.getGuestNote();
@@ -124,7 +124,7 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
     }
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView tvOrderShortId, tvCustomerName, tvNumberOfDishes, tvTotalPrice, tvGuestNote;
+        TextView tvOrderShortId, tvCustomerName, tvNumberOfDishes, tvTotalPrice, tvGuestNote,tvDistance;
         LinearLayout llDishesContainer;
         Button btnSeeMore, btnAccept;
 
@@ -134,6 +134,7 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
             tvCustomerName = itemView.findViewById(R.id.tv_customer_name);
             tvNumberOfDishes = itemView.findViewById(R.id.tv_numberof_dishes);
             tvTotalPrice = itemView.findViewById(R.id.tv_total_price);
+            tvDistance=itemView.findViewById(R.id.tv_distance);
             tvGuestNote = itemView.findViewById(R.id.tv_guest_note);
             llDishesContainer = itemView.findViewById(R.id.ll_dishes_container);
             btnSeeMore = itemView.findViewById(R.id.btn_see_more);
