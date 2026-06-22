@@ -74,6 +74,9 @@ public class CartManager {
         menuItem.setRestaurantName(dto.getRestaurantName());
         menuItem.setRestaurantLatitude(dto.getRestaurantLatitude());
         menuItem.setRestaurantLongitude(dto.getRestaurantLongitude());
+        menuItem.setRestaurantOpenTime(dto.getRestaurantOpenTime());
+        menuItem.setRestaurantCloseTime(dto.getRestaurantCloseTime());
+        menuItem.setIsAcceptingOrders(dto.getIsAcceptingOrders());
         menuItem.setSourcePromotion(dto.getAppliedPromotion() != null ? dto.getAppliedPromotion() : "NORMAL");
 
         List<CartTopping> toppings = new ArrayList<>();

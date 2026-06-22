@@ -36,6 +36,15 @@ public class CartItemResponseDTO {
     @SerializedName("restaurantLongitude")
     private Double restaurantLongitude;
 
+    @SerializedName("restaurantOpenTime")
+    private String restaurantOpenTime;
+
+    @SerializedName("restaurantCloseTime")
+    private String restaurantCloseTime;
+
+    @SerializedName("isAcceptingOrders")
+    private Boolean isAcceptingOrders;
+
     @SerializedName("selectedOptions")
     private List<Map<String, Object>> selectedOptions; // Trả về list mapping map chứa thông tin topping để vẽ UI
 
@@ -63,6 +72,15 @@ public class CartItemResponseDTO {
 
     public Double getRestaurantLongitude() { return restaurantLongitude; }
     public void setRestaurantLongitude(Double restaurantLongitude) { this.restaurantLongitude = restaurantLongitude; }
+
+    public String getRestaurantOpenTime() { return restaurantOpenTime; }
+    public void setRestaurantOpenTime(String restaurantOpenTime) { this.restaurantOpenTime = restaurantOpenTime; }
+
+    public String getRestaurantCloseTime() { return restaurantCloseTime; }
+    public void setRestaurantCloseTime(String restaurantCloseTime) { this.restaurantCloseTime = restaurantCloseTime; }
+
+    public Boolean getIsAcceptingOrders() { return isAcceptingOrders; }
+    public void setIsAcceptingOrders(Boolean isAcceptingOrders) { this.isAcceptingOrders = isAcceptingOrders; }
 
     public String getFoodName() { return foodName; }
     public void setFoodName(String foodName) { this.foodName = foodName; }

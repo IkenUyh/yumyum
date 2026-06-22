@@ -78,17 +78,48 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             }
             if (holder.tvDiscountTag != null) {
                 holder.tvDiscountTag.setVisibility(View.VISIBLE);
+                boolean hasBadge = false;
+
                 if (item.getMenuItem().getDiscountType() != null && !item.getMenuItem().getDiscountType().isEmpty()) {
-                    holder.tvDiscountTag.setText(item.getMenuItem().getDiscountType());
+                    String dType = item.getMenuItem().getDiscountType().toLowerCase();
+                    if (dType.contains("flashsale") || dType.contains("flash sale")) {
+                        if (holder.layoutDealBadge != null) {
+                            holder.layoutDealBadge.setVisibility(View.VISIBLE);
+                            holder.tvDealIcon.setText("⚡");
+                            holder.tvDealText.setText(item.getMenuItem().getDiscountType());
+                            hasBadge = true;
+                        }
+                    } else if (dType.contains("deal")) {
+                        if (holder.layoutDealBadge != null) {
+                            holder.layoutDealBadge.setVisibility(View.VISIBLE);
+                            holder.tvDealIcon.setText("\uD83D\uDD25");
+                            holder.tvDealText.setText(item.getMenuItem().getDiscountType());
+                            hasBadge = true;
+                        }
+                    }
+
+                    if (hasBadge) {
+                        if (item.getMenuItem().getDiscountPercent() > 0) {
+                            holder.tvDiscountTag.setText("-" + item.getMenuItem().getDiscountPercent() + "%");
+                        } else {
+                            holder.tvDiscountTag.setVisibility(View.GONE);
+                        }
+                    } else {
+                        if (holder.layoutDealBadge != null) holder.layoutDealBadge.setVisibility(View.GONE);
+                        holder.tvDiscountTag.setText(item.getMenuItem().getDiscountType());
+                    }
                 } else if (item.getMenuItem().getDiscountPercent() > 0) {
+                    if (holder.layoutDealBadge != null) holder.layoutDealBadge.setVisibility(View.GONE);
                     holder.tvDiscountTag.setText("-" + item.getMenuItem().getDiscountPercent() + "%");
                 } else {
+                    if (holder.layoutDealBadge != null) holder.layoutDealBadge.setVisibility(View.GONE);
                     holder.tvDiscountTag.setVisibility(View.GONE);
                 }
             }
         } else {
             if (holder.tvOriginalPrice != null) holder.tvOriginalPrice.setVisibility(View.GONE);
             if (holder.tvDiscountTag != null) holder.tvDiscountTag.setVisibility(View.GONE);
+            if (holder.layoutDealBadge != null) holder.layoutDealBadge.setVisibility(View.GONE);
         }
         
         holder.tvQuantity.setText(String.valueOf(item.getQuantity()));
@@ -152,10 +183,15 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     static class CartViewHolder extends RecyclerView.ViewHolder {
         ImageView imgItem;
         TextView tvRestaurant, tvName, tvPrice, tvOriginalPrice, tvDiscountTag, tvToppings, tvEditToppings, tvQuantity, btnIncrease, btnDecrease;
+        View layoutDealBadge;
+        TextView tvDealIcon, tvDealText;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
             imgItem = itemView.findViewById(R.id.img_cart_item);
+            layoutDealBadge = itemView.findViewById(R.id.layout_deal_badge);
+            tvDealIcon = itemView.findViewById(R.id.tv_deal_icon);
+            tvDealText = itemView.findViewById(R.id.tv_deal_text);
             tvRestaurant = itemView.findViewById(R.id.tv_cart_item_restaurant);
             tvName = itemView.findViewById(R.id.tv_cart_item_name);
             tvPrice = itemView.findViewById(R.id.tv_cart_item_price);

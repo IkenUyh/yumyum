@@ -25,6 +25,9 @@ public class CartItemResponseDTO {
     private String restaurantName;
     private BigDecimal restaurantLatitude;
     private BigDecimal restaurantLongitude;
+    private java.time.LocalTime restaurantOpenTime;
+    private java.time.LocalTime restaurantCloseTime;
+    private Boolean isAcceptingOrders;
     private List<Map<String, Object>> selectedOptions; // Trả về list topping cho frontend dễ vẽ UI
     private BigDecimal itemTotal;
     private String appliedPromotion;
@@ -74,6 +77,9 @@ public class CartItemResponseDTO {
                 .restaurantName(cartItem.getFood().getRestaurant().getName())
                 .restaurantLatitude(cartItem.getFood().getRestaurant().getLatitude())
                 .restaurantLongitude(cartItem.getFood().getRestaurant().getLongitude())
+                .restaurantOpenTime(cartItem.getFood().getRestaurant().getOpenTime())
+                .restaurantCloseTime(cartItem.getFood().getRestaurant().getCloseTime())
+                .isAcceptingOrders(cartItem.getFood().getRestaurant().getIsAcceptingOrders())
                 .foodName(cartItem.getFood().getName())
                 .foodImageUrl(cartItem.getFood().getImageUrl())
                 .basePrice(basePrice)

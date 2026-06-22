@@ -14,6 +14,9 @@ public class FoodMenuItem {
     private String restaurantName;
     private Double restaurantLatitude;
     private Double restaurantLongitude;
+    private String restaurantOpenTime;
+    private String restaurantCloseTime;
+    private Boolean isAcceptingOrders;
     private long originalPrice;
     private int discountPercent;
     private String discountType;
@@ -53,6 +56,12 @@ public class FoodMenuItem {
     public void setRestaurantLatitude(Double restaurantLatitude) { this.restaurantLatitude = restaurantLatitude; }
     public Double getRestaurantLongitude() { return restaurantLongitude; }
     public void setRestaurantLongitude(Double restaurantLongitude) { this.restaurantLongitude = restaurantLongitude; }
+    public String getRestaurantOpenTime() { return restaurantOpenTime; }
+    public void setRestaurantOpenTime(String restaurantOpenTime) { this.restaurantOpenTime = restaurantOpenTime; }
+    public String getRestaurantCloseTime() { return restaurantCloseTime; }
+    public void setRestaurantCloseTime(String restaurantCloseTime) { this.restaurantCloseTime = restaurantCloseTime; }
+    public Boolean getIsAcceptingOrders() { return isAcceptingOrders; }
+    public void setIsAcceptingOrders(Boolean isAcceptingOrders) { this.isAcceptingOrders = isAcceptingOrders; }
     public long getOriginalPrice() { return originalPrice; }
     public void setOriginalPrice(long originalPrice) { this.originalPrice = originalPrice; }
     public int getDiscountPercent() { return discountPercent; }
