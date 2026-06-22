@@ -72,7 +72,7 @@ public class HomeService {
 
                 // 3. Flashsales
                 List<Food> allFoodsWithRestaurant = foodRepository.findAllWithRestaurant();
-                Map<Long, PriceCalculationService.PriceResult> priceMap = priceCalculationService.calculateFinalPrices(allFoodsWithRestaurant);
+                Map<Long, PriceCalculationService.PriceResult> priceMap = priceCalculationService.calculateFinalPrices(allFoodsWithRestaurant, "FLASHSALE");
 
                 List<FoodMenuItemDTO> flashSales = new ArrayList<>();
                 List<Food> foodsWithFlashSale = allFoodsWithRestaurant.stream()
@@ -115,8 +115,8 @@ public class HomeService {
                                         .map(f -> {
                                                 PriceCalculationService.PriceResult pr = priceMap.get(f.getId());
                                                 long origPrice = pr != null ? pr.originalPrice.longValue() : f.getPrice().longValue();
-                                                long salePrice = pr != null ? pr.finalPrice.longValue() : f.getPrice().multiply(BigDecimal.valueOf(0.5)).longValue();
-                                                String discType = pr != null ? pr.discountType : "DEAL 50%";
+                                                long salePrice = (pr != null && pr.discountType != null) ? pr.finalPrice.longValue() : f.getPrice().multiply(BigDecimal.valueOf(0.5)).longValue();
+                                                String discType = (pr != null && pr.discountType != null) ? pr.discountType : "DEAL 50%";
                                                 int discount = origPrice > 0 ? (int) Math.round((1.0 - (double) salePrice / origPrice) * 100) : 50;
 
                                                 return FoodMenuItemDTO.builder()
