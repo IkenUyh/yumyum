@@ -88,7 +88,7 @@ public class OrderService {
             throw new RuntimeException("Quán hiện đang tạm ngưng nhận đơn mới. Vui lòng thông cảm!");
         }
 
-        java.time.LocalTime nowTime = java.time.LocalTime.now();
+        java.time.LocalTime nowTime = java.time.LocalTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
         java.time.LocalTime open = restaurant.getOpenTime();
         java.time.LocalTime close = restaurant.getCloseTime();
 
@@ -320,7 +320,7 @@ public class OrderService {
             throw new RuntimeException("Quán hiện đang tạm ngưng nhận đơn mới. Vui lòng thông cảm!");
         }
 
-        java.time.LocalTime nowTime = java.time.LocalTime.now();
+        java.time.LocalTime nowTime = java.time.LocalTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
         java.time.LocalTime open = restaurant.getOpenTime();
         java.time.LocalTime close = restaurant.getCloseTime();
 
