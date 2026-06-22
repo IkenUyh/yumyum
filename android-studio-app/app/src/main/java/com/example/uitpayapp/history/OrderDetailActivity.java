@@ -57,6 +57,8 @@ public class OrderDetailActivity extends AppCompatActivity {
     private Marker shipperMarker;
     private ValueAnimator shipperAnimator;
     private static final Map<String, Long> deliveryStartTimes = new HashMap<>();
+    private boolean isMapCentered = false;
+    private boolean isBottomSheetInitialized = false;
 
     // 2. Hệ thống nút bấm tương tác
     private ImageButton btnMapBack;
@@ -454,8 +456,11 @@ public class OrderDetailActivity extends AppCompatActivity {
             layoutDriverInfo.setVisibility(View.VISIBLE);
             mapContainer.setVisibility(View.VISIBLE);
 
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-            bottomSheetBehavior.setDraggable(true);
+            if (!isBottomSheetInitialized) {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                bottomSheetBehavior.setDraggable(true);
+                isBottomSheetInitialized = true;
+            }
 
             bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
                 @Override
@@ -582,8 +587,11 @@ public class OrderDetailActivity extends AppCompatActivity {
         line.getOutlinePaint().setStrokeWidth(8);
         mMap.getOverlays().add(line);
 
-        mMap.getController().setZoom(16.0);
-        mMap.getController().setCenter(merchantLocation);
+        if (!isMapCentered) {
+            mMap.getController().setZoom(16.0);
+            mMap.getController().setCenter(merchantLocation);
+            isMapCentered = true;
+        }
 
         if (orderStatus != null && !"COMPLETED".equalsIgnoreCase(orderStatus) && !"CANCELLED".equalsIgnoreCase(orderStatus)) {
             startShipperSimulation(merchantLocation, customerLocation);
