@@ -21,17 +21,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.uitpayapp.R;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+
+import org.osmdroid.config.Configuration;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Polyline;
+import android.preference.PreferenceManager;
+
 import android.animation.ValueAnimator;
 import android.view.animation.LinearInterpolator;
 import java.util.HashMap;
@@ -42,14 +39,14 @@ import java.util.List;
 import com.example.uitpayapp.home.home_models.CartManager;
 import com.example.uitpayapp.home.home_models.CartItem;
 
-public class OrderDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class OrderDetailActivity extends AppCompatActivity {
 
     // 1. Hệ thống điều khiển & Giao diện trượt
     private BottomSheetBehavior<View> bottomSheetBehavior;
     private View mapContainer;
     private View layoutDriverInfo;
     private Toolbar toolbar;
-    private GoogleMap mMap;
+    private MapView mMap;
     private com.example.uitpayapp.modules.order.OrderRepository orderRepository;
     private double merchantLat = 10.8800;
     private double merchantLng = 106.8000;
@@ -97,6 +94,10 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Configuration.getInstance().load(getApplicationContext(), PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
+        Configuration.getInstance().setUserAgentValue(getPackageName());
+
         setContentView(R.layout.activity_order_detail);
         
         getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
@@ -111,11 +112,9 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
         toolbar = findViewById(R.id.toolbar);
         btnMapBack = findViewById(R.id.btnMapBack);
         
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.mapFragment);
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(this);
-        }
+        mMap = findViewById(R.id.mapFragment);
+        mMap.setMultiTouchControls(true);
+
         btnCallDriver = findViewById(R.id.btnCallDriver);
         btnChatDriver = findViewById(R.id.btnChatDriver);
         btnCancelOrder = findViewById(R.id.btnCancelOrder);
@@ -417,7 +416,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                 shipperAnimator.cancel();
             }
             if (shipperMarker != null) {
-                shipperMarker.remove();
+                mMap.getOverlays().remove(shipperMarker);
             }
             if ("CANCELLED".equalsIgnoreCase(data.getStatus())) {
                 String refundInfo = "ZALOPAY".equalsIgnoreCase(data.getPaymentMethod()) 
@@ -556,50 +555,53 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
 
     private void updateMapMarkers() {
         if (mMap == null) return;
-        mMap.clear();
+        mMap.getOverlays().clear();
         drawMarkers(merchantLat, merchantLng, customerLat, customerLng);
     }
 
     private void drawMarkers(double mLat, double mLng, double cLat, double cLng) {
-        LatLng merchantLocation = new LatLng(mLat, mLng);
-        LatLng customerLocation = new LatLng(cLat, cLng);
+        GeoPoint merchantLocation = new GeoPoint(mLat, mLng);
+        GeoPoint customerLocation = new GeoPoint(cLat, cLng);
 
-        mMap.addMarker(new MarkerOptions().position(merchantLocation).title("Quán"));
-        mMap.addMarker(new MarkerOptions().position(customerLocation).title("Khách hàng"));
+        Marker mMarker = new Marker(mMap);
+        mMarker.setPosition(merchantLocation);
+        mMarker.setTitle("Quán");
+        mMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        mMap.getOverlays().add(mMarker);
 
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        builder.include(merchantLocation);
-        builder.include(customerLocation);
-        LatLngBounds bounds = builder.build();
+        Marker cMarker = new Marker(mMap);
+        cMarker.setPosition(customerLocation);
+        cMarker.setTitle("Khách hàng");
+        cMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        mMap.getOverlays().add(cMarker);
 
-        mMap.setOnMapLoadedCallback(() -> {
-            try {
-                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        Polyline line = new Polyline();
+        line.addPoint(merchantLocation);
+        line.addPoint(customerLocation);
+        line.getOutlinePaint().setColor(android.graphics.Color.parseColor("#E84A26"));
+        line.getOutlinePaint().setStrokeWidth(8);
+        mMap.getOverlays().add(line);
 
-        PolylineOptions polylineOptions = new PolylineOptions()
-                .add(merchantLocation)
-                .add(customerLocation)
-                .width(8)
-                .color(android.graphics.Color.parseColor("#E84A26"));
-        mMap.addPolyline(polylineOptions);
+        mMap.getController().setZoom(16.0);
+        mMap.getController().setCenter(merchantLocation);
 
-        if ("DELIVERING".equalsIgnoreCase(orderStatus)) {
+        if (orderStatus != null && !"COMPLETED".equalsIgnoreCase(orderStatus) && !"CANCELLED".equalsIgnoreCase(orderStatus)) {
             startShipperSimulation(merchantLocation, customerLocation);
         }
+        
+        mMap.invalidate();
     }
 
     @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
-        mMap = googleMap;
-        if (isMapDataLoaded) {
-            updateMapMarkers();
-        } else {
-            drawMarkers(10.8800, 106.8000, 10.8750, 106.7900);
-        }
+    public void onResume() {
+        super.onResume();
+        if (mMap != null) mMap.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mMap != null) mMap.onPause();
     }
 
     @Override
@@ -611,23 +613,23 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
         super.onDestroy();
     }
 
-    private BitmapDescriptor getMarkerIconFromDrawable(int resId, int width, int height) {
+    private android.graphics.drawable.Drawable getMarkerIconFromDrawable(int resId, int width, int height) {
         android.graphics.drawable.Drawable drawable = androidx.core.content.ContextCompat.getDrawable(this, resId);
         if (drawable == null) {
-            return BitmapDescriptorFactory.defaultMarker();
+            return null;
         }
         android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
         android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
         drawable.setBounds(0, 0, width, height);
         drawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
+        return new android.graphics.drawable.BitmapDrawable(getResources(), bitmap);
     }
 
-    private float getBearing(LatLng begin, LatLng end) {
-        double lat1 = Math.toRadians(begin.latitude);
-        double lng1 = Math.toRadians(begin.longitude);
-        double lat2 = Math.toRadians(end.latitude);
-        double lng2 = Math.toRadians(end.longitude);
+    private float getBearing(GeoPoint begin, GeoPoint end) {
+        double lat1 = Math.toRadians(begin.getLatitude());
+        double lng1 = Math.toRadians(begin.getLongitude());
+        double lat2 = Math.toRadians(end.getLatitude());
+        double lng2 = Math.toRadians(end.getLongitude());
 
         double dLng = lng2 - lng1;
 
@@ -638,19 +640,23 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
         return (float) (bearing + 360) % 360;
     }
 
-    private void startShipperSimulation(LatLng merchantLocation, LatLng customerLocation) {
+    private void startShipperSimulation(GeoPoint merchantLocation, GeoPoint customerLocation) {
         if (shipperAnimator != null) {
             shipperAnimator.cancel();
         }
         if (shipperMarker != null) {
-            shipperMarker.remove();
+            mMap.getOverlays().remove(shipperMarker);
         }
 
-        shipperMarker = mMap.addMarker(new MarkerOptions()
-                .position(merchantLocation)
-                .title("Shipper đang giao hàng")
-                .anchor(0.5f, 0.5f)
-                .icon(getMarkerIconFromDrawable(R.drawable.ic_shipper, 100, 100)));
+        shipperMarker = new Marker(mMap);
+        shipperMarker.setPosition(merchantLocation);
+        shipperMarker.setTitle("Shipper đang giao hàng");
+        shipperMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
+        android.graphics.drawable.Drawable icon = getMarkerIconFromDrawable(R.drawable.ic_shipper, 100, 100);
+        if (icon != null) {
+            shipperMarker.setIcon(icon);
+        }
+        mMap.getOverlays().add(shipperMarker);
 
         long totalDurationMs = 5 * 60 * 1000; // 5 phút giả lập
         long now = System.currentTimeMillis();
@@ -667,6 +673,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
             shipperMarker.setPosition(customerLocation);
             float bearing = getBearing(merchantLocation, customerLocation);
             shipperMarker.setRotation(bearing);
+            mMap.invalidate();
             return;
         }
 
@@ -680,14 +687,15 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
             if (mMap == null || shipperMarker == null) return;
             float fraction = (float) animation.getAnimatedValue();
 
-            double lat = merchantLocation.latitude + (customerLocation.latitude - merchantLocation.latitude) * fraction;
-            double lng = merchantLocation.longitude + (customerLocation.longitude - merchantLocation.longitude) * fraction;
-            LatLng currentPos = new LatLng(lat, lng);
+            double lat = merchantLocation.getLatitude() + (customerLocation.getLatitude() - merchantLocation.getLatitude()) * fraction;
+            double lng = merchantLocation.getLongitude() + (customerLocation.getLongitude() - merchantLocation.getLongitude()) * fraction;
+            GeoPoint currentPos = new GeoPoint(lat, lng);
 
             shipperMarker.setPosition(currentPos);
 
             float bearing = getBearing(merchantLocation, customerLocation);
             shipperMarker.setRotation(bearing);
+            mMap.invalidate();
         });
 
         shipperAnimator.start();
