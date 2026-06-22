@@ -310,12 +310,14 @@
                     
                     <!-- Step 1: Đặt đơn (Active) -->
                     <ImageView
+                        android:id="@+id/ivProgressStep1_success"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_circle_check"
                         app:tint="#388E3C" />
                         
                     <View
+                        android:id="@+id/lineProgress1_success"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="2dp"
@@ -323,12 +325,14 @@
 
                     <!-- Step 2: Chuẩn bị (Active) -->
                     <ImageView
+                        android:id="@+id/ivProgressStep2_success"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_circle_check"
                         app:tint="#388E3C" />
 
                     <View
+                        android:id="@+id/lineProgress2_success"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="2dp"
@@ -336,11 +340,13 @@
 
                     <!-- Step 3: Đang giao (Inactive) -->
                     <ImageView
+                        android:id="@+id/ivProgressStep3_success"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/bg_circle_gray" />
 
                     <View
+                        android:id="@+id/lineProgress3_success"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="2dp"
@@ -348,6 +354,7 @@
 
                     <!-- Step 4: Đã giao (Inactive) -->
                     <ImageView
+                        android:id="@+id/ivProgressStep4_success"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/bg_circle_gray" />
@@ -361,6 +368,7 @@
                     android:layout_marginTop="8dp">
 
                     <TextView
+                        android:id="@+id/tvProgressStep1_success"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
@@ -371,6 +379,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tvProgressStep2_success"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
@@ -381,6 +390,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tvProgressStep3_success"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
@@ -390,6 +400,7 @@
                         android:textColor="#757575" />
 
                     <TextView
+                        android:id="@+id/tvProgressStep4_success"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"

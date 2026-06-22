@@ -41,6 +41,7 @@ public class OrderResponseDTO {
     private String paymentMethod;
     private String paymentStatus;
     private String paymentUrl;
+    private String note;
 
     @Getter
     @Setter
@@ -120,6 +121,7 @@ public class OrderResponseDTO {
                 .paymentMethod(order.getPaymentMethod())
                 .paymentStatus(order.getPaymentStatus())
                 .paymentUrl(order.getPaymentUrl())
+                .note(order.getNote())
                 .build();
     }
 }
