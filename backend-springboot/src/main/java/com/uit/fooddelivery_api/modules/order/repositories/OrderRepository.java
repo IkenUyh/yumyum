@@ -95,4 +95,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @org.springframework.data.repository.query.Param("restaurantId") Long restaurantId,
             @org.springframework.data.repository.query.Param("start") java.time.LocalDateTime start,
             @org.springframework.data.repository.query.Param("end") java.time.LocalDateTime end);
+
+    @org.springframework.data.jpa.repository.Query("SELECT DISTINCT o " +
+            "FROM Order o JOIN FETCH o.orderItems oi JOIN FETCH oi.food " +
+            "WHERE o.restaurant.id = :restaurantId AND o.status = 'COMPLETED'")
+    java.util.List<Order> findCompletedOrdersByRestaurant(@org.springframework.data.repository.query.Param("restaurantId") Long restaurantId);
 }

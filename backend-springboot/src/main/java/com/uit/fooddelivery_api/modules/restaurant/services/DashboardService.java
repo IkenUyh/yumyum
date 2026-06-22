@@ -1,9 +1,11 @@
 package com.uit.fooddelivery_api.modules.restaurant.services;
 
+import com.uit.fooddelivery_api.modules.order.entities.Order;
 import com.uit.fooddelivery_api.modules.order.repositories.OrderRepository;
 import com.uit.fooddelivery_api.modules.restaurant.dtos.DashboardResponseDTO;
 import com.uit.fooddelivery_api.modules.restaurant.dtos.FoodSaleStatDTO;
 import com.uit.fooddelivery_api.modules.user.entities.User;
+import com.uit.fooddelivery_api.common.utils.OrderRevenueUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +23,13 @@ public class DashboardService {
     public DashboardResponseDTO getMerchantDashboard(User merchant) {
         Long merchantId = merchant.getId();
 
-        // 1. Lấy Tổng doanh thu & Số đơn
-        BigDecimal totalRevenue = orderRepository.calculateTotalRevenueByMerchant(merchantId);
-        Long totalOrders = orderRepository.countCompletedOrdersByMerchant(merchantId);
+        // 1. Lấy Tổng doanh thu & Số đơn (theo giá gốc)
+        List<Order> completedOrders = orderRepository.findCompletedOrdersByMerchant(merchantId);
+        BigDecimal totalRevenue = BigDecimal.ZERO;
+        for (Order order : completedOrders) {
+            totalRevenue = totalRevenue.add(OrderRevenueUtil.calculateOriginalRevenue(order));
+        }
+        Long totalOrders = (long) completedOrders.size();
 
         // 2. Map dữ liệu thô (Object[]) từ Database sang DTO
         List<Object[]> rawStats = orderRepository.getFoodSalesStatsByMerchant(merchantId);
