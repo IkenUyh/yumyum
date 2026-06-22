@@ -84,6 +84,16 @@ public class OrderResponseDTO {
             }
         }
 
+        String recipientName = null;
+        String recipientPhone = null;
+        if (order.getAddress() != null) {
+            recipientName = order.getAddress().getRecipientName();
+            recipientPhone = order.getAddress().getPhoneNumber();
+        } else if (order.getUser() != null) {
+            recipientName = order.getUser().getFullName();
+            recipientPhone = order.getUser().getPhoneNumber();
+        }
+
         return OrderResponseDTO.builder()
                 .id(order.getId())
                 .restaurantId(order.getRestaurant().getId())
@@ -96,8 +106,8 @@ public class OrderResponseDTO {
                 .createdAt(order.getCreatedAt())
                 .itemCount(totalItems)
                 .items(itemDTOs)
-                .customerName(order.getUser() != null ? order.getUser().getFullName() : null)
-                .customerPhone(order.getUser() != null ? order.getUser().getPhoneNumber() : null)
+                .customerName(recipientName)
+                .customerPhone(recipientPhone)
                 .reviewed(order.getReview() != null)
                 .reviewExpired(order.getCreatedAt() != null && java.time.LocalDateTime.now().isAfter(order.getCreatedAt().plusDays(7)))
                 .shippingFee(order.getShippingFee())

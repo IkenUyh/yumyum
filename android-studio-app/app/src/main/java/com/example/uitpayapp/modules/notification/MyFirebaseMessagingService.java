@@ -61,6 +61,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         if (title != null && body != null) {
             sendNotification(title, body);
+            com.example.uitpayapp.utils.NotificationBadgeHelper.sendUpdateBroadcast(getApplicationContext());
         }
     }
 
