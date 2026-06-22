@@ -16,11 +16,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         
-        Properties properties = new Properties()
-        if (project.rootProject.file('local.properties').exists()) {
-            properties.load(project.rootProject.file('local.properties').newDataInputStream())
-        }
-        manifestPlaceholders = [ MAPS_API_KEY: properties.getProperty('MAPS_API_KEY', "") ]
+
     }
 
     buildFeatures {
@@ -59,10 +55,8 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.github.bumptech.glide:glide:4.16.0'
-    implementation 'org.osmdroid:osmdroid-android:6.1.16'
+    implementation 'org.osmdroid:osmdroid-android:6.1.18'
     implementation 'com.google.android.gms:play-services-location:21.0.1'
-    implementation 'com.google.android.gms:play-services-maps:18.2.0'
-    implementation 'com.google.maps.android:android-maps-utils:3.8.2'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     
     // Firebase Cloud Messaging
