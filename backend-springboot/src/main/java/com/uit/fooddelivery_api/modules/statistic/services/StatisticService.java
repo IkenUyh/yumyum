@@ -1,5 +1,6 @@
 package com.uit.fooddelivery_api.modules.statistic.services;
 
+import com.uit.fooddelivery_api.modules.order.entities.Order;
 import com.uit.fooddelivery_api.modules.order.repositories.OrderRepository;
 import com.uit.fooddelivery_api.modules.statistic.dtos.DailyRevenueStatDTO;
 import com.uit.fooddelivery_api.modules.statistic.dtos.MerchantDashboardDTO;
@@ -7,6 +8,7 @@ import com.uit.fooddelivery_api.modules.statistic.dtos.MerchantDailyStatisticDTO
 import com.uit.fooddelivery_api.modules.statistic.dtos.MerchantMonthlyStatisticDTO;
 import com.uit.fooddelivery_api.modules.statistic.dtos.TopFoodDTO;
 import com.uit.fooddelivery_api.modules.user.entities.User;
+import com.uit.fooddelivery_api.common.utils.OrderRevenueUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,8 +33,13 @@ public class StatisticService {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
-        BigDecimal totalRevenue = orderRepository.calculateRevenueByRestaurantAndDate(restaurantId, startOfDay, endOfDay);
-        Long transactionCount = orderRepository.countCompletedOrdersByRestaurantAndDate(restaurantId, startOfDay, endOfDay);
+        List<Order> completedOrders = orderRepository.findCompletedOrdersByRestaurantAndDate(restaurantId, startOfDay, endOfDay);
+        
+        BigDecimal totalRevenue = BigDecimal.ZERO;
+        for (Order order : completedOrders) {
+            totalRevenue = totalRevenue.add(OrderRevenueUtil.calculateOriginalRevenue(order));
+        }
+        long transactionCount = completedOrders.size();
 
         return MerchantDailyStatisticDTO.builder()
                 .totalRevenue(totalRevenue)
@@ -41,17 +48,25 @@ public class StatisticService {
     }
 
     public MerchantMonthlyStatisticDTO getMerchantMonthlyStatistic(Long restaurantId, int month, int year) {
-        List<Object[]> rawRows = orderRepository.getRevenueByDayInMonth(restaurantId, month, year);
+        LocalDateTime startOfMonth = LocalDateTime.of(year, month, 1, 0, 0);
+        int daysInMonth = YearMonth.of(year, month).lengthOfMonth();
+        LocalDateTime endOfMonth = LocalDateTime.of(year, month, daysInMonth, 23, 59, 59, 999999999);
 
-        // Map day -> row for O(1) lookup
-        Map<Integer, Object[]> dayMap = new HashMap<>();
-        for (Object[] row : rawRows) {
-            int day = ((Number) row[0]).intValue();
-            dayMap.put(day, row);
+        List<Order> completedOrders = orderRepository.findCompletedOrdersByRestaurantAndDate(restaurantId, startOfMonth, endOfMonth);
+
+        // Group by day
+        Map<Integer, BigDecimal> dailyRevenueMap = new HashMap<>();
+        Map<Integer, Long> dailyTxCountMap = new HashMap<>();
+        
+        for (Order order : completedOrders) {
+            int day = order.getCreatedAt().getDayOfMonth();
+            BigDecimal rev = OrderRevenueUtil.calculateOriginalRevenue(order);
+            
+            dailyRevenueMap.put(day, dailyRevenueMap.getOrDefault(day, BigDecimal.ZERO).add(rev));
+            dailyTxCountMap.put(day, dailyTxCountMap.getOrDefault(day, 0L) + 1L);
         }
 
         // Determine how many days to include (cap at today for current month)
-        int daysInMonth = YearMonth.of(year, month).lengthOfMonth();
         LocalDate today = LocalDate.now();
         int maxDay = daysInMonth;
         if (year == today.getYear() && month == today.getMonthValue()) {
@@ -65,13 +80,9 @@ public class StatisticService {
         long totalTransactions = 0;
 
         for (int d = 1; d <= maxDay; d++) {
-            BigDecimal revenue = BigDecimal.ZERO;
-            long txCount = 0;
-            if (dayMap.containsKey(d)) {
-                Object[] row = dayMap.get(d);
-                revenue = new BigDecimal(row[1].toString());
-                txCount = ((Number) row[2]).longValue();
-            }
+            BigDecimal revenue = dailyRevenueMap.getOrDefault(d, BigDecimal.ZERO);
+            long txCount = dailyTxCountMap.getOrDefault(d, 0L);
+            
             dailyStats.add(new DailyRevenueStatDTO(d, revenue, txCount));
             totalRevenue = totalRevenue.add(revenue);
             totalTransactions += txCount;
@@ -99,13 +110,17 @@ public class StatisticService {
     public MerchantDashboardDTO getMerchantDashboard(User merchant) {
         Long merchantId = merchant.getId();
 
-        // 1. Lấy tổng doanh thu
-        BigDecimal totalRevenue = orderRepository.calculateTotalRevenueByMerchant(merchantId);
+        // 1. Lấy tổng doanh thu (giá gốc món ăn)
+        List<Order> completedOrders = orderRepository.findCompletedOrdersByMerchant(merchantId);
+        BigDecimal totalRevenue = BigDecimal.ZERO;
+        for (Order order : completedOrders) {
+            totalRevenue = totalRevenue.add(OrderRevenueUtil.calculateOriginalRevenue(order));
+        }
 
         // 2. Lấy tổng số đơn hoàn thành
-        Long totalOrders = orderRepository.countCompletedOrdersByMerchant(merchantId);
+        Long totalOrders = (long) completedOrders.size();
 
-        // 3. Xử lý danh sách món bán chạy (Ép kiểu an toàn từ Object[] của Hibernate)
+        // 3. Xử lý danh sách món bán chạy
         List<Object[]> rawFoodStats = orderRepository.getFoodSalesStatsByMerchant(merchantId);
         List<TopFoodDTO> topFoods = new ArrayList<>();
 
