@@ -25,6 +25,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "MyFirebaseMsgService";
     private static final String CHANNEL_ID = "YumYum_Notification_Channel";
     private static final String CHANNEL_NAME = "YumYum Notifications";
+    // Channel riêng dành cho Merchant - ưu tiên cao hơn để không bỏ lỡ đơn hàng
+    private static final String SELLER_CHANNEL_ID = "YumYum_Seller_Order_Channel";
+    private static final String SELLER_CHANNEL_NAME = "Thông báo đơn hàng mới";
 
     @Override
     public void onNewToken(@NonNull String token) {
@@ -66,9 +69,20 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void sendNotification(String title, String messageBody) {
-        Intent intent = new Intent(this, HomeActivity.class);
+        // Xác định màn hình đích dựa trên role của người dùng
+        String userRole = SessionManager.getInstance(getApplicationContext()).getUserRole();
+        boolean isMerchant = "MERCHANT".equalsIgnoreCase(userRole);
+
+        Intent intent;
+        if (isMerchant) {
+            // Merchant → mở SellerHomeActivity
+            intent = new Intent(this, com.example.uitpayapp.merchant.home.SellerHomeActivity.class);
+        } else {
+            // Customer / Driver → mở HomeActivity
+            intent = new Intent(this, HomeActivity.class);
+        }
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        
+
         // Gắn cờ FLAG_IMMUTABLE hoặc FLAG_MUTABLE tùy theo API level
         int pendingFlags = PendingIntent.FLAG_ONE_SHOT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -77,15 +91,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, pendingFlags);
 
+        // Chọn channel phù hợp theo role
+        String channelId = isMerchant ? SELLER_CHANNEL_ID : CHANNEL_ID;
+
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(this, CHANNEL_ID)
+                new NotificationCompat.Builder(this, channelId)
                         .setSmallIcon(R.drawable.notifications_24px) // Dùng icon thông báo đã có sẵn
                         .setContentTitle(title)
                         .setContentText(messageBody)
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setPriority(NotificationCompat.PRIORITY_MAX)  // MAX để đảm bảo hiện heads-up
                         .setContentIntent(pendingIntent);
 
         NotificationManager notificationManager =
@@ -93,14 +110,26 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         // Khởi tạo channel cho Android Oreo (SDK 26+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Channel cho customer
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
                     CHANNEL_NAME,
                     NotificationManager.IMPORTANCE_HIGH);
             channel.setDescription("Channel for YumYum food delivery status updates");
             channel.enableLights(true);
             channel.enableVibration(true);
+
+            // Channel riêng cho merchant - ưu tiên cao nhất để không bỏ lỡ đơn hàng
+            NotificationChannel sellerChannel = new NotificationChannel(SELLER_CHANNEL_ID,
+                    SELLER_CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_HIGH);
+            sellerChannel.setDescription("Channel for new order alerts - Merchant side");
+            sellerChannel.enableLights(true);
+            sellerChannel.enableVibration(true);
+            sellerChannel.setVibrationPattern(new long[]{0, 500, 200, 500});
+
             if (notificationManager != null) {
                 notificationManager.createNotificationChannel(channel);
+                notificationManager.createNotificationChannel(sellerChannel);
             }
         }
 

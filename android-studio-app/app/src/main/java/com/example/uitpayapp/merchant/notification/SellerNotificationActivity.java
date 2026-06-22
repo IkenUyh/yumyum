@@ -257,8 +257,27 @@ public class SellerNotificationActivity extends AppCompatActivity {
         android.content.SharedPreferences prefs = getSharedPreferences("SellerPrefs", MODE_PRIVATE);
         long currentStoreId = prefs.getLong("current_store_id", -1L);
 
-        String url = "wss://kienhuy-dev.name.vn/ws/chat/websocket";
-        mStompClient = ua.naiksoftware.stomp.Stomp.over(ua.naiksoftware.stomp.Stomp.ConnectionProvider.OKHTTP, url);
+        String baseUrl = com.example.uitpayapp.network.RetrofitClient.getBaseUrl();
+        String wsUrl = baseUrl;
+        if (wsUrl.startsWith("http://")) {
+            wsUrl = "ws://" + wsUrl.substring(7);
+        } else if (wsUrl.startsWith("https://")) {
+            wsUrl = "wss://" + wsUrl.substring(8);
+        }
+        if (!wsUrl.endsWith("/")) {
+            wsUrl += "/";
+        }
+        // URL chỉ đến /ws/chat — NaikSoftware Stomp tự append SockJS path nội bộ
+        wsUrl += "ws/chat";
+
+        // Thêm Authorization header vào HTTP WebSocket handshake
+        com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        String authToken = sessionManager.getAuthToken();
+        java.util.Map<String, String> connectHttpHeaders = new java.util.HashMap<>();
+        if (authToken != null && !authToken.isEmpty()) {
+            connectHttpHeaders.put("Authorization", "Bearer " + authToken);
+        }
+        mStompClient = ua.naiksoftware.stomp.Stomp.over(ua.naiksoftware.stomp.Stomp.ConnectionProvider.OKHTTP, wsUrl, connectHttpHeaders);
 
         mStompClient.lifecycle()
                 .subscribeOn(io.reactivex.schedulers.Schedulers.io())
@@ -298,30 +317,13 @@ public class SellerNotificationActivity extends AppCompatActivity {
                     });
         }
 
-        com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
-        Long userId = sessionManager.getUserId();
-        if (userId != null) {
-            mStompClient.topic("/user/" + userId + "/queue/notifications")
-                    .subscribeOn(io.reactivex.schedulers.Schedulers.io())
-                    .observeOn(io.reactivex.android.schedulers.AndroidSchedulers.mainThread())
-                    .subscribe(topicMessage -> {
-                        android.util.Log.d("WebSocket", "Received user notification: " + topicMessage.getPayload());
-                        try {
-                            org.json.JSONObject json = new org.json.JSONObject(topicMessage.getPayload());
-                            String title = json.optString("title", "Thông báo mới");
-                            String message = json.optString("message", json.optString("content", "Bạn có thông báo mới"));
-                            showNotification(title, message);
-                            loadRealData();
-                        } catch (Exception e) {
-                            showNotification("Thông báo mới", "Bạn có một thông báo từ hệ thống");
-                            loadRealData();
-                        }
-                    }, throwable -> {
-                        android.util.Log.e("WebSocket", "Error on subscribe user topic", throwable);
-                    });
+        // Gửi Authorization token trong STOMP CONNECT frame headers
+        java.util.List<ua.naiksoftware.stomp.dto.StompHeader> stompHeaders = new java.util.ArrayList<>();
+        String token = com.example.uitpayapp.network.SessionManager.getInstance(this).getAuthToken();
+        if (token != null && !token.isEmpty()) {
+            stompHeaders.add(new ua.naiksoftware.stomp.dto.StompHeader("Authorization", "Bearer " + token));
         }
-
-        mStompClient.connect();
+        mStompClient.connect(stompHeaders);
     }
 
     @Override
