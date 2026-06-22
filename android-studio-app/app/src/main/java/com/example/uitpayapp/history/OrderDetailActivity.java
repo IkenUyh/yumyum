@@ -587,7 +587,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                 .color(android.graphics.Color.parseColor("#E84A26"));
         mMap.addPolyline(polylineOptions);
 
-        if ("DELIVERING".equalsIgnoreCase(orderStatus)) {
+        if (orderStatus != null && !"COMPLETED".equalsIgnoreCase(orderStatus) && !"CANCELLED".equalsIgnoreCase(orderStatus)) {
             startShipperSimulation(merchantLocation, customerLocation);
         }
     }
