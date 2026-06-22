@@ -25,6 +25,7 @@ public class FoodService {
     private final CategoryRepository categoryRepository;
     private final FoodOptionGroupRepository foodOptionGroupRepository;
     private final com.uit.fooddelivery_api.modules.user.services.CloudinaryService cloudinaryService;
+    private final PriceCalculationService priceCalculationService;
 
     // Hàm xử lý upload ảnh món ăn
     @jakarta.transaction.Transactional
@@ -115,10 +116,22 @@ public class FoodService {
 
     // Lấy tất cả món ăn đang bán (public - không cần đăng nhập)
     public List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> getAllAvailableFoods(Double lat, Double lng) {
-        return foodRepository.findAll().stream()
+        List<Food> foods = foodRepository.findAll().stream()
                 .filter(food -> Boolean.TRUE.equals(food.getIsAvailable()))
+                .toList();
+
+        java.util.Map<Long, PriceCalculationService.PriceResult> priceMap = priceCalculationService.calculateFinalPrices(foods);
+
+        return foods.stream()
                 .map(food -> {
                     com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO dto = com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO.fromEntity(food);
+                    PriceCalculationService.PriceResult priceResult = priceMap.get(food.getId());
+                    if (priceResult != null) {
+                        dto.setPrice(priceResult.finalPrice);
+                        dto.setOriginalPrice(priceResult.originalPrice);
+                        dto.setDiscountType(priceResult.discountType);
+                    }
+
                     if (lat != null && lng != null && food.getRestaurant() != null && food.getRestaurant().getLatitude() != null && food.getRestaurant().getLongitude() != null) {
                         double distance = calculateDistance(lat, lng, food.getRestaurant().getLatitude().doubleValue(), food.getRestaurant().getLongitude().doubleValue());
                         distance = Math.round(distance * 10.0) / 10.0;
@@ -188,7 +201,14 @@ public class FoodService {
         Food food = foodRepository.findById(foodId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy món ăn với id: " + foodId));
         List<FoodOptionGroup> optionGroups = foodOptionGroupRepository.findByFoodId(foodId);
-        return FoodDetailResponseDTO.fromEntity(food, optionGroups);
+        FoodDetailResponseDTO dto = FoodDetailResponseDTO.fromEntity(food, optionGroups);
+        
+        PriceCalculationService.PriceResult priceResult = priceCalculationService.calculateFinalPrice(food);
+        dto.setPrice(priceResult.finalPrice);
+        dto.setOriginalPrice(priceResult.originalPrice);
+        dto.setDiscountType(priceResult.discountType);
+
+        return dto;
     }
 
     public List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> searchFoodsByKeyword(String keyword, Double lat, Double lng) {
@@ -201,8 +221,19 @@ public class FoodService {
             return java.util.Collections.emptyList();
         }
 
-        List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> results = foodRepository.searchFoodsByKeyword(booleanKeyword, cleanKeyword).stream().map(food -> {
+        List<Food> searchedFoods = foodRepository.searchFoodsByKeyword(booleanKeyword, cleanKeyword);
+        java.util.Map<Long, PriceCalculationService.PriceResult> priceMap = priceCalculationService.calculateFinalPrices(searchedFoods);
+
+        List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> results = searchedFoods.stream().map(food -> {
             com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO dto = com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO.fromEntity(food);
+            
+            PriceCalculationService.PriceResult priceResult = priceMap.get(food.getId());
+            if (priceResult != null) {
+                dto.setPrice(priceResult.finalPrice);
+                dto.setOriginalPrice(priceResult.originalPrice);
+                dto.setDiscountType(priceResult.discountType);
+            }
+
             if (lat != null && lng != null && food.getRestaurant() != null && food.getRestaurant().getLatitude() != null && food.getRestaurant().getLongitude() != null) {
                 double distance = calculateDistance(lat, lng, food.getRestaurant().getLatitude().doubleValue(), food.getRestaurant().getLongitude().doubleValue());
                 distance = Math.round(distance * 10.0) / 10.0;

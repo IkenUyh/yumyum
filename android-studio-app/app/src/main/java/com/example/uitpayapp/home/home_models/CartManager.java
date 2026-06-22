@@ -72,6 +72,9 @@ public class CartManager {
         );
         menuItem.setRestaurantId(dto.getRestaurantId());
         menuItem.setRestaurantName(dto.getRestaurantName());
+        menuItem.setRestaurantLatitude(dto.getRestaurantLatitude());
+        menuItem.setRestaurantLongitude(dto.getRestaurantLongitude());
+        menuItem.setSourcePromotion(dto.getAppliedPromotion() != null ? dto.getAppliedPromotion() : "NORMAL");
 
         List<CartTopping> toppings = new ArrayList<>();
         if (dto.getSelectedOptions() != null) {
@@ -187,7 +190,8 @@ public class CartManager {
     private void executeAddItemSync(CartItem item, final ApiCallback<String> callback) {
         Long foodId = getDbFoodId(item.getMenuItem().getId());
         List<Long> toppingIds = getToppingIds(item);
-        CartItemRequestDTO dto = new CartItemRequestDTO(foodId, item.getQuantity(), toppingIds);
+        String appliedPromotion = item.getMenuItem().getSourcePromotion() != null ? item.getMenuItem().getSourcePromotion() : "NORMAL";
+        CartItemRequestDTO dto = new CartItemRequestDTO(foodId, item.getQuantity(), toppingIds, appliedPromotion);
         cartRepository.addOrUpdateItem(dto, new ApiCallback<String>() {
             @Override
             public void onSuccess(String data) {
@@ -259,7 +263,8 @@ public class CartManager {
         }
         Long foodId = getDbFoodId(item.getMenuItem().getId());
         List<Long> toppingIds = getToppingIds(item);
-        CartItemRequestDTO dto = new CartItemRequestDTO(foodId, diff, toppingIds);
+        String appliedPromotion = item.getMenuItem().getSourcePromotion() != null ? item.getMenuItem().getSourcePromotion() : "NORMAL";
+        CartItemRequestDTO dto = new CartItemRequestDTO(foodId, diff, toppingIds, appliedPromotion);
         cartRepository.addOrUpdateItem(dto, new ApiCallback<String>() {
             @Override
             public void onSuccess(String data) {
@@ -290,8 +295,10 @@ public class CartManager {
         }
         CartItem oldItem = cartItems.get(position);
         boolean toppingsChanged = !new HashSet<>(oldItem.getSelectedToppings()).equals(new HashSet<>(newItem.getSelectedToppings()));
+        boolean promotionChanged = !String.valueOf(oldItem.getMenuItem().getSourcePromotion())
+                                    .equals(String.valueOf(newItem.getMenuItem().getSourcePromotion()));
         
-        if (!toppingsChanged) {
+        if (!toppingsChanged && !promotionChanged) {
             updateQuantitySync(position, newItem.getQuantity(), callback);
         } else {
             if (oldItem.getDbId() == null) {
@@ -339,8 +346,10 @@ public class CartManager {
             CartItem existing = cartItems.get(i);
             boolean sameName = existing.getMenuItem().getName().equals(item.getMenuItem().getName());
             boolean sameToppings = new HashSet<>(existing.getSelectedToppings()).equals(new HashSet<>(item.getSelectedToppings()));
+            boolean samePromotion = String.valueOf(existing.getMenuItem().getSourcePromotion())
+                                      .equals(String.valueOf(item.getMenuItem().getSourcePromotion()));
             
-            if (sameName && sameToppings) {
+            if (sameName && sameToppings && samePromotion) {
                 int newQty = existing.getQuantity() + item.getQuantity();
                 CartItem updatedItem = new CartItem(item.getDbId(), item.getMenuItem(), newQty, item.getSelectedToppings());
                 cartItems.set(i, updatedItem);
@@ -359,8 +368,10 @@ public class CartManager {
                 CartItem existing = cartItems.get(i);
                 boolean sameName = existing.getMenuItem().getName().equals(newItem.getMenuItem().getName());
                 boolean sameToppings = new HashSet<>(existing.getSelectedToppings()).equals(new HashSet<>(newItem.getSelectedToppings()));
+                boolean samePromotion = String.valueOf(existing.getMenuItem().getSourcePromotion())
+                                          .equals(String.valueOf(newItem.getMenuItem().getSourcePromotion()));
                 
-                if (sameName && sameToppings) {
+                if (sameName && sameToppings && samePromotion) {
                     int newQty = existing.getQuantity() + newItem.getQuantity();
                     CartItem updatedItem = new CartItem(newItem.getDbId(), newItem.getMenuItem(), newQty, newItem.getSelectedToppings());
                     cartItems.set(i, updatedItem);

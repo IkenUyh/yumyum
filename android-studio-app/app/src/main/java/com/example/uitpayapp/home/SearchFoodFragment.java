@@ -138,10 +138,11 @@ public class SearchFoodFragment extends Fragment {
                         filteredFoods.clear();
                         if (result != null) {
                             for (com.example.uitpayapp.modules.food.models.responses.FoodResponse res : result) {
+                                long finalPrice = (res.getOriginalPrice() != null && res.getOriginalPrice().longValue() > 0) ? res.getOriginalPrice().longValue() : res.getPrice().longValue();
                                 FoodMenuItem item = new FoodMenuItem(
                                         res.getId().toString(),
                                         res.getName(),
-                                        res.getPrice() != null ? res.getPrice().longValue() : 0L,
+                                        finalPrice,
                                         0,
                                         res.getDescription(),
                                         res.getImageUrl()
@@ -149,6 +150,9 @@ public class SearchFoodFragment extends Fragment {
                                 item.setRestaurantId(res.getRestaurantId());
                                 item.setRestaurantName(res.getRestaurantName());
                                 item.setDistance(res.getDistance());
+                                item.setOriginalPrice(finalPrice);
+                                item.setDiscountType(res.getDiscountType());
+                                item.setSourcePromotion("NORMAL");
                                 filteredFoods.add(item);
                             }
                         }
@@ -251,6 +255,28 @@ public class SearchFoodFragment extends Fragment {
                 }
             }
             
+            if (item.getOriginalPrice() > 0 && item.getOriginalPrice() > item.getPrice()) {
+                if (holder.tvOriginalPrice != null) {
+                    holder.tvOriginalPrice.setVisibility(View.VISIBLE);
+                    java.text.NumberFormat formatter = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+                    holder.tvOriginalPrice.setText(formatter.format(item.getOriginalPrice()) + "đ");
+                    holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+                }
+                if (holder.tvDiscountTag != null) {
+                    holder.tvDiscountTag.setVisibility(View.VISIBLE);
+                    if (item.getDiscountType() != null && !item.getDiscountType().isEmpty()) {
+                        holder.tvDiscountTag.setText(item.getDiscountType());
+                    } else if (item.getDiscountPercent() > 0) {
+                        holder.tvDiscountTag.setText("-" + item.getDiscountPercent() + "%");
+                    } else {
+                        holder.tvDiscountTag.setVisibility(View.GONE);
+                    }
+                }
+            } else {
+                if (holder.tvOriginalPrice != null) holder.tvOriginalPrice.setVisibility(View.GONE);
+                if (holder.tvDiscountTag != null) holder.tvDiscountTag.setVisibility(View.GONE);
+            }
+            
             holder.itemView.setOnClickListener(v -> listener.onItemClick(item, holder.ivImage));
         }
 
@@ -260,7 +286,7 @@ public class SearchFoodFragment extends Fragment {
         }
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
-            TextView tvName, tvPrice, tvStoreName, tvDistance;
+            TextView tvName, tvPrice, tvStoreName, tvDistance, tvOriginalPrice, tvDiscountTag;
             ImageView ivImage;
             public ViewHolder(View itemView) {
                 super(itemView);
@@ -269,16 +295,11 @@ public class SearchFoodFragment extends Fragment {
                 ivImage = itemView.findViewById(R.id.iv_food_image);
                 tvStoreName = itemView.findViewById(R.id.tv_store_name);
                 tvDistance = itemView.findViewById(R.id.tv_distance);
-                
-                // Hide unnecessary elements for search view
-                View discountTag = itemView.findViewById(R.id.tv_discount_tag);
-                if (discountTag != null) discountTag.setVisibility(View.GONE);
+                tvOriginalPrice = itemView.findViewById(R.id.tv_original_price);
+                tvDiscountTag = itemView.findViewById(R.id.tv_discount_tag);
 
                 View soldInfo = itemView.findViewById(R.id.ll_sold_info);
                 if (soldInfo != null) soldInfo.setVisibility(View.GONE);
-
-                View originalPrice = itemView.findViewById(R.id.tv_original_price);
-                if (originalPrice != null) originalPrice.setVisibility(View.GONE);
 
                 View btnBuyNow = itemView.findViewById(R.id.btn_buy_now);
                 if (btnBuyNow != null) btnBuyNow.setVisibility(View.GONE);

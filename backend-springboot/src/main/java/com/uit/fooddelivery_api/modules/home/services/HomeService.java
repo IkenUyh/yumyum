@@ -9,6 +9,7 @@ import com.uit.fooddelivery_api.modules.food.repositories.FoodRepository;
 import com.uit.fooddelivery_api.modules.home.dtos.*;
 import com.uit.fooddelivery_api.modules.restaurant.entities.Restaurant;
 import com.uit.fooddelivery_api.modules.restaurant.repositories.RestaurantRepository;
+import com.uit.fooddelivery_api.modules.food.services.PriceCalculationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -27,6 +29,7 @@ public class HomeService {
         private final FoodRepository foodRepository;
         private final CategoryRepository categoryRepository;
         private final FlashSaleItemRepository flashSaleItemRepository;
+        private final PriceCalculationService priceCalculationService;
         private final Random random = new Random();
 
         private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -68,30 +71,39 @@ public class HomeService {
                                 .build());
 
                 // 3. Flashsales
-                List<FlashSaleItem> activeFS = flashSaleItemRepository.findActiveFlashSaleItems(LocalDateTime.now());
-                // Lấy tất cả Food cùng Restaurant (chỉ gọi 1 lần để dùng chung)
                 List<Food> allFoodsWithRestaurant = foodRepository.findAllWithRestaurant();
+                Map<Long, PriceCalculationService.PriceResult> priceMap = priceCalculationService.calculateFinalPrices(allFoodsWithRestaurant);
 
                 List<FoodMenuItemDTO> flashSales = new ArrayList<>();
-                if (!activeFS.isEmpty()) {
-                        flashSales = activeFS.stream()
-                                        .map(fs -> {
-                                                long salePrice = fs.getSalePrice().longValue();
-                                                long origPrice = fs.getFood().getPrice().longValue();
+                List<Food> foodsWithFlashSale = allFoodsWithRestaurant.stream()
+                                .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
+                                .filter(f -> {
+                                        PriceCalculationService.PriceResult pr = priceMap.get(f.getId());
+                                        return pr != null && "FLASHSALE".equals(pr.discountType);
+                                })
+                                .collect(Collectors.toList());
+
+                if (!foodsWithFlashSale.isEmpty()) {
+                        flashSales = foodsWithFlashSale.stream()
+                                        .map(f -> {
+                                                PriceCalculationService.PriceResult pr = priceMap.get(f.getId());
+                                                long salePrice = pr.finalPrice.longValue();
+                                                long origPrice = pr.originalPrice.longValue();
                                                 int discount = origPrice > 0
                                                         ? (int) Math.round((1.0 - (double) salePrice / origPrice) * 100)
                                                         : 0;
                                                 return FoodMenuItemDTO.builder()
-                                                        .id("fs_" + fs.getFood().getId())
-                                                        .name(fs.getFood().getName())
+                                                        .id("fs_" + f.getId())
+                                                        .name(f.getName())
                                                         .price(salePrice)
                                                         .originalPrice(origPrice)
                                                         .discountPercent(discount)
+                                                        .discountType(pr.discountType)
                                                         .imageResId(0)
-                                                        .imageUrl(fs.getFood().getImageUrl())
-                                                        .description(fs.getFood().getDescription())
-                                                        .restaurantId(fs.getFood().getRestaurant() != null ? fs.getFood().getRestaurant().getId() : null)
-                                                        .restaurantName(fs.getFood().getRestaurant() != null ? fs.getFood().getRestaurant().getName() : null)
+                                                        .imageUrl(f.getImageUrl())
+                                                        .description(f.getDescription())
+                                                        .restaurantId(f.getRestaurant() != null ? f.getRestaurant().getId() : null)
+                                                        .restaurantName(f.getRestaurant() != null ? f.getRestaurant().getName() : null)
                                                         .build();
                                         })
                                         .limit(5)
@@ -101,15 +113,19 @@ public class HomeService {
                         flashSales = allFoodsWithRestaurant.stream()
                                         .filter(f -> f.getIsAvailable() != null && f.getIsAvailable())
                                         .map(f -> {
-                                                long origPrice = f.getPrice().longValue();
-                                                long salePrice = f.getPrice().multiply(BigDecimal.valueOf(0.5))
-                                                                .longValue();
+                                                PriceCalculationService.PriceResult pr = priceMap.get(f.getId());
+                                                long origPrice = pr != null ? pr.originalPrice.longValue() : f.getPrice().longValue();
+                                                long salePrice = pr != null ? pr.finalPrice.longValue() : f.getPrice().multiply(BigDecimal.valueOf(0.5)).longValue();
+                                                String discType = pr != null ? pr.discountType : "DEAL 50%";
+                                                int discount = origPrice > 0 ? (int) Math.round((1.0 - (double) salePrice / origPrice) * 100) : 50;
+
                                                 return FoodMenuItemDTO.builder()
                                                         .id("f_" + f.getId())
                                                         .name(f.getName())
                                                         .price(salePrice)
                                                         .originalPrice(origPrice)
-                                                        .discountPercent(50)
+                                                        .discountPercent(discount)
+                                                        .discountType(discType)
                                                         .imageResId(0)
                                                         .imageUrl(f.getImageUrl())
                                                         .description(f.getDescription())
@@ -201,10 +217,14 @@ public class HomeService {
                                                 distance = Math.round(distance * 10.0) / 10.0;
                                         }
                                         int delTime = (int) (distance * 4 + 10);
-                                        double origPrice = f.getPrice().doubleValue();
-                                        double discPrice = origPrice * 0.8;
+                                        PriceCalculationService.PriceResult pr = priceCalculationService.calculateFinalPrice(f);
+                                        double origPrice = pr.originalPrice.doubleValue();
+                                        double discPrice = pr.finalPrice.doubleValue();
                                         double rating = 3.5 + itemRandom.nextDouble() * 1.5;
                                         rating = Math.round(rating * 10.0) / 10.0;
+                                        
+                                        int discount = origPrice > 0 ? (int) Math.round((1.0 - discPrice / origPrice) * 100) : 0;
+                                        String discountTag = pr.discountType != null ? pr.discountType : ("-" + discount + "%");
 
                                         return RecommendedDealDTO.builder()
                                                         .storeName(f.getRestaurant().getName())
@@ -212,7 +232,7 @@ public class HomeService {
                                                         .deliveryTime(delTime)
                                                         .foodImageResId(0)
                                                         .imageUrl(f.getImageUrl())
-                                                        .discountTag("-20%")
+                                                        .discountTag(discountTag)
                                                         .foodTitle(f.getName())
                                                         .soldCount(10 + itemRandom.nextInt(200))
                                                         .originalPrice(origPrice)

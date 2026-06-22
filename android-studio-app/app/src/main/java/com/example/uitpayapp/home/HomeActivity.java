@@ -875,6 +875,7 @@ public class HomeActivity extends AppCompatActivity {
                 discountedItem.setRestaurantName(item.getRestaurantName());
                 discountedItem.setOriginalPrice(originalPrice);
                 discountedItem.setDiscountPercent(discountPct);
+                discountedItem.setSourcePromotion("FLASHSALE");
                 showFoodItemDetailPopup(discountedItem, iv);
             });
         }

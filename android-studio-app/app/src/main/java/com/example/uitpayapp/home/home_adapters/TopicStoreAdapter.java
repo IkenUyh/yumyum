@@ -41,6 +41,26 @@ public class TopicStoreAdapter extends RecyclerView.Adapter<TopicStoreAdapter.Vi
         FoodMenuItem food = foods.get(position);
         holder.tvName.setText(food.getName());
         holder.tvPrice.setText(food.getFormattedPrice());
+
+        if (food.getOriginalPrice() > 0 && food.getOriginalPrice() > food.getPrice()) {
+            holder.tvOriginalPrice.setVisibility(View.VISIBLE);
+            holder.tvDiscountTag.setVisibility(View.VISIBLE);
+            
+            java.text.NumberFormat formatter = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+            holder.tvOriginalPrice.setText(formatter.format(food.getOriginalPrice()) + "đ");
+            holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+            
+            if (food.getDiscountType() != null && !food.getDiscountType().isEmpty()) {
+                holder.tvDiscountTag.setText(food.getDiscountType());
+            } else if (food.getDiscountPercent() > 0) {
+                holder.tvDiscountTag.setText("-" + food.getDiscountPercent() + "%");
+            } else {
+                holder.tvDiscountTag.setVisibility(View.GONE);
+            }
+        } else {
+            holder.tvOriginalPrice.setVisibility(View.GONE);
+            holder.tvDiscountTag.setVisibility(View.GONE);
+        }
         
         if (food.getRestaurantName() != null && !food.getRestaurantName().isEmpty()) {
             holder.tvStoreName.setText(food.getRestaurantName());
@@ -102,7 +122,7 @@ public class TopicStoreAdapter extends RecyclerView.Adapter<TopicStoreAdapter.Vi
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView ivImage;
-        TextView tvName, tvStoreName, tvPrice;
+        TextView tvName, tvStoreName, tvPrice, tvOriginalPrice, tvDiscountTag;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -110,6 +130,8 @@ public class TopicStoreAdapter extends RecyclerView.Adapter<TopicStoreAdapter.Vi
             tvName = itemView.findViewById(R.id.tv_topic_food_name);
             tvStoreName = itemView.findViewById(R.id.tv_topic_store_name);
             tvPrice = itemView.findViewById(R.id.tv_topic_food_price);
+            tvOriginalPrice = itemView.findViewById(R.id.tv_original_price);
+            tvDiscountTag = itemView.findViewById(R.id.tv_discount_tag);
         }
     }
 }

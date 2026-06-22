@@ -17,7 +17,7 @@ import java.util.List;
 public class CartController {
 
     private final CartService cartService;
-    private final com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository;
+    private final com.uit.fooddelivery_api.modules.food.services.PriceCalculationService priceCalculationService;
 
     // Xem giỏ hàng
     @GetMapping
@@ -25,7 +25,7 @@ public class CartController {
         User currentUser = (User) authentication.getPrincipal();
         List<CartItemResponseDTO> cartItems = cartService.getMyCart(currentUser)
                 .stream()
-                .map(item -> CartItemResponseDTO.fromEntity(item, flashSaleItemRepository))
+                .map(item -> CartItemResponseDTO.fromEntity(item, priceCalculationService))
                 .toList();
         return ApiResponse.success(cartItems);
     }

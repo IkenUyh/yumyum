@@ -13,12 +13,16 @@ public class CartItemRequestDTO {
     @SerializedName("selectedOptionItemIds")
     private List<Long> selectedOptionItemIds;
 
+    @SerializedName("appliedPromotion")
+    private String appliedPromotion;
+
     public CartItemRequestDTO() {}
 
-    public CartItemRequestDTO(Long foodId, Integer quantity, List<Long> selectedOptionItemIds) {
+    public CartItemRequestDTO(Long foodId, Integer quantity, List<Long> selectedOptionItemIds, String appliedPromotion) {
         this.foodId = foodId;
         this.quantity = quantity;
         this.selectedOptionItemIds = selectedOptionItemIds;
+        this.appliedPromotion = appliedPromotion;
     }
 
     public Long getFoodId() { return foodId; }
@@ -29,4 +33,7 @@ public class CartItemRequestDTO {
 
     public List<Long> getSelectedOptionItemIds() { return selectedOptionItemIds; }
     public void setSelectedOptionItemIds(List<Long> selectedOptionItemIds) { this.selectedOptionItemIds = selectedOptionItemIds; }
+
+    public String getAppliedPromotion() { return appliedPromotion; }
+    public void setAppliedPromotion(String appliedPromotion) { this.appliedPromotion = appliedPromotion; }
 }

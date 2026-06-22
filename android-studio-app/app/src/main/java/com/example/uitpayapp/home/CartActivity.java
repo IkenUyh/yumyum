@@ -184,15 +184,40 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
             return;
         }
 
-        long totalAmount = cartManager.getTotalPrice();
-        String productNames = cartManager.getProductSummary();
+        com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        Double userLat = session.getDeliveryLatitude();
+        Double userLng = session.getDeliveryLongitude();
+
+        if (userLat == null || userLng == null) {
+            new AlertDialog.Builder(this)
+                .setTitle("Thiếu địa chỉ")
+                .setMessage("Vui lòng chọn địa chỉ giao hàng ở Trang Chủ trước khi tiến hành thanh toán.")
+                .setPositiveButton("Đóng", null)
+                .show();
+            return;
+        }
+
+        CartItem firstItem = cartManager.getCart().get(0);
+        Double restLat = firstItem.getMenuItem().getRestaurantLatitude();
+        Double restLng = firstItem.getMenuItem().getRestaurantLongitude();
+
+        if (restLat != null && restLng != null) {
+            float[] results = new float[1];
+            android.location.Location.distanceBetween(userLat, userLng, restLat, restLng, results);
+            double distanceKm = results[0] / 1000.0;
+
+            if (distanceKm > 15.0) {
+                new AlertDialog.Builder(this)
+                    .setTitle("Quá xa để giao hàng")
+                    .setMessage(String.format(java.util.Locale.getDefault(), "Khoảng cách hiện tại đến cửa hàng là %.1f km, vượt quá giới hạn giao hàng tối đa (15km).", distanceKm))
+                    .setPositiveButton("Đóng", null)
+                    .show();
+                return;
+            }
+        }
 
         Intent intent = new Intent(this, com.example.uitpayapp.home.checkout.FoodCheckoutActivity.class);
         startActivity(intent);
-
-        // We do NOT clear cart here because checkout might be cancelled.
-        // Cart will be cleared upon successful confirmation inside FoodCheckoutActivity.
-        // We also do not finish() so that the back button returns to the CartActivity.
     }
 
     @Override

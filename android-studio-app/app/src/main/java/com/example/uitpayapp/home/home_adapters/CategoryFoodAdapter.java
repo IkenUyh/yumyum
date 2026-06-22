@@ -48,6 +48,26 @@ public class CategoryFoodAdapter extends RecyclerView.Adapter<CategoryFoodAdapte
         holder.tvDesc.setText(item.getDescription());
         holder.tvPrice.setText(item.getFormattedPrice());
 
+        if (item.getOriginalPrice() > 0 && item.getOriginalPrice() > item.getPrice()) {
+            holder.tvOriginalPrice.setVisibility(View.VISIBLE);
+            holder.tvDiscountTag.setVisibility(View.VISIBLE);
+            
+            java.text.NumberFormat formatter = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+            holder.tvOriginalPrice.setText(formatter.format(item.getOriginalPrice()) + "đ");
+            holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+            
+            if (item.getDiscountType() != null && !item.getDiscountType().isEmpty()) {
+                holder.tvDiscountTag.setText(item.getDiscountType());
+            } else if (item.getDiscountPercent() > 0) {
+                holder.tvDiscountTag.setText("-" + item.getDiscountPercent() + "%");
+            } else {
+                holder.tvDiscountTag.setVisibility(View.GONE);
+            }
+        } else {
+            holder.tvOriginalPrice.setVisibility(View.GONE);
+            holder.tvDiscountTag.setVisibility(View.GONE);
+        }
+
         // Ưu tiên load ảnh từ URL (server), fallback sang imageResId (local)
         holder.ivImage.clearAnimation();
         String imageUrl = item.getImageUrl();
@@ -104,7 +124,7 @@ public class CategoryFoodAdapter extends RecyclerView.Adapter<CategoryFoodAdapte
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivImage;
-        TextView tvName, tvDesc, tvPrice;
+        TextView tvName, tvDesc, tvPrice, tvOriginalPrice, tvDiscountTag;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -112,6 +132,8 @@ public class CategoryFoodAdapter extends RecyclerView.Adapter<CategoryFoodAdapte
             tvName = itemView.findViewById(R.id.tv_food_name);
             tvDesc = itemView.findViewById(R.id.tv_food_desc);
             tvPrice = itemView.findViewById(R.id.tv_food_price);
+            tvOriginalPrice = itemView.findViewById(R.id.tv_original_price);
+            tvDiscountTag = itemView.findViewById(R.id.tv_discount_tag);
         }
     }
 }

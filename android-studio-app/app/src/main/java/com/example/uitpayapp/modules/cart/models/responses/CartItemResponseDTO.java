@@ -30,11 +30,20 @@ public class CartItemResponseDTO {
     @SerializedName("restaurantName")
     private String restaurantName;
 
+    @SerializedName("restaurantLatitude")
+    private Double restaurantLatitude;
+
+    @SerializedName("restaurantLongitude")
+    private Double restaurantLongitude;
+
     @SerializedName("selectedOptions")
     private List<Map<String, Object>> selectedOptions; // Trả về list mapping map chứa thông tin topping để vẽ UI
 
     @SerializedName("itemTotal")
     private BigDecimal itemTotal;
+
+    @SerializedName("appliedPromotion")
+    private String appliedPromotion;
 
     // Getters và Setters
     public Long getId() { return id; }
@@ -48,6 +57,12 @@ public class CartItemResponseDTO {
 
     public String getRestaurantName() { return restaurantName; }
     public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
+
+    public Double getRestaurantLatitude() { return restaurantLatitude; }
+    public void setRestaurantLatitude(Double restaurantLatitude) { this.restaurantLatitude = restaurantLatitude; }
+
+    public Double getRestaurantLongitude() { return restaurantLongitude; }
+    public void setRestaurantLongitude(Double restaurantLongitude) { this.restaurantLongitude = restaurantLongitude; }
 
     public String getFoodName() { return foodName; }
     public void setFoodName(String foodName) { this.foodName = foodName; }
@@ -66,4 +81,7 @@ public class CartItemResponseDTO {
 
     public BigDecimal getItemTotal() { return itemTotal; }
     public void setItemTotal(BigDecimal itemTotal) { this.itemTotal = itemTotal; }
+
+    public String getAppliedPromotion() { return appliedPromotion; }
+    public void setAppliedPromotion(String appliedPromotion) { this.appliedPromotion = appliedPromotion; }
 }

@@ -23,27 +23,25 @@ public class CartItemResponseDTO {
     private Integer quantity;
     private Long restaurantId;
     private String restaurantName;
+    private BigDecimal restaurantLatitude;
+    private BigDecimal restaurantLongitude;
     private List<Map<String, Object>> selectedOptions; // Trả về list topping cho frontend dễ vẽ UI
     private BigDecimal itemTotal;
+    private String appliedPromotion;
 
     public static CartItemResponseDTO fromEntity(CartItem cartItem) {
         return fromEntity(cartItem, null);
     }
 
-    public static CartItemResponseDTO fromEntity(CartItem cartItem, com.uit.fooddelivery_api.modules.flashsale.repositories.FlashSaleItemRepository flashSaleItemRepository) {
+    public static CartItemResponseDTO fromEntity(CartItem cartItem, com.uit.fooddelivery_api.modules.food.services.PriceCalculationService priceCalculationService) {
         BigDecimal basePrice = cartItem.getFood().getPrice();
-        boolean hasFlashSale = false;
-        if (flashSaleItemRepository != null) {
-            java.util.Optional<com.uit.fooddelivery_api.modules.flashsale.entities.FlashSaleItem> flashSaleOpt =
-                    flashSaleItemRepository.findActiveFlashSaleItemByFoodId(cartItem.getFood().getId(), java.time.LocalDateTime.now());
-            if (flashSaleOpt.isPresent()) {
-                basePrice = flashSaleOpt.get().getSalePrice();
-                hasFlashSale = true;
-            }
+        
+        if (priceCalculationService != null) {
+            com.uit.fooddelivery_api.modules.food.services.PriceCalculationService.PriceResult pr = 
+                priceCalculationService.calculateFinalPrice(cartItem.getFood(), cartItem.getAppliedPromotion());
+            basePrice = pr.finalPrice;
         }
-        if (!hasFlashSale) {
-            basePrice = basePrice.multiply(BigDecimal.valueOf(0.8));
-        }
+
         Integer qty = cartItem.getQuantity();
         BigDecimal optionsTotal = BigDecimal.ZERO;
         List<Map<String, Object>> parsedOptions = null;
@@ -74,12 +72,15 @@ public class CartItemResponseDTO {
                 .foodId(cartItem.getFood().getId())
                 .restaurantId(cartItem.getFood().getRestaurant().getId())
                 .restaurantName(cartItem.getFood().getRestaurant().getName())
+                .restaurantLatitude(cartItem.getFood().getRestaurant().getLatitude())
+                .restaurantLongitude(cartItem.getFood().getRestaurant().getLongitude())
                 .foodName(cartItem.getFood().getName())
                 .foodImageUrl(cartItem.getFood().getImageUrl())
                 .basePrice(basePrice)
                 .quantity(qty)
                 .selectedOptions(parsedOptions)
                 .itemTotal(itemTotal)
+                .appliedPromotion(cartItem.getAppliedPromotion())
                 .build();
     }
 }
