@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/4/47/Logo_UIT_updated.png" alt="UIT Logo" width="300">
+  <img src="docs/uit.png" alt="UIT Logo" width="600">
 </p>
 
-<h1 align="center">YumYum - Food Delivery Android Application 🍔💳</h1>
+<h1 align="center">YumYum - Food Delivery Android Application 🍔</h1>
 
 <p align="center">
   <strong>Đồ án môn học: Nhập môn ứng dụng di động</strong>
@@ -50,17 +50,17 @@
 ## 🌟 Tính năng nổi bật
 
 ### Dành cho Người dùng (Client App)
-- 🔐 **Xác thực đa lớp:** Đăng nhập, đăng ký an toàn. Hỗ trợ xác thực qua mã OTP và bảo mật giao dịch bằng mã PIN.
-- 🍔 **Khám phá ẩm thực:** Duyệt danh sách nhà hàng, món ăn với tính năng tìm kiếm thông minh và lọc linh hoạt.
-- 🛒 **Quản lý đơn hàng:** Thêm vào giỏ hàng, đặt món nhanh chóng và theo dõi trạng thái đơn hàng **thời gian thực (Real-time)**.
-- 💳 **Ví điện tử (YumYum Pay):** Nạp/rút tiền, thanh toán nội bộ và tích hợp cổng thanh toán bên thứ ba (VNPay).
-- 📍 **Định vị & Bản đồ:** Theo dõi vị trí giao hàng và tìm kiếm cửa hàng lân cận thông qua bản đồ tích hợp.
-- 🔔 **Thông báo:** Nhận thông báo đẩy (Push Notifications) về trạng thái đơn hàng, khuyến mãi.
+- **Xác thực đa lớp:** Đăng nhập, đăng ký an toàn. Hỗ trợ xác thực qua mã OTP và bảo mật giao dịch bằng mã PIN.
+- **Khám phá ẩm thực:** Duyệt danh sách nhà hàng, món ăn với tính năng tìm kiếm thông minh và lọc linh hoạt.
+- **Quản lý đơn hàng:** Thêm vào giỏ hàng, đặt món nhanh chóng và theo dõi trạng thái đơn hàng **thời gian thực (Real-time)**.
+- **Ví điện tử (YumYum Pay):** Nạp/rút tiền, thanh toán nội bộ và tích hợp cổng thanh toán bên thứ ba (VNPay).
+- **Định vị & Bản đồ:** Theo dõi vị trí giao hàng và tìm kiếm cửa hàng lân cận thông qua bản đồ tích hợp.
+- **Thông báo:** Nhận thông báo đẩy (Push Notifications) về trạng thái đơn hàng, khuyến mãi.
 
 ### Dành cho Hệ thống (Backend API)
-- 🛡️ **Bảo mật:** Phân quyền chặt chẽ bằng Spring Security kết hợp JSON Web Token (JWT).
-- ⚡ **Hiệu suất cao:** Tối ưu hóa truy vấn với Caching (Redis) và tìm kiếm tốc độ cao (Elasticsearch).
-- 🔄 **Đồng bộ thời gian thực:** Quản lý kết nối hai chiều (WebSocket) phục vụ tính năng chat và cập nhật trạng thái đơn hàng lập tức.
+- **Bảo mật:** Phân quyền chặt chẽ bằng Spring Security kết hợp JSON Web Token (JWT).
+- **Hiệu suất cao:** Tối ưu hóa truy vấn với Caching (Redis) và tìm kiếm tốc độ cao (Elasticsearch).
+- **Đồng bộ thời gian thực:** Quản lý kết nối hai chiều (WebSocket) phục vụ tính năng chat và cập nhật trạng thái đơn hàng lập tức.
 
 ---
 
@@ -106,7 +106,7 @@ zalopay-android-integration/
 
 ## 🚀 Hướng dẫn cài đặt
 
-Vì hệ thống máy chủ (Backend Server) đã được triển khai chạy thực tế (Live), bạn **chỉ cần chạy ứng dụng Android** là có thể trải nghiệm toàn bộ tính năng.
+Vì hệ thống máy chủ (Backend Server) đã được triển khai chạy thực tế (Live), ta **chỉ cần chạy ứng dụng Android** là có thể trải nghiệm toàn bộ tính năng.
 
 ### 1. Khởi chạy Ứng dụng Android (Chính)
 
@@ -153,5 +153,5 @@ docker-compose up -d
 
 ---
 <p align="center">
-  Được phát triển với ❤️ bởi <b>Nhóm Đồ án</b>
+  Được phát triển với ❤️ bởi <b>Nhóm 14</b>
 </p>
