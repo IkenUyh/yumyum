@@ -230,11 +230,13 @@ public class SearchStoreFragment extends Fragment {
             }
             
             // Bind address
-            if (item.getAddress() != null && !item.getAddress().isEmpty()) {
-                holder.tvAddress.setText(item.getAddress());
-                holder.tvAddress.setVisibility(View.VISIBLE);
-            } else {
-                holder.tvAddress.setVisibility(View.GONE);
+            if (holder.tvAddress != null) {
+                if (item.getAddress() != null && !item.getAddress().isEmpty()) {
+                    holder.tvAddress.setText(item.getAddress());
+                    holder.tvAddress.setVisibility(View.VISIBLE);
+                } else {
+                    holder.tvAddress.setVisibility(View.GONE);
+                }
             }
 
             // Load remote image with placeholder animation

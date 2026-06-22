@@ -49,11 +49,8 @@ public class RestaurantSearchController {
         // 1. Cố gắng tìm kiếm qua Elasticsearch trước
         try {
             log.info("Searching restaurants via Elasticsearch: q='{}'", cleanKeyword);
-            List<com.uit.fooddelivery_api.modules.search.documents.RestaurantDocument> esDocs = restaurantSearchRepository.findByNameContaining(cleanKeyword);
-            if (esDocs != null) {
-                if (esDocs.isEmpty()) {
-                    return ApiResponse.success(java.util.Collections.emptyList());
-                }
+            List<com.uit.fooddelivery_api.modules.search.documents.RestaurantDocument> esDocs = restaurantSearchRepository.searchFuzzyByName(cleanKeyword);
+            if (esDocs != null && !esDocs.isEmpty()) {
                 List<Long> ids = esDocs.stream()
                         .map(doc -> Long.parseLong(doc.getId()))
                         .toList();
@@ -65,7 +62,9 @@ public class RestaurantSearchController {
                 } else {
                     results = restaurantRepository.findRestaurantsByIds(ids);
                 }
-                return ApiResponse.success(results);
+                if (results != null && !results.isEmpty()) {
+                    return ApiResponse.success(results);
+                }
             }
         } catch (Exception e) {
             log.warn("Elasticsearch search failed, falling back to MySQL Full-Text Search. Reason: {}", e.getMessage());
@@ -79,9 +78,9 @@ public class RestaurantSearchController {
 
         List<RestaurantDistanceView> results;
         if (lat != null && lng != null) {
-            results = restaurantRepository.searchRestaurantsByKeywordAndLocation(booleanKeyword, lat, lng, radiusKm);
+            results = restaurantRepository.searchRestaurantsByKeywordAndLocation(booleanKeyword, cleanKeyword, lat, lng, radiusKm);
         } else {
-            results = restaurantRepository.searchRestaurantsByKeyword(booleanKeyword);
+            results = restaurantRepository.searchRestaurantsByKeyword(booleanKeyword, cleanKeyword);
         }
         return ApiResponse.success(results);
     }

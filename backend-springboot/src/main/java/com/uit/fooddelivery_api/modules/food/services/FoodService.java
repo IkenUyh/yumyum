@@ -192,21 +192,90 @@ public class FoodService {
     }
 
     public List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> searchFoodsByKeyword(String keyword, Double lat, Double lng) {
-        String booleanKeyword = java.util.Arrays.stream(keyword.trim().split("\\s+"))
+        String cleanKeyword = keyword.trim();
+        String booleanKeyword = java.util.Arrays.stream(cleanKeyword.split("\\s+"))
                 .filter(w -> !w.isEmpty())
                 .map(word -> "+" + word)
                 .collect(java.util.stream.Collectors.joining(" "));
         if (booleanKeyword.isEmpty()) {
             return java.util.Collections.emptyList();
         }
-        return foodRepository.searchFoodsByKeyword(booleanKeyword).stream().map(food -> {
+
+        List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> results = foodRepository.searchFoodsByKeyword(booleanKeyword, cleanKeyword).stream().map(food -> {
             com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO dto = com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO.fromEntity(food);
             if (lat != null && lng != null && food.getRestaurant() != null && food.getRestaurant().getLatitude() != null && food.getRestaurant().getLongitude() != null) {
                 double distance = calculateDistance(lat, lng, food.getRestaurant().getLatitude().doubleValue(), food.getRestaurant().getLongitude().doubleValue());
                 distance = Math.round(distance * 10.0) / 10.0;
                 dto.setDistance(distance);
+            } else {
+                dto.setDistance(0.0); // Default distance
             }
             return dto;
-        }).toList();
+        }).collect(java.util.stream.Collectors.toList()); // Collect to a mutable list
+
+        // Fallback: Fuzzy search in Java if DB returns empty or if we want to augment results
+        if (results.isEmpty()) {
+            List<com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO> allFoods = getAllAvailableFoods(lat, lng);
+            for (com.uit.fooddelivery_api.modules.food.dtos.FoodResponseDTO f : allFoods) {
+                if (f.getDistance() != null && f.getDistance() <= 20.0 && isFuzzyMatch(f.getName(), cleanKeyword)) {
+                    results.add(f);
+                }
+            }
+        }
+
+        // Sort primarily by distance ASC
+        results.sort((f1, f2) -> {
+            Double d1 = f1.getDistance() != null ? f1.getDistance() : 0.0;
+            Double d2 = f2.getDistance() != null ? f2.getDistance() : 0.0;
+            return Double.compare(d1, d2);
+        });
+
+        return results;
+    }
+
+    private String removeAccents(String str) {
+        if (str == null) return "";
+        String nfdNormalizedString = java.text.Normalizer.normalize(str, java.text.Normalizer.Form.NFD);
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(nfdNormalizedString).replaceAll("").replace('đ', 'd').replace('Đ', 'D');
+    }
+
+    private boolean isFuzzyMatch(String text, String keyword) {
+        if (text == null || keyword == null) return false;
+        String textNoAccent = removeAccents(text).toLowerCase();
+        String kwNoAccent = removeAccents(keyword).toLowerCase();
+        
+        if (textNoAccent.contains(kwNoAccent)) return true;
+
+        String[] textWords = textNoAccent.split("\\s+");
+        String[] keyWords = kwNoAccent.split("\\s+");
+        for (String kw : keyWords) {
+            boolean wordMatched = false;
+            for (String tw : textWords) {
+                if (tw.contains(kw) || calculateLevenshtein(tw, kw) <= 1) {
+                    wordMatched = true;
+                    break;
+                }
+            }
+            if (!wordMatched) return false;
+        }
+        return true;
+    }
+
+    private int calculateLevenshtein(String a, String b) {
+        int[][] dp = new int[a.length() + 1][b.length() + 1];
+        for (int i = 0; i <= a.length(); i++) {
+            for (int j = 0; j <= b.length(); j++) {
+                if (i == 0) {
+                    dp[i][j] = j;
+                } else if (j == 0) {
+                    dp[i][j] = i;
+                } else {
+                    dp[i][j] = Math.min(dp[i - 1][j - 1] + (a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1), 
+                        Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1));
+                }
+            }
+        }
+        return dp[a.length()][b.length()];
     }
 }
