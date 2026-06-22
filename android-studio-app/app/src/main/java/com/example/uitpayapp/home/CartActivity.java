@@ -116,7 +116,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
             @Override
             public void onSuccess(String data) {
                 runOnUiThread(() -> {
-                    cartAdapter.notifyItemChanged(position);
+                    cartAdapter.notifyDataSetChanged();
                     updateCartUI();
                 });
             }
@@ -158,7 +158,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
                 @Override
                 public void onSuccess(String data) {
                     runOnUiThread(() -> {
-                        cartAdapter.removeItem(position);
+                        cartAdapter.notifyDataSetChanged();
                         updateCartUI();
                         showCustomSnackbar("Đã xóa khỏi giỏ hàng");
                         dialog.dismiss();
