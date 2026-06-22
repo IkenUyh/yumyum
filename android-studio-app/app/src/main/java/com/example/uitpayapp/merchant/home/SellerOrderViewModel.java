@@ -44,6 +44,7 @@ public class SellerOrderViewModel extends AndroidViewModel {
     private StompClient mStompClient;
     private long connectedStoreId = -1L;
     private final MutableLiveData<String> newOrderEvent = new MutableLiveData<>();
+    private final android.os.Handler reconnectHandler = new android.os.Handler(android.os.Looper.getMainLooper());
 
     // UI feedback
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
@@ -78,7 +79,7 @@ public class SellerOrderViewModel extends AndroidViewModel {
                 .getSharedPreferences("SellerPrefs", android.content.Context.MODE_PRIVATE);
         long currentStoreId = prefs.getLong("current_store_id", -1L);
 
-        if (currentStoreId != -1L && connectedStoreId != currentStoreId) {
+        if (currentStoreId != -1L && (connectedStoreId != currentStoreId || mStompClient == null || !mStompClient.isConnected())) {
             initWebSocket(currentStoreId);
         }
 
@@ -504,6 +505,18 @@ public class SellerOrderViewModel extends AndroidViewModel {
         }
     }
 
+    private void reconnectWebSocket(long restaurantId) {
+        if (mStompClient == null) return; // Đã disconnect chủ động
+        
+        reconnectHandler.removeCallbacksAndMessages(null);
+        reconnectHandler.postDelayed(() -> {
+            if (mStompClient != null && !mStompClient.isConnected()) {
+                Log.d("WebSocket", "Attempting to reconnect...");
+                initWebSocket(restaurantId);
+            }
+        }, 5000); // Thử lại sau 5 giây
+    }
+
     @SuppressLint("CheckResult")
     private void initWebSocket(long restaurantId) {
         if (mStompClient != null && mStompClient.isConnected()) {
@@ -523,6 +536,7 @@ public class SellerOrderViewModel extends AndroidViewModel {
                             break;
                         case ERROR:
                             Log.e("WebSocket", "Error", lifecycleEvent.getException());
+                            reconnectWebSocket(restaurantId);
                             break;
                         case CLOSED:
                             Log.d("WebSocket", "Stomp connection closed");
@@ -535,7 +549,12 @@ public class SellerOrderViewModel extends AndroidViewModel {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(topicMessage -> {
                     Log.d("WebSocket", "Received message: " + topicMessage.getPayload());
-                    loadData();
+                    
+                    // Delay 1000ms trước khi loadData để đảm bảo transaction trên server đã được commit vào DB
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        loadData();
+                    }, 1000);
+                    
                     if (topicMessage.getPayload() != null && topicMessage.getPayload().startsWith("NEW_ORDER_")) {
                         newOrderEvent.postValue(topicMessage.getPayload());
                     }
@@ -547,9 +566,13 @@ public class SellerOrderViewModel extends AndroidViewModel {
     }
 
     public void disconnectWebSocket() {
+        if (reconnectHandler != null) {
+            reconnectHandler.removeCallbacksAndMessages(null);
+        }
         if (mStompClient != null) {
             mStompClient.disconnect();
             mStompClient = null;
         }
+        connectedStoreId = -1L;
     }
 }
