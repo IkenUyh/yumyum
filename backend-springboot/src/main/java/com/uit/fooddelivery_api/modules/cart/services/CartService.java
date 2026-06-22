@@ -76,8 +76,11 @@ public class CartService {
         for (CartItem item : existingItems) {
             if (item.getFood().getId().equals(food.getId())) {
                 String existingOptions = item.getSelectedOptions() == null ? "[]" : item.getSelectedOptions();
-                if (existingOptions.equals(optionsJson)) {
-                    targetItem = item; // Trùng y hệt, gộp vào!
+                String existingPromotion = item.getAppliedPromotion() == null ? "NORMAL" : item.getAppliedPromotion();
+                String newPromotion = dto.getAppliedPromotion() == null ? "NORMAL" : dto.getAppliedPromotion();
+
+                if (existingOptions.equals(optionsJson) && existingPromotion.equalsIgnoreCase(newPromotion)) {
+                    targetItem = item; // Trùng y hệt món, y hệt topping VÀ trùng y hệt promotion -> gộp vào!
                     break;
                 }
             }
@@ -94,13 +97,14 @@ public class CartService {
                 cartItemRepository.save(targetItem);
             }
         } else {
-            // Tạo giỏ mới (vì món này có topping khác biệt)
+            // Tạo giỏ mới (vì món này có topping khác biệt hoặc promotion khác biệt)
             if (dto.getQuantity() > 0) {
                 CartItem newItem = CartItem.builder()
                         .user(user)
                         .food(food)
                         .quantity(dto.getQuantity())
                         .selectedOptions(optionsJson) // Lưu JSON vào DB
+                        .appliedPromotion(dto.getAppliedPromotion() == null ? "NORMAL" : dto.getAppliedPromotion())
                         .build();
                 cartItemRepository.save(newItem);
             }

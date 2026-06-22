@@ -253,16 +253,19 @@ public class HomeViewModel extends ViewModel {
             }
             List<com.example.uitpayapp.home.home_models.FoodMenuItem> items = new ArrayList<>();
             for (FoodResponse f : foods) {
+                long finalPrice = (f.getOriginalPrice() != null && f.getOriginalPrice().longValue() > 0) ? f.getOriginalPrice().longValue() : f.getPrice().longValue();
                 com.example.uitpayapp.home.home_models.FoodMenuItem item = new com.example.uitpayapp.home.home_models.FoodMenuItem(
                         "f_" + f.getId(),
                         f.getName(),
-                        f.getPrice() != null ? f.getPrice().longValue() : 0,
+                        finalPrice,
                         0,
                         f.getDescription() != null ? f.getDescription() : "",
                         f.getImageUrl()
                 );
                 item.setRestaurantId(f.getRestaurantId());
                 item.setRestaurantName(f.getRestaurantName());
+                item.setOriginalPrice(finalPrice);
+                item.setDiscountType(f.getDiscountType());
                 items.add(item);
             }
             if (!items.isEmpty()) {

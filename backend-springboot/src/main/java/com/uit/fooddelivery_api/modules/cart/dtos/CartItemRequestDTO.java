@@ -11,4 +11,5 @@ public class CartItemRequestDTO {
     private Long foodId;
     private Integer quantity; // Số lượng muốn thêm (hoặc cập nhật)
     private List<Long> selectedOptionItemIds;
+    private String appliedPromotion;
 }

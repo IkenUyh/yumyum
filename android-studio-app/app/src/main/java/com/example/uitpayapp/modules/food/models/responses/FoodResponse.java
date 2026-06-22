@@ -40,6 +40,12 @@ public class FoodResponse {
     @SerializedName("ratingAverage")
     private Double ratingAverage;
 
+    @SerializedName("originalPrice")
+    private BigDecimal originalPrice;
+
+    @SerializedName("discountType")
+    private String discountType;
+
     // Getters
     public Long getId() { return id; }
     public Long getRestaurantId() { return restaurantId; }
@@ -57,4 +63,8 @@ public class FoodResponse {
     public void setDistance(Double distance) { this.distance = distance; }
     public Integer getReviewCount() { return reviewCount; }
     public Double getRatingAverage() { return ratingAverage; }
+    public BigDecimal getOriginalPrice() { return originalPrice; }
+    public void setOriginalPrice(BigDecimal originalPrice) { this.originalPrice = originalPrice; }
+    public String getDiscountType() { return discountType; }
+    public void setDiscountType(String discountType) { this.discountType = discountType; }
 }

@@ -21,6 +21,8 @@ public class FoodDetailResponseDTO {
     private String name;
     private String description;
     private BigDecimal price;
+    private BigDecimal originalPrice;
+    private String discountType;
     private String imageUrl;
     private Boolean isAvailable;
     private List<OptionGroupResponseDTO> optionGroups;
@@ -35,6 +37,8 @@ public class FoodDetailResponseDTO {
                 .name(food.getName())
                 .description(food.getDescription())
                 .price(food.getPrice())
+                .originalPrice(food.getPrice()) // default
+                .discountType(null) // default
                 .imageUrl(food.getImageUrl())
                 .isAvailable(food.getIsAvailable())
                 .optionGroups(optionGroups != null ? 

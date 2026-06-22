@@ -63,6 +63,33 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         // Total price of an item is item price + toppings. The display in cart usually shows (base + toppings) * 1.
         long unitPrice = item.getTotalPrice() / item.getQuantity();
         holder.tvPrice.setText(formatter.format(unitPrice) + "đ");
+
+        if (item.getMenuItem().getOriginalPrice() > 0 && item.getMenuItem().getOriginalPrice() > item.getMenuItem().getPrice()) {
+            if (holder.tvOriginalPrice != null) {
+                holder.tvOriginalPrice.setVisibility(View.VISIBLE);
+                
+                // Calculate original price with toppings if necessary. 
+                // However, original price is usually just for the food item, toppings are not discounted.
+                // So original price of the unit = original price + toppings price
+                long unitOriginalPrice = item.getMenuItem().getOriginalPrice() + (unitPrice - item.getMenuItem().getPrice());
+                
+                holder.tvOriginalPrice.setText(formatter.format(unitOriginalPrice) + "đ");
+                holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+            }
+            if (holder.tvDiscountTag != null) {
+                holder.tvDiscountTag.setVisibility(View.VISIBLE);
+                if (item.getMenuItem().getDiscountType() != null && !item.getMenuItem().getDiscountType().isEmpty()) {
+                    holder.tvDiscountTag.setText(item.getMenuItem().getDiscountType());
+                } else if (item.getMenuItem().getDiscountPercent() > 0) {
+                    holder.tvDiscountTag.setText("-" + item.getMenuItem().getDiscountPercent() + "%");
+                } else {
+                    holder.tvDiscountTag.setVisibility(View.GONE);
+                }
+            }
+        } else {
+            if (holder.tvOriginalPrice != null) holder.tvOriginalPrice.setVisibility(View.GONE);
+            if (holder.tvDiscountTag != null) holder.tvDiscountTag.setVisibility(View.GONE);
+        }
         
         holder.tvQuantity.setText(String.valueOf(item.getQuantity()));
 
@@ -124,7 +151,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     static class CartViewHolder extends RecyclerView.ViewHolder {
         ImageView imgItem;
-        TextView tvRestaurant, tvName, tvPrice, tvToppings, tvEditToppings, tvQuantity, btnIncrease, btnDecrease;
+        TextView tvRestaurant, tvName, tvPrice, tvOriginalPrice, tvDiscountTag, tvToppings, tvEditToppings, tvQuantity, btnIncrease, btnDecrease;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -132,6 +159,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             tvRestaurant = itemView.findViewById(R.id.tv_cart_item_restaurant);
             tvName = itemView.findViewById(R.id.tv_cart_item_name);
             tvPrice = itemView.findViewById(R.id.tv_cart_item_price);
+            tvOriginalPrice = itemView.findViewById(R.id.tv_original_price);
+            tvDiscountTag = itemView.findViewById(R.id.tv_discount_tag);
             tvToppings = itemView.findViewById(R.id.tv_cart_item_toppings);
             tvEditToppings = itemView.findViewById(R.id.tv_edit_toppings);
             tvQuantity = itemView.findViewById(R.id.tv_cart_item_quantity);

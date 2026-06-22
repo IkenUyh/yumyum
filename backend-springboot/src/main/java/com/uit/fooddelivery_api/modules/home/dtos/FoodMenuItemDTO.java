@@ -17,4 +17,5 @@ public class FoodMenuItemDTO {
     private String restaurantName;
     private long originalPrice;   // Giá gốc (trước khi giảm)
     private int discountPercent;  // Phần trăm giảm giá (VD: 30, 40, 50)
+    private String discountType;
 }

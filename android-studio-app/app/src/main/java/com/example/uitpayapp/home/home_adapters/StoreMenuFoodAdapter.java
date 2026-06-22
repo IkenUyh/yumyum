@@ -41,6 +41,26 @@ public class StoreMenuFoodAdapter extends RecyclerView.Adapter<StoreMenuFoodAdap
         holder.tvFoodName.setText(item.getName());
         holder.tvFoodDesc.setText(item.getDescription());
         holder.tvFoodPrice.setText(item.getFormattedPrice());
+
+        if (item.getOriginalPrice() > 0 && item.getOriginalPrice() > item.getPrice()) {
+            holder.tvOriginalPrice.setVisibility(View.VISIBLE);
+            holder.tvDiscountTag.setVisibility(View.VISIBLE);
+            
+            java.text.NumberFormat formatter = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+            holder.tvOriginalPrice.setText(formatter.format(item.getOriginalPrice()) + "đ");
+            holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+            
+            if (item.getDiscountType() != null && !item.getDiscountType().isEmpty()) {
+                holder.tvDiscountTag.setText(item.getDiscountType());
+            } else if (item.getDiscountPercent() > 0) {
+                holder.tvDiscountTag.setText("-" + item.getDiscountPercent() + "%");
+            } else {
+                holder.tvDiscountTag.setVisibility(View.GONE);
+            }
+        } else {
+            holder.tvOriginalPrice.setVisibility(View.GONE);
+            holder.tvDiscountTag.setVisibility(View.GONE);
+        }
         com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(holder.ivFoodImage, item.getImageUrl());
         
         int sold = 50 + (item.getName().hashCode() % 800);
@@ -62,6 +82,8 @@ public class StoreMenuFoodAdapter extends RecyclerView.Adapter<StoreMenuFoodAdap
         TextView tvFoodName;
         TextView tvFoodDesc;
         TextView tvFoodPrice;
+        TextView tvOriginalPrice;
+        TextView tvDiscountTag;
         TextView tvFoodStats;
         ImageView btnAdd;
 
@@ -71,6 +93,8 @@ public class StoreMenuFoodAdapter extends RecyclerView.Adapter<StoreMenuFoodAdap
             tvFoodName = itemView.findViewById(R.id.tv_food_name);
             tvFoodDesc = itemView.findViewById(R.id.tv_food_desc);
             tvFoodPrice = itemView.findViewById(R.id.tv_food_price);
+            tvOriginalPrice = itemView.findViewById(R.id.tv_original_price);
+            tvDiscountTag = itemView.findViewById(R.id.tv_discount_tag);
             tvFoodStats = itemView.findViewById(R.id.tv_food_stats);
             btnAdd = itemView.findViewById(R.id.btn_add_to_cart);
         }

@@ -31,4 +31,7 @@ public class CartItem {
 
     @Column(name = "selected_options", columnDefinition = "TEXT")
     private String selectedOptions; // Lưu chuỗi JSON cấu hình Topping
+
+    @Column(name = "applied_promotion", length = 50)
+    private String appliedPromotion;
 }

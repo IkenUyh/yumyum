@@ -45,10 +45,11 @@ public class CategoryRepository {
                     } else {
                         List<FoodMenuItem> foods = new ArrayList<>();
                         for (FoodResponse fr : foodResponses) {
+                            long finalPrice = (fr.getOriginalPrice() != null && fr.getOriginalPrice().longValue() > 0) ? fr.getOriginalPrice().longValue() : (fr.getPrice() != null ? fr.getPrice().longValue() : 0L);
                             FoodMenuItem item = new FoodMenuItem(
                                     fr.getId() != null ? String.valueOf(fr.getId()) : "",
                                     fr.getName() != null ? fr.getName() : "",
-                                    fr.getPrice() != null ? fr.getPrice().longValue() : 0L,
+                                    finalPrice,
                                     0,
                                     fr.getDescription() != null ? fr.getDescription() : "",
                                     fr.getImageUrl() != null ? fr.getImageUrl() : ""
@@ -58,6 +59,9 @@ public class CategoryRepository {
                             item.setDistance(fr.getDistance());
                             item.setReviewCount(fr.getReviewCount());
                             item.setRatingAverage(fr.getRatingAverage());
+                            item.setOriginalPrice(finalPrice);
+                            item.setDiscountType(fr.getDiscountType());
+                            item.setSourcePromotion("NORMAL");
                             foods.add(item);
                         }
                         callback.onSuccess(foods);

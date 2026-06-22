@@ -180,6 +180,7 @@ public class RecommendedDealDetailActivity extends AppCompatActivity {
                 item.setRestaurantId(restaurantId);
             }
             item.setRestaurantName(storeName);
+            item.setSourcePromotion("DEAL");
             btnBuyNow.setOnClickListener(v -> showFoodItemDetailPopup(item));
 
             View cvStoreInfo = findViewById(R.id.cv_store_info);
