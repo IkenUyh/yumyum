@@ -118,7 +118,6 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
             holder.layoutWarningBanner.setVisibility(View.GONE);
 
             holder.tvOrderStatus.setText("Đơn đang được giao...");
-            holder.tvEstimatedTime.setText("🕒 Thời gian giao dự kiến: 18:04");
         } else {
             holder.tvPickupStatus.setVisibility(View.VISIBLE);
             holder.tvPickupStatus.setText(order.getStatus());
@@ -206,7 +205,7 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
     public int getItemCount() { return orderList.size(); }
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView tvOrderHeader, tvOrderDate, tvFavoriteTag, tvMerchantName, tvFoodItemName, tvFoodPrice, tvFoodCount, tvOrderStatus, tvEstimatedTime, tvPickupStatus;
+        TextView tvOrderHeader, tvOrderDate, tvFavoriteTag, tvMerchantName, tvFoodItemName, tvFoodPrice, tvFoodCount, tvOrderStatus, tvPickupStatus;
         ImageView ivFoodImage;
         Button btnRate, btnReorder;
         LinearLayout layoutActiveStatusBlock, layoutButtons, layoutSingleItem;
@@ -224,7 +223,6 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
 
             tvPickupStatus = itemView.findViewById(R.id.tvPickupStatus);
             tvOrderStatus = itemView.findViewById(R.id.tvOrderStatus);
-            tvEstimatedTime = itemView.findViewById(R.id.tvEstimatedTime);
             layoutActiveStatusBlock = itemView.findViewById(R.id.layoutActiveStatusBlock);
             layoutButtons = itemView.findViewById(R.id.layoutButtons);
             btnRate = itemView.findViewById(R.id.btnRate);
