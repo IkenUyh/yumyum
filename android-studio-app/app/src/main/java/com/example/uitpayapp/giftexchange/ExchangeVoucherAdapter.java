@@ -43,6 +43,12 @@ public class ExchangeVoucherAdapter extends RecyclerView.Adapter<ExchangeVoucher
         ExchangeVoucherModel.ExchangeVoucherType type = voucher.getVoucherType();
         holder.ivExchangeType.setImageResource(type.getIconResId());
         holder.tvExchangeType.setText(type.getDisplayName());
+        
+        try {
+            holder.llExchangeLeftSide.setBackgroundColor(android.graphics.Color.parseColor(type.getColorHex()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         holder.tvTitle.setText(voucher.getTitle());
         if (!voucher.getCondition().isEmpty()) {
@@ -66,11 +72,13 @@ public class ExchangeVoucherAdapter extends RecyclerView.Adapter<ExchangeVoucher
     }
 
     public static class VoucherViewHolder extends RecyclerView.ViewHolder {
+        android.widget.LinearLayout llExchangeLeftSide;
         ImageView ivExchangeType;
         TextView tvExchangeType,tvTitle, tvCondition, tvCoinCost, tvOriginalCost;
 
         public VoucherViewHolder(@NonNull View itemView) {
             super(itemView);
+            llExchangeLeftSide = itemView.findViewById(R.id.ll_exchange_left_side);
             ivExchangeType = itemView.findViewById(R.id.iv_exchange_type);
             tvExchangeType= itemView.findViewById(R.id.tv_exchange_type);
             tvTitle = itemView.findViewById(R.id.tv_exchange_title);

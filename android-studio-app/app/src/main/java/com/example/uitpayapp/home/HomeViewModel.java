@@ -203,6 +203,13 @@ public class HomeViewModel extends ViewModel {
             public void onResponse(Call<ApiResponse<List<CategoryResponse>>> call, Response<ApiResponse<List<CategoryResponse>>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     List<CategoryResponse> categories = new ArrayList<>(response.body().getData());
+                    java.util.Iterator<CategoryResponse> iter = categories.iterator();
+                    while (iter.hasNext()) {
+                        String n = iter.next().getName();
+                        if (n != null && (n.equalsIgnoreCase("hot") || n.equalsIgnoreCase("hot flash sale") || n.equalsIgnoreCase("deal hot"))) {
+                            iter.remove();
+                        }
+                    }
                     if (categories.isEmpty()) {
                         randomTopicsData.setValue(UiState.empty());
                         return;
