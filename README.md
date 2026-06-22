@@ -2,7 +2,7 @@
   <img src="https://upload.wikimedia.org/wikipedia/commons/4/47/Logo_UIT_updated.png" alt="UIT Logo" width="300">
 </p>
 
-<h1 align="center">YumYum & FOOD DELIVERY INTEGRATION 🍔💳</h1>
+<h1 align="center">YumYum - Food Delivery Android Application 🍔💳</h1>
 
 <p align="center">
   <strong>Đồ án môn học: Nhập môn ứng dụng di động</strong>
