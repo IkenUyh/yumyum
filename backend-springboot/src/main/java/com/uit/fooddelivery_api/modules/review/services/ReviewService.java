@@ -2,6 +2,7 @@ package com.uit.fooddelivery_api.modules.review.services;
 
 import com.uit.fooddelivery_api.modules.order.entities.Order;
 import com.uit.fooddelivery_api.modules.order.repositories.OrderRepository;
+import com.uit.fooddelivery_api.modules.restaurant.entities.Restaurant;
 import com.uit.fooddelivery_api.modules.review.dtos.CreateReviewDTO;
 import com.uit.fooddelivery_api.modules.review.entities.Review;
 import com.uit.fooddelivery_api.modules.review.repositories.ReviewRepository;
@@ -112,7 +113,7 @@ public class ReviewService {
         Review savedReview = reviewRepository.save(review);
 
         // 8. Cập nhật Rating cho Cửa hàng
-        com.uit.fooddelivery_api.modules.restaurant.entities.Restaurant restaurant = order.getRestaurant();
+        Restaurant restaurant = order.getRestaurant();
         int currentCount = restaurant.getReviewCount() != null ? restaurant.getReviewCount() : 0;
         java.math.BigDecimal currentRating = restaurant.getRatingAverage() != null ? restaurant.getRatingAverage() : java.math.BigDecimal.ZERO;
 

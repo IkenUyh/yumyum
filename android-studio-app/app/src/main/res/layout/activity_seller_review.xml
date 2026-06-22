@@ -44,27 +44,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Tabs -->
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tab_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:tabIndicatorColor="#F24405"
-                app:tabSelectedTextColor="#F24405"
-                app:tabTextColor="#555555"
-                app:tabIndicatorFullWidth="false">
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Quán" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Món" />
-            </com.google.android.material.tabs.TabLayout>
-
             <!-- Rating Summary Section -->
             <LinearLayout
                 android:layout_width="match_parent"

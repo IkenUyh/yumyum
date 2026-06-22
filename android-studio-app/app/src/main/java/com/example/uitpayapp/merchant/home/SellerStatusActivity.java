@@ -49,8 +49,16 @@ public class SellerStatusActivity extends AppCompatActivity {
         tvOpeningHours = findViewById(R.id.tv_opening_hours);
 
         tvStatusText.setOnClickListener(v -> {
-            if (currentRestaurant != null && currentRestaurant.getIsAcceptingOrders() != null && !currentRestaurant.getIsAcceptingOrders()) {
+            if (currentRestaurant == null) return;
+            boolean isAccepting = currentRestaurant.getIsAcceptingOrders() != null && currentRestaurant.getIsAcceptingOrders();
+            if (!isAccepting) {
                 updateAcceptingOrders(true);
+            } else {
+                boolean inHours = isCurrentTimeInOpenHours(currentRestaurant.getOpenTime(), currentRestaurant.getCloseTime());
+                if (!inHours) {
+                    Toast.makeText(this, "Đang ngoài giờ hoạt động. Đổi giờ mở cửa để mở quán.", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, SellerScheduleActivity.class));
+                }
             }
         });
 
@@ -152,7 +160,8 @@ public class SellerStatusActivity extends AppCompatActivity {
 
     private void updateAcceptingOrders(boolean accept) {
         if (restaurantId == -1L) return;
-        RestaurantSettingsDTO dto = new RestaurantSettingsDTO(accept, null);
+        Integer maxPending = currentRestaurant != null && currentRestaurant.getMaxPendingOrders() != null ? currentRestaurant.getMaxPendingOrders() : 10;
+        RestaurantSettingsDTO dto = new RestaurantSettingsDTO(accept, maxPending);
         restaurantRepository.updateRestaurantSettings(restaurantId, dto, new ApiCallback<RestaurantResponseDTO>() {
             @Override
             public void onSuccess(RestaurantResponseDTO data) {

@@ -233,7 +233,7 @@ public class SellerOrderViewModel extends AndroidViewModel {
                 itemCount,
                 totalStr,
                 o.getStatus(),
-                "",
+                o.getNote() != null ? o.getNote() : "",
                 createdAtStr,
                 pickupTimeStr,
                 shippingFee,

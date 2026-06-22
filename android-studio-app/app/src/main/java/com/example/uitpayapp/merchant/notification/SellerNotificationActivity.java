@@ -34,6 +34,8 @@ public class SellerNotificationActivity extends AppCompatActivity {
         initViews();
         setupBottomNav();
         loadRealData();
+        checkNotificationPermission();
+        initWebSocket();
     }
 
     private void initViews() {
@@ -209,5 +211,125 @@ public class SellerNotificationActivity extends AppCompatActivity {
             overridePendingTransition(0, 0);
             finish();
         });
+    }
+
+    private void checkNotificationPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                androidx.core.app.ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+    }
+
+    private void showNotification(String title, String message) {
+        android.app.NotificationManager notificationManager = (android.app.NotificationManager) getSystemService(android.content.Context.NOTIFICATION_SERVICE);
+        String channelId = "seller_notification_channel";
+        
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            android.app.NotificationChannel channel = new android.app.NotificationChannel(
+                    channelId,
+                    "Thông báo hệ thống",
+                    android.app.NotificationManager.IMPORTANCE_HIGH
+            );
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        android.content.Intent intent = new android.content.Intent(this, SellerNotificationActivity.class);
+        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        android.app.PendingIntent pendingIntent = android.app.PendingIntent.getActivity(this, 0, intent,
+                android.app.PendingIntent.FLAG_ONE_SHOT | android.app.PendingIntent.FLAG_IMMUTABLE);
+
+        androidx.core.app.NotificationCompat.Builder builder = new androidx.core.app.NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.drawable.yumyum_demo_logo)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setAutoCancel(true)
+                .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent);
+
+        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+    }
+
+    private ua.naiksoftware.stomp.StompClient mStompClient;
+
+    @android.annotation.SuppressLint("CheckResult")
+    private void initWebSocket() {
+        android.content.SharedPreferences prefs = getSharedPreferences("SellerPrefs", MODE_PRIVATE);
+        long currentStoreId = prefs.getLong("current_store_id", -1L);
+
+        String url = "wss://kienhuy-dev.name.vn/ws/chat/websocket";
+        mStompClient = ua.naiksoftware.stomp.Stomp.over(ua.naiksoftware.stomp.Stomp.ConnectionProvider.OKHTTP, url);
+
+        mStompClient.lifecycle()
+                .subscribeOn(io.reactivex.schedulers.Schedulers.io())
+                .observeOn(io.reactivex.android.schedulers.AndroidSchedulers.mainThread())
+                .subscribe(lifecycleEvent -> {
+                    switch (lifecycleEvent.getType()) {
+                        case OPENED:
+                            android.util.Log.d("WebSocket", "Stomp connection opened in Notifications");
+                            break;
+                        case ERROR:
+                            android.util.Log.e("WebSocket", "Error", lifecycleEvent.getException());
+                            break;
+                        case CLOSED:
+                            android.util.Log.d("WebSocket", "Stomp connection closed in Notifications");
+                            break;
+                    }
+                });
+
+        if (currentStoreId != -1L) {
+            mStompClient.topic("/topic/restaurant/" + currentStoreId + "/notifications")
+                    .subscribeOn(io.reactivex.schedulers.Schedulers.io())
+                    .observeOn(io.reactivex.android.schedulers.AndroidSchedulers.mainThread())
+                    .subscribe(topicMessage -> {
+                        android.util.Log.d("WebSocket", "Received notification: " + topicMessage.getPayload());
+                        try {
+                            org.json.JSONObject json = new org.json.JSONObject(topicMessage.getPayload());
+                            String title = json.optString("title", "Thông báo mới");
+                            String message = json.optString("message", json.optString("content", "Bạn có thông báo mới"));
+                            showNotification(title, message);
+                            loadRealData();
+                        } catch (Exception e) {
+                            showNotification("Thông báo mới", "Bạn có một thông báo từ hệ thống");
+                            loadRealData();
+                        }
+                    }, throwable -> {
+                        android.util.Log.e("WebSocket", "Error on subscribe topic", throwable);
+                    });
+        }
+
+        com.example.uitpayapp.network.SessionManager sessionManager = com.example.uitpayapp.network.SessionManager.getInstance(this);
+        Long userId = sessionManager.getUserId();
+        if (userId != null) {
+            mStompClient.topic("/user/" + userId + "/queue/notifications")
+                    .subscribeOn(io.reactivex.schedulers.Schedulers.io())
+                    .observeOn(io.reactivex.android.schedulers.AndroidSchedulers.mainThread())
+                    .subscribe(topicMessage -> {
+                        android.util.Log.d("WebSocket", "Received user notification: " + topicMessage.getPayload());
+                        try {
+                            org.json.JSONObject json = new org.json.JSONObject(topicMessage.getPayload());
+                            String title = json.optString("title", "Thông báo mới");
+                            String message = json.optString("message", json.optString("content", "Bạn có thông báo mới"));
+                            showNotification(title, message);
+                            loadRealData();
+                        } catch (Exception e) {
+                            showNotification("Thông báo mới", "Bạn có một thông báo từ hệ thống");
+                            loadRealData();
+                        }
+                    }, throwable -> {
+                        android.util.Log.e("WebSocket", "Error on subscribe user topic", throwable);
+                    });
+        }
+
+        mStompClient.connect();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mStompClient != null) {
+            mStompClient.disconnect();
+            mStompClient = null;
+        }
     }
 }
