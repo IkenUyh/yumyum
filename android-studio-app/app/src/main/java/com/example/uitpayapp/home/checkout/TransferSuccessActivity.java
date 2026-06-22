@@ -16,6 +16,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.modules.order.OrderRepository;
+import com.example.uitpayapp.modules.order.models.responses.OrderResponse;
+import com.example.uitpayapp.network.ApiCallback;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -24,6 +27,10 @@ import java.util.Locale;
 import java.util.Random;
 
 public class TransferSuccessActivity extends AppCompatActivity {
+    private OrderRepository orderRepository;
+    private android.os.Handler pollingHandler;
+    private Runnable pollingRunnable;
+    private long currentOrderId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -241,9 +248,134 @@ public class TransferSuccessActivity extends AppCompatActivity {
             boolean isFoodOrder = getIntent().getBooleanExtra("KEY_IS_FOOD_ORDER", false);
             if (isFoodOrder) {
                 layoutDeliveryProgress.setVisibility(View.VISIBLE);
+                
+                String orderIdStr = getIntent().getStringExtra("KEY_ORDER_ID");
+                if (orderIdStr != null) {
+                    try {
+                        currentOrderId = Long.parseLong(orderIdStr);
+                        orderRepository = new OrderRepository();
+                        startPolling();
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+                }
             } else {
                 layoutDeliveryProgress.setVisibility(View.GONE);
             }
+        }
+    }
+
+    private void startPolling() {
+        if (pollingHandler == null) {
+            pollingHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+        }
+        pollingRunnable = new Runnable() {
+            @Override
+            public void run() {
+                fetchOrderStatus();
+                pollingHandler.postDelayed(this, 5000);
+            }
+        };
+        pollingHandler.post(pollingRunnable);
+    }
+
+    private void stopPolling() {
+        if (pollingHandler != null && pollingRunnable != null) {
+            pollingHandler.removeCallbacks(pollingRunnable);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopPolling();
+    }
+
+    private void fetchOrderStatus() {
+        if (orderRepository == null) return;
+        orderRepository.getOrderById(currentOrderId, new ApiCallback<OrderResponse>() {
+            @Override
+            public void onSuccess(OrderResponse order) {
+                if (isFinishing() || isDestroyed()) return;
+                
+                String status = order.getStatus();
+                int step = 1;
+                if ("PENDING".equalsIgnoreCase(status)) step = 1;
+                else if ("PREPARING".equalsIgnoreCase(status)) step = 2;
+                else if ("DELIVERING".equalsIgnoreCase(status)) step = 3;
+                else if ("COMPLETED".equalsIgnoreCase(status)) step = 4;
+                
+                updateProgressState(step);
+                
+                if ("COMPLETED".equalsIgnoreCase(status) || "CANCELLED".equalsIgnoreCase(status)) {
+                    stopPolling();
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Ignore silent errors during polling
+            }
+        });
+    }
+
+    private void updateProgressState(int step) {
+        View line1 = findViewById(R.id.lineProgress1_success);
+        TextView tv1 = findViewById(R.id.tvProgressStep1_success);
+        ImageView iv2 = findViewById(R.id.ivProgressStep2_success);
+        View line2 = findViewById(R.id.lineProgress2_success);
+        TextView tv2 = findViewById(R.id.tvProgressStep2_success);
+        ImageView iv3 = findViewById(R.id.ivProgressStep3_success);
+        View line3 = findViewById(R.id.lineProgress3_success);
+        TextView tv3 = findViewById(R.id.tvProgressStep3_success);
+        ImageView iv4 = findViewById(R.id.ivProgressStep4_success);
+        TextView tv4 = findViewById(R.id.tvProgressStep4_success);
+
+        if (iv2 == null) return;
+
+        int activeColor = android.graphics.Color.parseColor("#388E3C");
+        int inactiveColor = android.graphics.Color.parseColor("#E0E0E0");
+        int inactiveTextColor = android.graphics.Color.parseColor("#757575");
+
+        // Reset all to inactive first
+        iv2.setImageResource(R.drawable.bg_circle_gray);
+        iv2.clearColorFilter();
+        line1.setBackgroundColor(inactiveColor);
+        tv2.setTextColor(inactiveTextColor);
+        tv2.setTypeface(null, android.graphics.Typeface.NORMAL);
+
+        iv3.setImageResource(R.drawable.bg_circle_gray);
+        iv3.clearColorFilter();
+        line2.setBackgroundColor(inactiveColor);
+        tv3.setTextColor(inactiveTextColor);
+        tv3.setTypeface(null, android.graphics.Typeface.NORMAL);
+
+        iv4.setImageResource(R.drawable.bg_circle_gray);
+        iv4.clearColorFilter();
+        line3.setBackgroundColor(inactiveColor);
+        tv4.setTextColor(inactiveTextColor);
+        tv4.setTypeface(null, android.graphics.Typeface.NORMAL);
+
+        if (step >= 2) {
+            iv2.setImageResource(R.drawable.ic_circle_check);
+            iv2.setColorFilter(activeColor);
+            line1.setBackgroundColor(activeColor);
+            tv2.setTextColor(activeColor);
+            tv2.setTypeface(null, android.graphics.Typeface.BOLD);
+        }
+        if (step >= 3) {
+            iv3.setImageResource(R.drawable.ic_circle_check);
+            iv3.setColorFilter(activeColor);
+            line2.setBackgroundColor(activeColor);
+            tv3.setTextColor(activeColor);
+            tv3.setTypeface(null, android.graphics.Typeface.BOLD);
+        }
+        if (step >= 4) {
+            iv4.setImageResource(R.drawable.ic_circle_check);
+            iv4.setColorFilter(activeColor);
+            line3.setBackgroundColor(activeColor);
+            tv4.setTextColor(activeColor);
+            tv4.setTypeface(null, android.graphics.Typeface.BOLD);
         }
     }
 

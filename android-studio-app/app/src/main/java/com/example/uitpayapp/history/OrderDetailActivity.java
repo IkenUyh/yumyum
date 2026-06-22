@@ -71,7 +71,6 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
     private RecyclerView rvOrderItems;
 
     // 4. Các trường hiển thị văn bản (Trạng thái & Địa chỉ)
-    private TextView tvOrderTimeHeader;
     private TextView tvOrderStatusTitle;
     private TextView tvMerchantName;
     private TextView tvDestAddress;
@@ -90,6 +89,10 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
     private TextView tvOrderNote;
     private TextView tvPaymentMethod;
     private TextView btnCopyOrderId;
+
+    private android.os.Handler pollingHandler;
+    private Runnable pollingRunnable;
+    private long currentOrderId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +125,6 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
 
         // Ánh xạ các thành phần danh sách & thông tin chính
         rvOrderItems = findViewById(R.id.rvOrderItems);
-        tvOrderTimeHeader = findViewById(R.id.tvOrderTimeHeader);
         tvOrderStatusTitle = findViewById(R.id.tvOrderStatusTitle);
         layoutDriverInfo = findViewById(R.id.layoutDriverInfo);
         tvMerchantName = findViewById(R.id.tvMerchantName);
@@ -153,8 +155,8 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
             String orderIdStr = intent.getStringExtra("ORDER_ID");
             if (orderIdStr != null) {
                 try {
-                    long id = Long.parseLong(orderIdStr);
-                    fetchOrderDetail(id);
+                    currentOrderId = Long.parseLong(orderIdStr);
+                    fetchOrderDetail(currentOrderId);
                 } catch (NumberFormatException e) {
                     OrderDetail fallback = new OrderDetail();
                     fallback.setOrderId(orderIdStr);
@@ -181,12 +183,36 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
             } else {
                 Toast.makeText(this, "Không tìm thấy mã đơn hàng", Toast.LENGTH_SHORT).show();
                 finish();
+                return;
             }
         }
+        startPolling();
 
         btnMapBack.setOnClickListener(v -> finish());
         toolbar.setNavigationOnClickListener(v -> finish());
     }
+
+    private void startPolling() {
+        if (pollingHandler == null) {
+            pollingHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+        }
+        pollingRunnable = new Runnable() {
+            @Override
+            public void run() {
+                fetchOrderDetail(currentOrderId);
+                pollingHandler.postDelayed(this, 5000);
+            }
+        };
+        pollingHandler.post(pollingRunnable);
+    }
+
+    private void stopPolling() {
+        if (pollingHandler != null && pollingRunnable != null) {
+            pollingHandler.removeCallbacks(pollingRunnable);
+        }
+    }
+
+
 
     private void fetchOrderDetail(long orderId) {
         orderRepository.getOrderById(orderId, new com.example.uitpayapp.network.ApiCallback<com.example.uitpayapp.modules.order.models.responses.OrderResponse>() {
@@ -204,6 +230,10 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                     data.setOrderTime(order.getCreatedAt());
                     orderStatus = order.getStatus();
                     data.setStatus(orderStatus);
+
+                    if ("COMPLETED".equalsIgnoreCase(orderStatus) || "CANCELLED".equalsIgnoreCase(orderStatus)) {
+                        stopPolling();
+                    }
 
                     // Đọc tọa độ thực tế từ backend
                     merchantLat = order.getRestaurantLatitude() != null ? order.getRestaurantLatitude().doubleValue() : 10.8800;
@@ -399,7 +429,6 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                 tvOrderStatusTitle.setText("Hoàn thành");
                 updateProgressState(4);
             }
-            tvOrderTimeHeader.setVisibility(View.GONE);
             layoutDriverInfo.setVisibility(View.GONE);
             mapContainer.setVisibility(View.GONE);
             btnCancelOrder.setVisibility(View.GONE);
@@ -423,7 +452,6 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                 btnCancelOrder.setVisibility(View.GONE);
                 updateProgressState(3);
             }
-            tvOrderTimeHeader.setVisibility(View.VISIBLE);
             layoutDriverInfo.setVisibility(View.VISIBLE);
             mapContainer.setVisibility(View.VISIBLE);
 
@@ -573,6 +601,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
 
     @Override
     protected void onDestroy() {
+        stopPolling();
         if (shipperAnimator != null) {
             shipperAnimator.cancel();
         }
