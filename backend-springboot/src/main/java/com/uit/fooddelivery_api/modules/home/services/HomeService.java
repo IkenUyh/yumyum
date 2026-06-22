@@ -217,7 +217,7 @@ public class HomeService {
                                                 distance = Math.round(distance * 10.0) / 10.0;
                                         }
                                         int delTime = (int) (distance * 4 + 10);
-                                        PriceCalculationService.PriceResult pr = priceCalculationService.calculateFinalPrice(f);
+                                        PriceCalculationService.PriceResult pr = priceCalculationService.calculateFinalPrice(f, "DEAL 20%");
                                         double origPrice = pr.originalPrice.doubleValue();
                                         double discPrice = pr.finalPrice.doubleValue();
                                         double rating = 3.5 + itemRandom.nextDouble() * 1.5;

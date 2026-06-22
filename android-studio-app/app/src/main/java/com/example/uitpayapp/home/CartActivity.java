@@ -149,7 +149,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
         TextView btnCancel = dialog.findViewById(R.id.btn_dialog_cancel);
         TextView btnDelete = dialog.findViewById(R.id.btn_dialog_delete);
 
-        imgFood.setImageResource(item.getMenuItem().getImageResId());
+        com.example.uitpayapp.utils.ImageLoadHelper.loadImageWithFlashingPlaceholder(imgFood, item.getMenuItem().getImageUrl());
         tvFoodName.setText(item.getMenuItem().getName());
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
@@ -198,6 +198,49 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartA
         }
 
         CartItem firstItem = cartManager.getCart().get(0);
+
+        Boolean isAcceptingOrders = firstItem.getMenuItem().getIsAcceptingOrders();
+        String openTimeStr = firstItem.getMenuItem().getRestaurantOpenTime();
+        String closeTimeStr = firstItem.getMenuItem().getRestaurantCloseTime();
+
+        if (Boolean.FALSE.equals(isAcceptingOrders)) {
+            new AlertDialog.Builder(this)
+                .setTitle("Cửa hàng tạm ngưng")
+                .setMessage("Cửa hàng hiện đang tạm ngưng nhận đơn mới. Vui lòng quay lại sau.")
+                .setPositiveButton("Đóng", null)
+                .show();
+            return;
+        }
+
+        if (openTimeStr != null && closeTimeStr != null) {
+            try {
+                java.time.LocalTime now = java.time.LocalTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
+                java.time.LocalTime open = java.time.LocalTime.parse(openTimeStr);
+                java.time.LocalTime close = java.time.LocalTime.parse(closeTimeStr);
+
+                boolean isOpen;
+                if (open.isBefore(close)) {
+                    isOpen = !now.isBefore(open) && !now.isAfter(close);
+                } else {
+                    isOpen = !now.isBefore(open) || !now.isAfter(close);
+                }
+
+                if (!isOpen) {
+                    // Cắt giây khỏi chuỗi giờ (VD: 09:00:00 -> 09:00)
+                    String openFormatted = openTimeStr.length() > 5 ? openTimeStr.substring(0, 5) : openTimeStr;
+                    String closeFormatted = closeTimeStr.length() > 5 ? closeTimeStr.substring(0, 5) : closeTimeStr;
+                    new AlertDialog.Builder(this)
+                        .setTitle("Cửa hàng chưa mở cửa")
+                        .setMessage(String.format("Cửa hàng hiện chưa mở cửa. Thời gian hoạt động: %s - %s", openFormatted, closeFormatted))
+                        .setPositiveButton("Đóng", null)
+                        .show();
+                    return;
+                }
+            } catch (Exception e) {
+                // Bỏ qua lỗi parse và tiếp tục
+            }
+        }
+
         Double restLat = firstItem.getMenuItem().getRestaurantLatitude();
         Double restLng = firstItem.getMenuItem().getRestaurantLongitude();
 

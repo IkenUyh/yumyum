@@ -395,8 +395,11 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                     @Override
                     public void onError(String errorMessage) {
                         runOnUiThread(() -> {
-                            Toast.makeText(FoodCheckoutActivity.this, "Không thể tính phí ship: " + errorMessage,
-                                    Toast.LENGTH_SHORT).show();
+                            new androidx.appcompat.app.AlertDialog.Builder(FoodCheckoutActivity.this)
+                                .setTitle("Lỗi")
+                                .setMessage("Không thể tính phí ship: " + errorMessage)
+                                .setPositiveButton("Đóng", null)
+                                .show();
                         });
                     }
                 });
@@ -480,7 +483,11 @@ public class FoodCheckoutActivity extends AppCompatActivity {
 
     private void processCheckout() {
         if (cartManager.isEmpty()) {
-            Toast.makeText(this, "Giỏ hàng trống", Toast.LENGTH_SHORT).show();
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Lỗi")
+                .setMessage("Giỏ hàng trống")
+                .setPositiveButton("Đóng", null)
+                .show();
             return;
         }
 
@@ -489,8 +496,11 @@ public class FoodCheckoutActivity extends AppCompatActivity {
         } else {
             // Thanh toán qua Ví nội bộ
             if (currentWalletBalance < totalAmount) {
-                Toast.makeText(this, "Số dư ví không đủ! Vui lòng chọn Thanh toán tiền mặt hoặc nạp thêm tiền.", Toast.LENGTH_LONG)
-                        .show();
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Số dư không đủ")
+                    .setMessage("Số dư ví không đủ! Vui lòng chọn Thanh toán tiền mặt hoặc nạp thêm tiền.")
+                    .setPositiveButton("Đóng", null)
+                    .show();
                 return;
             }
             executeConfirmCheckout();
@@ -500,7 +510,11 @@ public class FoodCheckoutActivity extends AppCompatActivity {
     private void executeConfirmCheckout() {
         com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(this);
         if (addressId == null && session.getDeliveryAddressText() == null) {
-            Toast.makeText(this, "Vui lòng chọn địa chỉ giao hàng trước!", Toast.LENGTH_SHORT).show();
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Thiếu thông tin")
+                .setMessage("Vui lòng chọn địa chỉ giao hàng trước!")
+                .setPositiveButton("Đóng", null)
+                .show();
             return;
         }
         String productNames = cartManager.getProductSummary();
@@ -555,8 +569,11 @@ public class FoodCheckoutActivity extends AppCompatActivity {
                     @Override
                     public void onError(String errorMessage) {
                         runOnUiThread(() -> {
-                            Toast.makeText(FoodCheckoutActivity.this, "Lỗi đặt đơn: " + errorMessage, Toast.LENGTH_LONG)
-                                    .show();
+                            new androidx.appcompat.app.AlertDialog.Builder(FoodCheckoutActivity.this)
+                                .setTitle("Lỗi đặt đơn")
+                                .setMessage(errorMessage)
+                                .setPositiveButton("Đóng", null)
+                                .show();
                         });
                     }
                 });

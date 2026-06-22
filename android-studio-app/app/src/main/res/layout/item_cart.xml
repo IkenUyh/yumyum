@@ -25,6 +25,38 @@
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             android:src="#E0E0E0" />
+            
+        <!-- Huy hiệu ưu đãi đè lên góc trái trên cùng -->
+        <LinearLayout
+            android:id="@+id/layout_deal_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_discount_tag"
+            android:gravity="center"
+            android:paddingHorizontal="4dp"
+            android:paddingVertical="2dp"
+            android:layout_gravity="top|start"
+            android:visibility="gone">
+            
+            <TextView
+                android:id="@+id/tv_deal_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚡"
+                android:textSize="9sp"
+                android:textColor="#FFFFFF" />
+                
+            <TextView
+                android:id="@+id/tv_deal_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Flashsale"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:layout_marginStart="2dp" />
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
 
     <!-- Thông tin món -->
