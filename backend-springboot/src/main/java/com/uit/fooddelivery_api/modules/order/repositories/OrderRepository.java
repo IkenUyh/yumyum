@@ -81,4 +81,18 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "WHERE o.restaurant.id = :restaurantId " +
             "AND o.status IN ('PENDING', 'PREPARING')")
     Long countActiveOrdersByRestaurant(@org.springframework.data.repository.query.Param("restaurantId") Long restaurantId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT DISTINCT o " +
+            "FROM Order o JOIN FETCH o.orderItems oi JOIN FETCH oi.food " +
+            "WHERE o.restaurant.merchant.id = :merchantId AND o.status = 'COMPLETED'")
+    java.util.List<Order> findCompletedOrdersByMerchant(@org.springframework.data.repository.query.Param("merchantId") Long merchantId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT DISTINCT o " +
+            "FROM Order o JOIN FETCH o.orderItems oi JOIN FETCH oi.food " +
+            "WHERE o.restaurant.id = :restaurantId AND o.status = 'COMPLETED' " +
+            "AND o.createdAt >= :start AND o.createdAt <= :end")
+    java.util.List<Order> findCompletedOrdersByRestaurantAndDate(
+            @org.springframework.data.repository.query.Param("restaurantId") Long restaurantId,
+            @org.springframework.data.repository.query.Param("start") java.time.LocalDateTime start,
+            @org.springframework.data.repository.query.Param("end") java.time.LocalDateTime end);
 }
