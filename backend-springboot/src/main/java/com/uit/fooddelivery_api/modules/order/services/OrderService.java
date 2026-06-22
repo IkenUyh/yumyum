@@ -303,6 +303,7 @@ public class OrderService {
 
             address = new UserAddress();
             address.setUser(customer);
+            address.setAddressName("Vị trí hiện tại");
             address.setRecipientName(customer.getFullName());
             address.setPhoneNumber(customer.getPhoneNumber());
             address.setDetailedAddress(dto.getAddressText() != null ? dto.getAddressText() : "Vị trí hiện tại");
