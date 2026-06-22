@@ -42,6 +42,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     private TextView tvEmptyTitle, tvEmptyDesc;
     private TextView tvFilterService, tvFilterStatus, tvFilterDate;
     private EditText etSearch;
+    private android.content.BroadcastReceiver badgeUpdateReceiver;
     private ImageView ivSearch;
     private RecyclerView recyclerView;
     private FoodOrderAdapter adapter;
@@ -235,6 +236,9 @@ public class TransactionHistoryActivity extends AppCompatActivity {
 
             layoutCalendarOverlay.setVisibility(View.GONE);
             applyFilter(); // Kích hoạt bộ lọc
+        });
+        badgeUpdateReceiver = com.example.uitpayapp.utils.NotificationBadgeHelper.registerBadgeReceiver(this, () -> {
+            updateNotificationBadge();
         });
     }
 
@@ -779,27 +783,14 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     }
 
     private void updateNotificationBadge() {
-        final TextView tvNotificationBadge = findViewById(R.id.tv_notification_badge);
-        if (tvNotificationBadge == null) return;
-        
-        com.example.uitpayapp.modules.notification.NotificationRepository repo = 
-                new com.example.uitpayapp.modules.notification.NotificationRepository();
-        repo.getUnreadCount(new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Long>>() {
-            @Override
-            public void onSuccess(java.util.Map<String, Long> countData) {
-                long unreadCount = countData != null && countData.containsKey("unreadCount") ? countData.get("unreadCount") : 0;
-                if (unreadCount > 0) {
-                    tvNotificationBadge.setText(String.valueOf(unreadCount));
-                    tvNotificationBadge.setVisibility(View.VISIBLE);
-                } else {
-                    tvNotificationBadge.setVisibility(View.GONE);
-                }
-            }
+        com.example.uitpayapp.utils.NotificationBadgeHelper.updateBadge(this);
+    }
 
-            @Override
-            public void onError(String errorMessage) {
-                // Fail silently
-            }
-        });
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (badgeUpdateReceiver != null) {
+            unregisterReceiver(badgeUpdateReceiver);
+        }
     }
 }

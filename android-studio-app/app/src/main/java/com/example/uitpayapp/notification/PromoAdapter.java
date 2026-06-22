@@ -59,6 +59,7 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
                         if (onReadCallback != null) {
                             onReadCallback.run();
                         }
+                        com.example.uitpayapp.utils.NotificationBadgeHelper.sendUpdateBroadcast(v.getContext());
                     }
 
                     @Override

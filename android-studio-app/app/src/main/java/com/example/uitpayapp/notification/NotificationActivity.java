@@ -22,6 +22,7 @@ public class NotificationActivity extends AppCompatActivity {
     private RecyclerView rvPromotions;
     private PromoAdapter promoAdapter;
     private List<PromoNotification> promoList;
+    private android.content.BroadcastReceiver badgeUpdateReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +68,9 @@ public class NotificationActivity extends AppCompatActivity {
 
         loadRealData();
         setupBottomNavigation();
+        badgeUpdateReceiver = com.example.uitpayapp.utils.NotificationBadgeHelper.registerBadgeReceiver(this, () -> {
+            updateNotificationBadge();
+        });
     }
 
     private void loadRealData() {
@@ -232,27 +236,14 @@ public class NotificationActivity extends AppCompatActivity {
     }
 
     private void updateNotificationBadge() {
-        final TextView tvNotificationBadge = findViewById(R.id.tv_notification_badge);
-        if (tvNotificationBadge == null) return;
-        
-        com.example.uitpayapp.modules.notification.NotificationRepository repo = 
-                new com.example.uitpayapp.modules.notification.NotificationRepository();
-        repo.getUnreadCount(new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Long>>() {
-            @Override
-            public void onSuccess(java.util.Map<String, Long> countData) {
-                long unreadCount = countData != null && countData.containsKey("unreadCount") ? countData.get("unreadCount") : 0;
-                if (unreadCount > 0) {
-                    tvNotificationBadge.setText(String.valueOf(unreadCount));
-                    tvNotificationBadge.setVisibility(View.VISIBLE);
-                } else {
-                    tvNotificationBadge.setVisibility(View.GONE);
-                }
-            }
+        com.example.uitpayapp.utils.NotificationBadgeHelper.updateBadge(this);
+    }
 
-            @Override
-            public void onError(String errorMessage) {
-                // Fail silently
-            }
-        });
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (badgeUpdateReceiver != null) {
+            unregisterReceiver(badgeUpdateReceiver);
+        }
     }
 }

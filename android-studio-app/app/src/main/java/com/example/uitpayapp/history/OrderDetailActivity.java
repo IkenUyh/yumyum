@@ -74,6 +74,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
     private TextView tvOrderStatusTitle;
     private TextView tvMerchantName;
     private TextView tvDestAddress;
+    private TextView tvCustomerContact;
 
     // 5. Các trường hiển thị dòng tiền (Tính toán hóa đơn)
     private TextView tvTotalItemsTitle;
@@ -125,6 +126,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
         layoutDriverInfo = findViewById(R.id.layoutDriverInfo);
         tvMerchantName = findViewById(R.id.tvMerchantName);
         tvDestAddress = findViewById(R.id.tvDestAddress);
+        tvCustomerContact = findViewById(R.id.tvCustomerContact);
 
         // Ánh xạ các trường tính toán hóa đơn
         tvTotalItemsTitle = findViewById(R.id.tvTotalItemsTitle);
@@ -155,6 +157,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                 } catch (NumberFormatException e) {
                     OrderDetail fallback = new OrderDetail();
                     fallback.setOrderId(orderIdStr);
+                    fallback.setCustomerName("Khách Hàng");
                     fallback.setCustomerPhone("+84987301126");
                     fallback.setMerchantName("UIT FOOD");
                     fallback.setDestAddress("Ký túc xá khu A, ĐHQG TP.HCM");
@@ -193,6 +196,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                     data.setOrderId(String.valueOf(order.getId()));
                     data.setMerchantName(order.getRestaurantName() != null ? order.getRestaurantName() : "UIT FOOD");
                     data.setDestAddress(order.getDestAddress() != null ? order.getDestAddress() : "Ký túc xá khu A, ĐHQG TP.HCM");
+                    data.setCustomerName(order.getCustomerName() != null ? order.getCustomerName() : "Khách Hàng");
                     data.setCustomerPhone(order.getCustomerPhone() != null ? order.getCustomerPhone() : "+84987301126");
                     data.setPaymentMethod(order.getPaymentMethod());
                     orderStatus = order.getStatus();
@@ -240,6 +244,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                     Toast.makeText(OrderDetailActivity.this, "Lỗi tải chi tiết đơn hàng: " + errorMessage, Toast.LENGTH_LONG).show();
                     OrderDetail fallback = new OrderDetail();
                     fallback.setOrderId(String.valueOf(orderId));
+                    fallback.setCustomerName("Khách Hàng");
                     fallback.setCustomerPhone("+84987301126");
                     fallback.setMerchantName("UIT FOOD");
                     fallback.setDestAddress("Ký túc xá khu A, ĐHQG TP.HCM");
@@ -267,6 +272,17 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
         orderStatus = data.getStatus();
         tvMerchantName.setText("Từ: " + data.getMerchantName());
         tvDestAddress.setText("Đến: " + data.getDestAddress());
+        if (tvCustomerContact != null) {
+            String contactName = data.getCustomerName() != null ? data.getCustomerName() : "";
+            String contactPhone = data.getCustomerPhone() != null ? data.getCustomerPhone() : "";
+            if (!contactName.isEmpty() && !contactPhone.isEmpty()) {
+                tvCustomerContact.setText(contactName + " - " + contactPhone);
+            } else if (!contactName.isEmpty()) {
+                tvCustomerContact.setText(contactName);
+            } else {
+                tvCustomerContact.setText(contactPhone);
+            }
+        }
         tvTotalPaid.setText(String.format("%,.0fđ", data.getTotalPaid()));
         tvDetailOrderId.setText(data.getOrderId());
 

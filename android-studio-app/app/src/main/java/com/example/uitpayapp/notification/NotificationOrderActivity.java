@@ -79,6 +79,7 @@ public class NotificationOrderActivity extends AppCompatActivity {
                             adapter.notifyDataSetChanged();
                             updateReadAllText(tvReadAll, 0);
                             android.widget.Toast.makeText(NotificationOrderActivity.this, "Đã đánh dấu đọc tất cả thông báo", android.widget.Toast.LENGTH_SHORT).show();
+                            com.example.uitpayapp.utils.NotificationBadgeHelper.sendUpdateBroadcast(NotificationOrderActivity.this);
                         }
 
                         @Override
@@ -192,6 +193,7 @@ public class NotificationOrderActivity extends AppCompatActivity {
                             if (mListener != null) {
                                 mListener.onNotificationRead();
                             }
+                            com.example.uitpayapp.utils.NotificationBadgeHelper.sendUpdateBroadcast(v.getContext());
                         }
 
                         @Override

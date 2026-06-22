@@ -80,6 +80,7 @@ public class HomeActivity extends AppCompatActivity {
     private HomeViewModel viewModel;
     private FusedLocationProviderClient fusedLocationClient;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    private android.content.BroadcastReceiver badgeUpdateReceiver;
 
     private List<Restaurant> restaurants;
     private List<Restaurant> filteredRestaurants;
@@ -178,6 +179,9 @@ public class HomeActivity extends AppCompatActivity {
                 swipeRefreshLayout.setRefreshing(false);
             });
         }
+        badgeUpdateReceiver = com.example.uitpayapp.utils.NotificationBadgeHelper.registerBadgeReceiver(this, () -> {
+            updateNotificationBadge();
+        });
         checkAndSyncFcmToken();
     }
 
@@ -1580,30 +1584,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void updateNotificationBadge() {
-        final TextView tvNotificationBadge = findViewById(R.id.tv_notification_badge);
-        if (tvNotificationBadge == null)
-            return;
-
-        com.example.uitpayapp.modules.notification.NotificationRepository repo = new com.example.uitpayapp.modules.notification.NotificationRepository();
-        repo.getUnreadCount(new com.example.uitpayapp.network.ApiCallback<java.util.Map<String, Long>>() {
-            @Override
-            public void onSuccess(java.util.Map<String, Long> countData) {
-                long unreadCount = countData != null && countData.containsKey("unreadCount")
-                        ? countData.get("unreadCount")
-                        : 0;
-                if (unreadCount > 0) {
-                    tvNotificationBadge.setText(String.valueOf(unreadCount));
-                    tvNotificationBadge.setVisibility(View.VISIBLE);
-                } else {
-                    tvNotificationBadge.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                // Fail silently
-            }
-        });
+        com.example.uitpayapp.utils.NotificationBadgeHelper.updateBadge(this);
     }
 
     private void checkoutGlobalCart() {
@@ -1618,6 +1599,9 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (badgeUpdateReceiver != null) {
+            unregisterReceiver(badgeUpdateReceiver);
+        }
         if (sliderHandler != null && sliderRunnable != null) {
             sliderHandler.removeCallbacks(sliderRunnable);
         }
