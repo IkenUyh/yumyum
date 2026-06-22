@@ -169,14 +169,6 @@
                     android:textColor="#222222"
                     android:textStyle="bold"
                     android:textSize="14sp" />
-                <TextView
-                    android:id="@+id/tvEstimatedTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🕒 Thời gian giao dự kiến: 18:04"
-                    android:textColor="#757575"
-                    android:textSize="12sp"
-                    android:layout_marginTop="2dp"/>
             </LinearLayout>
             <LinearLayout
                 android:id="@+id/layoutButtons"
