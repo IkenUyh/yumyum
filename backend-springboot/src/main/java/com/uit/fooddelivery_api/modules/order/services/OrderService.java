@@ -1,6 +1,7 @@
 package com.uit.fooddelivery_api.modules.order.services;
 
 import com.uit.fooddelivery_api.common.utils.DistanceUtil;
+import com.uit.fooddelivery_api.common.utils.OrderRevenueUtil;
 import com.uit.fooddelivery_api.modules.cart.entities.CartItem;
 import com.uit.fooddelivery_api.modules.cart.repositories.CartItemRepository;
 import com.uit.fooddelivery_api.modules.order.dtos.CreateOrderDTO;
@@ -824,10 +825,8 @@ public class OrderService {
         // Đổi trạng thái đơn
         order.setStatus("COMPLETED");
 
-        // Cộng tiền vào số dư của nhà hàng
-        BigDecimal revenue = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
-        BigDecimal shipping = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
-        BigDecimal amountToAdd = revenue.subtract(shipping);
+        // Cộng tiền vào số dư của nhà hàng (theo giá gốc)
+        BigDecimal amountToAdd = OrderRevenueUtil.calculateOriginalRevenue(order);
 
         Restaurant restaurant = order.getRestaurant();
         restaurant.setBalance(restaurant.getBalance().add(amountToAdd));
@@ -940,10 +939,8 @@ public class OrderService {
 
         order.setStatus("COMPLETED");
 
-        // Bắn tiền thu nhập vào số dư nhà hàng (Merchant Balance) thay vì ví cá nhân
-        BigDecimal revenue = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
-        BigDecimal shipping = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
-        BigDecimal amountToAdd = revenue.subtract(shipping);
+        // Bắn tiền thu nhập vào số dư nhà hàng (Merchant Balance) thay vì ví cá nhân (theo giá gốc)
+        BigDecimal amountToAdd = OrderRevenueUtil.calculateOriginalRevenue(order);
 
         Restaurant restaurant = order.getRestaurant();
         restaurant.setBalance(restaurant.getBalance().add(amountToAdd));
@@ -1080,10 +1077,8 @@ public class OrderService {
 
         order.setStatus("COMPLETED");
 
-        // Bắn tiền doanh thu vào số dư nhà hàng
-        BigDecimal revenue = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
-        BigDecimal shipping = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
-        BigDecimal amountToAdd = revenue.subtract(shipping);
+        // Bắn tiền doanh thu vào số dư nhà hàng (theo giá gốc)
+        BigDecimal amountToAdd = OrderRevenueUtil.calculateOriginalRevenue(order);
 
         Restaurant restaurant = order.getRestaurant();
         restaurant.setBalance(restaurant.getBalance().add(amountToAdd));
@@ -1156,10 +1151,8 @@ public class OrderService {
             order.setStatus("COMPLETED");
             orderRepository.save(order);
 
-            // Cộng tiền doanh thu vào số dư nhà hàng (Merchant Balance)
-            BigDecimal revenue = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
-            BigDecimal shipping = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
-            BigDecimal amountToAdd = revenue.subtract(shipping);
+            // Cộng tiền doanh thu vào số dư nhà hàng (Merchant Balance) (theo giá gốc)
+            BigDecimal amountToAdd = OrderRevenueUtil.calculateOriginalRevenue(order);
 
             Restaurant restaurant = order.getRestaurant();
             restaurant.setBalance(restaurant.getBalance().add(amountToAdd));
