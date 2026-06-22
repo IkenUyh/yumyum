@@ -230,7 +230,7 @@ public class HomeViewModel extends ViewModel {
         for (int i = 0; i < categories.size(); i++) {
             CategoryResponse cat = categories.get(i);
             final int index = i;
-            categoryApiService.getFoodsByCategory(cat.getId()).enqueue(new Callback<ApiResponse<List<FoodResponse>>>() {
+            categoryApiService.getFoodsByCategory(cat.getId(), currentLat, currentLng).enqueue(new Callback<ApiResponse<List<FoodResponse>>>() {
                 @Override
                 public void onResponse(Call<ApiResponse<List<FoodResponse>>> call, Response<ApiResponse<List<FoodResponse>>> response) {
                     handleFoodResponse(cat, response, result, pendingCalls);
