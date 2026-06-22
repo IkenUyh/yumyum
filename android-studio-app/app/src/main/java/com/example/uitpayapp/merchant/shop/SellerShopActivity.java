@@ -1,5 +1,7 @@
 package com.example.uitpayapp.merchant.shop;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -18,6 +20,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.uitpayapp.R;
 import com.example.uitpayapp.merchant.home.SellerHomeActivity;
 import com.example.uitpayapp.merchant.marketing.SellerMarketingActivity;
+import com.example.uitpayapp.merchant.marketing.SellerWalletActivity;
 import com.example.uitpayapp.merchant.notification.SellerNotificationActivity;
 import com.example.uitpayapp.profile.ProfileActivity;
 import com.example.uitpayapp.profile.ProfileWebView;
@@ -146,6 +149,10 @@ public class SellerShopActivity extends AppCompatActivity {
             Intent intentAccount = new Intent(this, ProfileActivity.class);
             intentAccount.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intentAccount);
+        });
+        findViewById(R.id.ll_history).setOnClickListener(v -> {
+            Intent intentHistory = new Intent(this, SellerWalletActivity.class);
+            startActivity(intentHistory);
         });
     }
 
