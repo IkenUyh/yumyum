@@ -27,9 +27,26 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHold
     }
 
     public VoucherAdapter(List<VoucherModel> vouchers, List<VoucherModel> selectedVouchers, OnVoucherSelectedListener listener) {
-        this.vouchers = vouchers;
         this.selectedVouchers = selectedVouchers;
         this.listener = listener;
+
+        if (selectedVouchers != null && !selectedVouchers.isEmpty() && vouchers != null) {
+            java.util.Collections.sort(vouchers, new java.util.Comparator<VoucherModel>() {
+                @Override
+                public int compare(VoucherModel v1, VoucherModel v2) {
+                    boolean v1Selected = false;
+                    boolean v2Selected = false;
+                    for (VoucherModel sv : selectedVouchers) {
+                        if (sv.getId().equals(v1.getId())) v1Selected = true;
+                        if (sv.getId().equals(v2.getId())) v2Selected = true;
+                    }
+                    if (v1Selected && !v2Selected) return -1;
+                    if (!v1Selected && v2Selected) return 1;
+                    return 0;
+                }
+            });
+        }
+        this.vouchers = vouchers;
     }
 
     @NonNull
@@ -43,6 +60,16 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         VoucherModel voucher = vouchers.get(position);
         
+        if ("SHIPPING_DISCOUNT".equalsIgnoreCase(voucher.getType())) {
+            holder.llLeftSide.setBackgroundColor(android.graphics.Color.parseColor("#00BFA5"));
+            holder.icTypeVoucher.setImageResource(R.drawable.ic_delivery);
+            holder.tvTypeVoucher.setText("Miễn phí vận chuyển");
+        } else {
+            holder.llLeftSide.setBackgroundColor(android.graphics.Color.parseColor("#f24405"));
+            holder.icTypeVoucher.setImageResource(R.drawable.ic_food);
+            holder.tvTypeVoucher.setText("Giảm giá món");
+        }
+
         holder.tvTitle.setText(voucher.getTitle());
         holder.tvDescription.setText(voucher.getDescription());
         holder.tvMinOrder.setText(String.format("Đơn tối thiểu: %,dđ", voucher.getMinOrderAmount()).replace(',', '.'));
@@ -78,10 +105,15 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHold
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvDescription, tvMinOrder, btnUse;
+        android.widget.LinearLayout llLeftSide;
+        android.widget.ImageView icTypeVoucher;
+        TextView tvTitle, tvDescription, tvMinOrder, tvTypeVoucher, btnUse;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            llLeftSide = itemView.findViewById(R.id.ll_left_side);
+            icTypeVoucher = itemView.findViewById(R.id.ic_type_voucher);
+            tvTypeVoucher = itemView.findViewById(R.id.tv_type_voucher);
             tvTitle = itemView.findViewById(R.id.tv_voucher_title);
             tvDescription = itemView.findViewById(R.id.tv_voucher_description);
             tvMinOrder = itemView.findViewById(R.id.tv_min_order);

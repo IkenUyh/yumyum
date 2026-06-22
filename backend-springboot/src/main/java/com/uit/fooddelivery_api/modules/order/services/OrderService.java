@@ -294,25 +294,56 @@ public class OrderService {
                 throw new RuntimeException("Hệ thống chưa cập nhật đủ tọa độ để tính phí ship!");
             }
             
-            // Hủy default cũ
+            // Tìm xem đã có địa chỉ nào trùng tọa độ và chi tiết chưa
             List<UserAddress> oldAddresses = addressRepository.findByUserId(customer.getId());
+            UserAddress existingMatch = null;
+            
+            BigDecimal reqLat = BigDecimal.valueOf(dto.getLatitude());
+            BigDecimal reqLng = BigDecimal.valueOf(dto.getLongitude());
+            String reqDetail = dto.getAddressText() != null ? dto.getAddressText() : "Vị trí hiện tại";
+
+            // Bước 1: Tìm match
+            for (UserAddress old : oldAddresses) {
+                boolean latMatch = old.getLatitude() != null && old.getLatitude().compareTo(reqLat) == 0;
+                boolean lngMatch = old.getLongitude() != null && old.getLongitude().compareTo(reqLng) == 0;
+                boolean detailMatch = reqDetail.equals(old.getDetailedAddress());
+                
+                if (latMatch && lngMatch && detailMatch) {
+                    existingMatch = old;
+                    break;
+                }
+            }
+            
+            // Bước 2: Hủy default cũ
             for (UserAddress old : oldAddresses) {
                 if (Boolean.TRUE.equals(old.getIsDefault())) {
+                    if (existingMatch != null && old.getId().equals(existingMatch.getId())) {
+                        continue;
+                    }
                     old.setIsDefault(false);
                     addressRepository.save(old);
                 }
             }
 
-            address = new UserAddress();
-            address.setUser(customer);
-            address.setAddressName("Vị trí hiện tại");
-            address.setRecipientName(customer.getFullName());
-            address.setPhoneNumber(customer.getPhoneNumber());
-            address.setDetailedAddress(dto.getAddressText() != null ? dto.getAddressText() : "Vị trí hiện tại");
-            address.setLatitude(BigDecimal.valueOf(dto.getLatitude()));
-            address.setLongitude(BigDecimal.valueOf(dto.getLongitude()));
-            address.setIsDefault(true);
-            address = addressRepository.save(address);
+            // Bước 3: Tái sử dụng hoặc tạo mới
+            if (existingMatch != null) {
+                existingMatch.setIsDefault(true);
+                if (existingMatch.getAddressName() == null || existingMatch.getAddressName().equals("Nhà")) {
+                    existingMatch.setAddressName("Vị trí hiện tại");
+                }
+                address = addressRepository.save(existingMatch);
+            } else {
+                address = new UserAddress();
+                address.setUser(customer);
+                address.setAddressName("Vị trí hiện tại");
+                address.setRecipientName(customer.getFullName());
+                address.setPhoneNumber(customer.getPhoneNumber());
+                address.setDetailedAddress(reqDetail);
+                address.setLatitude(reqLat);
+                address.setLongitude(reqLng);
+                address.setIsDefault(true);
+                address = addressRepository.save(address);
+            }
         }
 
         // ==========================================
@@ -715,8 +746,8 @@ public class OrderService {
                 order.setPaymentStatus("CANCELLED");
                 refundMsg = "Đơn hàng chưa thanh toán, không cần hoàn tiền.";
             }
-        } else {
-            // WALLET (mặc định)
+        } else if ("WALLET".equalsIgnoreCase(order.getPaymentMethod())) {
+            // WALLET
             walletService.processTransaction(
                     order.getUser().getId(),
                     order.getTotalAmount(),
@@ -725,6 +756,18 @@ public class OrderService {
                     "Hoàn tiền do hủy đơn hàng: " + reason);
             order.setPaymentStatus("REFUNDED");
             refundMsg = "Tiền đã được hoàn lại vào Ví YumYumPay.";
+        } else {
+            // CASH
+            order.setPaymentStatus("CANCELLED");
+            refundMsg = "Đơn hàng chưa thanh toán bằng Ví/ZaloPay, không hoàn tiền mặt.";
+        }
+
+        // Hoàn lại xu nếu có sử dụng
+        if (order.getUsedCoins() != null && order.getUsedCoins() > 0) {
+            com.uit.fooddelivery_api.modules.loyalty.entities.LoyaltyPoint lp = loyaltyService.getMyLoyaltyInfo(order.getUser());
+            lp.setCurrentPoints(lp.getCurrentPoints() + order.getUsedCoins());
+            loyaltyPointRepository.save(lp);
+            refundMsg += " Đã hoàn lại " + order.getUsedCoins() + " Xu.";
         }
 
         // B. Trả lại lượt sử dụng Voucher vào kho (Issue #16)
