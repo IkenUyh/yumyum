@@ -165,22 +165,31 @@ public class SellerNotificationActivity extends AppCompatActivity {
                 }
             }
             java.text.SimpleDateFormat inputFormat;
+            // outputFormat dùng device timezone mặc định → hiển thị giờ địa phương (VN)
+            java.text.SimpleDateFormat outputFormat =
+                    new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+
             if (cleanStr.endsWith("Z")) {
+                // Chuỗi kết thúc 'Z' → rõ ràng là UTC, parse UTC, hiển thị giờ device
                 inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault());
                 inputFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
             } else if (cleanStr.contains("+") || (cleanStr.lastIndexOf("-") > 10)) {
+                // Có offset timezone (vd: +07:00) → dùng XXX pattern, format ra device TZ
                 try {
                     inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.getDefault());
                     java.util.Date date = inputFormat.parse(cleanStr);
-                    java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
                     return outputFormat.format(date);
                 } catch (Exception ex) {
                     inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+                    // Naive string → parse như UTC (backend serverTimezone=UTC)
+                    inputFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
                 }
             } else {
+                // Naive string (không có TZ suffix) từ backend → backend lưu UTC,
+                // parse như UTC rồi để outputFormat chuyển sang giờ thiết bị
                 inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+                inputFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
             }
-            java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
             java.util.Date date = inputFormat.parse(cleanStr);
             return outputFormat.format(date);
         } catch (Exception e) {

@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,9 +30,33 @@ public class StatisticService {
 
     private final OrderRepository orderRepository;
 
+    /**
+     * Múi giờ VN dùng để interpret tham số date từ client và group theo ngày VN.
+     * DB lưu timestamp theo UTC (JDBC serverTimezone=UTC + CURRENT_TIMESTAMP MySQL).
+     * Tất cả query bounds phải được convert từ VN → UTC trước khi gửi vào DB.
+     */
+    private static final ZoneId VN_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+    private static final ZoneId UTC_ZONE = ZoneId.of("UTC");
+
+    /** Convert VN date → UTC LocalDateTime đầu ngày (để query DB lưu UTC). */
+    private static LocalDateTime vnDayStartUtc(LocalDate vnDate) {
+        return vnDate.atStartOfDay(VN_ZONE).withZoneSameInstant(UTC_ZONE).toLocalDateTime();
+    }
+
+    /** Convert VN date → UTC LocalDateTime cuối ngày. */
+    private static LocalDateTime vnDayEndUtc(LocalDate vnDate) {
+        return vnDate.atTime(LocalTime.MAX).atZone(VN_ZONE).withZoneSameInstant(UTC_ZONE).toLocalDateTime();
+    }
+
+    /** Convert UTC createdAt (từ DB) → ngày VN, để group/display đúng ngày VN. */
+    private static LocalDate utcToVnDate(LocalDateTime utcDateTime) {
+        return utcDateTime.atZone(UTC_ZONE).withZoneSameInstant(VN_ZONE).toLocalDate();
+    }
+
     public MerchantDailyStatisticDTO getMerchantDailyStatistic(Long restaurantId, LocalDate date) {
-        LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+        // date là ngày VN từ client → convert sang UTC bounds để khớp với dữ liệu lưu UTC trong DB
+        LocalDateTime startOfDay = vnDayStartUtc(date);
+        LocalDateTime endOfDay = vnDayEndUtc(date);
 
         List<Order> completedOrders = orderRepository.findCompletedOrdersByRestaurantAndDate(restaurantId, startOfDay, endOfDay);
         
@@ -48,29 +73,34 @@ public class StatisticService {
     }
 
     public MerchantMonthlyStatisticDTO getMerchantMonthlyStatistic(Long restaurantId, int month, int year) {
-        LocalDateTime startOfMonth = LocalDateTime.of(year, month, 1, 0, 0);
+        // Query toàn bộ tháng VN → convert sang UTC bounds
+        LocalDate firstDayVn = LocalDate.of(year, month, 1);
         int daysInMonth = YearMonth.of(year, month).lengthOfMonth();
-        LocalDateTime endOfMonth = LocalDateTime.of(year, month, daysInMonth, 23, 59, 59, 999999999);
+        LocalDate lastDayVn = LocalDate.of(year, month, daysInMonth);
+
+        LocalDateTime startOfMonth = vnDayStartUtc(firstDayVn);
+        LocalDateTime endOfMonth = vnDayEndUtc(lastDayVn);
 
         List<Order> completedOrders = orderRepository.findCompletedOrdersByRestaurantAndDate(restaurantId, startOfMonth, endOfMonth);
 
-        // Group by day
+        // Group theo ngày VN (không phải ngày UTC), vì createdAt trong DB là UTC
         Map<Integer, BigDecimal> dailyRevenueMap = new HashMap<>();
         Map<Integer, Long> dailyTxCountMap = new HashMap<>();
         
         for (Order order : completedOrders) {
-            int day = order.getCreatedAt().getDayOfMonth();
+            // Convert UTC createdAt → ngày VN để group đúng
+            int day = utcToVnDate(order.getCreatedAt()).getDayOfMonth();
             BigDecimal rev = OrderRevenueUtil.calculateOriginalRevenue(order);
             
             dailyRevenueMap.put(day, dailyRevenueMap.getOrDefault(day, BigDecimal.ZERO).add(rev));
             dailyTxCountMap.put(day, dailyTxCountMap.getOrDefault(day, 0L) + 1L);
         }
 
-        // Determine how many days to include (cap at today for current month)
-        LocalDate today = LocalDate.now();
+        // Xác định số ngày hiển thị (cap tại hôm nay nếu đang xem tháng hiện tại)
+        LocalDate todayVn = LocalDate.now(VN_ZONE); // Dùng VN_ZONE để lấy ngày VN chính xác
         int maxDay = daysInMonth;
-        if (year == today.getYear() && month == today.getMonthValue()) {
-            maxDay = Math.min(today.getDayOfMonth(), daysInMonth);
+        if (year == todayVn.getYear() && month == todayVn.getMonthValue()) {
+            maxDay = Math.min(todayVn.getDayOfMonth(), daysInMonth);
         }
 
         List<DailyRevenueStatDTO> dailyStats = new ArrayList<>();
@@ -139,3 +169,4 @@ public class StatisticService {
                 .build();
     }
 }
+
