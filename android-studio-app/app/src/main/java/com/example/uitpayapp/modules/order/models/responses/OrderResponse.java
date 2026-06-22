@@ -35,6 +35,9 @@ public class OrderResponse {
     @SerializedName("itemCount")
     private Integer itemCount;
 
+    @SerializedName("note")
+    private String note;
+
     @SerializedName("items")
     private List<OrderItemResponse> items;
 
@@ -130,6 +133,9 @@ public class OrderResponse {
 
     public Integer getItemCount() { return itemCount; }
     public void setItemCount(Integer itemCount) { this.itemCount = itemCount; }
+
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
 
     public List<OrderItemResponse> getItems() { return items; }
     public void setItems(List<OrderItemResponse> items) { this.items = items; }

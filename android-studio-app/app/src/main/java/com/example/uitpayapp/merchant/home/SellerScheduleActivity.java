@@ -26,6 +26,9 @@ public class SellerScheduleActivity extends AppCompatActivity {
     private TextView tvOpenTime, tvCloseTime;
     private long restaurantId;
     private RestaurantRepository restaurantRepository;
+    private String currentName = "";
+    private String currentAddress = "";
+    private String currentImageUrl = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +70,10 @@ public class SellerScheduleActivity extends AppCompatActivity {
             @Override
             public void onSuccess(RestaurantResponseDTO data) {
                 runOnUiThread(() -> {
+                    if (data.getName() != null) currentName = data.getName();
+                    if (data.getAddress() != null) currentAddress = data.getAddress();
+                    if (data.getImageUrl() != null) currentImageUrl = data.getImageUrl();
+
                     if (data.getOpenTime() != null) {
                         String open = data.getOpenTime();
                         if (open.length() >= 5) {
@@ -94,7 +101,10 @@ public class SellerScheduleActivity extends AppCompatActivity {
         String open = tvOpenTime.getText().toString().trim();
         String close = tvCloseTime.getText().toString().trim();
 
-        UpdateRestaurantInfoDTO dto = new UpdateRestaurantInfoDTO(null, null, open, close, null);
+        if (open.length() == 5) open += ":00";
+        if (close.length() == 5) close += ":00";
+
+        UpdateRestaurantInfoDTO dto = new UpdateRestaurantInfoDTO(currentName, currentAddress, open, close, currentImageUrl);
         restaurantRepository.updateRestaurantInfo(restaurantId, dto, new ApiCallback<RestaurantResponseDTO>() {
             @Override
             public void onSuccess(RestaurantResponseDTO data) {
