@@ -971,6 +971,9 @@ public class OrderService {
                 "Cảm ơn bạn đã đặt hàng tại FoodDelivery! Đơn hàng #" + order.getId() + " đã giao thành công.",
                 "ORDER_UPDATE");
 
+        // TÍCH ĐIỂM HẠNG VÀ XU KHI HOÀN THÀNH ĐƠN
+        loyaltyService.addPointsAndSpending(order.getUser(), order.getTotalAmount());
+
         return orderRepository.save(order);
     }
 
@@ -1099,6 +1102,9 @@ public class OrderService {
                 "Đơn hàng #" + order.getId() + " từ " + order.getRestaurant().getName() + " đã hoàn tất!",
                 "ORDER_UPDATE");
 
+        // TÍCH ĐIỂM HẠNG VÀ XU KHI HOÀN THÀNH ĐƠN
+        loyaltyService.addPointsAndSpending(order.getUser(), order.getTotalAmount());
+
         return orderRepository.save(order);
     }
 
@@ -1177,6 +1183,9 @@ public class OrderService {
                     "Đơn hàng hoàn tất \uD83C\uDF89",
                     "Đơn hàng #" + order.getId() + " đã giao thành công!",
                     "ORDER_UPDATE");
+
+            // TÍCH ĐIỂM HẠNG VÀ XU KHI HOÀN THÀNH ĐƠN
+            loyaltyService.addPointsAndSpending(order.getUser(), order.getTotalAmount());
         }
     }
 }

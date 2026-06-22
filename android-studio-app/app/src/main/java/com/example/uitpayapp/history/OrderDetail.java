@@ -22,6 +22,8 @@ public class OrderDetail {
     private double merchantLongitude;
     private double destLatitude;
     private double destLongitude;
+    private String orderNote;
+    private String orderTime;
 
     // Constructors, Getters and Setters
 
@@ -36,6 +38,12 @@ public class OrderDetail {
 
     public double getDestLongitude() { return destLongitude; }
     public void setDestLongitude(double destLongitude) { this.destLongitude = destLongitude; }
+
+    public String getOrderNote() { return orderNote; }
+    public void setOrderNote(String orderNote) { this.orderNote = orderNote; }
+
+    public String getOrderTime() { return orderTime; }
+    public void setOrderTime(String orderTime) { this.orderTime = orderTime; }
 
     public static class DriverInfo {
         public String name;

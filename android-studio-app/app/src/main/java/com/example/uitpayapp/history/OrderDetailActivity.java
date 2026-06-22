@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -199,6 +200,8 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                     data.setCustomerName(order.getCustomerName() != null ? order.getCustomerName() : "Khách Hàng");
                     data.setCustomerPhone(order.getCustomerPhone() != null ? order.getCustomerPhone() : "+84987301126");
                     data.setPaymentMethod(order.getPaymentMethod());
+                    data.setOrderNote(order.getNote());
+                    data.setOrderTime(order.getCreatedAt());
                     orderStatus = order.getStatus();
                     data.setStatus(orderStatus);
 
@@ -221,6 +224,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                             ci.note = "";
                             ci.price = item.getPrice() != null ? item.getPrice().doubleValue() : 0;
                             ci.quantity = item.getQuantity() != null ? item.getQuantity() : 0;
+                            ci.imageUrl = item.getImageUrl();
                             items.add(ci);
                             subtotal += (ci.price * ci.quantity);
                         }
@@ -285,9 +289,13 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
         }
         tvTotalPaid.setText(String.format("%,.0fđ", data.getTotalPaid()));
         tvDetailOrderId.setText(data.getOrderId());
+        tvOrderPlacedTime.setText(data.getOrderTime() != null ? data.getOrderTime() : "Không có thông tin");
+        tvOrderNote.setText(data.getOrderNote() != null && !data.getOrderNote().trim().isEmpty() ? data.getOrderNote() : "Không có");
 
         if ("ZALOPAY".equalsIgnoreCase(data.getPaymentMethod())) {
             tvPaymentMethod.setText("ZaloPay");
+        } else if ("CASH".equalsIgnoreCase(data.getPaymentMethod())) {
+            tvPaymentMethod.setText("Tiền mặt");
         } else {
             tvPaymentMethod.setText("Ví nội bộ (YumYumPay)");
         }
@@ -386,8 +394,10 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                     ? "Đã hủy (Đã hoàn tiền ZaloPay)" 
                     : "Đã hủy (Đã hoàn lại Ví YumYumPay)";
                 tvOrderStatusTitle.setText(refundInfo);
+                findViewById(R.id.layoutDeliveryProgress).setVisibility(View.GONE);
             } else {
                 tvOrderStatusTitle.setText("Hoàn thành");
+                updateProgressState(4);
             }
             tvOrderTimeHeader.setVisibility(View.GONE);
             layoutDriverInfo.setVisibility(View.GONE);
@@ -403,12 +413,15 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
             if ("PENDING".equalsIgnoreCase(statusStr)) {
                 tvOrderStatusTitle.setText("Chờ xác nhận...");
                 btnCancelOrder.setVisibility(View.VISIBLE);
+                updateProgressState(1);
             } else if ("PREPARING".equalsIgnoreCase(statusStr)) {
                 tvOrderStatusTitle.setText("Đang chuẩn bị...");
                 btnCancelOrder.setVisibility(View.GONE);
+                updateProgressState(2);
             } else {
                 tvOrderStatusTitle.setText("Đơn đang được giao...");
                 btnCancelOrder.setVisibility(View.GONE);
+                updateProgressState(3);
             }
             tvOrderTimeHeader.setVisibility(View.VISIBLE);
             layoutDriverInfo.setVisibility(View.VISIBLE);
@@ -436,6 +449,77 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
                     if (slideOffset == 0) toolbar.setVisibility(View.GONE);
                 }
             });
+        }
+    }
+
+    private void updateProgressState(int step) {
+        ImageView iv1 = findViewById(R.id.ivProgressStep1);
+        View line1 = findViewById(R.id.lineProgress1);
+        TextView tv1 = findViewById(R.id.tvProgressStep1);
+        ImageView iv2 = findViewById(R.id.ivProgressStep2);
+        View line2 = findViewById(R.id.lineProgress2);
+        TextView tv2 = findViewById(R.id.tvProgressStep2);
+        ImageView iv3 = findViewById(R.id.ivProgressStep3);
+        View line3 = findViewById(R.id.lineProgress3);
+        TextView tv3 = findViewById(R.id.tvProgressStep3);
+        ImageView iv4 = findViewById(R.id.ivProgressStep4);
+        TextView tv4 = findViewById(R.id.tvProgressStep4);
+
+        if (iv1 == null) return;
+
+        int activeColor = android.graphics.Color.parseColor("#FF5722");
+        int inactiveColor = android.graphics.Color.parseColor("#E0E0E0");
+        int inactiveTextColor = android.graphics.Color.parseColor("#757575");
+
+        // Step 1
+        iv1.setImageResource(R.drawable.ic_circle_check);
+        iv1.setColorFilter(activeColor);
+        tv1.setTextColor(activeColor);
+        tv1.setTypeface(null, android.graphics.Typeface.BOLD);
+
+        // Step 2
+        if (step >= 2) {
+            line1.setBackgroundColor(activeColor);
+            iv2.setImageResource(R.drawable.ic_circle_check);
+            iv2.setColorFilter(activeColor);
+            tv2.setTextColor(activeColor);
+            tv2.setTypeface(null, android.graphics.Typeface.BOLD);
+        } else {
+            line1.setBackgroundColor(inactiveColor);
+            iv2.setImageResource(R.drawable.bg_circle_gray);
+            iv2.clearColorFilter();
+            tv2.setTextColor(inactiveTextColor);
+            tv2.setTypeface(null, android.graphics.Typeface.NORMAL);
+        }
+
+        // Step 3
+        if (step >= 3) {
+            line2.setBackgroundColor(activeColor);
+            iv3.setImageResource(R.drawable.ic_circle_check);
+            iv3.setColorFilter(activeColor);
+            tv3.setTextColor(activeColor);
+            tv3.setTypeface(null, android.graphics.Typeface.BOLD);
+        } else {
+            line2.setBackgroundColor(inactiveColor);
+            iv3.setImageResource(R.drawable.bg_circle_gray);
+            iv3.clearColorFilter();
+            tv3.setTextColor(inactiveTextColor);
+            tv3.setTypeface(null, android.graphics.Typeface.NORMAL);
+        }
+
+        // Step 4
+        if (step >= 4) {
+            line3.setBackgroundColor(activeColor);
+            iv4.setImageResource(R.drawable.ic_circle_check);
+            iv4.setColorFilter(activeColor);
+            tv4.setTextColor(activeColor);
+            tv4.setTypeface(null, android.graphics.Typeface.BOLD);
+        } else {
+            line3.setBackgroundColor(inactiveColor);
+            iv4.setImageResource(R.drawable.bg_circle_gray);
+            iv4.clearColorFilter();
+            tv4.setTextColor(inactiveTextColor);
+            tv4.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
     }
 
@@ -595,6 +679,12 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
             holder.tvName.setText(item.quantity + " x " + item.itemName);
             holder.tvNote.setText(item.note);
             holder.tvPrice.setText(String.format("%,.0fđ", item.price));
+
+            if (item.imageUrl != null && !item.imageUrl.isEmpty()) {
+                com.bumptech.glide.Glide.with(holder.itemView.getContext())
+                        .load(item.imageUrl)
+                        .into(holder.ivProductThumb);
+            }
         }
 
         @Override
@@ -602,11 +692,13 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
 
         static class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvName, tvNote, tvPrice;
+            com.google.android.material.imageview.ShapeableImageView ivProductThumb;
             ViewHolder(View view) {
                 super(view);
                 tvName = view.findViewById(R.id.tvProductQtyName);
                 tvNote = view.findViewById(R.id.tvProductNote);
                 tvPrice = view.findViewById(R.id.tvProductPrice);
+                ivProductThumb = view.findViewById(R.id.ivProductThumb);
             }
         }
     }
