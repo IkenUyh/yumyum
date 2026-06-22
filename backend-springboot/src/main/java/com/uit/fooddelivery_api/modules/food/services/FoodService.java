@@ -252,7 +252,7 @@ public class FoodService {
         for (String kw : keyWords) {
             boolean wordMatched = false;
             for (String tw : textWords) {
-                if (tw.contains(kw) || calculateLevenshtein(tw, kw) <= 1) {
+                if (tw.contains(kw) || (kw.length() > 4 && calculateLevenshtein(tw, kw) <= 1)) {
                     wordMatched = true;
                     break;
                 }

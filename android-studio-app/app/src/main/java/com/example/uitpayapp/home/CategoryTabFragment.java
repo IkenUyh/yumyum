@@ -68,12 +68,16 @@ public class CategoryTabFragment extends Fragment {
         // ViewModel được chia sẻ giữa các tab trong cùng 1 Activity
         viewModel = new ViewModelProvider(requireActivity()).get(CategoryViewModel.class);
 
+        com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(getContext());
+        Double lat = session.getDeliveryLatitude() != 0.0 ? session.getDeliveryLatitude() : null;
+        Double lng = session.getDeliveryLongitude() != 0.0 ? session.getDeliveryLongitude() : null;
+
         // Retry button
         View btnRetry = view.findViewById(R.id.btn_category_retry);
         if (btnRetry != null) {
             btnRetry.setOnClickListener(v -> {
                 if (categoryId > 0) {
-                    viewModel.fetchFoodsByCategory(categoryId);
+                    viewModel.fetchFoodsByCategory(categoryId, lat, lng);
                 }
             });
         }
@@ -82,7 +86,7 @@ public class CategoryTabFragment extends Fragment {
         if (srl != null) {
             srl.setOnRefreshListener(() -> {
                 if (categoryId > 0) {
-                    viewModel.fetchFoodsByCategory(categoryId);
+                    viewModel.fetchFoodsByCategory(categoryId, lat, lng);
                 }
                 srl.setRefreshing(false);
             });
@@ -108,8 +112,25 @@ public class CategoryTabFragment extends Fragment {
                 List<FoodMenuItem> displayFoods = foods != null ? new ArrayList<>(foods) : new ArrayList<>();
 
                 // Sắp xếp cục bộ theo filterType
-                if ("Bán chạy".equals(filterType) || "Đánh giá".equals(filterType)) {
-                    java.util.Collections.shuffle(displayFoods);
+                if ("Bán chạy".equals(filterType)) {
+                    displayFoods.sort((f1, f2) -> {
+                        Integer r1 = f1.getReviewCount() != null ? f1.getReviewCount() : 0;
+                        Integer r2 = f2.getReviewCount() != null ? f2.getReviewCount() : 0;
+                        return r2.compareTo(r1); // DESC
+                    });
+                } else if ("Đánh giá".equals(filterType)) {
+                    displayFoods.sort((f1, f2) -> {
+                        Double r1 = f1.getRatingAverage() != null ? f1.getRatingAverage() : 0.0;
+                        Double r2 = f2.getRatingAverage() != null ? f2.getRatingAverage() : 0.0;
+                        return r2.compareTo(r1); // DESC
+                    });
+                } else {
+                    // Mặc định hoặc "Gần tôi" -> xếp theo khoảng cách ASC
+                    displayFoods.sort((f1, f2) -> {
+                        Double d1 = f1.getDistance() != null ? f1.getDistance() : Double.MAX_VALUE;
+                        Double d2 = f2.getDistance() != null ? f2.getDistance() : Double.MAX_VALUE;
+                        return d1.compareTo(d2);
+                    });
                 }
 
                 CategoryFoodAdapter adapter = new CategoryFoodAdapter(displayFoods, (item, imageView) -> {
@@ -135,7 +156,7 @@ public class CategoryTabFragment extends Fragment {
 
         // Chỉ gọi API nếu ViewModel chưa có dữ liệu (tránh gọi lại khi chuyển tab)
         if (!viewModel.hasData() && categoryId > 0) {
-            viewModel.fetchFoodsByCategory(categoryId);
+            viewModel.fetchFoodsByCategory(categoryId, lat, lng);
         } else if (!viewModel.hasData() && categoryId <= 0) {
             viewModel.triggerError("Danh mục không hợp lệ");
         }

@@ -92,17 +92,9 @@
                             android:orientation="vertical"
                             android:layout_marginRight="10dp">
                             <TextView
-                                android:id="@+id/tvOrderTimeHeader"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Thời gian giao dự kiến: 18:04"
-                                android:textColor="#666666"
-                                android:textSize="13sp" />
-                            <TextView
                                 android:id="@+id/tvOrderStatusTitle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
                                 android:text="Đơn đang được giao..."
                                 android:textColor="#222222"
                                 android:textStyle="bold"
@@ -117,56 +109,120 @@
                             android:src="@drawable/ic_shipper" />
                     </RelativeLayout>
 
-                    <!-- Horizontal Progress -->
+                    <!-- Horizontal Progress (Sync with TransferSuccessActivity) -->
                     <LinearLayout
+                        android:id="@+id/layoutDeliveryProgress"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
+                        android:orientation="vertical"
                         android:layout_marginVertical="16dp"
                         android:paddingHorizontal="4dp">
-                        
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_circle_check"
-                            app:tint="#FF5722" />
+
+                        <!-- Progress Icons Row -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
                             
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="2dp"
-                            android:background="#FF5722" />
+                            <ImageView
+                                android:id="@+id/ivProgressStep1"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_circle_check"
+                                app:tint="#FF5722" />
+                                
+                            <View
+                                android:id="@+id/lineProgress1"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="2dp"
+                                android:background="#FF5722" />
 
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_circle_check"
-                            app:tint="#FF5722" />
+                            <ImageView
+                                android:id="@+id/ivProgressStep2"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_circle_check"
+                                app:tint="#FF5722" />
 
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="2dp"
-                            android:background="#FF5722" />
+                            <View
+                                android:id="@+id/lineProgress2"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="2dp"
+                                android:background="#E0E0E0" />
 
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_circle_check"
-                            app:tint="#FF5722" />
+                            <ImageView
+                                android:id="@+id/ivProgressStep3"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/bg_circle_gray" />
 
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="2dp"
-                            android:background="#FF5722" />
+                            <View
+                                android:id="@+id/lineProgress3"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="2dp"
+                                android:background="#E0E0E0" />
 
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_home"
-                            app:tint="#FF5722" />
+                            <ImageView
+                                android:id="@+id/ivProgressStep4"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/bg_circle_gray" />
+                        </LinearLayout>
+
+                        <!-- Progress Labels Row -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="8dp">
+
+                            <TextView
+                                android:id="@+id/tvProgressStep1"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:gravity="start"
+                                android:text="Đặt đơn"
+                                android:textSize="12sp"
+                                android:textColor="#FF5722"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tvProgressStep2"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="Chuẩn bị"
+                                android:textSize="12sp"
+                                android:textColor="#FF5722"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tvProgressStep3"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="Đang giao"
+                                android:textSize="12sp"
+                                android:textColor="#757575" />
+
+                            <TextView
+                                android:id="@+id/tvProgressStep4"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:gravity="end"
+                                android:text="Đã giao"
+                                android:textSize="12sp"
+                                android:textColor="#757575" />
+
+                        </LinearLayout>
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#EFEFEF"/>

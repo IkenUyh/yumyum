@@ -89,7 +89,7 @@ public class OrderService {
             throw new RuntimeException("Quán hiện đang tạm ngưng nhận đơn mới. Vui lòng thông cảm!");
         }
 
-        java.time.LocalTime nowTime = java.time.LocalTime.now();
+        java.time.LocalTime nowTime = java.time.LocalTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
         java.time.LocalTime open = restaurant.getOpenTime();
         java.time.LocalTime close = restaurant.getCloseTime();
 
@@ -304,6 +304,7 @@ public class OrderService {
 
             address = new UserAddress();
             address.setUser(customer);
+            address.setAddressName("Vị trí hiện tại");
             address.setRecipientName(customer.getFullName());
             address.setPhoneNumber(customer.getPhoneNumber());
             address.setDetailedAddress(dto.getAddressText() != null ? dto.getAddressText() : "Vị trí hiện tại");
@@ -321,7 +322,7 @@ public class OrderService {
             throw new RuntimeException("Quán hiện đang tạm ngưng nhận đơn mới. Vui lòng thông cảm!");
         }
 
-        java.time.LocalTime nowTime = java.time.LocalTime.now();
+        java.time.LocalTime nowTime = java.time.LocalTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
         java.time.LocalTime open = restaurant.getOpenTime();
         java.time.LocalTime close = restaurant.getCloseTime();
 
@@ -977,6 +978,9 @@ public class OrderService {
                 "Cảm ơn bạn đã đặt hàng tại FoodDelivery! Đơn hàng #" + order.getId() + " đã giao thành công.",
                 "ORDER_UPDATE");
 
+        // TÍCH ĐIỂM HẠNG VÀ XU KHI HOÀN THÀNH ĐƠN
+        loyaltyService.addPointsAndSpending(order.getUser(), order.getTotalAmount());
+
         return orderRepository.save(order);
     }
 
@@ -1105,6 +1109,9 @@ public class OrderService {
                 "Đơn hàng #" + order.getId() + " từ " + order.getRestaurant().getName() + " đã hoàn tất!",
                 "ORDER_UPDATE");
 
+        // TÍCH ĐIỂM HẠNG VÀ XU KHI HOÀN THÀNH ĐƠN
+        loyaltyService.addPointsAndSpending(order.getUser(), order.getTotalAmount());
+
         return orderRepository.save(order);
     }
 
@@ -1183,6 +1190,9 @@ public class OrderService {
                     "Đơn hàng hoàn tất \uD83C\uDF89",
                     "Đơn hàng #" + order.getId() + " đã giao thành công!",
                     "ORDER_UPDATE");
+
+            // TÍCH ĐIỂM HẠNG VÀ XU KHI HOÀN THÀNH ĐƠN
+            loyaltyService.addPointsAndSpending(order.getUser(), order.getTotalAmount());
         }
     }
 }

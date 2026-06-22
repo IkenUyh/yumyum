@@ -48,12 +48,34 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}/foods")
-    public ApiResponse<List<FoodResponseDTO>> getFoodsByCategory(@PathVariable("id") Long categoryId) {
+    public ApiResponse<List<FoodResponseDTO>> getFoodsByCategory(
+            @PathVariable("id") Long categoryId,
+            @RequestParam(value = "lat", required = false) Double lat,
+            @RequestParam(value = "lng", required = false) Double lng) {
+        
         List<FoodResponseDTO> list = foodService.getFoodsByCategory(categoryId)
                 .stream()
-                .map(FoodResponseDTO::fromEntity)
+                .map(food -> {
+                    FoodResponseDTO dto = FoodResponseDTO.fromEntity(food);
+                    if (lat != null && lng != null && food.getRestaurant().getLatitude() != null && food.getRestaurant().getLongitude() != null) {
+                        double d = calculateDistance(lat, lng, food.getRestaurant().getLatitude(), food.getRestaurant().getLongitude());
+                        dto.setDistance(d);
+                    }
+                    return dto;
+                })
                 .toList();
         return ApiResponse.success(list);
+    }
+
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        double R = 6371; // km
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 
     @PostMapping

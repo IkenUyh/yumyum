@@ -34,6 +34,12 @@ public class FoodResponse {
     @SerializedName("distance")
     private Double distance;
 
+    @SerializedName("reviewCount")
+    private Integer reviewCount;
+
+    @SerializedName("ratingAverage")
+    private Double ratingAverage;
+
     // Getters
     public Long getId() { return id; }
     public Long getRestaurantId() { return restaurantId; }
@@ -49,4 +55,6 @@ public class FoodResponse {
     public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
     public Double getDistance() { return distance; }
     public void setDistance(Double distance) { this.distance = distance; }
+    public Integer getReviewCount() { return reviewCount; }
+    public Double getRatingAverage() { return ratingAverage; }
 }

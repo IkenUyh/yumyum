@@ -34,8 +34,8 @@ public class CategoryRepository {
         void onError(String message);
     }
 
-    public void getFoodsByCategory(Long categoryId, CategoryFoodsCallback callback) {
-        apiService.getFoodsByCategory(categoryId).enqueue(new Callback<ApiResponse<List<FoodResponse>>>() {
+    public void getFoodsByCategory(Long categoryId, Double lat, Double lng, CategoryFoodsCallback callback) {
+        apiService.getFoodsByCategory(categoryId, lat, lng).enqueue(new Callback<ApiResponse<List<FoodResponse>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<FoodResponse>>> call, Response<ApiResponse<List<FoodResponse>>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
@@ -55,6 +55,9 @@ public class CategoryRepository {
                             );
                             item.setRestaurantId(fr.getRestaurantId());
                             item.setRestaurantName(fr.getRestaurantName());
+                            item.setDistance(fr.getDistance());
+                            item.setReviewCount(fr.getReviewCount());
+                            item.setRatingAverage(fr.getRatingAverage());
                             foods.add(item);
                         }
                         callback.onSuccess(foods);

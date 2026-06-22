@@ -42,6 +42,7 @@ public class OrderResponseDTO {
     private String paymentStatus;
     private String paymentUrl;
     private Double distance;
+    private String note;
 
     @Getter
     @Setter
@@ -134,6 +135,7 @@ public class OrderResponseDTO {
                 .paymentStatus(order.getPaymentStatus())
                 .paymentUrl(order.getPaymentUrl())
                 .distance(calcDistance)
+                .note(order.getNote())
                 .build();
     }
 }

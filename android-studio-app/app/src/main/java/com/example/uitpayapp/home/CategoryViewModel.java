@@ -31,9 +31,9 @@ public class CategoryViewModel extends ViewModel {
      * Gọi API lấy danh sách món ăn theo category ID.
      * Sau khi fetch xong, sẽ cache lại và áp dụng bộ lọc hiện tại.
      */
-    public void fetchFoodsByCategory(Long categoryId) {
+    public void fetchFoodsByCategory(Long categoryId, Double lat, Double lng) {
         foodsData.setValue(UiState.loading(null));
-        repository.getFoodsByCategory(categoryId, new CategoryRepository.CategoryFoodsCallback() {
+        repository.getFoodsByCategory(categoryId, lat, lng, new CategoryRepository.CategoryFoodsCallback() {
             @Override
             public void onSuccess(List<FoodMenuItem> foods) {
                 originalFoods = new ArrayList<>(foods);

@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface RestaurantSearchRepository extends ElasticsearchRepository<RestaurantDocument, String> {
-    @org.springframework.data.elasticsearch.annotations.Query("{\"match\": {\"name\": {\"query\": \"?0\", \"fuzziness\": \"AUTO\"}}}")
+    @org.springframework.data.elasticsearch.annotations.Query("{\"match\": {\"name\": {\"query\": \"?0\", \"fuzziness\": \"AUTO:5,7\"}}}")
     List<RestaurantDocument> searchFuzzyByName(String keyword);
 }
