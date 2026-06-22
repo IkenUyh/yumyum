@@ -340,18 +340,21 @@ public class TransferSuccessActivity extends AppCompatActivity {
         // Reset all to inactive first
         iv2.setImageResource(R.drawable.bg_circle_gray);
         iv2.clearColorFilter();
+        androidx.core.widget.ImageViewCompat.setImageTintList(iv2, null);
         line1.setBackgroundColor(inactiveColor);
         tv2.setTextColor(inactiveTextColor);
         tv2.setTypeface(null, android.graphics.Typeface.NORMAL);
 
         iv3.setImageResource(R.drawable.bg_circle_gray);
         iv3.clearColorFilter();
+        androidx.core.widget.ImageViewCompat.setImageTintList(iv3, null);
         line2.setBackgroundColor(inactiveColor);
         tv3.setTextColor(inactiveTextColor);
         tv3.setTypeface(null, android.graphics.Typeface.NORMAL);
 
         iv4.setImageResource(R.drawable.bg_circle_gray);
         iv4.clearColorFilter();
+        androidx.core.widget.ImageViewCompat.setImageTintList(iv4, null);
         line3.setBackgroundColor(inactiveColor);
         tv4.setTextColor(inactiveTextColor);
         tv4.setTypeface(null, android.graphics.Typeface.NORMAL);

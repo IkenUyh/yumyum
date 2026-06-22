@@ -516,6 +516,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
             line1.setBackgroundColor(inactiveColor);
             iv2.setImageResource(R.drawable.bg_circle_gray);
             iv2.clearColorFilter();
+            androidx.core.widget.ImageViewCompat.setImageTintList(iv2, null);
             tv2.setTextColor(inactiveTextColor);
             tv2.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
@@ -531,6 +532,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
             line2.setBackgroundColor(inactiveColor);
             iv3.setImageResource(R.drawable.bg_circle_gray);
             iv3.clearColorFilter();
+            androidx.core.widget.ImageViewCompat.setImageTintList(iv3, null);
             tv3.setTextColor(inactiveTextColor);
             tv3.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
@@ -546,6 +548,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OnMapReady
             line3.setBackgroundColor(inactiveColor);
             iv4.setImageResource(R.drawable.bg_circle_gray);
             iv4.clearColorFilter();
+            androidx.core.widget.ImageViewCompat.setImageTintList(iv4, null);
             tv4.setTextColor(inactiveTextColor);
             tv4.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
