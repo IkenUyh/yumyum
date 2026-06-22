@@ -5,6 +5,9 @@ import com.uit.fooddelivery_api.modules.restaurant.entities.Restaurant;
 import com.uit.fooddelivery_api.modules.restaurant.repositories.RestaurantRepository;
 import com.uit.fooddelivery_api.modules.user.entities.User;
 import com.uit.fooddelivery_api.modules.wallet.services.WalletService;
+import com.uit.fooddelivery_api.modules.order.repositories.OrderRepository;
+import com.uit.fooddelivery_api.modules.order.entities.Order;
+import com.uit.fooddelivery_api.common.utils.OrderRevenueUtil;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -23,6 +26,31 @@ public class MerchantWalletController {
     private final RestaurantRepository restaurantRepository;
     private final WalletService walletService;
     private final com.uit.fooddelivery_api.modules.restaurant.repositories.RestaurantTransactionRepository restaurantTransactionRepository;
+    private final OrderRepository orderRepository;
+
+    private BigDecimal calculateRestaurantBalance(Restaurant r) {
+        BigDecimal originalRevenue = BigDecimal.ZERO;
+        List<Order> completedOrders = orderRepository.findCompletedOrdersByRestaurant(r.getId());
+        if (completedOrders != null) {
+            for (Order order : completedOrders) {
+                originalRevenue = originalRevenue.add(OrderRevenueUtil.calculateOriginalRevenue(order));
+            }
+        }
+        
+        BigDecimal totalWithdrawn = BigDecimal.ZERO;
+        List<com.uit.fooddelivery_api.modules.restaurant.entities.RestaurantTransaction> txs = 
+                restaurantTransactionRepository.findByRestaurantIdsOrderByCreatedAtDesc(java.util.Collections.singletonList(r.getId()));
+        if (txs != null) {
+            for (com.uit.fooddelivery_api.modules.restaurant.entities.RestaurantTransaction tx : txs) {
+                if (!"REVENUE".equals(tx.getType())) {
+                    totalWithdrawn = totalWithdrawn.add(tx.getAmount().abs());
+                }
+            }
+        }
+        
+        BigDecimal calculatedBalance = originalRevenue.subtract(totalWithdrawn);
+        return calculatedBalance.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : calculatedBalance;
+    }
 
     // Lấy số dư của một nhà hàng cụ thể
     @GetMapping("/balance")
@@ -37,9 +65,7 @@ public class MerchantWalletController {
             if (restaurantId != null && !r.getId().equals(restaurantId)) {
                 continue;
             }
-            if (r.getBalance() != null) {
-                totalBalance = totalBalance.add(r.getBalance());
-            }
+            totalBalance = totalBalance.add(calculateRestaurantBalance(r));
         }
 
         Map<String, BigDecimal> response = new HashMap<>();
@@ -70,9 +96,10 @@ public class MerchantWalletController {
             if (request.getRestaurantId() != null && !r.getId().equals(request.getRestaurantId())) {
                 continue;
             }
-            if (r.getBalance() != null && r.getBalance().compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal deduct = r.getBalance().min(remainingAmount);
-                r.setBalance(r.getBalance().subtract(deduct));
+            BigDecimal currentBal = calculateRestaurantBalance(r);
+            if (currentBal.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal deduct = currentBal.min(remainingAmount);
+                r.setBalance(currentBal.subtract(deduct));
                 restaurantRepository.save(r);
                 
                 restaurantTransactionRepository.save(com.uit.fooddelivery_api.modules.restaurant.entities.RestaurantTransaction.builder()
@@ -176,17 +203,37 @@ public class MerchantWalletController {
         List<com.uit.fooddelivery_api.modules.restaurant.entities.RestaurantTransaction> txs = 
                 restaurantTransactionRepository.findByRestaurantIdsOrderByCreatedAtDesc(restaurantIds);
                 
-        List<com.uit.fooddelivery_api.modules.wallet.dtos.TransactionResponseDTO> dtos = txs.stream().map(tx -> 
-            com.uit.fooddelivery_api.modules.wallet.dtos.TransactionResponseDTO.builder()
+        List<Order> completedOrders = orderRepository.findCompletedOrdersByMerchant(merchant.getId());
+        Map<Long, Order> orderMap = completedOrders.stream().collect(java.util.stream.Collectors.toMap(Order::getId, o -> o, (o1, o2) -> o1));
+
+        List<com.uit.fooddelivery_api.modules.wallet.dtos.TransactionResponseDTO> dtos = txs.stream().map(tx -> {
+            BigDecimal amt = tx.getAmount();
+            if ("REVENUE".equals(tx.getType()) && tx.getReferenceId() != null && tx.getReferenceId().startsWith("ORDER_")) {
+                try {
+                    Long orderId = Long.parseLong(tx.getReferenceId().substring(6));
+                    Order order = orderMap.get(orderId);
+                    if (order != null) {
+                        BigDecimal calculated = OrderRevenueUtil.calculateOriginalRevenue(order);
+                        if (tx.getAmount().compareTo(BigDecimal.ZERO) < 0) {
+                            amt = calculated.negate();
+                        } else {
+                            amt = calculated;
+                        }
+                    }
+                } catch (Exception e) {
+                    // fallback
+                }
+            }
+            return com.uit.fooddelivery_api.modules.wallet.dtos.TransactionResponseDTO.builder()
                 .id(tx.getId())
-                .amount(tx.getAmount())
+                .amount(amt)
                 .balanceAfter(tx.getBalanceAfter())
                 .type(tx.getType())
                 .referenceId(tx.getReferenceId())
                 .description(tx.getDescription())
                 .createdAt(tx.getCreatedAt())
-                .build()
-        ).collect(java.util.stream.Collectors.toList());
+                .build();
+        }).collect(java.util.stream.Collectors.toList());
         
         return ApiResponse.success(dtos);
     }
