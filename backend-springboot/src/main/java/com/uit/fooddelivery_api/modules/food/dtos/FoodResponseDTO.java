@@ -35,7 +35,7 @@ public class FoodResponseDTO {
                 .imageUrl(food.getImageUrl())
                 .isAvailable(food.getIsAvailable())
                 .reviewCount(food.getRestaurant().getReviewCount())
-                .ratingAverage(food.getRestaurant().getRatingAverage())
+                .ratingAverage(food.getRestaurant().getRatingAverage() != null ? food.getRestaurant().getRatingAverage().doubleValue() : null)
                 .build();
     }
 }
