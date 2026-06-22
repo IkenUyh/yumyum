@@ -64,11 +64,14 @@ public class RegisterStoreActivity extends AppCompatActivity {
         findViewById(R.id.row_store_address).setOnClickListener(openSheetListener);
         findViewById(R.id.tv_register_store_edit_store_info).setOnClickListener(openSheetListener);
 
-        findViewById(R.id.btn_register_store_submit).setOnClickListener(v -> {
+        View btnSubmit = findViewById(R.id.btn_register_store_submit);
+        btnSubmit.setOnClickListener(v -> {
             if (storeName.equals("Chưa cập nhật") || storeAddress.equals("Chưa cập nhật")) {
                 Toast.makeText(this, "Vui lòng cập nhật đầy đủ thông tin cửa hàng", Toast.LENGTH_SHORT).show();
                 return;
             }
+
+            btnSubmit.setEnabled(false);
 
             com.example.uitpayapp.modules.merchant.MerchantRepository merchantRepository = new com.example.uitpayapp.modules.merchant.MerchantRepository();
             com.example.uitpayapp.modules.merchant.models.requests.SubmitRequestDTO dto = 
@@ -90,6 +93,7 @@ public class RegisterStoreActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(String error) {
+                    btnSubmit.setEnabled(true);
                     Toast.makeText(RegisterStoreActivity.this, "Lỗi đăng ký cửa hàng: " + error, Toast.LENGTH_SHORT).show();
                 }
             });

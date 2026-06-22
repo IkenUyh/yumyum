@@ -19,7 +19,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.merchant.shop.shop_model.MerchantMenuCategory;
+import com.example.uitpayapp.modules.food.models.responses.CategoryResponse;
 import com.example.uitpayapp.merchant.shop.shop_model.MerchantMenuItem;
 import com.example.uitpayapp.merchant.shop.viewmodel.MerchantMenuViewModel;
 
@@ -34,7 +34,7 @@ public class AddMerchantDishActivity extends AppCompatActivity {
     private MerchantMenuItem dishData;
     private String categoryName;
     private Long categoryId;
-    private final List<MerchantMenuCategory> categoriesList = new java.util.ArrayList<>();
+    private final List<CategoryResponse> categoriesList = new java.util.ArrayList<>();
     private MerchantMenuViewModel viewModel;
     private android.net.Uri selectedImageUri;
 
@@ -74,7 +74,9 @@ public class AddMerchantDishActivity extends AppCompatActivity {
             viewModel.loadMenu();
         });
 
-        viewModel.getDishCategories().observe(this, state -> {
+        viewModel.loadAllCategories();
+
+        viewModel.getAllCategoriesState().observe(this, state -> {
             if (state != null && state.isSuccess() && state.getData() != null) {
                 categoriesList.clear();
                 categoriesList.addAll(state.getData());
@@ -176,13 +178,13 @@ public class AddMerchantDishActivity extends AppCompatActivity {
     private void showCategoryPopup() {
         PopupMenu popup = new PopupMenu(this, tvCategory);
         for (int i = 0; i < categoriesList.size(); i++) {
-            MerchantMenuCategory cat = categoriesList.get(i);
-            popup.getMenu().add(0, i, 0, cat.getCategoryName());
+            CategoryResponse cat = categoriesList.get(i);
+            popup.getMenu().add(0, i, 0, cat.getName());
         }
         popup.setOnMenuItemClickListener(item -> {
             int index = item.getItemId();
-            MerchantMenuCategory selected = categoriesList.get(index);
-            tvCategory.setText(selected.getCategoryName());
+            CategoryResponse selected = categoriesList.get(index);
+            tvCategory.setText(selected.getName());
             categoryId = selected.getId();
             return true;
         });

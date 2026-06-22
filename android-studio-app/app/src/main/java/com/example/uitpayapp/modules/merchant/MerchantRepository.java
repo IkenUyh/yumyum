@@ -114,7 +114,20 @@ public class MerchantRepository {
                 callback.onError(apiResponse.getMessage() != null ? apiResponse.getMessage() : "Dữ liệu trống");
             }
         } else {
-            callback.onError("Lỗi hệ thống: " + response.code());
+            String errorMessage = "Lỗi hệ thống: " + response.code();
+            try {
+                if (response.errorBody() != null) {
+                    String errorBodyStr = response.errorBody().string();
+                    com.google.gson.Gson gson = new com.google.gson.Gson();
+                    ApiResponse<?> errorResponse = gson.fromJson(errorBodyStr, ApiResponse.class);
+                    if (errorResponse != null && errorResponse.getMessage() != null) {
+                        errorMessage = errorResponse.getMessage();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            callback.onError(errorMessage);
         }
     }
 }

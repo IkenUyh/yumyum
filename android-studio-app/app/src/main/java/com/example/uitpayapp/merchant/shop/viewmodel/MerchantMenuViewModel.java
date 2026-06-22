@@ -41,6 +41,7 @@ public class MerchantMenuViewModel extends ViewModel {
     private final MutableLiveData<Long> restaurantId = new MutableLiveData<>();
     private final MutableLiveData<UiState<String>> operationStatus = new MutableLiveData<>();
     private final MutableLiveData<UiState<FoodResponse>> foodOperationSuccess = new MutableLiveData<>();
+    private final MutableLiveData<UiState<List<CategoryResponse>>> allCategoriesState = new MutableLiveData<>();
 
     public MerchantMenuViewModel() {
         this.categoryRepository = new CategoryRepository();
@@ -50,6 +51,10 @@ public class MerchantMenuViewModel extends ViewModel {
 
     public LiveData<UiState<List<MerchantMenuCategory>>> getDishCategories() {
         return dishCategories;
+    }
+
+    public LiveData<UiState<List<CategoryResponse>>> getAllCategoriesState() {
+        return allCategoriesState;
     }
 
     public LiveData<UiState<List<ToppingGroup>>> getToppingGroups() {
@@ -272,6 +277,21 @@ public class MerchantMenuViewModel extends ViewModel {
                 }
             });
         }
+    }
+
+    public void loadAllCategories() {
+        allCategoriesState.setValue(UiState.loading(null));
+        categoryRepository.getAllCategories(new ApiCallback<List<CategoryResponse>>() {
+            @Override
+            public void onSuccess(List<CategoryResponse> result) {
+                allCategoriesState.setValue(UiState.success(result));
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                allCategoriesState.setValue(UiState.error(errorMessage, null));
+            }
+        });
     }
 
     // ==========================================
