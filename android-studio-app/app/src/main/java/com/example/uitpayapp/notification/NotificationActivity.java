@@ -109,7 +109,7 @@ public class NotificationActivity extends AppCompatActivity {
                                 dto.getTitle(),
                                 dto.getMessage(),
                                 formatDateTime(dto.getCreatedAt()),
-                                android.R.drawable.ic_menu_gallery,
+                                R.drawable.ic_discount_voucher,
                                 dto.getIsRead() != null && dto.getIsRead()
                         ));
                     } else if ("ORDER_UPDATE".equalsIgnoreCase(dto.getType()) || "SYSTEM".equalsIgnoreCase(dto.getType())) {

@@ -48,7 +48,7 @@ public class NotificationOrderActivity extends AppCompatActivity {
                                 dto.getTitle(),
                                 dto.getMessage(),
                                 formatDateTime(dto.getCreatedAt()),
-                                android.R.drawable.ic_menu_gallery,
+                                R.drawable.ic_receipt,
                                 isRead
                         ));
                     }
