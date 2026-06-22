@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <ImageView
+        android:id="@+id/btn_close"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_white_circle"
+        android:elevation="2dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_bold_close"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#000000" />
+
+    <!-- Logo Removed -->
+
+    <TextView
+        android:id="@+id/tv_instruction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Thiết lập mã PIN mới"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/layout_dots"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="120dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_instruction">
+
+        <TextView android:id="@+id/tv_dot_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp" android:text="○" android:textColor="#BDBDBD" android:textSize="30sp" />
+        <TextView android:id="@+id/tv_dot_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp" android:text="○" android:textColor="#BDBDBD" android:textSize="30sp" />
+        <TextView android:id="@+id/tv_dot_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp" android:text="○" android:textColor="#BDBDBD" android:textSize="30sp" />
+        <TextView android:id="@+id/tv_dot_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp" android:text="○" android:textColor="#BDBDBD" android:textSize="30sp" />
+        <TextView android:id="@+id/tv_dot_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp" android:text="○" android:textColor="#BDBDBD" android:textSize="30sp" />
+        <TextView android:id="@+id/dot_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp" android:text="○" android:textColor="#BDBDBD" android:textSize="30sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_error_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        android:text="Mã PIN không khớp"
+        android:textAlignment="center"
+        android:textColor="#E53935"
+        android:textSize="14sp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layout_dots" />
+
+    <GridLayout
+        android:id="@+id/keypad"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#D2D5DC"
+        android:columnCount="3"
+        android:padding="3dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout android:id="@+id/btn_1" android:layout_width="0dp" android:layout_height="58dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="3dp" android:background="@drawable/bg_keypad_button" android:elevation="2dp" android:gravity="center" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="1" android:textColor="#000000" android:textSize="26sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text=" " android:textSize="10sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_2" android:layout_width="0dp" android:layout_height="58dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="3dp" android:background="@drawable/bg_keypad_button" android:elevation="2dp" android:gravity="center" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="2" android:textColor="#000000" android:textSize="26sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="A B C" android:textColor="#000000" android:textSize="10sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_3" android:layout_width="0dp" android:layout_height="58dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="3dp" android:background="@drawable/bg_keypad_button" android:elevation="2dp" android:gravity="center" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="3" android:textColor="#000000" android:textSize="26sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="D E F" android:textColor="#000000" android:textSize="10sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_4" android:layout_width="0dp" android:layout_height="58dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="3dp" android:background="@drawable/bg_keypad_button" android:elevation="2dp" android:gravity="center" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="4" android:textColor="#000000" android:textSize="26sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="G H I" android:textColor="#000000" android:textSize="10sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_5" android:layout_width="0dp" android:layout_height="58dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="3dp" android:background="@drawable/bg_keypad_button" android:elevation="2dp" android:gravity="center" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="5" android:textColor="#000000" android:textSize="26sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="J K L" android:textColor="#000000" android:textSize="10sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_6" android:layout_width="0dp" android:layout_height="58dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="3dp" android:background="@drawable/bg_keypad_button" android:elevation="2dp" android:gravity="center" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="6" android:textColor="#000000" android:textSize="26sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="M N O" android:textColor="#000000" android:textSize="10sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_7" android:layout_width="0dp" android:layout_height="58dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="3dp" android:background="@drawable/bg_keypad_button" android:elevation="2dp" android:gravity="center" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="7" android:textColor="#000000" android:textSize="26sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="P Q R S" android:textColor="#000000" android:textSize="10sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_8" android:layout_width="0dp" android:layout_height="58dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="3dp" android:background="@drawable/bg_keypad_button" android:elevation="2dp" android:gravity="center" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="8" android:textColor="#000000" android:textSize="26sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="T U V" android:textColor="#000000" android:textSize="10sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_9" android:layout_width="0dp" android:layout_height="58dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="3dp" android:background="@drawable/bg_keypad_button" android:elevation="2dp" android:gravity="center" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="9" android:textColor="#000000" android:textSize="26sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="W X Y Z" android:textColor="#000000" android:textSize="10sp" />
+        </LinearLayout>
+
+        <TextView android:layout_width="0dp" android:layout_height="58dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="3dp" android:background="#00000000" />
+        <LinearLayout android:id="@+id/btn_0" android:layout_width="0dp" android:layout_height="58dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="3dp" android:background="@drawable/bg_keypad_button" android:elevation="2dp" android:gravity="center" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="0" android:textColor="#000000" android:textSize="26sp" />
+        </LinearLayout>
+        <TextView android:id="@+id/btn_delete" android:layout_width="0dp" android:layout_height="58dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="3dp" android:background="#00000000" android:gravity="center" android:text="⌫" android:textColor="#000000" android:textSize="28sp" />
+    </GridLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

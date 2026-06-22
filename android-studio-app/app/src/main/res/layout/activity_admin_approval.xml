@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f1f5ff"
+    android:orientation="vertical"
+    android:id="@+id/admin_approval_container">
+
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/top_bar_admin_approval"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/top_bar_back_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_less_than"
+            app:tint="#000000" />
+
+        <TextView
+            android:id="@+id/top_bar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Quản lý duyệt"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/ll_filters"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:background="#FFFFFF"
+        android:weightSum="3">
+
+        <TextView
+            android:id="@+id/tv_filter_pending"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/bg_tab_selected"
+            android:paddingVertical="8dp"
+            android:text="Chờ duyệt"
+            android:textColor="#f24405"
+            android:textAlignment="center"
+            android:textSize="13sp"/>
+            
+        <TextView
+            android:id="@+id/tv_filter_approved"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_tab_unselected_gray"
+            android:paddingVertical="8dp"
+            android:text="Đã duyệt"
+            android:textColor="#757575"
+            android:textAlignment="center"
+            android:textSize="13sp"/>
+
+        <TextView
+            android:id="@+id/tv_filter_rejected"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_tab_unselected_gray"
+            android:paddingVertical="8dp"
+            android:text="Từ chối"
+            android:textColor="#757575"
+            android:textAlignment="center"
+            android:textSize="13sp"/>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_approval_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="8dp"
+        android:clipToPadding="false"
+        tools:listitem="@layout/item_pending_store" />
+
+</LinearLayout>

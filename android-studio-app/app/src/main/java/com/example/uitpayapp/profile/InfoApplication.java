@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,11 +25,13 @@ public class InfoApplication extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         setContentView(R.layout.activity_info_application);
         View pagetitle = findViewById(R.id.top_bar_info_application);
         ViewCompat.setOnApplyWindowInsetsListener(pagetitle, (v, insets) -> {
             Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
-            int safeTopPadding = cutout.top + 10;
+            Insets systemBar = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            int safeTopPadding = Math.max(cutout.top, systemBar.top) + 10;
             v.setPadding(v.getPaddingLeft(), safeTopPadding, v.getPaddingRight(), v.getPaddingBottom());
             //hong can thanh duoi
             return insets;
@@ -38,8 +41,8 @@ public class InfoApplication extends AppCompatActivity
         pagetitle.findViewById(R.id.top_bar_back_btn).setOnClickListener(v->finish());
         List<GroupItemData> ListGroupItem = new ArrayList<>();
         List<MenuItemData> ListItems = new ArrayList<>();
-        ListItems.add(new MenuItemData("Bình chọn UITpay","",R.drawable.ic_info_app_evaluation,false));
-        ListItems.add(new MenuItemData("Quy định dịch vụ","",R.drawable.ic_info_app_term,false));
+        ListItems.add(new MenuItemData("Bình chọn YumYum","",R.drawable.ic_info_app_evaluation,false));
+        ListItems.add(new MenuItemData("Điều khoản dịch vụ","",R.drawable.ic_info_app_term,false));
         ListItems.add(new MenuItemData("Quy chế hoạt động","",R.drawable.ic_info_app_law,false));
         ListGroupItem.add(new GroupItemData("",ListItems));
         ProfileMenuAdapter adapter=new ProfileMenuAdapter(this,ListGroupItem,itemMenu->HanleItemClick(itemMenu));
@@ -47,8 +50,8 @@ public class InfoApplication extends AppCompatActivity
         recyclerView.setAdapter(adapter);
     }
     private void HanleItemClick(MenuItemData item) {
-        if (item.getTitle().equals("Bình chọn UITpay")) {
-            String packetName = "vn.com.vng.zalopay";
+        if (item.getTitle().equals("Bình chọn YumYum")) {
+            String packetName = "com.deliverynow";
             try {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packetName)));
             } catch (android.content.ActivityNotFoundException e) {
@@ -58,12 +61,11 @@ public class InfoApplication extends AppCompatActivity
         }
 
         Intent intent = new Intent(this, ProfileWebView.class);
-        if (item.getTitle().equals("Quy định dịch vụ")) {
-            intent.putExtra("URL_KEY", "https://zalopay.vn/quy-dinh");
+        if (item.getTitle().equals("Điều khoản dịch vụ")) {
+            intent.putExtra("URL_KEY", "https://help.cs.shopeefood.vn/portal/103/article/74116?previousPage=other%20articles");
         } else if (item.getTitle().equals("Quy chế hoạt động")) {
-            intent.putExtra("URL_KEY", "https://zalopay.vn/quy-dinh/quy-che-hoat-dong");
+            intent.putExtra("URL_KEY", "https://help.cs.shopeefood.vn/portal/103/article/73880-Quy-ch%E1%BA%BF-ho%E1%BA%A1t-%C4%91%E1%BB%99ng");
         }
         startActivity(intent);
     }
 }
-

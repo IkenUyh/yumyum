@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="8dp">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivProductThumb"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:scaleType="centerCrop"
+        android:src="@android:drawable/ic_menu_gallery"
+        app:shapeAppearanceOverlay="@xml/rounded_corners_small" />
+
+    <TextView
+        android:id="@+id/tvProductQtyName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/ivProductThumb"
+        android:layout_toLeftOf="@id/tvProductPrice"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="10dp"
+        android:text="1 x Burrito Thịt bò xào (ko phải tacos)"
+        android:textColor="#222222"
+        android:textStyle="bold"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/tvProductNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvProductQtyName"
+        android:layout_toRightOf="@id/ivProductThumb"
+        android:layout_toLeftOf="@id/tvProductPrice"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="4dp"
+        android:text="Đầy đủ: hành tím + cà chua + xà lách, Sốt chính: Sốt Mayo tỏi (Shawarma Garlic), Khoai tây chiên ko dầu, Mix thêm thịt gà, Vỏ bánh Tortilla Truyền Thống"
+        android:textColor="#888888"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/tvProductPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:text="58.000đ"
+        android:textColor="#333333"
+        android:textSize="14sp"
+        android:textStyle="bold"/>
+</RelativeLayout>

@@ -1,0 +1,4 @@
+ALTER TABLE orders 
+ADD COLUMN note TEXT,
+ADD COLUMN is_cutlery_requested BOOLEAN DEFAULT FALSE,
+ADD COLUMN used_coins INT DEFAULT 0;

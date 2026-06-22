@@ -1,0 +1,3 @@
+ALTER TABLE vouchers
+ADD COLUMN user_id BIGINT NULL,
+ADD CONSTRAINT fk_voucher_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;

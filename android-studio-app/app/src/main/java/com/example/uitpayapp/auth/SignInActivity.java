@@ -1,40 +1,50 @@
 package com.example.uitpayapp.auth;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.example.uitpayapp.home.ImageSliderAdapter;
+import com.example.uitpayapp.home.home_adapters.ImageSliderAdapter;
 import com.example.uitpayapp.R;
+import com.example.uitpayapp.modules.user.UserRepository;
+import com.example.uitpayapp.modules.user.models.responses.AuthResponseDTO;
+import com.example.uitpayapp.network.ApiCallback;
 
 import java.util.List;
 
 public class SignInActivity extends AppCompatActivity {
 
     private EditText edtPhoneNumber;
+    private TextView tvErrorPhone;
     private Button btnLogin;
     private Handler sliderHandler;
     private Runnable sliderRunnable;
-    FrameLayout loading;
-    TextView txtDots;
-    Handler handler;
-    Runnable runnable;
+    private android.app.Dialog loadingDialog;
+    private UserRepository userRepository;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Hide error message when returning to this screen
+        if (tvErrorPhone != null && edtPhoneNumber != null && tvErrorPhone.getVisibility() == View.VISIBLE) {
+            tvErrorPhone.setVisibility(View.GONE);
+            edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_rounded);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -53,66 +63,148 @@ public class SignInActivity extends AppCompatActivity {
             return insets;
         });
         btnLogin= findViewById(R.id.btnLogin);
-        loading = findViewById(R.id.loadingOverlay);
-        txtDots = findViewById(R.id.txtDots);
-        handler = new Handler(Looper.getMainLooper());
+        tvErrorPhone = findViewById(R.id.tv_error_phone);
         edtPhoneNumber = findViewById(R.id.PhoneNumber);
-        runnable = new Runnable() {
-            int count = 0;
+        
+        userRepository = new UserRepository();
+        
+        loadingDialog = new android.app.Dialog(this);
+        loadingDialog.setContentView(R.layout.dialog_loading);
+        loadingDialog.setCancelable(false);
+        if (loadingDialog.getWindow() != null) {
+            loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
 
-            @Override
-            public void run() {
-                count = (count + 1) % 4;
-
-                String dots = "";
-                for (int i = 0; i < count; i++) {
-                    dots += "●";
-                }
-
-                txtDots.setText(dots);
-
-                handler.postDelayed(this, 500);
+        edtPhoneNumber.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_rounded);
+                tvErrorPhone.setVisibility(View.GONE);
             }
-        };
+        });
+
         btnLogin.setOnClickListener(v -> {
-            String phone = edtPhoneNumber.getText().toString();
+            String phone = edtPhoneNumber.getText().toString().trim();
 
             if(phone.isEmpty()){
-                Toast.makeText(SignInActivity.this, "Vui lòng nhập số điện thoại", Toast.LENGTH_SHORT).show();
+                edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_error);
+                tvErrorPhone.setText("Vui lòng nhập số điện thoại");
+                tvErrorPhone.setVisibility(View.VISIBLE);
                 return;
             }
 
-            loading.setVisibility(View.VISIBLE);
-            handler.post(runnable);
+            if (loadingDialog != null && !isFinishing()) loadingDialog.show();
 
-            // Giả lập loading nhẹ 0.5s cho mượt rồi chuyển màn hình
-            new Handler().postDelayed(() -> {
-                loading.setVisibility(View.GONE);
-                handler.removeCallbacks(runnable);
-                sliderHandler.removeCallbacks(sliderRunnable);
-                android.content.Intent intent = new android.content.Intent(SignInActivity.this, PasscodeActivity.class);
-                intent.putExtra("PHONE_NUMBER", phone); // Gói dữ liệu
-                startActivity(intent);
-            }, 500);
+            userRepository.checkPhoneExists(phone, new ApiCallback<com.example.uitpayapp.modules.user.models.responses.CheckPhoneResponseDTO>() {
+                @Override
+                public void onSuccess(com.example.uitpayapp.modules.user.models.responses.CheckPhoneResponseDTO data) {
+                    if (data != null && data.isExists()) {
+                        proceedToPasscode(phone, data.getAvatarUrl(), data.getFullName());
+                    } else {
+                        if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
+                        edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_error);
+                        tvErrorPhone.setText("Số điện thoại không tồn tại");
+                        tvErrorPhone.setVisibility(View.VISIBLE);
+                        
+                        // Ẩn cảnh báo sau 3 giây
+                        tvErrorPhone.postDelayed(() -> {
+                            if (tvErrorPhone.getVisibility() == View.VISIBLE) {
+                                tvErrorPhone.setVisibility(View.GONE);
+                                edtPhoneNumber.setBackgroundResource(R.drawable.bg_edittext_rounded);
+                            }
+                        }, 3000);
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
+                    Toast.makeText(SignInActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                }
+            });
         });
-        List <Integer> imageList = List.of(
-                R.drawable.img_advertisment1,
-                R.drawable.img_advertisment2,
-                R.drawable.img_advertisment3);
+
+        // Nút quay lại
+        View btnBack = findViewById(R.id.btn_back);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
+
+        // Nút đăng ký
+        View btnRegister = findViewById(R.id.btnRegister);
+        if (btnRegister != null) {
+            btnRegister.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(SignInActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        // Setup Banner Slider
         ViewPager2 viewPager2 = findViewById(R.id.imgAdvertisement);
-        //adapter se la trung gian dua anh len viewpaper
-        ImageSliderAdapter adapter = new ImageSliderAdapter(imageList);
-        viewPager2.setAdapter(adapter);
-        sliderHandler=new Handler(Looper.getMainLooper());
-        sliderRunnable=new Runnable() {
-            @Override
-            public void run() {
-                int currentitem=viewPager2.getCurrentItem();
-                currentitem=(currentitem+1)%imageList.size();
-                viewPager2.setCurrentItem(currentitem,true);
-                sliderHandler.postDelayed(this,3000);
-            }
-        };
-        sliderHandler.post(sliderRunnable);
+        View bannerLoading = findViewById(R.id.layout_banner_loading);
+        View bannerError = findViewById(R.id.layout_banner_error);
+        
+        if (viewPager2 != null) {
+            ImageSliderAdapter adapter = new ImageSliderAdapter(new java.util.ArrayList<>());
+            viewPager2.setAdapter(adapter);
+            sliderHandler = new Handler(Looper.getMainLooper());
+            sliderRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (adapter.getItemCount() > 1) {
+                        int currentitem = viewPager2.getCurrentItem();
+                        currentitem = (currentitem + 1) % adapter.getItemCount();
+                        viewPager2.setCurrentItem(currentitem, true);
+                    }
+                    sliderHandler.postDelayed(this, 3000);
+                }
+            };
+            sliderHandler.post(sliderRunnable);
+            
+            if (bannerLoading != null) bannerLoading.setVisibility(View.VISIBLE);
+            if (bannerError != null) bannerError.setVisibility(View.GONE);
+            viewPager2.setVisibility(View.GONE);
+
+            com.example.uitpayapp.network.RetrofitClient.getHomeApiService().getHomeCore("").enqueue(new retrofit2.Callback<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>>() {
+                @Override
+                public void onResponse(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>> call, retrofit2.Response<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>> response) {
+                    if (bannerLoading != null) bannerLoading.setVisibility(View.GONE);
+                    if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                        List<com.example.uitpayapp.home.network.Banner> banners = response.body().getData().getBanners();
+                        if (banners != null && !banners.isEmpty()) {
+                            viewPager2.setVisibility(View.VISIBLE);
+                            List<String> urls = new java.util.ArrayList<>();
+                            for (com.example.uitpayapp.home.network.Banner b : banners) urls.add(b.getImageUrl());
+                            adapter.updateData(urls);
+                        } else {
+                            if (bannerError != null) bannerError.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        if (bannerError != null) bannerError.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                @Override
+                public void onFailure(retrofit2.Call<com.example.uitpayapp.models.ApiResponse<com.example.uitpayapp.home.network.HomeCoreResponse>> call, Throwable t) {
+                    if (bannerLoading != null) bannerLoading.setVisibility(View.GONE);
+                    if (bannerError != null) {
+                        bannerError.setVisibility(View.VISIBLE);
+                        TextView tvError = findViewById(R.id.tv_banner_error);
+                        if (tvError != null) tvError.setText("Không kết nối được server");
+                    }
+                }
+            });
+        }
+    }
+    
+    private void proceedToPasscode(String phone, String avatarUrl, String fullName) {
+        if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
+        if (sliderHandler != null && sliderRunnable != null) {
+            sliderHandler.removeCallbacks(sliderRunnable);
+        }
+        android.content.Intent intent = new android.content.Intent(SignInActivity.this, PasscodeActivity.class);
+        intent.putExtra("PHONE_NUMBER", phone); // Gói dữ liệu
+        intent.putExtra("AVATAR_URL", avatarUrl);
+        intent.putExtra("FULL_NAME", fullName);
+        startActivity(intent);
     }
 }

@@ -1,30 +1,84 @@
 services:
   mysql-db:
     image: mysql:9.0
-    container_name: zalopay-mysql
+    container_name: fooddelivery-mysql
     restart: always
     ports:
-      - "3306:3306"
+      - "3308:3306"
     environment:
       MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: zalopay_db
+      MYSQL_DATABASE: fooddelivery_db
     volumes:
       - mysql_data:/var/lib/mysql
+    command: --innodb-buffer-pool-size=64M --max-connections=50
+
+
+  redis-db:
+    image: redis:7-alpine
+    container_name: fooddelivery-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
 
   backend-app:
     build: .
-    container_name: zalopay-backend-app
+    image: ikenuyh/fooddelivery-backend:latest
+    container_name: fooddelivery-backend-app
     restart: always
     ports:
-      - "8081:8081"
+      - "8083:8081"
     depends_on:
-      - mysql-db
+      mysql-db:
+        condition: service_started
+      redis-db:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
     environment:
-      # Ket noi voi MySQL thong qua ten service
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/zalopay_db?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/fooddelivery_db?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_DATA_REDIS_HOST=redis-db
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200
+      - MAIL_USERNAME=huykiento@gmail.com
+      - MAIL_PASSWORD=kzibyvfluqxbztcx
+
+
+  reverse-proxy:
+    image: caddy:2-alpine
+    container_name: fooddelivery-caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
+    container_name: fooddelivery-es
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 volumes:
   mysql_data:
+  caddy_data:
+  caddy_config:
+  es_data:

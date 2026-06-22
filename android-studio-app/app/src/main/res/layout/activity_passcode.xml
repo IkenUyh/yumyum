@@ -26,7 +26,7 @@
         android:id="@+id/layout_user_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="80dp"
         android:gravity="center"
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/btn_close"
@@ -44,19 +44,10 @@
                 android:layout_height="match_parent"
                 android:background="#E0E0E0"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_dog_kid" />
+                android:src="@drawable/ic_account_24px" />
 
         </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:id="@+id/tv_username"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Username"
-            android:textColor="#0A1C40"
-            android:textSize="22sp"
-            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tv_phone_number"
@@ -72,7 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Nhập mật khẩu ZaloPay để đăng nhập"
+            android:text="Nhập mật khẩu YumYum để đăng nhập"
             android:textColor="#212121"
             android:textSize="16sp" />
     </LinearLayout>
@@ -145,12 +136,14 @@
 
     <TextView
         android:id="@+id/tv_error_message"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="24dp"
         android:text="Mã Pin không đúng. Vui lòng thử lại."
         android:textColor="#E53935"
-        android:textSize="15sp"
+        android:textSize="14sp"
+        android:textAlignment="center"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -160,25 +153,15 @@
         android:id="@+id/btn_forgot_pass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:text="Quên mật khẩu?"
-        android:textColor="#0052CC"
+        android:textColor="#FF5722"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_error_message" />
 
-    <TextView
-        android:id="@+id/btn_not_my_account"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Đây không phải tài khoản của tôi"
-        android:textColor="#0052CC"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.454"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_forgot_pass" />
+
 
     <GridLayout
         android:id="@+id/keypad"

@@ -7,7 +7,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#f1f5ff">
+        android:background="#f5f7fa">
 
         <TextView
             android:id="@+id/pagetilte"
@@ -19,13 +19,14 @@
             android:textAlignment="center"
             android:padding="15dp"
             android:textColor="#FFFFFF"
-            android:background="#0034c8"/>
+            android:background="#f24405"/>
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
             android:layout_below="@id/pagetilte"
             android:layout_above="@+id/bottomNavContainer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:scrollbars="none">
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -47,12 +48,14 @@
                             android:layout_width="70dp"
                             android:layout_height="70dp"
                             android:scaleType="centerCrop"
-                            android:src="@drawable/ic_dog_kid" />
+                            android:src="@drawable/ic_account_24px" />
                     </androidx.cardview.widget.CardView>
                     <LinearLayout
+                        android:id="@+id/ll_user_info"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:visibility="gone">
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -102,6 +105,26 @@
                                 android:background="#e6faef"/>
                         </androidx.cardview.widget.CardView>
                     </LinearLayout>
+                    <RelativeLayout
+                        android:id="@+id/rl_login_profile"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp">
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btn_login_profile"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingVertical="8dp"
+                            android:paddingHorizontal="16dp"
+                            android:background="@drawable/bg_button_login_rounded"
+                            android:text="Đăng nhập/Đăng ký"
+                            android:textAllCaps="false"
+                            android:backgroundTint="#f28157"
+                            android:textColor="#ffffff"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentEnd="true"/>
+                    </RelativeLayout>
+
                 </LinearLayout>
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
@@ -110,21 +133,23 @@
                     android:layout_marginTop="-15dp"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
-                    android:backgroundTint="#f1f5ff">
+                    android:backgroundTint="#f5f7fa">
                     <LinearLayout
                         android:id="@+id/profile_container"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp"
-                        android:layout_marginTop="60dp">
+                        android:layout_marginTop="30dp">
                         <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/main_menu"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"
                             android:orientation="vertical">
                         </androidx.recyclerview.widget.RecyclerView>
                         <androidx.cardview.widget.CardView
+                            android:id="@+id/cv_logout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             app:cardCornerRadius="12dp"
@@ -132,6 +157,7 @@
                             app:cardUseCompatPadding="true"
                             android:background="#FFFFFF">
                             <LinearLayout
+                                android:id="@+id/btn_logout"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
@@ -154,108 +180,15 @@
                         </androidx.cardview.widget.CardView>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="90dp"
-                    android:orientation="horizontal"
-                    android:padding="12dp"
-                    android:paddingBottom="40dp">
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/qr_manage_card"
-                        android:layout_width="0dp"
-                        android:layout_height="80dp"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="6dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="0dp">
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="horizontal"
-                            android:padding="12dp"
-                            android:gravity="center_horizontal">
-                            <LinearLayout
-                                android:layout_width="110dp"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:textSize="14sp"
-                                    android:textColor="#000000"
-                                    android:text="Quản lý mã"
-                                    android:textStyle="bold"/>
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:textSize="10sp"
-                                    android:textColor="#000000"
-                                    android:text="Quản lý các mã QR quan trọng"
-                                    android:textStyle="normal"/>
-                            </LinearLayout>
-                            <ImageView
-                                android:layout_width="40dp"
-                                android:layout_height="40dp"
-                                android:src="@drawable/ic_qr_scan"
-                                android:scaleType="centerCrop"
-                                android:layout_gravity="center_vertical"/>
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="0dp"
-                        android:layout_height="80dp"
-                        android:layout_weight="1"
-                        android:layout_marginStart="6dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="0dp">
-                        <LinearLayout
-                            android:id="@+id/profile_uitpay_priority"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="horizontal"
-                            android:padding="12dp"
-                            android:gravity="center_horizontal">
-                            <LinearLayout
-                                android:layout_width="110dp"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:textSize="14sp"
-                                    android:textColor="#000000"
-                                    android:text="UITpay Priority"
-                                    android:textStyle="bold"/>
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:textSize="10sp"
-                                    android:textColor="#000000"
-                                    android:text="Thành viên"
-                                    android:textStyle="normal"/>
-                            </LinearLayout>
-                            <ImageView
-                                android:layout_width="40dp"
-                                android:layout_height="40dp"
-                                android:src="@drawable/ic_priority_uitpay"
-                                android:scaleType="centerCrop"
-                                android:layout_gravity="center_vertical"/>
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-                </LinearLayout>
             </RelativeLayout>
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/bottomNavContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:clipChildren="false"
-            android:clipToPadding="false">
-
+            android:background="#F5F5F5"
+            android:layout_alignParentBottom="true">
             <LinearLayout
                 android:id="@+id/layoutBottomNav"
                 android:layout_width="match_parent"
@@ -265,17 +198,16 @@
                 android:orientation="horizontal"
                 android:weightSum="5"
                 app:layout_constraintBottom_toBottomOf="parent">
-
                 <LinearLayout
                     android:id="@+id/navHome"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="?attr/selectableItemBackground">
+                    android:gravity="center"
+                    android:orientation="vertical">
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
@@ -295,117 +227,123 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="?attr/selectableItemBackground">
+                    android:gravity="center"
+                    android:orientation="vertical">
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@drawable/ic_history_24px"
+                        android:src="@drawable/list_alt_24px"
                         app:tint="#757575" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Lịch sử"
+                        android:text="Đơn hàng"
                         android:textColor="#757575"
                         android:textSize="12sp" />
                 </LinearLayout>
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1" />
-
                 <LinearLayout
-                    android:id="@+id/navGift"
+                    android:id="@+id/navFavorite"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="?attr/selectableItemBackground">
+                    android:gravity="center"
+                    android:orientation="vertical">
+
                     <ImageView
-                        android:layout_width="34dp"
-                        android:layout_height="34dp"
-                        android:src="@drawable/ic_sanqua_qua3d"
-                        android:contentDescription="Săn quà" />
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/favorite_24px"
+                        app:tint="#757575" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Săn quà"
+                        android:text="Yêu thích"
                         android:textColor="#757575"
                         android:textSize="12sp" />
                 </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/navNotification"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:orientation="vertical">
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/notifications_24px"
+                        app:tint="#757575" />
+                    <TextView
+                        android:id="@+id/tv_notification_badge"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginTop="-2dp"
+                        android:layout_marginEnd="-4dp"
+                        android:background="@drawable/bg_circle_gray"
+                        android:backgroundTint="#EE4D2D"
+                        android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:textSize="8sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+                </FrameLayout>
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Thông báo"
+                        android:textColor="#757575"
+                        android:textSize="12sp" />
+                </LinearLayout>
                 <LinearLayout
                     android:id="@+id/navAccount"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="?attr/selectableItemBackground">
+                    android:gravity="center"
+                    android:orientation="vertical">
+
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_account_24px"
-                        app:tint="#0C40CC" />
+                        app:tint="#EE4D2D" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:text="Tài khoản"
-                        android:textColor="#0C40CC"
-                        android:textStyle="bold"
-                        android:textSize="12sp" />
+                        android:textColor="#EE4D2D"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:elevation="10dp"
-                android:gravity="center"
-                android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/btnScanQR"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    app:cardBackgroundColor="#0C40CC"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="0dp">
-
-                    <ImageView
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_qr_code_24px"
-                        app:tint="@android:color/white" />
-                </androidx.cardview.widget.CardView>
-
-                <TextView
-                    android:id="@+id/tvQR_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Quét mọi QR"
-                    android:textColor="#0C40CC"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

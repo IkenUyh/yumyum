@@ -1,0 +1,224 @@
+package com.example.uitpayapp.home;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.uitpayapp.R;
+import com.example.uitpayapp.home.home_adapters.CategoryFoodAdapter;
+import com.example.uitpayapp.home.home_models.CartItem;
+import com.example.uitpayapp.home.home_models.CartManager;
+import com.example.uitpayapp.home.home_models.FoodMenuItem;
+import com.example.uitpayapp.utils.CartAnimationHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class CategoryTabFragment extends Fragment {
+
+    private static final String ARG_CATEGORY_NAME = "category_name";
+    private static final String ARG_CATEGORY_ID = "category_id";
+    private static final String ARG_FILTER_TYPE = "filter_type";
+
+    private CategoryViewModel viewModel;
+    private RecyclerView recyclerView;
+    private View layoutLoading, layoutError, layoutEmpty, swipeRefreshLayout;
+    private TextView tvError, tvEmpty;
+
+    public static CategoryTabFragment newInstance(String categoryName, long categoryId, String filterType) {
+        CategoryTabFragment fragment = new CategoryTabFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_CATEGORY_NAME, categoryName);
+        args.putLong(ARG_CATEGORY_ID, categoryId);
+        args.putString(ARG_FILTER_TYPE, filterType);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_category_tab, container, false);
+
+        recyclerView = view.findViewById(R.id.rv_category_foods);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        layoutLoading = view.findViewById(R.id.layout_category_loading);
+        layoutError = view.findViewById(R.id.layout_category_error);
+        layoutEmpty = view.findViewById(R.id.layout_category_empty);
+        tvError = view.findViewById(R.id.tv_category_error);
+        tvEmpty = view.findViewById(R.id.tv_category_empty);
+
+        androidx.swiperefreshlayout.widget.SwipeRefreshLayout srl = view.findViewById(R.id.swipe_refresh_category);
+        swipeRefreshLayout = srl;
+
+        long categoryId = getArguments() != null ? getArguments().getLong(ARG_CATEGORY_ID, -1L) : -1L;
+        String filterType = getArguments() != null ? getArguments().getString(ARG_FILTER_TYPE) : "";
+
+        // ViewModel được chia sẻ giữa các tab trong cùng 1 Activity
+        viewModel = new ViewModelProvider(requireActivity()).get(CategoryViewModel.class);
+
+        com.example.uitpayapp.network.SessionManager session = com.example.uitpayapp.network.SessionManager.getInstance(getContext());
+        Double lat = session.getDeliveryLatitude() != 0.0 ? session.getDeliveryLatitude() : null;
+        Double lng = session.getDeliveryLongitude() != 0.0 ? session.getDeliveryLongitude() : null;
+
+        // Retry button
+        View btnRetry = view.findViewById(R.id.btn_category_retry);
+        if (btnRetry != null) {
+            btnRetry.setOnClickListener(v -> {
+                if (categoryId > 0) {
+                    viewModel.fetchFoodsByCategory(categoryId, lat, lng);
+                }
+            });
+        }
+
+        // Pull-to-refresh
+        if (srl != null) {
+            srl.setOnRefreshListener(() -> {
+                if (categoryId > 0) {
+                    viewModel.fetchFoodsByCategory(categoryId, lat, lng);
+                }
+                srl.setRefreshing(false);
+            });
+        }
+
+        // Observe LiveData
+        viewModel.getFoodsData().observe(getViewLifecycleOwner(), state -> {
+            if (state.isLoading()) {
+                layoutLoading.setVisibility(View.VISIBLE);
+                startShimmerAnimation();
+                layoutError.setVisibility(View.GONE);
+                layoutEmpty.setVisibility(View.GONE);
+                swipeRefreshLayout.setVisibility(View.GONE);
+            } else if (state.isSuccess()) {
+                layoutLoading.setVisibility(View.GONE);
+                stopShimmerAnimation();
+                layoutError.setVisibility(View.GONE);
+                layoutEmpty.setVisibility(View.GONE);
+                swipeRefreshLayout.setVisibility(View.VISIBLE);
+
+                // Áp dụng filter cục bộ trước khi hiển thị
+                List<FoodMenuItem> foods = state.getData();
+                List<FoodMenuItem> displayFoods = foods != null ? new ArrayList<>(foods) : new ArrayList<>();
+
+                // Sắp xếp cục bộ theo filterType
+                if ("Bán chạy".equals(filterType)) {
+                    displayFoods.sort((f1, f2) -> {
+                        Integer r1 = f1.getReviewCount() != null ? f1.getReviewCount() : 0;
+                        Integer r2 = f2.getReviewCount() != null ? f2.getReviewCount() : 0;
+                        return r2.compareTo(r1); // DESC
+                    });
+                } else if ("Đánh giá".equals(filterType)) {
+                    displayFoods.sort((f1, f2) -> {
+                        Double r1 = f1.getRatingAverage() != null ? f1.getRatingAverage() : 0.0;
+                        Double r2 = f2.getRatingAverage() != null ? f2.getRatingAverage() : 0.0;
+                        return r2.compareTo(r1); // DESC
+                    });
+                } else {
+                    // Mặc định hoặc "Gần tôi" -> xếp theo khoảng cách ASC
+                    displayFoods.sort((f1, f2) -> {
+                        Double d1 = f1.getDistance() != null ? f1.getDistance() : Double.MAX_VALUE;
+                        Double d2 = f2.getDistance() != null ? f2.getDistance() : Double.MAX_VALUE;
+                        return d1.compareTo(d2);
+                    });
+                }
+
+                CategoryFoodAdapter adapter = new CategoryFoodAdapter(displayFoods, (item, imageView) -> {
+                    showFoodItemDetailPopup(item, imageView);
+                });
+                recyclerView.setAdapter(adapter);
+            } else if (state.isEmpty()) {
+                layoutLoading.setVisibility(View.GONE);
+                stopShimmerAnimation();
+                layoutError.setVisibility(View.GONE);
+                layoutEmpty.setVisibility(View.VISIBLE);
+                swipeRefreshLayout.setVisibility(View.GONE);
+                tvEmpty.setText("Chưa có món ăn nào trong danh mục này");
+            } else if (state.isError()) {
+                layoutLoading.setVisibility(View.GONE);
+                stopShimmerAnimation();
+                layoutError.setVisibility(View.VISIBLE);
+                layoutEmpty.setVisibility(View.GONE);
+                swipeRefreshLayout.setVisibility(View.GONE);
+                tvError.setText(state.getMessage() != null ? state.getMessage() : "Đã xảy ra lỗi");
+            }
+        });
+
+        // Chỉ gọi API nếu ViewModel chưa có dữ liệu (tránh gọi lại khi chuyển tab)
+        if (!viewModel.hasData() && categoryId > 0) {
+            viewModel.fetchFoodsByCategory(categoryId, lat, lng);
+        } else if (!viewModel.hasData() && categoryId <= 0) {
+            viewModel.triggerError("Danh mục không hợp lệ");
+        }
+
+        return view;
+    }
+
+    private void startShimmerAnimation() {
+        if (layoutLoading != null) {
+            android.view.animation.AlphaAnimation blinkAnimation = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
+            blinkAnimation.setDuration(500);
+            blinkAnimation.setRepeatMode(android.view.animation.Animation.REVERSE);
+            blinkAnimation.setRepeatCount(android.view.animation.Animation.INFINITE);
+            layoutLoading.startAnimation(blinkAnimation);
+        }
+    }
+
+    private void stopShimmerAnimation() {
+        if (layoutLoading != null) {
+            layoutLoading.clearAnimation();
+        }
+    }
+
+    private void showFoodItemDetailPopup(FoodMenuItem item, ImageView sourceImage) {
+        if (getContext() == null) return;
+
+        com.example.uitpayapp.utils.FoodDetailBottomSheetHelper.show(getContext(), item, null, (selectedItem, quantity, selectedToppings) -> {
+            CartItem newItem = new CartItem(selectedItem, quantity, selectedToppings);
+            CartManager.getInstance().addItemSync(getContext(), newItem, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String data) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            View btnCart = getActivity().findViewById(R.id.btn_cart);
+                            if (btnCart != null) {
+                                CartAnimationHelper.animateFlyToCart(getActivity(), sourceImage != null ? sourceImage : getActivity().findViewById(android.R.id.content), btnCart, () -> {
+                                    // Update cart badge
+                                    if (getActivity() instanceof CategoryActivity) {
+                                        TextView tvBadge = getActivity().findViewById(R.id.tv_global_cart_badge);
+                                        int count = CartManager.getInstance().getTotalItemCount();
+                                        if (count > 0) {
+                                            tvBadge.setVisibility(View.VISIBLE);
+                                            tvBadge.setText(String.valueOf(count));
+                                        } else {
+                                            tvBadge.setVisibility(View.GONE);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            android.widget.Toast.makeText(getContext(), "Không thể thêm vào giỏ hàng: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                }
+            });
+        });
+    }
+}

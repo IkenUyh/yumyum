@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8F8F8">
+
+    <!-- Header -->
+    <RelativeLayout
+        android:id="@+id/layoutHeader"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@android:color/white"
+        android:paddingHorizontal="16dp">
+        <ImageView
+            android:id="@+id/btnMerchantBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:tint="#666666"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Đánh giá quán và món"
+            android:textColor="#212121"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="Hỗ trợ"
+            android:textColor="#666666"
+            android:textSize="16sp"/>
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/layoutHeader"
+        android:layout_above="@+id/btnMerchantSubmit"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Banner Nhận Xu Thưởng Giống Mẫu -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:background="#FFF9E6"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🪙 Đánh giá quán, nhận ngay 500 xu"
+                    android:textColor="#A07810"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textColor="#A07810"
+                    android:textSize="18sp"/>
+            </LinearLayout>
+
+            <!-- Vùng Đánh Giá Tổng Thể Quán -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:background="@android:color/white"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/imgMerchantGrid"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@android:color/darker_gray" />
+
+                <TextView
+                    android:id="@+id/txtMerchantSummary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Cơm Chiên Dương Châu &amp; Mì Trộn Tóp Mỡ..."
+                    android:textColor="#666666"
+                    android:textSize="14sp"
+                    android:gravity="center"/>
+
+                <RatingBar
+                    android:id="@+id/merchantRatingBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:numStars="5"
+                    android:rating="0"
+                    android:stepSize="1"
+                    android:theme="@style/RatingBarOrange"/>
+
+                <TextView
+                    android:id="@+id/txtMerchantRatingStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="#FF9800"
+                    android:textSize="14sp"
+                    android:visibility="gone"/>
+
+                <!-- Lời Khen Cho Quán (Hiện Động) -->
+                <LinearLayout
+                    android:id="@+id/layoutMerchantCompliments"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:visibility="gone"
+                    android:layout_marginTop="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Gửi lời khen của bạn"
+                        android:textColor="#212121"
+                        android:textStyle="bold"/>
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupMerchant"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        app:chipSpacingHorizontal="8dp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Khung Nhập Bình Luận & Thêm Ảnh -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:layout_marginTop="8dp"
+                android:padding="16dp"
+                android:orientation="vertical">
+
+                <EditText
+                    android:id="@+id/edtMerchantComment"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:background="@drawable/bg_edittext_rounded"
+                    android:gravity="top|left"
+                    android:hint="Bạn hãy để lại bình luận tại đây nhé! Mọi thắc mắc về đơn hàng..."
+                    android:padding="12dp"
+                    android:textSize="14sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Nhập 50 ký tự &amp; 1 ảnh để nhận ngay 500 xu"
+                    android:textColor="#9E9E9E"
+                    android:textSize="13sp"/>
+
+                <!-- Khung Nét Đứt Thêm Ảnh -->
+                <LinearLayout
+                    android:id="@+id/btnAddImage"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_add_image_dash"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_camera"
+                        app:tint="#EE4D2D"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Thêm ảnh"
+                        android:textColor="#EE4D2D"
+                        android:textSize="12dp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Cụm Đánh Giá Từng Món Khách Quan -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:layout_marginTop="8dp"
+                android:padding="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Bạn có hài lòng với món?"
+                    android:textColor="#212121"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
+
+                <!-- Container chứa danh sách món sinh tự động -->
+                <LinearLayout
+                    android:id="@+id/layoutDishesContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"/>
+            </LinearLayout>
+
+            <!-- Switch Ẩn Danh Của Tôi -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@android:color/white"
+                android:layout_marginTop="8dp"
+                android:paddingHorizontal="16dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:text="Ẩn danh đánh giá của tôi"
+                    android:textColor="#212121"
+                    android:textSize="15sp"/>
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchAnonymous"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    app:thumbTint="@color/selector_switch_thumb"
+                    app:trackTint="@color/selector_switch_track" />
+            </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Nút Gửi Đi Màn Hình Lớn -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnMerchantSubmit"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_btn_submit"
+        android:enabled="false"
+        android:text="Gửi đi"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"/>
+</RelativeLayout>

@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.uitpayapp.R;
@@ -18,13 +19,15 @@ public class ProfileWebView extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         setContentView(R.layout.activity_profilescreen_web_view);
         View topBar = findViewById(R.id.top_bar_webview);
         WebView webView = findViewById(R.id.profilescreen_webview);
         View webContainer = findViewById(R.id.webview_page_container);
         ViewCompat.setOnApplyWindowInsetsListener(topBar, (v, insets) -> {
             Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
-            int safeTopPadding = cutout.top + 10;
+            Insets systemBar = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            int safeTopPadding = Math.max(cutout.top, systemBar.top) + 10;
             v.setPadding(v.getPaddingLeft(), safeTopPadding, v.getPaddingRight(), v.getPaddingBottom());
             //thanh duoi
             Insets navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
@@ -34,7 +37,7 @@ public class ProfileWebView extends AppCompatActivity {
             }
             return insets;
         });
-        ((TextView) topBar.findViewById(R.id.top_bar_title)).setText("UITpay");
+        ((TextView) topBar.findViewById(R.id.top_bar_title)).setText("Yum Yum");
         topBar.findViewById(R.id.top_bar_back_btn).setOnClickListener(v -> finish());
         String url = getIntent().getStringExtra("URL_KEY");
         if (url != null && !url.isEmpty()) {

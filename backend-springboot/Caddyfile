@@ -1,0 +1,4 @@
+kienhuy-dev.name.vn {
+    tls huykiento@gmail.com
+    reverse_proxy backend-app:8081
+}

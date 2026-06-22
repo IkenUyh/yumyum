@@ -14,50 +14,6 @@
         android:orientation="vertical"
         android:paddingBottom="10dp">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="40dp"
-            android:padding="12dp">
-            <TextView android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Số dư hiện có"
-                android:textColor="#000000"/>
-            <ImageView android:id="@+id/hide_show_amount"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:src="@drawable/ic_eye"
-                android:layout_alignParentEnd="true"/>
-        </RelativeLayout>
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="40dp"
-            android:padding="8dp">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp"
-                android:src="@drawable/ic_uitpay_demo"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Ví UITpay" android:layout_marginLeft="34dp" android:textColor="#000000"/>
-            <TextView android:id="@+id/wallet_balance"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="0đ" android:layout_alignParentEnd="true" android:textColor="#000000"
-                android:inputType="textPassword"/>
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="40dp"
-            android:padding="8dp">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp"
-                android:src="@drawable/ic_accmulated_balance"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Số dư sinh lời" android:layout_marginLeft="34dp" android:textColor="#000000"/>
-            <TextView android:id="@+id/accmulated_balance"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="0đ" android:layout_alignParentEnd="true" android:textColor="#000000"
-                android:inputType="textPassword"/>
-        </RelativeLayout>
     </LinearLayout>
     <View
         android:layout_width="match_parent"

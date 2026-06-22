@@ -1,48 +1,120 @@
 package com.example.uitpayapp.profile;
 
-import android.content.Intent;
-import android.graphics.Color;
+import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.PopupMenu;
+import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.bumptech.glide.Glide;
 import com.example.uitpayapp.R;
-import com.example.uitpayapp.ScanQRCode.QRScanActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+
+import com.example.uitpayapp.modules.user.UserRepository;
+import com.example.uitpayapp.modules.user.models.responses.UserResponseDTO;
+import com.example.uitpayapp.network.SessionManager;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 public class AccountDetailActivity extends AppCompatActivity {
-    TextView tvVerifyStatus;
-    View infoVerifyMainStatus, infoNoVerifyMainStatus;
+    ImageView ivAvatar;
+    TextView tvFullName,tvPhone;
     List<String> MainInfo;
+    private java.io.File getFileFromUri(android.net.Uri uri) {
+        try {
+            java.io.File tempFile = new java.io.File(getCacheDir(), "temp_avatar.jpg");
+            java.io.InputStream inputStream = getContentResolver().openInputStream(uri);
+            java.io.FileOutputStream outputStream = new java.io.FileOutputStream(tempFile);
+            byte[] buffer = new byte[4096];
+            int read;
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            outputStream.flush();
+            outputStream.close();
+            inputStream.close();
+            return tempFile;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
+            registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
+                if (uri != null) {
+                    java.io.File file = getFileFromUri(uri);
+                    if (file != null) {
+                        new UserRepository().uploadAvatar(file, new com.example.uitpayapp.network.ApiCallback<String>() {
+                            @Override
+                            public void onSuccess(String avatarUrl) {
+                                updateAvatar(avatarUrl);
+                                SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                                sharedPreferences.edit().putString("AVATAR_URL", avatarUrl).apply();
+
+                                SessionManager sessionManager = SessionManager.getInstance(AccountDetailActivity.this);
+                                sessionManager.updateProfileSession(
+                                        sessionManager.getUserName(),
+                                        avatarUrl,
+                                        sessionManager.getUserEmail()
+                                );
+                                Toast.makeText(AccountDetailActivity.this, "Đã cập nhật ảnh đại diện", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                Toast.makeText(AccountDetailActivity.this, "Cập nhật ảnh đại diện thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        Toast.makeText(this, "Không thể mở tệp ảnh đại diện", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         setContentView(R.layout.activity_account_detail);
         initView();
-        setNoVerifyData();
-        infoNoVerifyMainStatus.setOnClickListener(v -> HanleVerifyAccount());
-        findViewById(R.id.info_verify_showmore).setOnClickListener(v -> showInfoBottomSheet());
+        fetchUserProfile();
         findViewById(R.id.update_secondary_info).setOnClickListener(v -> HanleUpdateSecondaryInfo());
+
+        findViewById(R.id.btn_delete_account).setOnClickListener(v -> {
+            startActivity(new android.content.Intent(this, DeleteAccountActivity.class));
+        });
+
+        findViewById(R.id.inforow_email).setOnClickListener(v -> showUpdateEmailBottomSheet());
+        findViewById(R.id.inforow_phone).setOnClickListener(v -> showUpdatePhoneBottomSheet());
+        findViewById(R.id.inforow_password).setOnClickListener(v -> showUpdatePasswordBottomSheet());
+
+        findViewById(R.id.btn_change_avatar).setOnClickListener(v -> {
+            pickMedia.launch(new PickVisualMediaRequest.Builder()
+                    .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                    .build());
+        });
     }
 
     private void initView() {
@@ -50,9 +122,9 @@ public class AccountDetailActivity extends AppCompatActivity {
         topBar.findViewById(R.id.top_bar_back_btn).setOnClickListener(v -> finish());
         ((TextView) topBar.findViewById(R.id.top_bar_title)).setText("Thông tin chi tiết");
         View mainContainer = findViewById(R.id.account_detail_container);
-        tvVerifyStatus = findViewById(R.id.info_tv_verify_status);
-        infoVerifyMainStatus = findViewById(R.id.info_verify_main_status);
-        infoNoVerifyMainStatus = findViewById(R.id.info_no_verify_main_status);
+        ivAvatar = findViewById(R.id.iv_avatar);
+        tvFullName = findViewById(R.id.tv_full_name);
+        tvPhone = findViewById(R.id.tv_phone_number);
 
         ViewCompat.setOnApplyWindowInsetsListener(topBar, (v, insets) -> {
             Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
@@ -61,7 +133,8 @@ public class AccountDetailActivity extends AppCompatActivity {
             v.setPadding(v.getPaddingLeft(), safeTopPadding, v.getPaddingRight(), v.getPaddingBottom());
             //thanh duoi
             Insets navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
-            int safeBottomPadding = navInsets.bottom;
+            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+            int safeBottomPadding = Math.max(navInsets.bottom,imeInsets.bottom)+10;
             if (mainContainer != null) {
                 mainContainer.setPadding(mainContainer.getPaddingLeft(), mainContainer.getPaddingTop(), mainContainer.getPaddingRight(), safeBottomPadding);
             }
@@ -69,24 +142,95 @@ public class AccountDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void setNoVerifyData() {
-        setRowData(R.id.inforow_name, "Tên", "Chưa cập nhật");
-        setRowData(R.id.inforow_gender, "Giới tính", "Chưa cập nhật");
-        setRowData(R.id.inforow_birthday, "Ngày sinh", "Chưa cập nhật");
-        setRowData(R.id.inforow_id_number, "Căn cước công dân", "Chưa cập nhật");
-        setRowData(R.id.inforow_issue_date, "Ngày cấp giấy tờ", "Chưa cập nhật");
-        setRowData(R.id.inforow_issue_place, "Nơi cấp giấy tờ", "Chưa cập nhật");
-        
-        setRowData(R.id.inforow_email, "Email", "Chưa cập nhật");
-        setRowData(R.id.inforow_address, "Địa chỉ", "Chưa cập nhật");
-        setRowData(R.id.inforow_job, "Nghề nghiệp", "Chưa cập nhật");
+    private void fetchUserProfile() {
+        new UserRepository().getProfile(new com.example.uitpayapp.network.ApiCallback<UserResponseDTO>() {
+            @Override
+            public void onSuccess(UserResponseDTO data) {
+                if (data != null) {
+                    SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("FULL_NAME", data.getFullName());
+                    editor.putString("PHONE_NUMBER", data.getPhoneNumber());
+                    editor.putString("AVATAR_URL", data.getAvatarUrl() != null ? data.getAvatarUrl() : "");
+                    if (data.getEmail() != null) {
+                        editor.putString("EMAIL", data.getEmail());
+                    }
+                    
+                    String birthday = data.getBirthday() != null && !data.getBirthday().isEmpty() ? data.getBirthday() : "Chưa cập nhật";
+                    String gender = data.getGender() != null && !data.getGender().isEmpty() ? data.getGender() : "Chưa cập nhật";
+                    String job = data.getJob() != null && !data.getJob().isEmpty() ? data.getJob() : "Chưa cập nhật";
+                    
+                    editor.putString("BIRTHDAY", birthday);
+                    editor.putString("GENDER", gender);
+                    editor.putString("JOB", job);
+                    editor.apply();
 
-        infoVerifyMainStatus.setVisibility(View.GONE);
-        infoNoVerifyMainStatus.setVisibility(View.VISIBLE);
-        tvVerifyStatus.setText("Chưa xác thực");
-        tvVerifyStatus.setBackgroundResource(R.drawable.bg_button_login_rounded);
-        tvVerifyStatus.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#fbebeb")));
-        tvVerifyStatus.setTextColor(Color.parseColor("#e02449"));
+                    SessionManager sessionManager = SessionManager.getInstance(AccountDetailActivity.this);
+                    sessionManager.updateProfileSession(
+                            data.getFullName(),
+                            data.getAvatarUrl(),
+                            data.getEmail()
+                    );
+
+                    if (tvFullName != null) tvFullName.setText(data.getFullName());
+                    if (tvPhone != null) tvPhone.setText(data.getPhoneNumber());
+                    if (data.getAvatarUrl() != null && !data.getAvatarUrl().isEmpty()) {
+                        updateAvatar(data.getAvatarUrl());
+                    }
+
+                    setRowData(R.id.inforow_username, "Tên", data.getFullName());
+                    setRowData(R.id.inforow_phone, "Số điện thoại", data.getPhoneNumber());
+                    setRowData(R.id.inforow_email, "Email", data.getEmail() != null && !data.getEmail().isEmpty() ? data.getEmail() : "Chưa cập nhật");
+                    setRowData(R.id.inforow_password, "Mật khẩu", "********");
+                    setRowData(R.id.inforow_birthday, "Ngày sinh", birthday);
+                    setRowData(R.id.inforow_gender, "Giới tính", gender);
+                    setRowData(R.id.inforow_job, "Nghề nghiệp", job);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                loadUserDataLocal();
+            }
+        });
+    }
+
+    private void loadUserDataLocal() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String savedName = sharedPreferences.getString("FULL_NAME", "Người dùng ZaloPay");
+        String savedPhone = sharedPreferences.getString("PHONE_NUMBER", "Chưa cập nhật");
+        String savedAvatar = sharedPreferences.getString("AVATAR_URL", "");
+        String email = sharedPreferences.getString("EMAIL", "Chưa cập nhật");
+        String birthday = sharedPreferences.getString("BIRTHDAY", "Chưa cập nhật");
+        String gender = sharedPreferences.getString("GENDER", "Chưa cập nhật");
+        String job = sharedPreferences.getString("JOB", "Chưa cập nhật");
+
+        tvFullName = findViewById(R.id.tv_full_name);
+        tvPhone = findViewById(R.id.tv_phone_number);
+
+        if (tvFullName != null) tvFullName.setText(savedName);
+        if (tvPhone != null) tvPhone.setText(savedPhone);
+        if (!savedAvatar.isEmpty()) {
+            updateAvatar(savedAvatar);
+        }
+
+        setRowData(R.id.inforow_username, "Tên", savedName);
+        setRowData(R.id.inforow_phone, "Số điện thoại", savedPhone);
+        setRowData(R.id.inforow_email, "Email", email);
+        setRowData(R.id.inforow_password, "Mật khẩu", "********");
+        setRowData(R.id.inforow_birthday, "Ngày sinh", birthday);
+        setRowData(R.id.inforow_gender, "Giới tính", gender);
+        setRowData(R.id.inforow_job, "Nghề nghiệp", job);
+    }
+
+    private void updateAvatar(String url) {
+        if (ivAvatar != null) {
+            Glide.with(this)
+                    .load(url)
+                    .circleCrop()
+                    .placeholder(R.drawable.yumyum_demo_logo)
+                    .into(ivAvatar);
+        }
     }
 
     private void setRowData(int viewId, String label, String value) {
@@ -98,142 +242,339 @@ public class AccountDetailActivity extends AppCompatActivity {
             if (tvValue != null) tvValue.setText(value);
         }
     }
-
-    private final ActivityResultLauncher<Intent> qrScanLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-            String resultData = result.getData().getStringExtra("QR_DATA");
-            if (resultData != null) {
-                HandleCCCDData(resultData);
-            }
-        }
-    });
-
-    private void HanleVerifyAccount() {
-        Intent intent = new Intent(this, QRScanActivity.class);
-        intent.putExtra("SCAN_TYPE", "CCCD");
-        qrScanLauncher.launch(intent);
-    }
-    private void HandleCCCDData(String resultData) {
-        String[] items = resultData.split("\\|");
-        items[3]=SplitDate(items[3]);
-        items[6]=SplitDate(items[6]);
-        MainInfo=new ArrayList<>(Arrays.asList(items));
-        MainInfo.remove(1);
-        if (MainInfo.size() == 6) {
-            setRowData(R.id.inforow_id_number, "Căn cước công dân", HideMainInfo(MainInfo.get(0), 3));
-            setRowData(R.id.inforow_name, "Tên", MainInfo.get(1));
-            setRowData(R.id.inforow_birthday, "Ngày sinh", HideMainInfo(MainInfo.get(2), 5));
-            setRowData(R.id.inforow_gender, "Giới tính", MainInfo.get(3));
-            setRowData(R.id.inforow_address, "Địa chỉ", MainInfo.get(4));
-            setRowData(R.id.inforow_issue_date, "Ngày cấp giấy tờ", HideMainInfo(MainInfo.get(5), 5));
-            setRowData(R.id.inforow_issue_place, "Nơi cấp giấy tờ", "CỤC CẢNH SÁT QUẢY LÝ HÀNH CHÍNH VỀ TRẬT TỰ XÃ HỘI");
-            setVerifiedStatus();
-        }
-    }
-    private String HideMainInfo(String text, int lengthShow)
-    {
-        int startsub=text.length()-lengthShow;
-        String result="";
-        for (int i=0;i<startsub;i++) {
-            result += "*";
-        };
-        result += text.substring(startsub);
-        return result;
-    }
-    private String SplitDate(String input)
-    {
-        SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy");
-        SimpleDateFormat inputFormat = new SimpleDateFormat("ddMMyyyy");
-
-        try {
-            Date date=inputFormat.parse(input);
-            return outputFormat.format(date);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    private void setVerifiedStatus() {
-        infoVerifyMainStatus.setVisibility(View.VISIBLE);
-        infoNoVerifyMainStatus.setVisibility(View.GONE);
-        tvVerifyStatus.setText("Đã xác thực");
-        tvVerifyStatus.setBackgroundResource(R.drawable.bg_button_login_rounded);
-        tvVerifyStatus.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#E8F5E9")));
-        tvVerifyStatus.setTextColor(Color.parseColor("#2E7D32"));
-    }
-    private void showInfoBottomSheet()
-    {
-        if (infoNoVerifyMainStatus.getVisibility()==View.VISIBLE)
-        {
-            Toast.makeText(this,"Vui lòng xác thực tài khoản trước!",Toast.LENGTH_SHORT).show();
-            return;
-        }
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
-        View view=getLayoutInflater().inflate(R.layout.layout_dynamic_bottom_sheet,null);
-        bottomSheetDialog.setContentView(view);
-        ((TextView)view.findViewById(R.id.sheet_title)).setText("Thông tin chi tiết");
-        view.findViewById(R.id.btn_close).setOnClickListener(v->bottomSheetDialog.dismiss());
-        LinearLayout container=view.findViewById(R.id.sheet_container);
-        //
-        if (MainInfo!=null||MainInfo.size()==6)
-        {
-            addInfoRowToSheet(container, "Tên", MainInfo.get(1));
-            addInfoRowToSheet(container, "Số CCCD", MainInfo.get(0));
-            addInfoRowToSheet(container, "Giới tính", MainInfo.get(3));
-            addInfoRowToSheet(container, "Ngày sinh", MainInfo.get(2));
-            addInfoRowToSheet(container, "Căn cước công dân", MainInfo.get(0));
-            addInfoRowToSheet(container, "Ngày cấp giấy tờ", MainInfo.get(5));
-            addInfoRowToSheet(container, "Nơi cấp giấy tờ", "CỤC CẢNH SÁT QUẢN LÝ HÀNH CHÍNH VỀ TRẬT TỰ XÃ HỘI");
-        } else return;
-
-        bottomSheetDialog.show();
-    }
-    private void addInfoRowToSheet(android.widget.LinearLayout container, String label, String value) {
-        View row = getLayoutInflater().inflate(R.layout.item_info_row, null);
-        ((TextView) row.findViewById(R.id.tv_label)).setText(label);
-        ((TextView) row.findViewById(R.id.tv_value)).setText(value);
-        container.addView(row);
-    }
+    
     private void HanleUpdateSecondaryInfo() {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_update_info, null);
         bottomSheetDialog.setContentView(view);
 
-        EditText etEmail = view.findViewById(R.id.et_update_email);
-        EditText etAddress = view.findViewById(R.id.et_update_address);
-        TextView tvJob = view.findViewById(R.id.tv_update_job);
+        EditText etEmail = view.findViewById(R.id.et_email);
+        EditText etFullName= view.findViewById(R.id.et_fullname);
+        EditText etBirthday= view.findViewById(R.id.et_birthday);
+        Spinner spGender= view.findViewById(R.id.sp_gender);
+        Spinner spJob= view.findViewById(R.id.sp_job);
 
         String currentEmail = ((TextView) findViewById(R.id.inforow_email).findViewById(R.id.tv_value)).getText().toString();
-        String currentAddress = ((TextView) findViewById(R.id.inforow_address).findViewById(R.id.tv_value)).getText().toString();
         String currentJob = ((TextView) findViewById(R.id.inforow_job).findViewById(R.id.tv_value)).getText().toString();
+        String currentFullName =((TextView) findViewById(R.id.inforow_username).findViewById(R.id.tv_value)).getText().toString();
+        String currentBirthday =((TextView) findViewById(R.id.inforow_birthday).findViewById(R.id.tv_value)).getText().toString();
+        String currentGender =((TextView) findViewById(R.id.inforow_gender).findViewById(R.id.tv_value)).getText().toString();
 
         if (!currentEmail.equals("Chưa cập nhật")) etEmail.setText(currentEmail);
-        if (!currentAddress.equals("Chưa cập nhật")) etAddress.setText(currentAddress);
-        if (!currentJob.equals("Chưa cập nhật")) tvJob.setText(currentJob);
+        if (!currentFullName.equals("Chưa cập nhật")) etFullName.setText(currentFullName);
+        if (!currentBirthday.equals("Chưa cập nhật")) etBirthday.setText(currentBirthday);
 
-        view.findViewById(R.id.btn_close_update_secondary_info).setOnClickListener(v -> bottomSheetDialog.dismiss());
-        view.findViewById(R.id.btn_popup_job).setOnClickListener(v -> {
-            PopupMenu popupMenu = new PopupMenu(this, v);
-            String[] jobs = {"Nhân viên văn phòng", "Kinh doanh tự do", "Học sinh/Sinh viên", "Công nhân","Nông dân", "Nghỉ hưu", "Khác"};
-            for (String job : jobs) {
-                popupMenu.getMenu().add(job);
+        // Setup Gender Spinner
+        String[] genders = {"Nam", "Nữ", "Không công khai"};
+        ArrayAdapter<String> genderAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, genders);
+        spGender.setAdapter(genderAdapter);
+        if (!currentGender.equals("Chưa cập nhật")) {
+            for (int i = 0; i < genders.length; i++) {
+                if (genders[i].equalsIgnoreCase(currentGender)) {
+                    spGender.setSelection(i);
+                    break;
+                }
             }
-            popupMenu.setOnMenuItemClickListener(item -> {
-                tvJob.setText(item.getTitle());
-                return true;
-            });
-            popupMenu.show();
+        }
+
+        // Setup Job Spinner
+        String[] jobs={"Nhân viên văn phòng","Freelancer","Sinh viên/Học sinh","Ở nhà","Nghề nghiệp khác"};
+        ArrayAdapter<String> jobAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, jobs);
+        spJob.setAdapter(jobAdapter);
+        if (!currentJob.equals("Chưa cập nhật")) {
+            for (int i = 0; i < jobs.length; i++) {
+                if (jobs[i].equalsIgnoreCase(currentJob)) {
+                    spJob.setSelection(i);
+                    break;
+                }
+            }
+        }
+
+        etBirthday.setOnClickListener(v -> {
+            Calendar calendar = Calendar.getInstance();
+            String birthStr = etBirthday.getText().toString();
+            if (!birthStr.isEmpty()) {
+                @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                try {
+                    Date date = sdf.parse(birthStr);
+                    if (date != null) calendar.setTime(date);
+                } catch (ParseException ignored) {}
+            }
+            DatePickerDialog dialog = new DatePickerDialog(
+                    this,
+                    (dview, year, month, dayOfMonth) -> {
+                        @SuppressLint("DefaultLocale") String dateStr = String.format("%02d/%02d/%d", dayOfMonth, month + 1, year);
+                        etBirthday.setText(dateStr);
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
+            );
+            dialog.show();
         });
+
+        // Hide email field in the main update dialog since it's handled separately
+        etEmail.setVisibility(View.GONE);
+        
+        view.findViewById(R.id.btn_close_update_secondary_info).setOnClickListener(v -> bottomSheetDialog.dismiss());
 
         view.findViewById(R.id.btn_save_update).setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
-            String address = etAddress.getText().toString().trim();
-            String job = tvJob.getText().toString().trim();
+            String fullName = etFullName.getText().toString().trim();
+            String birthday = etBirthday.getText().toString().trim();
+            String gender = spGender.getSelectedItem().toString();
+            String job = spJob.getSelectedItem().toString();
 
-            if (!email.isEmpty()) setRowData(R.id.inforow_email, "Email", email);
-            if (!address.isEmpty()) setRowData(R.id.inforow_address, "Địa chỉ", address);
-            if (!job.isEmpty() && !job.equals("Chọn nghề nghiệp")) setRowData(R.id.inforow_job, "Nghề nghiệp", job);
+            if (!email.isEmpty() && !email.equalsIgnoreCase(currentEmail)) {
+                // Gửi mã OTP xác nhận về email mới
+                android.app.ProgressDialog sendProgress = new android.app.ProgressDialog(AccountDetailActivity.this);
+                sendProgress.setMessage("Đang gửi mã xác thực đến email mới...");
+                sendProgress.setCancelable(false);
+                sendProgress.show();
 
+                new UserRepository().sendEmailOtp(email, new com.example.uitpayapp.network.ApiCallback<String>() {
+                    @Override
+                    public void onSuccess(String result) {
+                        runOnUiThread(() -> {
+                            sendProgress.dismiss();
+                            
+                            // Hiển thị Dialog nhập mã OTP
+                            android.app.AlertDialog.Builder otpBuilder = new android.app.AlertDialog.Builder(AccountDetailActivity.this);
+                            otpBuilder.setTitle("Xác thực Email mới");
+                            otpBuilder.setMessage("Vui lòng nhập mã xác thực (6 số) đã gửi đến email " + email + ":");
+
+                            final android.widget.EditText otpInput = new android.widget.EditText(AccountDetailActivity.this);
+                            otpInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+                            otpInput.setTransformationMethod(android.text.method.PasswordTransformationMethod.getInstance());
+                            otpInput.setGravity(android.view.Gravity.CENTER);
+                            otpBuilder.setView(otpInput);
+
+                            otpBuilder.setPositiveButton("Xác nhận", (dialog, which) -> {
+                                String otp = otpInput.getText().toString().trim();
+                                if (otp.length() != 6) {
+                                    Toast.makeText(AccountDetailActivity.this, "Mã OTP phải gồm 6 chữ số", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                performProfileUpdate(fullName, email, gender, birthday, job, otp, bottomSheetDialog);
+                            });
+                            otpBuilder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
+                            otpBuilder.show();
+                        });
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        runOnUiThread(() -> {
+                            sendProgress.dismiss();
+                            Toast.makeText(AccountDetailActivity.this, "Gửi OTP thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                });
+            } else {
+                // Không đổi email, cập nhật trực tiếp không cần OTP
+                performProfileUpdate(fullName, email, gender, birthday, job, null, bottomSheetDialog);
+            }
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private void performProfileUpdate(String fullName, String email, String gender, String birthday, String job, String emailOtp, BottomSheetDialog bottomSheetDialog) {
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+        progressDialog.setMessage("Đang cập nhật thông tin...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        new UserRepository().updateProfile(fullName, email, gender, birthday, job, emailOtp, new com.example.uitpayapp.network.ApiCallback<UserResponseDTO>() {
+            @Override
+            public void onSuccess(UserResponseDTO userResponse) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    if (userResponse != null) {
+                        if (email != null && !email.isEmpty()) setRowData(R.id.inforow_email, "Email", email);
+                        if (fullName != null && !fullName.isEmpty()) {
+                            setRowData(R.id.inforow_username, "Tên", fullName);
+                            tvFullName.setText(fullName);
+                        }
+
+                        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("FULL_NAME", fullName);
+                        editor.putString("EMAIL", email);
+                        editor.putString("BIRTHDAY", birthday);
+                        editor.putString("GENDER", gender);
+                        editor.putString("JOB", job);
+                        editor.apply();
+
+                        if (birthday != null && !birthday.isEmpty()) setRowData(R.id.inforow_birthday, "Ngày sinh", birthday);
+                        if (gender != null) setRowData(R.id.inforow_gender, "Giới tính", gender);
+                        if (job != null) setRowData(R.id.inforow_job, "Nghề nghiệp", job);
+
+                        SessionManager sessionManager = SessionManager.getInstance(AccountDetailActivity.this);
+                        sessionManager.updateProfileSession(fullName, userResponse.getAvatarUrl(), email);
+
+                        Toast.makeText(AccountDetailActivity.this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
+                        bottomSheetDialog.dismiss();
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(AccountDetailActivity.this, "Cập nhật thất bại: " + errorMessage, Toast.LENGTH_LONG).show();
+                });
+            }
+        });
+    }
+
+    private void showUpdateEmailBottomSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_update_email, null);
+        bottomSheetDialog.setContentView(view);
+
+        EditText etNewEmail = view.findViewById(R.id.et_new_email);
+        view.findViewById(R.id.btn_close_update_email).setOnClickListener(v -> bottomSheetDialog.dismiss());
+
+        view.findViewById(R.id.btn_save_email).setOnClickListener(v -> {
+            String newEmail = etNewEmail.getText().toString().trim();
+            if (newEmail.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập email mới", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            android.app.ProgressDialog sendProgress = new android.app.ProgressDialog(AccountDetailActivity.this);
+            sendProgress.setMessage("Đang gửi mã xác thực đến email mới...");
+            sendProgress.setCancelable(false);
+            sendProgress.show();
+
+            new UserRepository().sendEmailOtp(newEmail, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    runOnUiThread(() -> {
+                        sendProgress.dismiss();
+                        bottomSheetDialog.dismiss();
+
+                        android.app.AlertDialog.Builder otpBuilder = new android.app.AlertDialog.Builder(AccountDetailActivity.this);
+                        otpBuilder.setTitle("Xác thực Email mới");
+                        otpBuilder.setMessage("Vui lòng nhập mã xác thực (6 số) đã gửi đến email " + newEmail + ":");
+
+                        final android.widget.EditText otpInput = new android.widget.EditText(AccountDetailActivity.this);
+                        otpInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+                        otpInput.setTransformationMethod(android.text.method.PasswordTransformationMethod.getInstance());
+                        otpInput.setGravity(android.view.Gravity.CENTER);
+                        otpBuilder.setView(otpInput);
+
+                        otpBuilder.setPositiveButton("Xác nhận", (dialog, which) -> {
+                            String otp = otpInput.getText().toString().trim();
+                            if (otp.length() != 6) {
+                                Toast.makeText(AccountDetailActivity.this, "Mã OTP phải gồm 6 chữ số", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            // Cập nhật lại chỉ email (giữ nguyên các trường khác)
+                            String currentJob = ((TextView) findViewById(R.id.inforow_job).findViewById(R.id.tv_value)).getText().toString();
+                            String currentFullName =((TextView) findViewById(R.id.inforow_username).findViewById(R.id.tv_value)).getText().toString();
+                            String currentBirthday =((TextView) findViewById(R.id.inforow_birthday).findViewById(R.id.tv_value)).getText().toString();
+                            String currentGender =((TextView) findViewById(R.id.inforow_gender).findViewById(R.id.tv_value)).getText().toString();
+                            
+                            performProfileUpdate(currentFullName, newEmail, currentGender.equals("Chưa cập nhật") ? null : currentGender, currentBirthday.equals("Chưa cập nhật") ? null : currentBirthday, currentJob.equals("Chưa cập nhật") ? null : currentJob, otp, new BottomSheetDialog(AccountDetailActivity.this));
+                        });
+                        otpBuilder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
+                        otpBuilder.show();
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    runOnUiThread(() -> {
+                        sendProgress.dismiss();
+                        Toast.makeText(AccountDetailActivity.this, "Gửi OTP thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private void showUpdatePhoneBottomSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_update_phone, null);
+        bottomSheetDialog.setContentView(view);
+
+        EditText etNewPhone = view.findViewById(R.id.et_new_phone);
+        view.findViewById(R.id.btn_close_update_phone).setOnClickListener(v -> bottomSheetDialog.dismiss());
+
+        view.findViewById(R.id.btn_save_phone).setOnClickListener(v -> {
+            String newPhone = etNewPhone.getText().toString().trim();
+            if (newPhone.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập số điện thoại mới", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Mocking phone update since backend doesn't support it directly in updateProfile
+            SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            sharedPreferences.edit().putString("PHONE_NUMBER", newPhone).apply();
+            setRowData(R.id.inforow_phone, "Số điện thoại", newPhone);
+            if (tvPhone != null) tvPhone.setText(newPhone);
+            
+            Toast.makeText(this, "Cập nhật số điện thoại thành công!", Toast.LENGTH_SHORT).show();
             bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private void showUpdatePasswordBottomSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_update_password, null);
+        bottomSheetDialog.setContentView(view);
+
+        EditText etOldPassword = view.findViewById(R.id.et_old_password);
+        EditText etNewPassword = view.findViewById(R.id.et_new_password);
+        EditText etConfirmPassword = view.findViewById(R.id.et_confirm_password);
+
+        view.findViewById(R.id.btn_close_update_password).setOnClickListener(v -> bottomSheetDialog.dismiss());
+
+        view.findViewById(R.id.btn_save_password).setOnClickListener(v -> {
+            String oldPw = etOldPassword.getText().toString();
+            String newPw = etNewPassword.getText().toString();
+            String confirmPw = etConfirmPassword.getText().toString();
+
+            if (oldPw.isEmpty() || newPw.isEmpty() || confirmPw.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!newPw.equals(confirmPw)) {
+                Toast.makeText(this, "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+            progressDialog.setMessage("Đang cập nhật mật khẩu...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
+            new UserRepository().changePassword(oldPw, newPw, confirmPw, new com.example.uitpayapp.network.ApiCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(AccountDetailActivity.this, "Cập nhật mật khẩu thành công!", Toast.LENGTH_SHORT).show();
+                        bottomSheetDialog.dismiss();
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(AccountDetailActivity.this, "Đổi mật khẩu thất bại: " + errorMessage, Toast.LENGTH_LONG).show();
+                    });
+                }
+            });
         });
 
         bottomSheetDialog.show();

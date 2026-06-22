@@ -1,0 +1,2 @@
+ALTER TABLE orders ADD COLUMN driver_id BIGINT;
+ALTER TABLE orders ADD CONSTRAINT fk_order_driver FOREIGN KEY (driver_id) REFERENCES users(id) ON DELETE SET NULL;

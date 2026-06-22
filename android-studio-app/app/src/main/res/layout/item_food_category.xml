@@ -1,26 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="90dp"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:padding="8dp">
 
-    <FrameLayout
-        android:layout_width="56dp"
-        android:layout_height="56dp">
-        <View
-            android:id="@+id/view_category_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_food_category_circle" />
-        <TextView
-            android:id="@+id/tv_category_emoji"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:textSize="28sp" />
-    </FrameLayout>
+    <ImageView
+        android:id="@+id/iv_category_icon"
+        android:layout_width="43dp"
+        android:layout_height="43dp"
+        android:layout_gravity="center" />
 
     <TextView
         android:id="@+id/tv_category_name"

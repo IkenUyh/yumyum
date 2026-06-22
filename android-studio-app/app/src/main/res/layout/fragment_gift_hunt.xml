@@ -93,7 +93,7 @@
                         <ImageView
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:src="@drawable/img_coin"/>
+                            android:src="@drawable/ic_coin"/>
                     </LinearLayout>
 
                     <!-- SPACE -->
@@ -103,6 +103,7 @@
 
                     <!-- HƯỚNG DẪN -->
                     <TextView
+                        android:id="@+id/tvHuongDan"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Hướng dẫn"
@@ -115,19 +116,30 @@
                         android:layout_height="1dp"/>
 
                     <!-- LỊCH SỬ -->
-                    <TextView
+                    <LinearLayout
+                        android:id="@+id/btnLichSu"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Lịch sử"
-                        android:textColor="#0C40CC"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:paddingLeft="4dp"
-                        app:tint="#0C40CC"
-                        android:src="@drawable/ic_history_24px"/>
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Lịch sử"
+                            android:textColor="#0C40CC"
+                            android:textSize="14sp"
+                            android:textStyle="bold"/>
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:paddingLeft="4dp"
+                            app:tint="#0C40CC"
+                            android:src="@drawable/ic_history_24px"/>
+                    </LinearLayout>
+
                 </LinearLayout>
 
                 <!-- CARD HỘP QUÀ -->

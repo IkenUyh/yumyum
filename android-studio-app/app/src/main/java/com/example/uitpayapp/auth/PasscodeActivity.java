@@ -3,33 +3,29 @@ package com.example.uitpayapp.auth;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.uitpayapp.modules.user.models.responses.AuthResponseDTO;
+import com.example.uitpayapp.network.ApiCallback;
+import com.example.uitpayapp.network.SessionManager;
 import com.example.uitpayapp.profile.ContactSupportActivity;
 import com.example.uitpayapp.home.HomeActivity;
 import com.example.uitpayapp.R;
 
 // Thêm các thư viện import của DTO và Retrofit
-import com.example.uitpayapp.models.ApiResponse;
-import com.example.uitpayapp.models.LoginRequestDTO;
-import com.example.uitpayapp.models.UserResponseDTO;
-import com.example.uitpayapp.network.RetrofitClient;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.example.uitpayapp.modules.user.models.responses.UserResponseDTO;
+import com.example.uitpayapp.modules.user.UserRepository;
 
 public class PasscodeActivity extends AppCompatActivity {
 
     // --- Cấu hình hằng số (Constants) ---
     private static final int MAX_LENGTH = 6;
     private static final int RESET_DELAY_MS = 1500;
-    private static final int COLOR_ACTIVE = Color.parseColor("#0052CC"); // Chấm xanh
+    private static final int COLOR_ACTIVE = Color.parseColor("#FF5722"); // Chấm cam
     private static final int COLOR_INACTIVE = Color.parseColor("#BDBDBD"); // Chấm xám
 
     private final TextView[] dots = new TextView[MAX_LENGTH];
@@ -61,28 +57,42 @@ public class PasscodeActivity extends AppCompatActivity {
         }
         tvErrorMessage = findViewById(R.id.tv_error_message);
 
-        // === LOAD AVATAR VA THONG TIN USER TU CACHE ===
+        // === LOAD AVATAR VA THONG TIN USER ===
         android.widget.ImageView ivAvatar = findViewById(R.id.iv_avatar);
-        TextView tvUsername = findViewById(R.id.tv_username);
         TextView tvPhoneNumber = findViewById(R.id.tv_phone_number);
 
-        android.content.SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        String savedPhone = prefs.getString("PHONE_NUMBER", "");
-        String savedName = prefs.getString("FULL_NAME", "Username");
-        String avatarUrl = prefs.getString("AVATAR_URL", "");
+        // Uu tien lay tu Intent truoc (do SignInActivity truyen sang)
+        String avatarUrl = getIntent().getStringExtra("AVATAR_URL");
+        String fullName = getIntent().getStringExtra("FULL_NAME");
 
-        // Kiem tra: Neu khop so dien thoai cu thi hien avatar
-        if (phoneNumber.equals(savedPhone)) {
-            if (!avatarUrl.isEmpty() && ivAvatar != null) {
-                com.bumptech.glide.Glide.with(this)
-                        .load(avatarUrl)
-                        .circleCrop()
-                        .into(ivAvatar);
+        // Neu khong co thi fallback lay tu SharedPreferences (cho truong hop tu dang ky qua hay quen mat khau)
+        if (avatarUrl == null || avatarUrl.isEmpty()) {
+            android.content.SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            String savedPhone = prefs.getString("PHONE_NUMBER", "");
+            if (phoneNumber.equals(savedPhone)) {
+                avatarUrl = prefs.getString("AVATAR_URL", "");
             }
         }
-        else {
-            // Neu khong khop thi chi de chu "Username" co dinh
-            tvUsername.setText("Username");
+
+        if (avatarUrl != null && !avatarUrl.isEmpty() && !avatarUrl.equals("null") && ivAvatar != null) {
+            String finalAvatarUrl = avatarUrl;
+            if (!finalAvatarUrl.startsWith("http")) {
+                if (finalAvatarUrl.startsWith("/")) {
+                    finalAvatarUrl = finalAvatarUrl.substring(1);
+                }
+                // Nếu backend trả về domain không có http
+                if (!finalAvatarUrl.contains("kienhuy-dev.name.vn")) {
+                    finalAvatarUrl = com.example.uitpayapp.network.RetrofitClient.getBaseUrl() + finalAvatarUrl;
+                } else {
+                    finalAvatarUrl = "https://" + finalAvatarUrl;
+                }
+            }
+            com.bumptech.glide.Glide.with(this)
+                    .load(finalAvatarUrl)
+                    .placeholder(R.drawable.bg_circle_gray)
+                    .error(R.drawable.yumyum_demo_logo)
+                    .circleCrop()
+                    .into(ivAvatar);
         }
 
         // Hien thi so dien thoai da duoc che (Masked) voi ma vung
@@ -127,25 +137,13 @@ public class PasscodeActivity extends AppCompatActivity {
         //Tìm text quên mật khẩu
         TextView btnForgotPass = findViewById(R.id.btn_forgot_pass);
         btnForgotPass.setOnClickListener(v -> {
-            com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog =
-                    new com.google.android.material.bottomsheet.BottomSheetDialog(PasscodeActivity.this);
-            View bottomSheetView = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_forgot, null);
-            bottomSheetDialog.setContentView(bottomSheetView);
-
-            TextView btnCloseX = bottomSheetView.findViewById(R.id.btn_close_sheet);
-            btnCloseX.setOnClickListener(v1 -> {
-                bottomSheetDialog.dismiss();
-            });
-
-            bottomSheetDialog.show();
-        });
-
-        //Tìm text Đây không phải tài khoản của tôi
-        TextView btnNotMyAccount = findViewById(R.id.btn_not_my_account);
-        btnNotMyAccount.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(PasscodeActivity.this, ContactSupportActivity.class);
+            Intent intent = new Intent(PasscodeActivity.this, ForgotPhoneActivity.class);
+            intent.putExtra("PHONE_NUMBER", phoneNumber);
             startActivity(intent);
         });
+
+        // Nút X (Đóng) quay lại màn hình nhập số điện thoại
+        findViewById(R.id.btn_close).setOnClickListener(v -> finish());
     }
 
     private void onNumberClick(String number) {
@@ -172,52 +170,52 @@ public class PasscodeActivity extends AppCompatActivity {
     }
 
     // Xử lý gọi API khi nhập đủ 6 số
+// Khai báo UserRepository ở cấp độ Class của Activity để tái sử dụng
+    private final UserRepository userRepository = new UserRepository();
+
     private void handlePasscodeComplete() {
         isChecking = true;
 
-        // Tạo gói dữ liệu chuẩn bị gửi đi
-        LoginRequestDTO request = new LoginRequestDTO(phoneNumber, passcode);
-
-        RetrofitClient.getApiService().login(request).enqueue(new Callback<ApiResponse<UserResponseDTO>>() {
+        userRepository.login(phoneNumber, passcode, new ApiCallback<AuthResponseDTO>() {
             @Override
-            public void onResponse(Call<ApiResponse<UserResponseDTO>> call, Response<ApiResponse<UserResponseDTO>> response) {
-                isChecking = false; // Mở khóa cho nhập tiếp nếu lỡ sai
+            public void onSuccess(AuthResponseDTO data) {
+                isChecking = false;
+                if (data != null && data.getUser() != null) {
+                    SessionManager sessionManager = SessionManager.getInstance(PasscodeActivity.this);
+                    sessionManager.createLoginSession(
+                            data.getUser().getId(),
+                            data.getToken(),
+                            data.getUser().getFullName(),
+                            data.getUser().getPhoneNumber(),
+                            data.getUser().getAvatarUrl(),
+                            data.getUser().getEmail(),
+                            data.getUser().getRole()
+                    );
+ 
+                    // Sync FCM Token
+                    syncFcmToken(sessionManager);
 
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<UserResponseDTO> apiResponse = response.body();
-
-                    if (apiResponse.getCode() == 200) {
-                        UserResponseDTO user = apiResponse.getData();
-                        android.content.SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-                        android.content.SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString("FULL_NAME", user.getFullName());
-                        editor.putString("PHONE_NUMBER", user.getPhoneNumber());
-                        editor.putString("AVATAR_URL", user.getAvatarUrl());
-                        editor.apply(); // Lưu lại
-                        // Thành công: Chuyển sang HomeActivity
-                        Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                    else {
-                        showLoginError("Mã Pin không đúng. Vui lòng thử lại");
-                    }
-                }
-                else {
-                    showLoginError("Mã Pin không đúng. Vui lòng thử lại");
+                    Toast.makeText(PasscodeActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(PasscodeActivity.this, HomeActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    showLoginError("Dữ liệu đăng nhập phản hồi không hợp lệ!");
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<UserResponseDTO>> call, Throwable t) {
+            public void onError(String error) {
                 isChecking = false;
-                Log.e("API_ERROR", "Lỗi: " + t.getMessage());
-                showLoginError("Mất kết nối máy chủ!");
+                if (error != null && error.contains("Bad credentials")) {
+                    showLoginError("Mật khẩu không đúng");
+                } else {
+                    showLoginError(error != null ? error : "Mật khẩu không đúng");
+                }
             }
         });
     }
-
     // Hàm phụ trợ để báo lỗi và reset bàn phím
     private void showLoginError(String message) {
         tvErrorMessage.setText(message);
@@ -226,6 +224,8 @@ public class PasscodeActivity extends AppCompatActivity {
         passcode = "";
         updateDots();
     }
+
+
 
     // Cập nhật giao diện 6 dấu chấm
     private void updateDots() {
@@ -238,5 +238,27 @@ public class PasscodeActivity extends AppCompatActivity {
                 dots[i].setTextColor(COLOR_INACTIVE);
             }
         }
+    }
+
+    private void syncFcmToken(SessionManager sessionManager) {
+        com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                String token = task.getResult();
+                sessionManager.saveFcmToken(token);
+
+                com.example.uitpayapp.modules.notification.NotificationRepository repo = new com.example.uitpayapp.modules.notification.NotificationRepository();
+                repo.registerFcmToken(token, new ApiCallback<String>() {
+                    @Override
+                    public void onSuccess(String data) {
+                        sessionManager.setFcmTokenSynced(true);
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        sessionManager.setFcmTokenSynced(false);
+                    }
+                });
+            }
+        });
     }
 }
