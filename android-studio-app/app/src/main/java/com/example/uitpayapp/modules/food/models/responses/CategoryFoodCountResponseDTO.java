@@ -3,7 +3,7 @@ package com.example.uitpayapp.modules.food.models.responses;
 import com.google.gson.annotations.SerializedName;
 
 public class CategoryFoodCountResponseDTO {
-    @SerializedName("categoryId")
+    @SerializedName(value = "categoryId", alternate = {"id"})
     private Long categoryId;
 
     @SerializedName(value = "categoryName", alternate = {"name"})

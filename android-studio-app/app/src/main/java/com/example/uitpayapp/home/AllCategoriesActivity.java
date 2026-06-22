@@ -59,7 +59,7 @@ public class AllCategoriesActivity extends AppCompatActivity {
         AllCategoriesAdapter adapter = new AllCategoriesAdapter(new ArrayList<>(), category -> {
             Intent intent = new Intent(this, CategoryActivity.class);
             intent.putExtra(CategoryActivity.EXTRA_SELECTED_CATEGORY, category.getCategoryName());
-            intent.putExtra(CategoryActivity.EXTRA_SELECTED_CATEGORY_ID, category.getCategoryId());
+            intent.putExtra(CategoryActivity.EXTRA_SELECTED_CATEGORY_ID, category.getCategoryId() != null ? category.getCategoryId() : -1L);
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
@@ -88,7 +88,15 @@ public class AllCategoriesActivity extends AppCompatActivity {
                                    retrofit2.Response<com.example.uitpayapp.models.ApiResponse<List<com.example.uitpayapp.modules.food.models.responses.CategoryFoodCountResponseDTO>>> response) {
                 loadingView.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    adapter.updateData(response.body().getData());
+                    List<com.example.uitpayapp.modules.food.models.responses.CategoryFoodCountResponseDTO> list = new ArrayList<>(response.body().getData());
+                    java.util.Iterator<com.example.uitpayapp.modules.food.models.responses.CategoryFoodCountResponseDTO> iter = list.iterator();
+                    while (iter.hasNext()) {
+                        String n = iter.next().getCategoryName();
+                        if (n != null && (n.equalsIgnoreCase("hot") || n.equalsIgnoreCase("hot flash sale") || n.equalsIgnoreCase("deal hot"))) {
+                            iter.remove();
+                        }
+                    }
+                    adapter.updateData(list);
                     rv.setVisibility(View.VISIBLE);
                 } else {
                     errorView.setVisibility(View.VISIBLE);

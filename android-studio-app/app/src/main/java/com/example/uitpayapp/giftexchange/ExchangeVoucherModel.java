@@ -4,15 +4,17 @@ import com.example.uitpayapp.R;
 
 public class ExchangeVoucherModel {
     public enum ExchangeVoucherType {
-        FOOD_DISCOUNT("Giảm giá món", R.drawable.ic_food),
-        SHIPPING_FEE("Phí vận chuyển", R.drawable.ic_delivery);
+        FOOD_DISCOUNT("Giảm giá món", R.drawable.ic_food, "#f24405"),
+        SHIPPING_FEE("Phí vận chuyển", R.drawable.ic_delivery, "#00BFA5");
 
         private final String displayName;
         private final int iconResId;
+        private final String colorHex;
 
-        ExchangeVoucherType(String displayName, int iconResId) {
+        ExchangeVoucherType(String displayName, int iconResId, String colorHex) {
             this.displayName = displayName;
             this.iconResId = iconResId;
+            this.colorHex = colorHex;
         }
 
         public String getDisplayName() {
@@ -21,6 +23,10 @@ public class ExchangeVoucherModel {
 
         public int getIconResId() {
             return iconResId;
+        }
+
+        public String getColorHex() {
+            return colorHex;
         }
     }
 
