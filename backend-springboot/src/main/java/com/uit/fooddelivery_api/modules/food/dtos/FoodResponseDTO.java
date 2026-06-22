@@ -20,6 +20,8 @@ public class FoodResponseDTO {
     private String imageUrl;
     private Boolean isAvailable;
     private Double distance;
+    private Integer reviewCount;
+    private Double ratingAverage;
 
     public static FoodResponseDTO fromEntity(Food food) {
         return FoodResponseDTO.builder()
@@ -32,6 +34,8 @@ public class FoodResponseDTO {
                 .price(food.getPrice())
                 .imageUrl(food.getImageUrl())
                 .isAvailable(food.getIsAvailable())
+                .reviewCount(food.getRestaurant().getReviewCount())
+                .ratingAverage(food.getRestaurant().getRatingAverage())
                 .build();
     }
 }

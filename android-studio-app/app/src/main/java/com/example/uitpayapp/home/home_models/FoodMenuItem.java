@@ -52,6 +52,14 @@ public class FoodMenuItem {
     public Double getDistance() { return distance; }
     public void setDistance(Double distance) { this.distance = distance; }
 
+    private Integer reviewCount;
+    private Double ratingAverage;
+
+    public Integer getReviewCount() { return reviewCount; }
+    public void setReviewCount(Integer reviewCount) { this.reviewCount = reviewCount; }
+    public Double getRatingAverage() { return ratingAverage; }
+    public void setRatingAverage(Double ratingAverage) { this.ratingAverage = ratingAverage; }
+
     public String getFormattedPrice() {
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
         return formatter.format(price) + "đ";
