@@ -103,7 +103,25 @@ public class SellerWalletActivity extends AppCompatActivity {
                         int color = tx.getAmount().compareTo(java.math.BigDecimal.ZERO) >= 0 ? Color.parseColor("#4CAF50") : Color.parseColor("#F44336");
                         String dateStr = "N/A";
                         if (tx.getCreatedAt() != null && tx.getCreatedAt().length() >= 10) {
-                            dateStr = tx.getCreatedAt().substring(8, 10) + "-" + tx.getCreatedAt().substring(5, 7) + "-" + tx.getCreatedAt().substring(0, 4);
+                            // Backend lưu timestamp theo UTC (serverTimezone=UTC trong JDBC)
+                            // Parse đúng UTC rồi chuyển sang múi giờ thiết bị để hiển thị
+                            try {
+                                String raw = tx.getCreatedAt().length() >= 19
+                                        ? tx.getCreatedAt().substring(0, 19)
+                                        : tx.getCreatedAt().substring(0, 10) + "T00:00:00";
+                                java.text.SimpleDateFormat inputFmt = new java.text.SimpleDateFormat(
+                                        "yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+                                inputFmt.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                                java.text.SimpleDateFormat outputFmt = new java.text.SimpleDateFormat(
+                                        "dd-MM-yyyy HH:mm", java.util.Locale.getDefault());
+                                // outputFmt dùng device timezone mặc định → hiển thị giờ VN
+                                dateStr = outputFmt.format(inputFmt.parse(raw));
+                            } catch (Exception ex) {
+                                // Fallback: cắt substring nếu parse lỗi
+                                dateStr = tx.getCreatedAt().substring(8, 10) + "-"
+                                        + tx.getCreatedAt().substring(5, 7) + "-"
+                                        + tx.getCreatedAt().substring(0, 4);
+                            }
                         }
                         transactionList.add(new TransactionModel(dateStr, tx.getDescription(), amountStr, color));
                     }

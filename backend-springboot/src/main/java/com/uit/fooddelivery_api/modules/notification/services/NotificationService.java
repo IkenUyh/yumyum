@@ -13,6 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -87,22 +88,31 @@ public class NotificationService {
         }
     }
 
+    // Múi giờ VN — dùng để convert query bounds sang UTC (DB lưu UTC do serverTimezone=UTC)
+    private static final ZoneId VN_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+    private static final ZoneId UTC_ZONE = ZoneId.of("UTC");
+
     /**
      * Lấy lịch sử thông báo.
      * Nếu month và year được truyền vào thì chỉ lấy thông báo trong tháng đó.
      * Nếu không truyền (null) thì lấy thông báo trong 30 ngày gần nhất mặc định.
+     *
+     * Lưu ý: DB lưu created_at theo UTC (JDBC serverTimezone=UTC).
+     * Các query bounds phải được convert từ giờ VN → UTC để match đúng dữ liệu.
      */
     public List<Notification> getMyHistory(Long userId, Integer month, Integer year) {
         if (month != null && year != null) {
-            // Lấy theo tháng cụ thể
+            // Lấy theo tháng cụ thể: convert đầu/cuối tháng VN → UTC
             YearMonth ym = YearMonth.of(year, month);
-            LocalDateTime from = ym.atDay(1).atStartOfDay();
-            LocalDateTime to = ym.atEndOfMonth().atTime(23, 59, 59);
+            LocalDateTime from = ym.atDay(1).atStartOfDay(VN_ZONE)
+                    .withZoneSameInstant(UTC_ZONE).toLocalDateTime();
+            LocalDateTime to = ym.atEndOfMonth().atTime(23, 59, 59)
+                    .atZone(VN_ZONE).withZoneSameInstant(UTC_ZONE).toLocalDateTime();
             return notificationRepository.findByUserIdInDateRange(userId, from, to);
         }
-        // Mặc định: lấy 30 ngày gần nhất
-        LocalDateTime from = LocalDateTime.now().minusDays(30);
-        LocalDateTime to = LocalDateTime.now();
+        // Mặc định: lấy 30 ngày gần nhất theo giờ UTC (vì DB lưu UTC)
+        LocalDateTime to = LocalDateTime.now(UTC_ZONE);
+        LocalDateTime from = to.minusDays(30);
         return notificationRepository.findByUserIdInDateRange(userId, from, to);
     }
 

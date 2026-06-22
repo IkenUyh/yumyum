@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 @RestController
 @RequestMapping("/api/v1/statistics")
@@ -38,13 +39,15 @@ public class StatisticController {
             @RequestParam(value = "date", required = false) String dateStr,
             Authentication authentication) {
         LocalDate date;
+        // Dùng ZoneId tường minh thay vì phụ thuộc JVM default timezone
+        LocalDate todayVn = LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"));
         if (dateStr == null || dateStr.trim().isEmpty()) {
-            date = LocalDate.now();
+            date = todayVn;
         } else {
             try {
                 date = LocalDate.parse(dateStr);
             } catch (Exception e) {
-                date = LocalDate.now();
+                date = todayVn;
             }
         }
         MerchantDailyStatisticDTO dailyData = statisticService.getMerchantDailyStatistic(restaurantId, date);
