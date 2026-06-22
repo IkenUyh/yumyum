@@ -41,6 +41,7 @@ public class OrderResponseDTO {
     private String paymentMethod;
     private String paymentStatus;
     private String paymentUrl;
+    private Double distance;
     private String note;
 
     @Getter
@@ -95,6 +96,18 @@ public class OrderResponseDTO {
             recipientPhone = order.getUser().getPhoneNumber();
         }
 
+        Double calcDistance = null;
+        if (order.getRestaurant() != null && order.getRestaurant().getLatitude() != null && order.getRestaurant().getLongitude() != null &&
+            order.getAddress() != null && order.getAddress().getLatitude() != null && order.getAddress().getLongitude() != null) {
+            calcDistance = com.uit.fooddelivery_api.common.utils.DistanceUtil.calculateDistance(
+                order.getRestaurant().getLatitude().doubleValue(),
+                order.getRestaurant().getLongitude().doubleValue(),
+                order.getAddress().getLatitude().doubleValue(),
+                order.getAddress().getLongitude().doubleValue()
+            );
+            calcDistance = Math.round(calcDistance * 10.0) / 10.0;
+        }
+
         return OrderResponseDTO.builder()
                 .id(order.getId())
                 .restaurantId(order.getRestaurant().getId())
@@ -121,6 +134,7 @@ public class OrderResponseDTO {
                 .paymentMethod(order.getPaymentMethod())
                 .paymentStatus(order.getPaymentStatus())
                 .paymentUrl(order.getPaymentUrl())
+                .distance(calcDistance)
                 .note(order.getNote())
                 .build();
     }

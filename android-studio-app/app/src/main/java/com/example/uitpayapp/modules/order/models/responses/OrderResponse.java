@@ -75,6 +75,9 @@ public class OrderResponse {
     @SerializedName("destLongitude")
     private BigDecimal destLongitude;
 
+    @SerializedName("distance")
+    private Double distance;
+
 
     public static class OrderItemResponse {
         @SerializedName("name")
@@ -89,6 +92,9 @@ public class OrderResponse {
         @SerializedName("price")
         private BigDecimal price;
 
+        @SerializedName("selectedOptions")
+        private List<java.util.Map<String, Object>> selectedOptions;
+
         // Getters and Setters
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
@@ -101,6 +107,9 @@ public class OrderResponse {
 
         public BigDecimal getPrice() { return price; }
         public void setPrice(BigDecimal price) { this.price = price; }
+
+        public List<java.util.Map<String, Object>> getSelectedOptions() { return selectedOptions; }
+        public void setSelectedOptions(List<java.util.Map<String, Object>> selectedOptions) { this.selectedOptions = selectedOptions; }
     }
 
     // Getters and Setters
@@ -172,6 +181,9 @@ public class OrderResponse {
 
     public BigDecimal getDestLongitude() { return destLongitude; }
     public void setDestLongitude(BigDecimal destLongitude) { this.destLongitude = destLongitude; }
+
+    public Double getDistance() { return distance; }
+    public void setDistance(Double distance) { this.distance = distance; }
 
     @SerializedName("paymentMethod")
     private String paymentMethod;

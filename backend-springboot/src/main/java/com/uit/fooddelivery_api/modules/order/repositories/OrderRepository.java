@@ -14,12 +14,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // 2. Tìm tất cả đơn hàng thuộc về các Nhà hàng của một Chủ quán
     java.util.List<Order> findByRestaurantMerchantIdOrderByCreatedAtDesc(Long merchantId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(o.totalAmount), 0) " +
+    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(o.totalAmount - COALESCE(o.shippingFee, 0) + COALESCE(o.discountAmount, 0)), 0) " +
             "FROM Order o " +
             "WHERE o.restaurant.merchant.id = :merchantId AND o.status = 'COMPLETED'")
     java.math.BigDecimal calculateTotalRevenueByMerchant(@org.springframework.data.repository.query.Param("merchantId") Long merchantId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(o.totalAmount), 0) " +
+    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(o.totalAmount - COALESCE(o.shippingFee, 0) + COALESCE(o.discountAmount, 0)), 0) " +
             "FROM Order o " +
             "WHERE o.restaurant.id = :restaurantId AND o.status = 'COMPLETED' " +
             "AND o.createdAt >= :startOfDay AND o.createdAt <= :endOfDay")
@@ -64,7 +64,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Lấy doanh thu theo từng ngày trong tháng cho một cửa hàng
     @org.springframework.data.jpa.repository.Query(
-            "SELECT DAY(o.createdAt), COALESCE(SUM(o.totalAmount), 0), COUNT(o) " +
+            "SELECT DAY(o.createdAt), COALESCE(SUM(o.totalAmount - COALESCE(o.shippingFee, 0) + COALESCE(o.discountAmount, 0)), 0), COUNT(o) " +
             "FROM Order o " +
             "WHERE o.restaurant.id = :restaurantId AND o.status = 'COMPLETED' " +
             "AND MONTH(o.createdAt) = :month AND YEAR(o.createdAt) = :year " +
