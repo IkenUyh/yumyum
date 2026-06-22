@@ -58,7 +58,7 @@ public class CategoryController {
                 .map(food -> {
                     FoodResponseDTO dto = FoodResponseDTO.fromEntity(food);
                     if (lat != null && lng != null && food.getRestaurant().getLatitude() != null && food.getRestaurant().getLongitude() != null) {
-                        double d = calculateDistance(lat, lng, food.getRestaurant().getLatitude(), food.getRestaurant().getLongitude());
+                        double d = calculateDistance(lat, lng, food.getRestaurant().getLatitude().doubleValue(), food.getRestaurant().getLongitude().doubleValue());
                         dto.setDistance(d);
                     }
                     return dto;
