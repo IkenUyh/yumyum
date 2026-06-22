@@ -139,37 +139,8 @@ public class RegisterStoreActivity extends AppCompatActivity {
         }
         tvBottomSheetAddressRef = tvAddress;
         view.findViewById(R.id.layout_select_store_address).setOnClickListener(v -> {
-            CharSequence[] options = {"Nhập địa chỉ cửa hàng", "Chọn địa chỉ qua bản đồ"};
-            new android.app.AlertDialog.Builder(this)
-                .setTitle("Phương thức chọn địa chỉ")
-                .setItems(options, (dialogInterface, i) -> {
-                    if (i == 0) {
-                        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-                        builder.setTitle("Nhập địa chỉ cửa hàng");
-                        final EditText input = new EditText(this);
-                        input.setHint("Nhập số nhà, tên đường, quận/huyện...");
-                        if (!storeAddress.equals("Chưa cập nhật") && !storeAddress.equals("Chọn địa chỉ từ bản đồ")) {
-                            input.setText(storeAddress);
-                        }
-                        builder.setView(input);
-                        builder.setPositiveButton("Xác nhận", (dialog, which) -> {
-                            String manualAddress = input.getText().toString().trim();
-                            if (!manualAddress.isEmpty()) {
-                                tvAddress.setText(manualAddress);
-                                tvAddress.setTextColor(Color.BLACK);
-                                storeAddress = manualAddress;
-                                latitude = 0.0;
-                                longitude = 0.0;
-                            }
-                        });
-                        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
-                        builder.show();
-                    } else {
-                        Intent intent = new Intent(this, MapPickerActivity.class);
-                        startActivityForResult(intent, 100);
-                    }
-                })
-                .show();
+            Intent intent = new Intent(this, MapPickerActivity.class);
+            startActivityForResult(intent, 100);
         });
         view.findViewById(R.id.btn_save_store_info).setOnClickListener(v -> {
             String name = etName.getText().toString().trim();

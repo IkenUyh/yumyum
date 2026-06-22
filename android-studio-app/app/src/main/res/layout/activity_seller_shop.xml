@@ -134,11 +134,15 @@
                     android:paddingVertical="20dp"
                     android:weightSum="4">
                     <LinearLayout
+                        android:id="@+id/btn_order"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
@@ -255,7 +259,10 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:padding="16dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
@@ -283,9 +290,13 @@
                 app:cardUseCompatPadding="true">
 
                 <RelativeLayout
+                    android:id="@+id/ll_history"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp">
+                    android:padding="16dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
                     <ImageView
                         android:id="@+id/iv_history"
                         android:layout_width="40dp"

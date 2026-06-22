@@ -64,6 +64,11 @@ public class SellerOrderViewModel extends AndroidViewModel {
     private final java.util.Set<String> notifiedOrderIds = new java.util.HashSet<>();
     private boolean isFirstLoadDone = false;
 
+    private final List<SellerOrder> rawNewOrders = new java.util.ArrayList<>();
+    private final List<SellerOrder> rawConfirmedOrders = new java.util.ArrayList<>();
+    private final List<SellerHistoryOrder> rawHistoryOrders = new java.util.ArrayList<>();
+    private String currentSearchQuery = "";
+
     public SellerOrderViewModel(@NonNull Application application) {
         super(application);
         orderRepository = new OrderRepository();
@@ -260,15 +265,59 @@ public class SellerOrderViewModel extends AndroidViewModel {
             }
         }
 
-        newOrders.setValue(pending);
-        confirmedOrders.setValue(preparing);
-        historyOrders.setValue(history);
+        rawNewOrders.clear();
+        rawNewOrders.addAll(pending);
+        rawConfirmedOrders.clear();
+        rawConfirmedOrders.addAll(preparing);
+        rawHistoryOrders.clear();
+        rawHistoryOrders.addAll(history);
+
+        applySearchFilter();
 
         if (hasNewOrder) {
             newOrderEvent.setValue("NEW_ORDER_DETECTED");
             if (!SellerHomeActivity.isResumed) {
                 showLocalNotification();
             }
+        }
+    }
+
+    public void setSearchQuery(String query) {
+        this.currentSearchQuery = query;
+        applySearchFilter();
+    }
+
+    private void applySearchFilter() {
+        String query = currentSearchQuery.trim().toLowerCase(java.util.Locale.getDefault());
+        if (query.isEmpty()) {
+            newOrders.setValue(new java.util.ArrayList<>(rawNewOrders));
+            confirmedOrders.setValue(new java.util.ArrayList<>(rawConfirmedOrders));
+            historyOrders.setValue(new java.util.ArrayList<>(rawHistoryOrders));
+        } else {
+            java.util.List<SellerOrder> filteredNew = new java.util.ArrayList<>();
+            for (SellerOrder o : rawNewOrders) {
+                if (o.getCustomerName() != null && o.getCustomerName().toLowerCase(java.util.Locale.getDefault()).contains(query)) {
+                    filteredNew.add(o);
+                }
+            }
+
+            java.util.List<SellerOrder> filteredConfirmed = new java.util.ArrayList<>();
+            for (SellerOrder o : rawConfirmedOrders) {
+                if (o.getCustomerName() != null && o.getCustomerName().toLowerCase(java.util.Locale.getDefault()).contains(query)) {
+                    filteredConfirmed.add(o);
+                }
+            }
+
+            java.util.List<SellerHistoryOrder> filteredHistory = new java.util.ArrayList<>();
+            for (SellerHistoryOrder o : rawHistoryOrders) {
+                if (o.getCustomerName() != null && o.getCustomerName().toLowerCase(java.util.Locale.getDefault()).contains(query)) {
+                    filteredHistory.add(o);
+                }
+            }
+
+            newOrders.setValue(filteredNew);
+            confirmedOrders.setValue(filteredConfirmed);
+            historyOrders.setValue(filteredHistory);
         }
     }
 
@@ -463,10 +512,6 @@ public class SellerOrderViewModel extends AndroidViewModel {
         currentHistory.add(0, historyOrder);
         historyOrders.setValue(currentHistory);
     }
-
-    /**
-     * Bàn giao đơn hàng cho Shipper (PREPARING → DELIVERING) bằng cách gọi API merchant-deliver.
-     */
     public void deliverOrder(SellerOrder order) {
         if (order.getOrderId() == null) {
             // Fallback local
@@ -500,9 +545,6 @@ public class SellerOrderViewModel extends AndroidViewModel {
         confirmedOrders.setValue(currentConfirmed);
     }
 
-    /**
-     * Hoàn thành đơn hàng PREPARING → gọi API merchant-complete để cập nhật trên server.
-     */
     public void completeOrder(SellerOrder order) {
         if (order.getOrderId() == null) {
             // Không có orderId, fallback local
