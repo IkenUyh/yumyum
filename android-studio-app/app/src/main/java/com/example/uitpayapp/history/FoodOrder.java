@@ -15,6 +15,7 @@ public class FoodOrder {
     private List<SubItem> subItems; // ĐÃ THÊM: Danh sách các món ăn chi tiết bên trong đơn
     private boolean isReviewed;
     private boolean isReviewExpired;
+    private String merchantImageUrl;
 
     // Class con đại diện cho từng món trong đơn hàng
     public static class SubItem {
@@ -75,4 +76,6 @@ public class FoodOrder {
     public void setReviewed(boolean reviewed) { this.isReviewed = reviewed; }
     public boolean isReviewExpired() { return isReviewExpired; }
     public void setReviewExpired(boolean reviewExpired) { this.isReviewExpired = reviewExpired; }
+    public String getMerchantImageUrl() { return merchantImageUrl; }
+    public void setMerchantImageUrl(String merchantImageUrl) { this.merchantImageUrl = merchantImageUrl; }
 }

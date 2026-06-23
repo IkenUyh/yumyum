@@ -165,15 +165,24 @@ public class FoodOrderAdapter extends RecyclerView.Adapter<FoodOrderAdapter.Orde
 
                 // Truyền mã ID đơn hàng để phục vụ việc submit dữ liệu lên endpoint API của Spring Boot
                 intent.putExtra("ORDER_ID", order.getOrderId());
+                intent.putExtra("MERCHANT_NAME", order.getMerchantName());
+                intent.putExtra("MERCHANT_IMAGE", order.getMerchantImageUrl());
 
                 // Truyền danh sách tên món ăn thực tế từ đơn hàng
                 java.util.ArrayList<String> dishNames = new java.util.ArrayList<>();
+                java.util.ArrayList<String> dishImages = new java.util.ArrayList<>();
                 if (order.getSubItems() != null) {
                     for (FoodOrder.SubItem subItem : order.getSubItems()) {
                         dishNames.add(subItem.getName());
+                        if (subItem.getImageUrl() != null && !subItem.getImageUrl().isEmpty()) {
+                            dishImages.add(subItem.getImageUrl());
+                        } else {
+                            dishImages.add(String.valueOf(subItem.getImageResId()));
+                        }
                     }
                 }
                 intent.putStringArrayListExtra("DISH_NAMES", dishNames);
+                intent.putStringArrayListExtra("DISH_IMAGES", dishImages);
 
                 context.startActivity(intent);
             }
