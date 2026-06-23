@@ -82,6 +82,12 @@ public class SellerReviewActivity extends AppCompatActivity {
         updateRatingSummaries();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadReviewsFromApi();
+    }
+
     private void initViews() {
         ImageView btnBack = findViewById(R.id.btn_back);
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
@@ -155,48 +161,17 @@ public class SellerReviewActivity extends AppCompatActivity {
         if (rvReviews != null) {
             rvReviews.setAdapter(adapter);
         }
-        loadReviewsFromApi();
     }
 
     private void loadReviewsFromApi() {
-        if (merchantId == null || merchantId == -1L) {
-            Toast.makeText(this, "Không tìm thấy phiên đăng nhập chủ quán!", Toast.LENGTH_SHORT).show();
+        android.content.SharedPreferences prefs = getSharedPreferences("SellerPrefs", MODE_PRIVATE);
+        long storeId = prefs.getLong("current_store_id", -1L);
+        if (storeId == -1L) {
+            Toast.makeText(this, "Tài khoản của bạn chưa đăng ký quán ăn!", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        // 1. Lấy tất cả nhà hàng để tìm nhà hàng thuộc về merchantId này
-        restaurantRepository.getAllRestaurants(new ApiCallback<List<RestaurantResponseDTO>>() {
-            @Override
-            public void onSuccess(List<RestaurantResponseDTO> data) {
-                if (data == null || data.isEmpty()) {
-                    Toast.makeText(SellerReviewActivity.this, "Không tìm thấy quán ăn nào!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                // Tìm quán ăn của merchant hiện tại
-                for (RestaurantResponseDTO r : data) {
-                    if (r.getMerchantId() != null && r.getMerchantId().equals(merchantId)) {
-                        restaurantId = r.getId();
-                        break;
-                    }
-                }
-
-                if (restaurantId == null) {
-                    Toast.makeText(SellerReviewActivity.this, "Tài khoản của bạn chưa đăng ký quán ăn!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                // 2. Tải các đánh giá của quán ăn đó từ API
-                fetchReviews(restaurantId);
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                // Fallback giả lập (Mock) ID cửa hàng là 2 khi API lỗi
-                Toast.makeText(SellerReviewActivity.this, "Lỗi kết nối Backend. Tự động dùng Cửa hàng giả lập (ID=2) để test", Toast.LENGTH_SHORT).show();
-                fetchReviews(2L);
-            }
-        });
+        restaurantId = storeId;
+        fetchReviews(restaurantId);
     }
 
     private void fetchReviews(Long resId) {
