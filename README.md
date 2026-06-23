@@ -141,17 +141,20 @@ docker-compose up -d
 
 ## 📱 Demo / Ảnh chụp màn hình
 
-*(Gắn link hình ảnh demo thực tế của ứng dụng tại đây)*
-
 <div align="center">
-  <img src="https://via.placeholder.com/200x400.png?text=Home+Screen" alt="Home" width="200"/>
-  &nbsp;&nbsp;&nbsp;
-  <img src="https://via.placeholder.com/200x400.png?text=Cart/Checkout" alt="Cart" width="200"/>
-  &nbsp;&nbsp;&nbsp;
-  <img src="https://via.placeholder.com/200x400.png?text=E-Wallet/VNPay" alt="VNPay" width="200"/>
+  <img src="docs/home.jpeg" alt="Home Screen" width="200"/>
+  &nbsp;&nbsp;
+  <img src="docs/order.jpeg" alt="Order Confirmation" width="200"/>
+  &nbsp;&nbsp;
+  <img src="docs/sandbox.jpeg" alt="VNPAY Sandbox" width="200"/>
+  &nbsp;&nbsp;
+  <img src="docs/ship.jpeg" alt="Order Detail" width="200"/>
+  <br/><br/>
+  <img src="docs/money.jpeg" alt="Transaction Success" width="200"/>
+  &nbsp;&nbsp;
+  <img src="docs/orderrestaurant.jpeg" alt="Store Orders" width="200"/>
+  &nbsp;&nbsp;
+  <img src="docs/dashboard.jpeg" alt="Revenue Statistics" width="200"/>
+  &nbsp;&nbsp;
+  <img src="docs/updatefoodtopping.jpeg" alt="Menu Management" width="200"/>
 </div>
-
----
-<p align="center">
-  Được phát triển với ❤️ bởi <b>Nhóm 14</b>
-</p>
