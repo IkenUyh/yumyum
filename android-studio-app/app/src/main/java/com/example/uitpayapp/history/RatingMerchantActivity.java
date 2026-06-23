@@ -40,6 +40,8 @@ public class RatingMerchantActivity extends AppCompatActivity {
     private AppCompatButton btnMerchantSubmit;
     private EditText edtMerchantComment;
     private SwitchCompat switchAnonymous;
+    private ImageView imgMerchantGrid;
+    private TextView txtMerchantSummary;
 
     // KHAI BÁO THÊM: Biến quản lý API và dữ liệu phụ thuộc
     private ReviewRepository reviewRepository;
@@ -48,6 +50,7 @@ public class RatingMerchantActivity extends AppCompatActivity {
 
     private final List<String> merchantCompliments = Arrays.asList("Ngon xỉu!", "Đóng gói tốt", "No căng bụng", "Giá phải chăng");
     private final List<String> orderDishes = new java.util.ArrayList<>(java.util.Arrays.asList("Mì Trộn Thập Cẩm", "Cơm Chiên Dương Châu"));
+    private final List<String> orderDishesImages = new java.util.ArrayList<>();
 
     private final Map<String, Integer> dishSatisfactionMap = new HashMap<>();
     private final List<String> mSelectedCompliments = new ArrayList<>();
@@ -86,11 +89,49 @@ public class RatingMerchantActivity extends AppCompatActivity {
             orderDishes.addAll(receivedDishes);
         }
 
+        java.util.ArrayList<String> receivedImages = getIntent().getStringArrayListExtra("DISH_IMAGES");
+        if (receivedImages != null) {
+            orderDishesImages.clear();
+            orderDishesImages.addAll(receivedImages);
+        }
+
         // 2. Khởi tạo tầng Repository kết nối API
         ReviewService reviewService = RetrofitClient.getReviewService();
         reviewRepository = new ReviewRepository(reviewService);
 
         initViews();
+
+        String merchantName = getIntent().getStringExtra("MERCHANT_NAME");
+        String merchantImage = getIntent().getStringExtra("MERCHANT_IMAGE");
+
+        if (txtMerchantSummary != null && merchantName != null && !merchantName.isEmpty()) {
+            txtMerchantSummary.setText(merchantName);
+        }
+
+        if (imgMerchantGrid != null) {
+            if (merchantImage != null && !merchantImage.isEmpty()) {
+                if (merchantImage.startsWith("http://") || merchantImage.startsWith("https://")) {
+                    com.bumptech.glide.Glide.with(this)
+                            .load(merchantImage)
+                            .placeholder(R.drawable.yumyum_demo_logo)
+                            .into(imgMerchantGrid);
+                } else {
+                    try {
+                        int resId = Integer.parseInt(merchantImage);
+                        if (resId != 0) {
+                            imgMerchantGrid.setImageResource(resId);
+                        } else {
+                            imgMerchantGrid.setImageResource(R.drawable.yumyum_demo_logo);
+                        }
+                    } catch (NumberFormatException e) {
+                        imgMerchantGrid.setImageResource(R.drawable.yumyum_demo_logo);
+                    }
+                }
+            } else {
+                imgMerchantGrid.setImageResource(R.drawable.yumyum_demo_logo);
+            }
+        }
+
         setupMerchantChips();
         populateOrderDishes();
         setupListeners();
@@ -105,6 +146,8 @@ public class RatingMerchantActivity extends AppCompatActivity {
         btnMerchantSubmit = findViewById(R.id.btnMerchantSubmit);
         edtMerchantComment = findViewById(R.id.edtMerchantComment);
         switchAnonymous = findViewById(R.id.switchAnonymous);
+        imgMerchantGrid = findViewById(R.id.imgMerchantGrid);
+        txtMerchantSummary = findViewById(R.id.txtMerchantSummary);
     }
 
     private void setupMerchantChips() {
@@ -131,15 +174,42 @@ public class RatingMerchantActivity extends AppCompatActivity {
         layoutDishesContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
 
-        for (String dishName : orderDishes) {
+        for (int i = 0; i < orderDishes.size(); i++) {
+            String dishName = orderDishes.get(i);
             dishSatisfactionMap.put(dishName, 0);
 
             View dishView = inflater.inflate(R.layout.activity_history_item_dish_review, layoutDishesContainer, false);
             TextView tvName = dishView.findViewById(R.id.txtDishName);
+            ImageView imgDishThumb = dishView.findViewById(R.id.imgDishThumb);
             ImageView btnLike = dishView.findViewById(R.id.btnLike);
             ImageView btnDislike = dishView.findViewById(R.id.btnDislike);
 
             tvName.setText(dishName);
+
+            if (imgDishThumb != null) {
+                String imageSource = (orderDishesImages.size() > i) ? orderDishesImages.get(i) : null;
+                if (imageSource != null && !imageSource.isEmpty()) {
+                    if (imageSource.startsWith("http://") || imageSource.startsWith("https://")) {
+                        com.bumptech.glide.Glide.with(this)
+                                .load(imageSource)
+                                .placeholder(R.drawable.yumyum_demo_logo)
+                                .into(imgDishThumb);
+                    } else {
+                        try {
+                            int resId = Integer.parseInt(imageSource);
+                            if (resId != 0) {
+                                imgDishThumb.setImageResource(resId);
+                            } else {
+                                imgDishThumb.setImageResource(R.drawable.yumyum_demo_logo);
+                            }
+                        } catch (NumberFormatException e) {
+                            imgDishThumb.setImageResource(R.drawable.yumyum_demo_logo);
+                        }
+                    }
+                } else {
+                    imgDishThumb.setImageResource(R.drawable.yumyum_demo_logo);
+                }
+            }
 
             btnLike.setOnClickListener(v -> {
                 if (dishSatisfactionMap.get(dishName) == 1) {

@@ -82,11 +82,19 @@
                 android:background="@android:color/white"
                 android:padding="16dp">
 
-                <ImageView
-                    android:id="@+id/imgMerchantGrid"
+                <androidx.cardview.widget.CardView
                     android:layout_width="80dp"
                     android:layout_height="80dp"
-                    android:src="@android:color/darker_gray" />
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp">
+
+                    <ImageView
+                        android:id="@+id/imgMerchantGrid"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@android:color/darker_gray" />
+                </androidx.cardview.widget.CardView>
 
                 <TextView
                     android:id="@+id/txtMerchantSummary"

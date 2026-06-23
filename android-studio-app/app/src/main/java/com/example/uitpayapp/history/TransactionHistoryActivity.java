@@ -442,24 +442,28 @@ public class TransactionHistoryActivity extends AppCompatActivity {
 
     private void createDummyFoodOrders() {
         List<FoodOrder.SubItem> subItems1 = new ArrayList<>();
-        subItems1.add(new FoodOrder.SubItem("Món 1", 0));
-        subItems1.add(new FoodOrder.SubItem("Món 2", 0));
-        allOrders.add(new FoodOrder("05066-620675729", "Bun Burrito - Trần Quốc Toản", 61000, 1, "Hôm nay 17:14", "Đang giao", "Đồ ăn", true, "Đang đến", subItems1));
+        subItems1.add(new FoodOrder.SubItem("Mì Trộn Thập Cẩm", R.drawable.ic_cat_com));
+        subItems1.add(new FoodOrder.SubItem("Cơm Chiên Dương Châu", R.drawable.ic_cat_com));
+        FoodOrder o1 = new FoodOrder("05066-620675729", "Bun Burrito - Trần Quốc Toản", 61000, 1, "Hôm nay 17:14", "Đang giao", "Đồ ăn", true, "Đang đến", subItems1);
+        o1.setMerchantImageUrl(String.valueOf(R.drawable.ic_priority_yumyum));
+        allOrders.add(o1);
 
         List<FoodOrder.SubItem> subItems2 = new ArrayList<>();
-        subItems2.add(new FoodOrder.SubItem("Món 3", 0));
-        subItems2.add(new FoodOrder.SubItem("Món 4", 0));
-        allOrders.add(new FoodOrder("04066-570542539", "MêBee - Cơm Tấm Long Xuyên &amp; Trà Sữa", 64000, 3, "04/06/2026", "Hoàn thành", "Đồ ăn", true, "Lịch sử", subItems2));
+        subItems2.add(new FoodOrder.SubItem("Cơm Tấm Long Xuyên", R.drawable.ic_cat_com));
+        subItems2.add(new FoodOrder.SubItem("Trà Sữa Thái", R.drawable.ic_cat_tra_sua));
+        FoodOrder o2 = new FoodOrder("04066-570542539", "MêBee - Cơm Tấm Long Xuyên & Trà Sữa", 64000, 3, "04/06/2026", "Hoàn thành", "Đồ ăn", true, "Lịch sử", subItems2);
+        o2.setMerchantImageUrl(String.valueOf(R.drawable.ic_priority_yumyum));
+        allOrders.add(o2);
 
         List<FoodOrder.SubItem> subItemsSingle = new ArrayList<>();
-        subItemsSingle.add(new FoodOrder.SubItem("Món 5", 0));
-        allOrders.add(new FoodOrder("21099-112233445", "Cơm Tấm Ngô Quyền - Linh Trung", 45000, 1, "15/05/2026", "Hoàn thành", "Đồ ăn", false, "Lịch sử", subItemsSingle));
+        subItemsSingle.add(new FoodOrder.SubItem("Cơm Tấm Đặc Biệt", R.drawable.ic_cat_com));
+        FoodOrder o3 = new FoodOrder("21099-112233445", "Cơm Tấm Ngô Quyền - Linh Trung", 45000, 1, "15/05/2026", "Hoàn thành", "Đồ ăn", false, "Lịch sử", subItemsSingle);
+        o3.setMerchantImageUrl(String.valueOf(R.drawable.ic_priority_yumyum));
+        allOrders.add(o3);
 
         List<FoodOrder.SubItem> subItemsAnVien = new ArrayList<>();
-        // Đổ món ăn "Lục Trà Chanh Dây" vào danh sách sub-item
-        subItemsAnVien.add(new FoodOrder.SubItem("Lục Trà Chanh Dây", 0));
-
-        allOrders.add(new FoodOrder(
+        subItemsAnVien.add(new FoodOrder.SubItem("Lục Trà Chanh Dây", R.drawable.ic_cat_tra_sua));
+        FoodOrder o4 = new FoodOrder(
                 "15016-594977098",                        // Mã hóa đơn (Khớp mã liên kết từ tab Deal)
                 "Trà Sữa An Viên - Đường 30 Tháng 4",      // Tên quán
                 11000,                                     // Tổng thanh toán sau giảm giá (11.000đ)
@@ -470,12 +474,15 @@ public class TransactionHistoryActivity extends AppCompatActivity {
                 false,                                     // Yêu thích
                 "Lịch sử",                                 // CATEGORY LÀ LỊCH SỬ ĐỂ HIỂN THỊ TRONG TAB LỊCH SỬ
                 subItemsAnVien                             // Mảng món ăn bên trong
-        ));
-
+        );
+        o4.setMerchantImageUrl(String.valueOf(R.drawable.ic_priority_yumyum));
+        allOrders.add(o4);
 
         List<FoodOrder.SubItem> subItemsFour = new ArrayList<>();
-        subItemsFour.add(new FoodOrder.SubItem("Món 6", 0));
-        allOrders.add(new FoodOrder("12044-998877665", "Gà Rán Popeyes - Võ Văn Ngân", 145000, 4, "12/05/2026", "Hoàn thành", "Đồ ăn", true, "Lịch sử", subItemsFour));
+        subItemsFour.add(new FoodOrder.SubItem("Gà Rán Giòn Cay", R.drawable.ic_cat_fastfood));
+        FoodOrder o5 = new FoodOrder("12044-998877665", "Gà Rán Popeyes - Võ Văn Ngân", 145000, 4, "12/05/2026", "Hoàn thành", "Đồ ăn", true, "Lịch sử", subItemsFour);
+        o5.setMerchantImageUrl(String.valueOf(R.drawable.ic_priority_yumyum));
+        allOrders.add(o5);
     }
 
     private void fetchOrdersFromBackend() {
@@ -553,7 +560,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
                     long totalPrice = order.getTotalAmount() != null ? order.getTotalAmount().longValue() : 0;
                     int itemCount = order.getItemCount() != null ? order.getItemCount() : 0;
                     
-                    allOrders.add(new FoodOrder(
+                    FoodOrder foodOrder = new FoodOrder(
                         orderIdStr,
                         merchantName,
                         totalPrice,
@@ -566,7 +573,9 @@ public class TransactionHistoryActivity extends AppCompatActivity {
                         subItems,
                         order.getReviewed(),
                         order.getReviewExpired()
-                    ));
+                    );
+                    foodOrder.setMerchantImageUrl(order.getRestaurantImageUrl());
+                    allOrders.add(foodOrder);
                 }
                 applyFilter();
             }
